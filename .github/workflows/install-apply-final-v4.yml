@@ -1,0 +1,84 @@
+name: Deploy final recruiter-routed application
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/install-apply-final-v4.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-final-recruitment-application
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify installation archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .apply-final-v4/part* | base64 --decode > /tmp/apply-final-v4.tar.gz
+          echo "02376c855ece6cc85c3c7924c60cff37cb22d8f0258dfd0463b7fcb738ea0cbf  /tmp/apply-final-v4.tar.gz" | sha256sum -c -
+
+      - name: Install, validate and publish
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            mkdir -p /tmp/kiris-i18n
+            git cat-file blob f435612905a1fee314c01c3dbb21d2885f72bf93 > /tmp/kiris-i18n/i18n-core.js
+            git cat-file blob 72d89ed75e79755ee9413c23300ce1b1b35b0e91 > /tmp/kiris-i18n/i18n-caucasus-central.js
+            git cat-file blob 2c0c0e3760d4885a598129e4689d4ffaad994ad7 > /tmp/kiris-i18n/i18n-asia.js
+
+            rm -rf apply
+            tar -xzf /tmp/apply-final-v4.tar.gz -C .
+            cp /tmp/kiris-i18n/i18n-core.js apply/i18n-core.js
+            cp /tmp/kiris-i18n/i18n-caucasus-central.js apply/i18n-caucasus-central.js
+            cp /tmp/kiris-i18n/i18n-asia.js apply/i18n-asia.js
+
+            rm -rf .apply-final-v4 .github/install-v5-2
+            rm -f .apply-update-v51.b64
+            rm -f .github/workflows/install-apply-v5-2.yml
+            rm -f .github/workflows/install-apply-v51.yml
+            rm -f .github/workflows/install-apply-final-v4.yml
+
+            node --check apply/config.js
+            node --check apply/delivery-i18n.js
+            node --check apply/app.js
+            node scripts/validate-apply.mjs
+
+            git add -A
+            if git diff --cached --quiet; then
+              echo "Final application is already installed."
+              exit 0
+            fi
+
+            git commit -m "Deploy recruiter-routed application without copy workflow"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Main changed during publication; retrying from the latest revision."
+            sleep 2
+          done
+
+          echo "Could not publish after repeated concurrent updates." >&2
+          exit 1
