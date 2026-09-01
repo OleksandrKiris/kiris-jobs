@@ -1,168 +1,246 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
-<meta name="description" content="Multilingual candidate application — Kiris Jobs">
-<title>Kiris Jobs — Candidate application</title>
-<style>
-:root{--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#dbe4ee;--accent:#2563eb;--accent2:#1d4ed8;--danger:#b91c1c;--ok:#166534;--warn:#92400e;--soft:#eff6ff}
-*{box-sizing:border-box}html{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.ltr{direction:ltr;unicode-bidi:isolate}
-.shell{max-width:780px;margin:0 auto;padding:18px 14px 48px}.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.brand strong{font-size:18px}.badge{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#fff}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}.hero{text-align:center;padding:8px 0 14px}.hero .globe{font-size:36px}.hero h1{font-size:clamp(27px,7vw,42px);line-height:1.08;margin:8px 0}.hero p{color:var(--muted);margin:0 auto;max-width:610px;line-height:1.55}.trust{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.trust div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:9px;text-align:center;font-size:12px;color:var(--muted)}
-.lang-search{width:100%;min-height:50px;border:1px solid var(--line);border-radius:14px;padding:0 14px;margin:12px 0}.langs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.lang-btn{min-height:58px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:left;padding:10px 12px;display:flex;align-items:center;gap:10px}.lang-btn:hover,.lang-btn:focus-visible{border-color:var(--accent);outline:3px solid #dbeafe}.flag{font-size:24px}.meta{min-width:0}.name{font-weight:800}.eng{font-size:12px;color:var(--muted)}
-.topline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.idchip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;color:var(--muted);background:#f8fafc}.change-lang{border:0;background:none;color:var(--accent);font-weight:700;padding:8px}.progress{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px}.progress span{height:5px;border-radius:99px;background:#e2e8f0}.progress span.on{background:var(--accent)}.step-title{margin:0 0 4px;font-size:26px}.step-sub{margin:0 0 18px;color:var(--muted)}
-.field{margin:0 0 16px}.field label{display:block;font-weight:750;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;min-height:50px;border:1px solid #cbd5e1;border-radius:12px;padding:11px 12px;background:#fff;color:var(--text)}.field textarea{min-height:108px;resize:vertical}.hint{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.4}.error{font-size:13px;color:var(--danger);margin-top:5px}.bad{border-color:var(--danger)!important;outline:2px solid #fee2e2}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:18px}.btn{min-height:50px;border-radius:12px;border:1px solid var(--line);padding:0 18px;font-weight:800;background:#fff;color:var(--text)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent2)}.btn.good{background:#166534;border-color:#166534;color:#fff}.btn:disabled{opacity:.55;cursor:not-allowed}.notice{border:1px solid #fde68a;background:#fffbeb;border-radius:14px;padding:12px 14px;color:#854d0e;line-height:1.45;margin:14px 0}.success{border-color:#bbf7d0;background:#f0fdf4;color:#166534}.info{border-color:#bfdbfe;background:#eff6ff;color:#1e40af}.consent{display:flex;align-items:flex-start;gap:10px}.consent input{width:21px;height:21px;margin-top:2px}.review{display:grid;gap:2px}.row{display:grid;grid-template-columns:minmax(120px,34%) 1fr;gap:12px;border-bottom:1px solid var(--line);padding:10px 0}.row dt{color:var(--muted)}.row dd{margin:0;font-weight:650;overflow-wrap:anywhere}.delivery-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.delivery-grid .btn{width:100%}.footer{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}.small{font-size:12px;color:var(--muted)}
-.recruiter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.recruiter-btn{width:100%;min-height:88px;border:1px solid var(--line);border-radius:16px;background:#fff;text-align:left;padding:13px;display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:11px;color:var(--text)}.recruiter-btn:hover,.recruiter-btn:focus-visible,.recruiter-btn.selected{border-color:var(--accent);outline:3px solid #dbeafe;background:#f8fbff}.recruiter-avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accent2);font-weight:900}.recruiter-name{font-weight:850}.recruiter-email{display:block;color:var(--muted);font-size:12px;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;margin-top:3px}.recruiter-arrow{font-size:22px;color:var(--accent)}.route-links{display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:flex-end}.selected-recruiter{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:13px;margin-bottom:15px}.selected-recruiter strong{display:block}.selected-recruiter small{display:block;color:#475569;margin-top:2px;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere}.recruiter-back{border:0;background:none;color:var(--accent);font-weight:750;padding:8px 0}.language-chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;color:var(--muted);background:#f8fafc}.recruiter-help{margin-top:14px;font-size:12px;color:var(--muted);text-align:center}
-@media(max-width:580px){.langs,.recruiter-grid,.grid2,.delivery-grid,.trust{grid-template-columns:1fr}.card{padding:18px 14px;border-radius:16px}.row{grid-template-columns:1fr;gap:3px}.actions .btn{flex:1 1 100%}.trust{gap:6px}.trust div{padding:7px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1457d9">
+  <meta name="description" content="Public multilingual recruitment application for PPO Siechnice">
+  <meta name="robots" content="index,follow">
+  <title>Rekrutacja PPO Siechnice — formularz kandydata</title>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<main class="shell">
-<div class="brand"><strong>Kiris Jobs</strong><span class="badge">Recruitment Lite 2.0</span></div>
-<section id="languageScreen" class="card">
-  <div class="hero"><div class="globe">🌍</div><h1>Select your language</h1><p>Complete the application on your phone. Nothing is uploaded to GitHub. You decide how to send the application.</p></div>
-  <div class="trust"><div>🔒 No passport scans</div><div>📱 Mobile friendly</div><div>📨 You confirm sending</div></div>
-  <input id="languageSearch" class="lang-search" type="search" placeholder="Search language…" autocomplete="off">
-  <div id="languageGrid" class="langs"></div>
-</section>
+  <main class="app-shell">
+    <header class="brandbar">
+      <span class="brand-name">Rekrutacja PPO Siechnice</span>
+      <span class="version-badge">Recruitment Lite 3.0</span>
+    </header>
 
-<section id="recruiterScreen" class="card hidden">
-  <div class="topline"><button id="backToLanguages" type="button" class="recruiter-back"></button><span id="chosenLanguageChip" class="language-chip"></span></div>
-  <div class="hero"><div class="globe">👤</div><h1 id="recruiterTitle"></h1><p id="recruiterSub"></p></div>
-  <div id="recruiterGrid" class="recruiter-grid" role="list"></div>
-  <p id="recruiterHelp" class="recruiter-help"></p>
-</section>
+    <section id="languageScreen" class="card" aria-labelledby="languageTitle">
+      <div class="hero">
+        <div class="hero-icon" aria-hidden="true">🌍</div>
+        <h1 id="languageTitle" tabindex="-1">Choose your language</h1>
+        <p id="languageSubtitle">The whole application will be displayed in the selected language.</p>
+      </div>
+      <div class="trust-grid" aria-label="Form information">
+        <div id="trustPrivate" class="trust-item">🔒 No passport scans</div>
+        <div id="trustMobile" class="trust-item">📱 Works on a phone</div>
+        <div id="trustControl" class="trust-item">📨 You confirm sending</div>
+      </div>
+      <label class="hidden" for="languageSearch">Search language</label>
+      <input id="languageSearch" class="search-input" type="search" autocomplete="off" placeholder="Search language…">
+      <div id="languageGrid" class="language-grid"></div>
+    </section>
 
-<section id="formScreen" class="card hidden">
-  <div class="topline"><span id="candidateChip" class="idchip ltr"></span><div class="route-links"><button id="changeLanguage" type="button" class="change-lang">🌍 Language</button><button id="changeRecruiter" type="button" class="change-lang">👤 Recruiter</button></div></div>
-  <div class="selected-recruiter"><span aria-hidden="true">👤</span><span><strong id="selectedRecruiterName"></strong><small id="selectedRecruiterEmail"></small></span></div>
-  <div class="progress" aria-hidden="true"><span id="p1"></span><span id="p2"></span><span id="p3"></span><span id="p4"></span></div>
-  <h2 id="stepTitle" class="step-title"></h2><p id="stepSub" class="step-sub"></p>
-  <form id="candidateForm" novalidate>
-    <div id="step1">
-      <div class="grid2"><div class="field"><label for="firstName" data-k="firstName"></label><input id="firstName" autocomplete="given-name" maxlength="80"><div class="error" data-e="firstName"></div></div><div class="field"><label for="lastName" data-k="lastName"></label><input id="lastName" autocomplete="family-name" maxlength="80"><div class="error" data-e="lastName"></div></div></div>
-      <div class="field"><label for="phone" data-k="phone"></label><input id="phone" class="ltr" type="tel" inputmode="tel" autocomplete="tel" placeholder="+48… / +380… / +995…" maxlength="30"><div class="hint" id="phoneHint"></div><div class="error" data-e="phone"></div></div>
-      <div class="field"><label for="messenger" data-k="messenger"></label><select id="messenger"></select><div class="error" data-e="messenger"></div></div>
-      <div class="field"><label for="email" data-k="email"></label><input id="email" class="ltr" type="email" autocomplete="email" maxlength="120"><div class="error" data-e="email"></div></div>
-    </div>
-    <div id="step2" class="hidden">
-      <div class="field"><label for="citizenship" data-k="citizenship"></label><input id="citizenship" maxlength="80"><div class="error" data-e="citizenship"></div></div>
-      <div class="grid2"><div class="field"><label for="country" data-k="country"></label><input id="country" maxlength="80"><div class="error" data-e="country"></div></div><div class="field"><label for="city" data-k="city"></label><input id="city" maxlength="80"><div class="error" data-e="city"></div></div></div>
-      <div class="field"><label for="age" data-k="age"></label><input id="age" class="ltr" type="number" inputmode="numeric" min="18" max="75"><div class="error" data-e="age"></div></div>
-      <div class="field"><label for="inPoland" data-k="inPoland"></label><select id="inPoland"></select><div class="error" data-e="inPoland"></div></div>
-      <div class="field"><label for="documents" data-k="documents"></label><select id="documents"></select><div class="error" data-e="documents"></div></div>
-    </div>
-    <div id="step3" class="hidden">
-      <div class="field"><label for="job" data-k="job"></label><select id="job"></select><div class="error" data-e="job"></div></div>
-      <div class="field"><label for="experience" data-k="experience"></label><textarea id="experience" maxlength="1000"></textarea></div>
-      <div class="field"><label for="start" data-k="start"></label><select id="start"></select><div class="error" data-e="start"></div></div>
-      <div class="field"><label for="shift" data-k="shift"></label><select id="shift"></select><div class="error" data-e="shift"></div></div>
-      <div class="field"><label for="housing" data-k="housing"></label><select id="housing"></select><div class="error" data-e="housing"></div></div>
-      <div class="field"><label for="source" data-k="source"></label><select id="source"></select><div class="error" data-e="source"></div></div>
-      <div class="field"><label for="comment" data-k="comment"></label><textarea id="comment" maxlength="1000"></textarea></div>
-      <div id="safetyNotice" class="notice"></div>
-      <div class="field consent"><input id="consent" type="checkbox"><label for="consent" id="consentLabel" style="font-weight:650"></label></div><div class="error" data-e="consent"></div>
-    </div>
-    <div class="actions"><button id="backBtn" type="button" class="btn"></button><button id="nextBtn" type="button" class="btn primary"></button></div>
-  </form>
-</section>
+    <section id="recruiterScreen" class="card hidden" aria-labelledby="recruiterTitle">
+      <button id="recruiterBackLanguage" class="link-button" type="button">← Change language</button>
+      <div class="hero">
+        <div class="hero-icon" aria-hidden="true">👤</div>
+        <h1 id="recruiterTitle" tabindex="-1">Choose your recruiter</h1>
+        <p id="recruiterSubtitle">Select the person who sent you this link.</p>
+      </div>
+      <div id="recruiterRequired" class="selection-note"></div>
+      <div id="recruiterGrid" class="recruiter-grid"></div>
+    </section>
 
-<section id="reviewScreen" class="card hidden">
-  <div class="topline"><span id="reviewChip" class="idchip ltr"></span><span id="routingChip" class="idchip"></span></div>
-  <h2 id="reviewTitle" class="step-title"></h2><p id="reviewSub" class="step-sub"></p>
-  <dl id="reviewList" class="review"></dl>
-  <div id="mailNotice" class="notice info"></div>
-  <div class="delivery-grid">
-    <button id="mailBtn" type="button" class="btn primary"></button>
-    <button id="copyBtn" type="button" class="btn"></button>
-    <button id="excelBtn" type="button" class="btn good"></button>
-    <button id="downloadBtn" type="button" class="btn"></button>
-  </div>
-  <div class="actions"><button id="editBtn" type="button" class="btn"></button><button id="newBtn" type="button" class="btn"></button></div>
-  <div id="resultMsg" class="notice success hidden" aria-live="polite"></div>
-</section>
+    <section id="formScreen" class="card hidden" aria-labelledby="formStepTitle">
+      <div class="topline">
+        <div class="topline-group">
+          <span id="applicationIdChip" class="chip ltr-value"></span>
+          <span id="recruiterChip" class="chip"></span>
+        </div>
+        <div class="topline-group">
+          <button id="changeLanguage" class="link-button" type="button">🌍 Language</button>
+          <button id="changeRecruiter" class="link-button" type="button">👤 Recruiter</button>
+        </div>
+      </div>
 
-<section id="resumeBanner" class="card hidden" style="margin-top:14px"><strong id="resumeText"></strong><div class="actions" style="margin-top:10px"><button id="resumeYes" class="btn primary" type="button"></button><button id="resumeNo" class="btn" type="button"></button></div></section>
-<p class="footer">This static page does not send form data to GitHub. Draft data stays only in this browser. Do not submit passport scans, banking details, passwords or medical documents.</p>
-</main>
-<script>
-(()=>{
-'use strict';
-const RECRUITERS={yana:{name:'Yana Radushynska',email:'yana.radushynska@pposiechnice.pl'},yuliia:{name:'Yuliia Korniienko',email:'yuliia.korniienko@pposiechnice.pl'},fariz:{name:'Fariz Injaev',email:'fariz.injaev@pposiechnice.pl'},oleksandr:{name:'Oleksandr Kiris',email:'oleksandr.kiris@pposiechnice.pl'},maksym:{name:'Maksym Saliuk',email:'maksym.saliuk@pposiechnice.pl'},anastasiia:{name:'Anastasiia Derepa',email:'anastasiia.derepa@citronex.pl'}};
-const STORAGE_KEY='kiris_jobs_application_v3', LANG_KEY='kiris_jobs_language_v3';
-const $=id=>document.getElementById(id);
-const LANGS={pl:['🇵🇱','Polski','Polish','ltr'],uk:['🇺🇦','Українська','Ukrainian','ltr'],ru:['🇷🇺','Русский','Russian','ltr'],en:['🇬🇧','English','English','ltr'],ka:['🇬🇪','ქართული','Georgian','ltr'],az:['🇦🇿','Azərbaycan dili','Azerbaijani','ltr'],hy:['🇦🇲','Հայերեն','Armenian','ltr'],tr:['🇹🇷','Türkçe','Turkish','ltr'],uz:['🇺🇿','O‘zbekcha','Uzbek','ltr'],ky:['🇰🇬','Кыргызча','Kyrgyz','ltr'],tg:['🇹🇯','Тоҷикӣ','Tajik','ltr'],kk:['🇰🇿','Қазақша','Kazakh','ltr'],hi:['🇮🇳','हिन्दी','Hindi','ltr'],bn:['🇧🇩','বাংলা','Bengali','ltr'],ne:['🇳🇵','नेपाली','Nepali','ltr'],ur:['🇵🇰','اردو','Urdu','rtl'],si:['🇱🇰','සිංහල','Sinhala','ltr'],fil:['🇵🇭','Filipino','Filipino','ltr'],id:['🇮🇩','Bahasa Indonesia','Indonesian','ltr'],vi:['🇻🇳','Tiếng Việt','Vietnamese','ltr']};
-const ROUTE_I18N={
-en:['Choose your recruiter','Select the person who should receive your application.','Back to languages','Recruiter','Selected recruiter','The email will be addressed only to the recruiter you select.'],
-pl:['Wybierz rekrutera','Wybierz osobę, która ma otrzymać Twoje zgłoszenie.','Wróć do języków','Rekruter','Wybrany rekruter','Wiadomość zostanie zaadresowana tylko do wybranego rekrutera.'],
-uk:['Оберіть рекрутера','Оберіть людину, яка має отримати вашу анкету.','Назад до мов','Рекрутер','Обраний рекрутер','Лист буде адресовано лише обраному рекрутеру.'],
-ru:['Выберите рекрутера','Выберите человека, который должен получить вашу анкету.','Назад к языкам','Рекрутер','Выбранный рекрутер','Письмо будет адресовано только выбранному рекрутеру.'],
-ka:['აირჩიეთ რეკრუტერი','აირჩიეთ ადამიანი, რომელმაც უნდა მიიღოს თქვენი განაცხადი.','ენებზე დაბრუნება','რეკრუტერი','არჩეული რეკრუტერი','წერილი გაიგზავნება მხოლოდ არჩეულ რეკრუტერთან.'],
-az:['Rekruteri seçin','Müraciətinizi qəbul edəcək şəxsi seçin.','Dillərə qayıt','Rekruter','Seçilmiş rekruter','Məktub yalnız seçdiyiniz rekruterə ünvanlanacaq.'],
-hy:['Ընտրեք հավաքագրողին','Ընտրեք այն անձին, ով պետք է ստանա ձեր դիմումը։','Վերադառնալ լեզուներին','Հավաքագրող','Ընտրված հավաքագրող','Նամակը կուղղվի միայն ընտրված հավաքագրողին։'],
-tr:['İşe alım uzmanını seçin','Başvurunuzu alacak kişiyi seçin.','Dillere dön','İşe alım uzmanı','Seçilen kişi','E-posta yalnızca seçtiğiniz kişiye gönderilecektir.'],
-uz:['Rekruterni tanlang','Arizangizni qabul qiladigan shaxsni tanlang.','Tillarga qaytish','Rekruter','Tanlangan rekruter','Xat faqat tanlangan rekruterga yo‘naltiriladi.'],
-ky:['Рекрутерди тандаңыз','Арызыңызды ала турган адамды тандаңыз.','Тилдерге кайтуу','Рекрутер','Тандалган рекрутер','Кат тандалган рекрутерге гана жөнөтүлөт.'],
-tg:['Рекрутерро интихоб кунед','Шахсеро интихоб кунед, ки дархости шуморо мегирад.','Бозгашт ба забонҳо','Рекрутер','Рекрутери интихобшуда','Нома танҳо ба рекрутери интихобшуда фиристода мешавад.'],
-kk:['Рекрутерді таңдаңыз','Өтінішіңізді алатын адамды таңдаңыз.','Тілдерге оралу','Рекрутер','Таңдалған рекрутер','Хат тек таңдалған рекрутерге жіберіледі.'],
-hi:['रिक्रूटर चुनें','उस व्यक्ति को चुनें जिसे आपका आवेदन मिलना चाहिए।','भाषाओं पर वापस जाएँ','रिक्रूटर','चुना गया रिक्रूटर','ईमेल केवल चुने गए रिक्रूटर को भेजा जाएगा।'],
-bn:['রিক্রুটার নির্বাচন করুন','যিনি আপনার আবেদন গ্রহণ করবেন তাকে নির্বাচন করুন।','ভাষায় ফিরে যান','রিক্রুটার','নির্বাচিত রিক্রুটার','ইমেইল শুধু নির্বাচিত রিক্রুটারের কাছে যাবে।'],
-ne:['रिक्रुटर छान्नुहोस्','तपाईंको आवेदन प्राप्त गर्ने व्यक्ति छान्नुहोस्।','भाषामा फर्कनुहोस्','रिक्रुटर','छानिएको रिक्रुटर','इमेल छानिएको रिक्रुटरलाई मात्र पठाइनेछ।'],
-ur:['ریکروٹر منتخب کریں','اس شخص کو منتخب کریں جسے آپ کی درخواست ملنی چاہیے۔','زبانوں پر واپس جائیں','ریکروٹر','منتخب ریکروٹر','ای میل صرف منتخب ریکروٹر کو بھیجی جائے گی۔'],
-si:['බඳවාගැනීමේ නිලධාරියා තෝරන්න','ඔබගේ අයදුම්පත ලැබිය යුතු පුද්ගලයා තෝරන්න.','භාෂා වෙත ආපසු','බඳවාගැනීමේ නිලධාරියා','තෝරාගත් නිලධාරියා','විද්‍යුත් තැපෑල තෝරාගත් නිලධාරියාට පමණක් යොමු වේ.'],
-fil:['Pumili ng recruiter','Piliin ang taong dapat makatanggap ng iyong aplikasyon.','Bumalik sa mga wika','Recruiter','Napiling recruiter','Ang email ay ipapadala lamang sa napiling recruiter.'],
-id:['Pilih perekrut','Pilih orang yang harus menerima lamaran Anda.','Kembali ke bahasa','Perekrut','Perekrut terpilih','Email hanya akan dialamatkan kepada perekrut yang dipilih.'],
-vi:['Chọn chuyên viên tuyển dụng','Chọn người sẽ nhận hồ sơ của bạn.','Quay lại ngôn ngữ','Nhân viên tuyển dụng','Người đã chọn','Email chỉ được gửi đến người tuyển dụng bạn chọn.']};
-function rt(i){const a=ROUTE_I18N[lang]||ROUTE_I18N.en;return a[i]||ROUTE_I18N.en[i]}
-const EN={step1:'Contact',step1sub:'How can we contact you?',step2:'Location and documents',step2sub:'Tell us where you are now.',step3:'Work preferences',step3sub:'Tell us what kind of work you are looking for.',review:'Check your application',reviewSub:'Review your answers before sending.',firstName:'First name *',lastName:'Last name *',phone:'Phone number with country code *',messenger:'Preferred messenger *',email:'Email (optional)',citizenship:'Citizenship *',country:'Current country *',city:'Current city *',age:'Age *',inPoland:'Are you currently in Poland? *',documents:'Documents for stay/work in Poland *',job:'What kind of work are you interested in? *',experience:'Work experience (optional)',start:'When can you start? *',shift:'Can you work shifts? *',housing:'Do you need accommodation? *',source:'Where did you hear about us? *',comment:'Additional comment (optional)',safety:'Do not send passport scans, bank details, passwords or medical documents through this form.',consent:'I confirm that the information is correct and I agree to be contacted about employment. *',back:'Back',next:'Continue',check:'Check application',edit:'Edit',mail:'Send by email',copy:'Copy application',excel:'Copy Excel row',download:'Download TXT',new:'New application',required:'Required field',phoneErr:'Enter a valid phone number with country code and at least 7 digits',emailErr:'Enter a valid email address',ageErr:'You must be at least 18 years old',copied:'Application copied.',excelCopied:'Excel row copied. Paste it into the first empty row in Excel.',downloaded:'TXT file prepared.',mailInfo:'Your mail app will open with a prepared message. The website cannot send it automatically — press Send in your mail app.',mailLong:'This application is long. Some mail apps may truncate long mailto links. If the email does not open correctly, use “Copy application” or download TXT.',resume:'An unfinished application was found. Continue?',yes:'Continue',no:'Start again',changeLanguage:'Language',phoneHint:'Use an international number, for example +380…, +995…, +998….'};
-const RU={step1:'Контакты',step1sub:'Как с вами связаться?',step2:'Место и документы',step2sub:'Укажите, где вы сейчас находитесь.',step3:'Работа',step3sub:'Расскажите, какую работу вы ищете.',review:'Проверьте анкету',reviewSub:'Проверьте данные перед отправкой.',firstName:'Имя *',lastName:'Фамилия *',phone:'Телефон с кодом страны *',messenger:'Предпочитаемый мессенджер *',email:'Email (необязательно)',citizenship:'Гражданство *',country:'Страна проживания *',city:'Город *',age:'Возраст *',inPoland:'Вы сейчас в Польше? *',documents:'Документы для пребывания/работы в Польше *',job:'Какая работа вас интересует? *',experience:'Опыт работы (необязательно)',start:'Когда готовы начать? *',shift:'Готовы работать посменно? *',housing:'Нужно жильё? *',source:'Откуда узнали о вакансии? *',comment:'Дополнительный комментарий',safety:'Не отправляйте через эту анкету сканы паспорта, банковские данные, пароли или медицинские документы.',consent:'Подтверждаю правильность данных и согласен(на) на контакт по поводу трудоустройства. *',back:'Назад',next:'Продолжить',check:'Проверить анкету',edit:'Изменить',mail:'Отправить по email',copy:'Скопировать анкету',excel:'Скопировать строку Excel',download:'Скачать TXT',new:'Новая анкета',required:'Обязательное поле',phoneErr:'Введите корректный номер с кодом страны и минимум 7 цифрами',emailErr:'Введите корректный email',ageErr:'Только для кандидатов 18+',copied:'Анкета скопирована.',excelCopied:'Строка для Excel скопирована.',downloaded:'TXT подготовлен.',mailInfo:'Откроется ваша почта с готовым письмом. Сайт не может отправить его автоматически — нажмите «Отправить» в почтовом приложении.',mailLong:'Анкета длинная. Некоторые почтовые приложения могут обрезать длинную mailto-ссылку. Если письмо открылось не полностью, используйте «Скопировать анкету» или TXT.',resume:'Найдена незавершённая анкета. Продолжить?',yes:'Продолжить',no:'Начать заново',changeLanguage:'Язык',phoneHint:'Используйте международный формат, например +380…, +995…, +998….'};
-const UK={...RU,step1:'Контакти',step1sub:'Як з вами зв’язатися?',step2:'Місце та документи',step2sub:'Вкажіть, де ви зараз перебуваєте.',step3:'Робота',step3sub:'Розкажіть, яку роботу ви шукаєте.',review:'Перевірте анкету',reviewSub:'Перевірте дані перед відправленням.',firstName:'Ім’я *',lastName:'Прізвище *',phone:'Телефон з кодом країни *',messenger:'Бажаний месенджер *',citizenship:'Громадянство *',country:'Країна перебування *',city:'Місто *',age:'Вік *',inPoland:'Ви зараз у Польщі? *',job:'Яка робота вас цікавить? *',experience:'Досвід роботи (необов’язково)',start:'Коли готові почати? *',shift:'Готові працювати позмінно? *',housing:'Потрібне житло? *',source:'Звідки дізналися про вакансію? *',comment:'Додатковий коментар',consent:'Підтверджую правильність даних і погоджуюся на контакт щодо працевлаштування. *',back:'Назад',next:'Продовжити',check:'Перевірити анкету',edit:'Змінити',mail:'Надіслати email',copy:'Скопіювати анкету',excel:'Скопіювати рядок Excel',download:'Завантажити TXT',new:'Нова анкета',required:'Обов’язкове поле',ageErr:'Тільки для кандидатів 18+',resume:'Знайдено незавершену анкету. Продовжити?',yes:'Продовжити',no:'Почати заново',changeLanguage:'Мова'};
-const PL={...EN,step1:'Kontakt',step1sub:'Jak możemy się z Tobą skontaktować?',step2:'Miejsce i dokumenty',step2sub:'Podaj, gdzie obecnie przebywasz.',step3:'Praca',step3sub:'Powiedz nam, jakiej pracy szukasz.',review:'Sprawdź zgłoszenie',reviewSub:'Sprawdź dane przed wysłaniem.',firstName:'Imię *',lastName:'Nazwisko *',phone:'Telefon z kodem kraju *',messenger:'Preferowany komunikator *',email:'E-mail (opcjonalnie)',citizenship:'Obywatelstwo *',country:'Kraj pobytu *',city:'Miasto *',age:'Wiek *',inPoland:'Czy obecnie jesteś w Polsce? *',documents:'Dokumenty dotyczące pobytu/pracy w Polsce *',job:'Jakiego rodzaju pracy szukasz? *',experience:'Doświadczenie zawodowe (opcjonalnie)',start:'Kiedy możesz rozpocząć? *',shift:'Czy możesz pracować zmianowo? *',housing:'Czy potrzebujesz zakwaterowania? *',source:'Skąd wiesz o ofercie? *',comment:'Dodatkowy komentarz',safety:'Nie wysyłaj przez ten formularz skanów paszportu, danych bankowych, haseł ani dokumentacji medycznej.',consent:'Potwierdzam poprawność danych i wyrażam zgodę na kontakt w sprawie zatrudnienia. *',back:'Wstecz',next:'Dalej',check:'Sprawdź zgłoszenie',edit:'Edytuj',mail:'Wyślij e-mailem',copy:'Kopiuj zgłoszenie',excel:'Kopiuj wiersz Excel',download:'Pobierz TXT',new:'Nowe zgłoszenie',required:'Pole wymagane',phoneErr:'Podaj poprawny numer z kodem kraju i minimum 7 cyfr',emailErr:'Podaj poprawny adres e-mail',ageErr:'Wymagany wiek co najmniej 18 lat',copied:'Zgłoszenie skopiowane.',excelCopied:'Wiersz Excel skopiowany.',downloaded:'Plik TXT przygotowany.',mailInfo:'Otworzy się aplikacja pocztowa z gotową wiadomością. Strona nie wysyła jej automatycznie — naciśnij „Wyślij” w poczcie.',mailLong:'Zgłoszenie jest długie. Niektóre aplikacje mogą skracać długie linki mailto. Jeśli wiadomość jest niepełna, użyj kopiowania zgłoszenia albo pliku TXT.',resume:'Znaleziono niedokończone zgłoszenie. Kontynuować?',yes:'Kontynuuj',no:'Zacznij od nowa',changeLanguage:'Język',phoneHint:'Użyj formatu międzynarodowego, np. +380…, +995…, +998….'};
-const LOCALES={en:EN,pl:PL,ru:RU,uk:UK};
-const translit={ka:{step1:'კონტაქტი',firstName:'სახელი *',lastName:'გვარი *',phone:'ტელეფონი ქვეყნის კოდით *',email:'ელფოსტა (არასავალდებულო)',citizenship:'მოქალაქეობა *',country:'ამჟამინდელი ქვეყანა *',city:'ქალაქი *',age:'ასაკი *',job:'რა სამუშაო გაინტერესებთ? *',back:'უკან',next:'გაგრძელება',mail:'ელფოსტით გაგზავნა',copy:'განაცხადის კოპირება',excel:'Excel-ის სტრიქონის კოპირება'},az:{step1:'Əlaqə',firstName:'Ad *',lastName:'Soyad *',phone:'Ölkə kodu ilə telefon *',email:'E-poçt (istəyə bağlı)',citizenship:'Vətəndaşlıq *',country:'Hazırkı ölkə *',city:'Şəhər *',age:'Yaş *',job:'Hansı işlə maraqlanırsınız? *',back:'Geri',next:'Davam et',mail:'E-poçtla göndər',copy:'Anketi kopyala',excel:'Excel sətrini kopyala'},hy:{step1:'Կապ',firstName:'Անուն *',lastName:'Ազգանուն *',phone:'Հեռախոս երկրի կոդով *',email:'Էլ. փոստ (ոչ պարտադիր)',citizenship:'Քաղաքացիություն *',country:'Ներկայիս երկիր *',city:'Քաղաք *',age:'Տարիք *',job:'Ի՞նչ աշխատանք եք փնտրում։ *',back:'Հետ',next:'Շարունակել',mail:'Ուղարկել էլ. փոստով',copy:'Պատճենել հայտը',excel:'Պատճենել Excel տողը'},tr:{step1:'İletişim',firstName:'Ad *',lastName:'Soyad *',phone:'Ülke koduyla telefon *',email:'E-posta (isteğe bağlı)',citizenship:'Vatandaşlık *',country:'Bulunduğunuz ülke *',city:'Şehir *',age:'Yaş *',job:'Hangi işle ilgileniyorsunuz? *',back:'Geri',next:'Devam',mail:'E-posta ile gönder',copy:'Başvuruyu kopyala',excel:'Excel satırını kopyala'},uz:{step1:'Aloqa',firstName:'Ism *',lastName:'Familiya *',phone:'Mamlakat kodi bilan telefon *',email:'E-mail (ixtiyoriy)',citizenship:'Fuqarolik *',country:'Hozirgi mamlakat *',city:'Shahar *',age:'Yosh *',job:'Qanday ish qidiryapsiz? *',back:'Orqaga',next:'Davom etish',mail:'E-mail orqali yuborish',copy:'Anketani nusxalash',excel:'Excel qatorini nusxalash'},ky:{step1:'Байланыш',firstName:'Аты *',lastName:'Фамилия *',phone:'Өлкө коду менен телефон *',email:'Email (милдеттүү эмес)',citizenship:'Жарандык *',country:'Учурдагы өлкө *',city:'Шаар *',age:'Жаш *',job:'Кандай жумуш издейсиз? *',back:'Артка',next:'Улантуу'},tg:{step1:'Тамос',firstName:'Ном *',lastName:'Насаб *',phone:'Телефон бо рамзи кишвар *',email:'Email (ихтиёрӣ)',citizenship:'Шаҳрвандӣ *',country:'Кишвари ҳозира *',city:'Шаҳр *',age:'Синну сол *',job:'Кадом корро меҷӯед? *',back:'Бозгашт',next:'Идома'},kk:{step1:'Байланыс',firstName:'Аты *',lastName:'Тегі *',phone:'Ел кодымен телефон *',email:'Email (міндетті емес)',citizenship:'Азаматтық *',country:'Қазіргі ел *',city:'Қала *',age:'Жас *',job:'Қандай жұмыс іздейсіз? *',back:'Артқа',next:'Жалғастыру'},hi:{step1:'संपर्क',firstName:'नाम *',lastName:'उपनाम *',phone:'देश कोड सहित फ़ोन *',email:'ईमेल (वैकल्पिक)',citizenship:'नागरिकता *',country:'वर्तमान देश *',city:'शहर *',age:'उम्र *',job:'आप किस काम में रुचि रखते हैं? *',back:'वापस',next:'जारी रखें'},bn:{step1:'যোগাযোগ',firstName:'নাম *',lastName:'পদবি *',phone:'দেশের কোডসহ ফোন *',email:'ইমেইল (ঐচ্ছিক)',citizenship:'নাগরিকত্ব *',country:'বর্তমান দেশ *',city:'শহর *',age:'বয়স *',job:'কোন কাজ খুঁজছেন? *',back:'পেছনে',next:'চালিয়ে যান'},ne:{step1:'सम्पर्क',firstName:'नाम *',lastName:'थर *',phone:'देश कोड सहित फोन *',email:'इमेल (वैकल्पिक)',citizenship:'नागरिकता *',country:'हालको देश *',city:'सहर *',age:'उमेर *',job:'कस्तो काम खोज्दै हुनुहुन्छ? *',back:'पछाडि',next:'जारी राख्नुहोस्'},ur:{step1:'رابطہ',firstName:'نام *',lastName:'خاندانی نام *',phone:'ملک کے کوڈ کے ساتھ فون *',email:'ای میل (اختیاری)',citizenship:'شہریت *',country:'موجودہ ملک *',city:'شہر *',age:'عمر *',job:'آپ کس کام میں دلچسپی رکھتے ہیں؟ *',back:'واپس',next:'جاری رکھیں',mail:'ای میل سے بھیجیں',copy:'درخواست کاپی کریں',excel:'Excel قطار کاپی کریں'},si:{step1:'සම්බන්ධතාව',firstName:'නම *',lastName:'වාසගම *',phone:'රටේ කේතය සමඟ දුරකථනය *',email:'විද්‍යුත් තැපෑල (විකල්ප)',citizenship:'පුරවැසිභාවය *',country:'වත්මන් රට *',city:'නගරය *',age:'වයස *',job:'ඔබ සොයන්නේ කුමන රැකියාවක්ද? *',back:'ආපසු',next:'ඉදිරියට'},fil:{step1:'Contact',firstName:'Pangalan *',lastName:'Apelyido *',phone:'Telepono na may country code *',email:'Email (opsyonal)',citizenship:'Pagkamamamayan *',country:'Kasalukuyang bansa *',city:'Lungsod *',age:'Edad *',job:'Anong trabaho ang hinahanap mo? *',back:'Bumalik',next:'Magpatuloy'},id:{step1:'Kontak',firstName:'Nama depan *',lastName:'Nama belakang *',phone:'Nomor telepon dengan kode negara *',email:'Email (opsional)',citizenship:'Kewarganegaraan *',country:'Negara saat ini *',city:'Kota *',age:'Usia *',job:'Pekerjaan apa yang Anda cari? *',back:'Kembali',next:'Lanjut'},vi:{step1:'Liên hệ',firstName:'Tên *',lastName:'Họ *',phone:'Số điện thoại có mã quốc gia *',email:'Email (không bắt buộc)',citizenship:'Quốc tịch *',country:'Quốc gia hiện tại *',city:'Thành phố *',age:'Tuổi *',job:'Bạn đang tìm công việc gì? *',back:'Quay lại',next:'Tiếp tục'}};
-Object.keys(translit).forEach(k=>LOCALES[k]={...EN,...translit[k]});
-const OPTIONS={messenger:[['','—'],['WhatsApp','WhatsApp'],['Viber','Viber'],['Telegram','Telegram'],['Phone','Phone only'],['Other','Other']],inPoland:[['','—'],['Tak','Yes'],['Nie','No']],documents:[['','—'],['Brak polskich dokumentów','No Polish documents'],['Wiza','Visa'],['Karta pobytu','Residence card'],['PESEL UKR / ochrona czasowa','PESEL UKR / temporary protection'],['Inny dokument','Other document'],['Do weryfikacji','I am not sure']],job:[['','—'],['Szklarnia','Greenhouse'],['Sortowanie i pakowanie','Sorting / packing'],['Magazyn i logistyka','Warehouse / logistics'],['Produkcja','Production'],['Sprzątanie','Cleaning'],['Kierowca','Driver'],['Praca techniczna','Technical work'],['Inna','Other']],start:[['','—'],['Natychmiast','Immediately'],['7 dni','Within 7 days'],['14 dni','Within 14 days'],['30 dni','Within 30 days'],['Później','Later']],shift:[['','—'],['Tak','Yes'],['Nie','No'],['Zależy od grafiku','Depends on schedule']],housing:[['','—'],['Tak','Yes'],['Nie','No']],source:[['','—'],['Facebook','Facebook'],['Instagram','Instagram'],['TikTok','TikTok'],['Telegram','Telegram'],['WhatsApp','WhatsApp'],['Viber','Viber'],['Polecenie','Referral'],['Rekruter / agencja','Recruiter / agency'],['Inne','Other']]};
-const FIELDS=['firstName','lastName','phone','messenger','email','citizenship','country','city','age','inPoland','documents','job','experience','start','shift','housing','source','comment'];
-const REQUIRED={1:['firstName','lastName','phone','messenger'],2:['citizenship','country','city','age','inPoland','documents'],3:['job','start','shift','housing','source','consent']};
-let lang='en',step=1,id=null,recruiterKey='',recruiter=null;
-const params=new URLSearchParams(location.search); const campaign=clean(params.get('campaign')||''); const urlSource=clean(params.get('src')||''); const requestedRecruiterKey=(params.get('recruiter')||'').toLowerCase(); if(RECRUITERS[requestedRecruiterKey]){recruiterKey=requestedRecruiterKey;recruiter=RECRUITERS[recruiterKey];}
-function clean(v){return String(v||'').replace(/[\t\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim().slice(0,500)}
-function t(k){return (LOCALES[lang]&&LOCALES[lang][k])||EN[k]||k}
-function makeId(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `KAND-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`}
-function nowPL(){return new Intl.DateTimeFormat('pl-PL',{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Warsaw'}).format(new Date())}
-function normalizePhone(v){let s=String(v||'').trim().replace(/[()\s.-]/g,''); if(s.startsWith('00'))s='+'+s.slice(2); return s}
-function validPhone(v){const n=normalizePhone(v);return /^\+?[0-9]{7,15}$/.test(n)}
-function validEmail(v){return !v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
-function formData(){const o={};FIELDS.forEach(f=>o[f]=clean($(f).value));o.phone=normalizePhone(o.phone);o.consent=$('consent').checked;return o}
-function save(){if(!id)return;localStorage.setItem(STORAGE_KEY,JSON.stringify({id,lang,step,recruiterKey,data:formData(),savedAt:Date.now()}));localStorage.setItem(LANG_KEY,lang)}
-function restore(d){id=d.id||makeId();lang=d.lang||'en';step=Math.min(3,Math.max(1,d.step||1));recruiterKey=RECRUITERS[d.recruiterKey]?d.recruiterKey:'';recruiter=recruiterKey?RECRUITERS[recruiterKey]:null;setLanguage(lang,false);FIELDS.forEach(f=>{if(d.data&&d.data[f]!=null)$(f).value=d.data[f]});$('consent').checked=!!(d.data&&d.data.consent);if(recruiter)showForm();else showRecruiters();}
-function fillOptions(){Object.keys(OPTIONS).forEach(id=>{$(id).innerHTML=OPTIONS[id].map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('')})}
-function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function setLanguage(code,start=true){lang=LANGS[code]?code:'en';document.documentElement.lang=lang;document.documentElement.dir=LANGS[lang][3];document.querySelectorAll('[data-k]').forEach(el=>el.textContent=t(el.dataset.k));$('consentLabel').textContent=t('consent');$('safetyNotice').textContent=t('safety');$('phoneHint').textContent=t('phoneHint');$('changeLanguage').textContent='🌍 '+t('changeLanguage');$('changeRecruiter').textContent='👤 '+rt(3);$('recruiterTitle').textContent=rt(0);$('recruiterSub').textContent=rt(1);$('backToLanguages').textContent='← '+rt(2);$('recruiterHelp').textContent=rt(5);$('backBtn').textContent=t('back');$('editBtn').textContent=t('edit');$('mailBtn').textContent='📧 '+t('mail');$('copyBtn').textContent='📋 '+t('copy');$('excelBtn').textContent='📊 '+t('excel');$('downloadBtn').textContent='⬇ '+t('download');$('newBtn').textContent='＋ '+t('new');$('resumeText').textContent=t('resume');$('resumeYes').textContent=t('yes');$('resumeNo').textContent=t('no');if(start){id=id||makeId();step=1;showRecruiters();save()}renderStep()}
-function recruiterInitials(n){return n.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
-function updateRecruiterSummary(){if(!recruiter)return;$('selectedRecruiterName').textContent=rt(4)+': '+recruiter.name;$('selectedRecruiterEmail').textContent=recruiter.email}
-function renderRecruiters(){$('recruiterGrid').innerHTML=Object.entries(RECRUITERS).map(([k,v])=>`<button type="button" class="recruiter-btn${k===recruiterKey?' selected':''}" data-recruiter="${k}" aria-pressed="${k===recruiterKey}"><span class="recruiter-avatar">${esc(recruiterInitials(v.name))}</span><span><span class="recruiter-name">${esc(v.name)}</span><span class="recruiter-email">${esc(v.email)}</span></span><span class="recruiter-arrow">›</span></button>`).join('');document.querySelectorAll('[data-recruiter]').forEach(b=>b.addEventListener('click',()=>selectRecruiter(b.dataset.recruiter)))}
-function showRecruiters(){$('languageScreen').classList.add('hidden');$('formScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('resumeBanner').classList.add('hidden');$('recruiterScreen').classList.remove('hidden');$('recruiterTitle').textContent=rt(0);$('recruiterSub').textContent=rt(1);$('backToLanguages').textContent='← '+rt(2);$('recruiterHelp').textContent=rt(5);$('chosenLanguageChip').textContent=LANGS[lang][0]+' '+LANGS[lang][1];renderRecruiters();scrollTo({top:0,behavior:'smooth'})}
-function selectRecruiter(k){if(!RECRUITERS[k])return;recruiterKey=k;recruiter=RECRUITERS[k];updateRecruiterSummary();showForm();save()}
-function renderStep(){[1,2,3].forEach(n=>{$('step'+n).classList.toggle('hidden',n!==step);$('p'+n).classList.toggle('on',n<=step)});$('p4').classList.toggle('on',false);$('stepTitle').textContent=t('step'+step);$('stepSub').textContent=t('step'+step+'sub');$('backBtn').classList.toggle('hidden',step===1);$('nextBtn').textContent=step===3?t('check'):t('next');$('candidateChip').textContent=id||'';}
-function showForm(){if(!recruiter){showRecruiters();return}$('languageScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('formScreen').classList.remove('hidden');$('resumeBanner').classList.add('hidden');updateRecruiterSummary();renderStep();scrollTo({top:0,behavior:'smooth'})}
-function clearErrors(){document.querySelectorAll('.error').forEach(e=>e.textContent='');document.querySelectorAll('.bad').forEach(e=>e.classList.remove('bad'))}
-function error(f,msg){const e=document.querySelector(`[data-e="${f}"]`);if(e)e.textContent=msg;const i=$(f);if(i)i.classList.add('bad')}
-function validate(n){clearErrors();let ok=true;const d=formData();REQUIRED[n].forEach(f=>{if(f==='consent'){if(!d.consent){error('consent',t('required'));ok=false}}else if(!d[f]){error(f,t('required'));ok=false}});if(n===1&&!validPhone(d.phone)){error('phone',t('phoneErr'));ok=false}if(n===1&&!validEmail(d.email)){error('email',t('emailErr'));ok=false}if(n===2&&(+d.age<18||+d.age>75)){error('age',t('ageErr'));ok=false}return ok}
-function routeSource(d){return urlSource||d.source||'direct'}
-function labels(){return {firstName:'Imię',lastName:'Nazwisko',phone:'Telefon',messenger:'Komunikator',email:'E-mail',citizenship:'Obywatelstwo',country:'Kraj pobytu',city:'Miasto',age:'Wiek',inPoland:'W Polsce',documents:'Dokumenty',job:'Stanowisko',experience:'Doświadczenie',start:'Gotowość',shift:'Praca zmianowa',housing:'Zakwaterowanie',source:'Źródło deklarowane',comment:'Komentarz'}}
-function buildText(){const d=formData(),L=labels(),lines=['REKRUTACJA — NOWY KANDYDAT','',`ID: ${id}`,`Data zgłoszenia: ${nowPL()}`,`Język formularza: ${lang.toUpperCase()}`,`Rekruter: ${recruiter.name}`,`E-mail rekrutera: ${recruiter.email}`,`Źródło linku: ${routeSource(d)}`,`Kampania: ${campaign||'-'}`,'','--- DANE KANDYDATA ---',''];FIELDS.forEach(f=>lines.push(`${L[f]}: ${d[f]||'-'}`));lines.push('','--- SYSTEM ---',`ID zgłoszenia: ${id}`,`Source: ${routeSource(d)}`,`Campaign: ${campaign||'-'}`,`Recruiter: ${recruiter.name}`);return lines.join('\n')}
-function tsv(){const d=formData();const vals=[id,nowPL(),lang.toUpperCase(),d.firstName,d.lastName,d.phone,d.messenger,d.email,d.citizenship,d.country,d.city,d.age,d.job,d.experience,d.inPoland,d.documents,d.start,d.shift,d.housing,routeSource(d),campaign,recruiter.name,recruiter.email,d.comment];return vals.map(v=>clean(v)).join('\t')}
-function showReview(){const d=formData(),L=labels();$('formScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('reviewScreen').classList.remove('hidden');$('reviewTitle').textContent=t('review');$('reviewSub').textContent=t('reviewSub');$('reviewChip').textContent=id;$('routingChip').textContent=`${recruiter.name} • ${routeSource(d)}`;$('reviewList').innerHTML=FIELDS.map(f=>`<div class="row"><dt>${esc(L[f])}</dt><dd class="${['phone','email'].includes(f)?'ltr':''}">${esc(d[f]||'-')}</dd></div>`).join('');const long=buildText().length>4500;$('mailNotice').textContent=t(long?'mailLong':'mailInfo');$('p4').classList.add('on');save();scrollTo({top:0,behavior:'smooth'})}
-async function copyText(text,msg){try{await navigator.clipboard.writeText(text)}catch{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}$('resultMsg').textContent=msg;$('resultMsg').classList.remove('hidden')}
-function mail(){const d=formData();const subject=`[REKRUTACJA] ${id} | ${d.firstName} ${d.lastName} | ${d.citizenship} | ${d.job}`.slice(0,180);const body=buildText();location.href=`mailto:${encodeURIComponent(recruiter.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}
-function download(){const blob=new Blob([buildText()+'\n\n--- WIERSZ DO EXCEL ---\n'+tsv()],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${id}.txt`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);$('resultMsg').textContent=t('downloaded');$('resultMsg').classList.remove('hidden')}
-function resetAll(){localStorage.removeItem(STORAGE_KEY);id=null;step=1;recruiterKey='';recruiter=null;FIELDS.forEach(f=>$(f).value='');$('consent').checked=false;$('reviewScreen').classList.add('hidden');$('formScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden');scrollTo({top:0,behavior:'smooth'})}
-function renderLanguages(q=''){const n=q.toLowerCase();$('languageGrid').innerHTML=Object.entries(LANGS).filter(([c,v])=>!n||[c,...v].join(' ').toLowerCase().includes(n)).map(([c,v])=>`<button class="lang-btn" type="button" data-lang="${c}"><span class="flag">${v[0]}</span><span class="meta"><span class="name">${esc(v[1])}</span><br><span class="eng">${esc(v[2])} · ${c}</span></span></button>`).join('');document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang,true)))}
-fillOptions();renderLanguages();$('languageSearch').addEventListener('input',e=>renderLanguages(e.target.value));$('nextBtn').addEventListener('click',()=>{if(!validate(step))return;if(step<3){step++;renderStep();save();scrollTo({top:0,behavior:'smooth'})}else showReview()});$('backBtn').addEventListener('click',()=>{if(step>1){step--;renderStep();save()}});$('editBtn').addEventListener('click',()=>{step=3;showForm()});$('changeLanguage').addEventListener('click',()=>{$('formScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden');save()});$('changeRecruiter').addEventListener('click',showRecruiters);$('backToLanguages').addEventListener('click',()=>{$('recruiterScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden')});$('mailBtn').addEventListener('click',mail);$('copyBtn').addEventListener('click',()=>copyText(buildText(),t('copied')));$('excelBtn').addEventListener('click',()=>copyText(tsv(),t('excelCopied')));$('downloadBtn').addEventListener('click',download);$('newBtn').addEventListener('click',resetAll);$('candidateForm').addEventListener('input',save);$('candidateForm').addEventListener('change',save);$('resumeYes').addEventListener('click',()=>{try{restore(JSON.parse(localStorage.getItem(STORAGE_KEY)))}catch{resetAll()}});$('resumeNo').addEventListener('click',resetAll);
-try{const draft=JSON.parse(localStorage.getItem(STORAGE_KEY));if(draft&&draft.id&&draft.data){lang=draft.lang||localStorage.getItem(LANG_KEY)||'en';$('resumeText').textContent=(LOCALES[lang]||EN).resume;$('resumeYes').textContent=(LOCALES[lang]||EN).yes;$('resumeNo').textContent=(LOCALES[lang]||EN).no;$('resumeBanner').classList.remove('hidden')}}catch{}
-})();
-</script>
+      <div class="progress" aria-label="Application progress">
+        <span id="progress1"></span><span id="progress2"></span><span id="progress3"></span><span id="progress4"></span>
+      </div>
+
+      <h2 id="formStepTitle" class="form-step-title" tabindex="-1"></h2>
+      <p id="formStepSubtitle" class="form-step-subtitle"></p>
+
+      <form id="candidateForm" novalidate>
+        <div id="step1">
+          <div class="two-columns">
+            <div class="field">
+              <label for="firstName" data-label="firstName"></label>
+              <input id="firstName" type="text" autocomplete="given-name" maxlength="100">
+              <div class="field-error" data-error="firstName" aria-live="polite"></div>
+            </div>
+            <div class="field">
+              <label for="lastName" data-label="lastName"></label>
+              <input id="lastName" type="text" autocomplete="family-name" maxlength="100">
+              <div class="field-error" data-error="lastName" aria-live="polite"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="phone" data-label="phone"></label>
+            <input id="phone" class="ltr-value" type="tel" inputmode="tel" autocomplete="tel" maxlength="32" placeholder="+48… / +380… / +995…">
+            <div id="phoneHint" class="field-hint"></div>
+            <div class="field-error" data-error="phone" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="messenger" data-label="messenger"></label>
+            <select id="messenger"></select>
+            <div class="field-error" data-error="messenger" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="email" data-label-optional="email"></label>
+            <input id="email" class="ltr-value" type="email" autocomplete="email" maxlength="160">
+            <div class="field-error" data-error="email" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div id="step2" class="hidden">
+          <div class="field">
+            <label for="citizenship" data-label="citizenship"></label>
+            <input id="citizenship" type="text" autocomplete="country-name" maxlength="100">
+            <div class="field-error" data-error="citizenship" aria-live="polite"></div>
+          </div>
+          <div class="two-columns">
+            <div class="field">
+              <label for="country" data-label="country"></label>
+              <input id="country" type="text" maxlength="100">
+              <div class="field-error" data-error="country" aria-live="polite"></div>
+            </div>
+            <div class="field">
+              <label for="city" data-label="city"></label>
+              <input id="city" type="text" maxlength="100">
+              <div class="field-error" data-error="city" aria-live="polite"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="age" data-label="age"></label>
+            <input id="age" class="ltr-value" type="number" inputmode="numeric" min="18" max="75">
+            <div class="field-error" data-error="age" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="inPoland" data-label="inPoland"></label>
+            <select id="inPoland"></select>
+            <div class="field-error" data-error="inPoland" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="documents" data-label="documents"></label>
+            <select id="documents"></select>
+            <div class="field-error" data-error="documents" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div id="step3" class="hidden">
+          <div class="field">
+            <label for="job" data-label="job"></label>
+            <select id="job"></select>
+            <div class="field-error" data-error="job" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="experience" data-label-optional="experience"></label>
+            <textarea id="experience" maxlength="900"></textarea>
+            <div id="experienceHint" class="field-hint"></div>
+          </div>
+          <div class="field">
+            <label for="start" data-label="start"></label>
+            <select id="start"></select>
+            <div class="field-error" data-error="start" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="shift" data-label="shift"></label>
+            <select id="shift"></select>
+            <div class="field-error" data-error="shift" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="housing" data-label="housing"></label>
+            <select id="housing"></select>
+            <div class="field-error" data-error="housing" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="source" data-label="source"></label>
+            <select id="source"></select>
+            <div class="field-error" data-error="source" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="comment" data-label-optional="comment"></label>
+            <textarea id="comment" maxlength="900"></textarea>
+          </div>
+          <div id="safetyNotice" class="notice warning"></div>
+          <div class="field">
+            <div class="consent-row">
+              <input id="consent" type="checkbox">
+              <label id="consentLabel" for="consent"></label>
+            </div>
+            <div class="field-error" data-error="consent" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="backButton" class="button soft" type="button"></button>
+          <button id="nextButton" class="button primary" type="button"></button>
+        </div>
+      </form>
+    </section>
+
+    <section id="reviewScreen" class="card hidden" aria-labelledby="reviewTitle">
+      <div class="review-header">
+        <div>
+          <div class="topline-group">
+            <span id="reviewIdChip" class="chip ltr-value"></span>
+            <span id="reviewLanguageChip" class="chip"></span>
+          </div>
+          <h2 id="reviewTitle" class="screen-title" tabindex="-1"></h2>
+          <p id="reviewSubtitle" class="screen-subtitle"></p>
+        </div>
+        <button id="reviewChangeRecruiter" class="link-button" type="button"></button>
+      </div>
+
+      <div class="recipient-card">
+        <div id="recipientLabel" class="recipient-label"></div>
+        <div id="recipientName" class="recipient-name"></div>
+        <div id="recipientEmail" class="recipient-email ltr-value"></div>
+        <div id="recipientInfo" class="field-hint"></div>
+      </div>
+
+      <dl id="reviewList" class="review-list"></dl>
+      <div id="mailNotice" class="notice"></div>
+
+      <div class="delivery-grid">
+        <button id="mailButton" class="button primary" type="button"></button>
+        <button id="copyButton" class="button" type="button"></button>
+      </div>
+
+      <details class="secondary-options">
+        <summary id="otherOptionsSummary"></summary>
+        <div class="delivery-grid">
+          <button id="shareButton" class="button" type="button"></button>
+          <button id="downloadButton" class="button" type="button"></button>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button id="editButton" class="button soft" type="button"></button>
+        <button id="newButton" class="button" type="button"></button>
+      </div>
+      <div id="resultMessage" class="notice success hidden" aria-live="polite"></div>
+    </section>
+
+    <section id="resumeBanner" class="card hidden" aria-live="polite" style="margin-top: 14px;">
+      <strong id="resumeText"></strong>
+      <div class="actions">
+        <button id="resumeButton" class="button primary" type="button"></button>
+        <button id="discardButton" class="button" type="button"></button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Ta statyczna strona nie zapisuje danych kandydata w GitHub. Dane robocze pozostają lokalnie w przeglądarce do czasu ich skopiowania lub otwarcia poczty. Informacja o prywatności: <a href="https://pposiechnice.pl/?lang=en&page_id=981" target="_blank" rel="noopener noreferrer">PPO Siechnice</a>.
+    </footer>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="./i18n-core.js"></script>
+  <script src="./i18n-caucasus-central.js"></script>
+  <script src="./i18n-asia.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
