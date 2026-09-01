@@ -1,0 +1,107 @@
+name: Install recruiter selector
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/patch-recruiter-selection.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Patch application
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('apply/index.html'); s=p.read_text(encoding='utf-8')
+          if 'id="recruiterScreen"' in s and 'yana.radushynska@pposiechnice.pl' in s:
+              print('Already installed'); raise SystemExit(0)
+          def r(a,b,label):
+              global s
+              if a not in s: raise SystemExit('Missing marker: '+label)
+              s=s.replace(a,b,1)
+
+          css=""".recruiter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.recruiter-btn{width:100%;min-height:88px;border:1px solid var(--line);border-radius:16px;background:#fff;text-align:left;padding:13px;display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:11px;color:var(--text)}.recruiter-btn:hover,.recruiter-btn:focus-visible,.recruiter-btn.selected{border-color:var(--accent);outline:3px solid #dbeafe;background:#f8fbff}.recruiter-avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accent2);font-weight:900}.recruiter-name{font-weight:850}.recruiter-email{display:block;color:var(--muted);font-size:12px;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;margin-top:3px}.recruiter-arrow{font-size:22px;color:var(--accent)}.route-links{display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:flex-end}.selected-recruiter{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:13px;margin-bottom:15px}.selected-recruiter strong{display:block}.selected-recruiter small{display:block;color:#475569;margin-top:2px;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere}.recruiter-back{border:0;background:none;color:var(--accent);font-weight:750;padding:8px 0}.language-chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;color:var(--muted);background:#f8fafc}.recruiter-help{margin-top:14px;font-size:12px;color:var(--muted);text-align:center}\n"""
+          r('@media(max-width:580px){.langs,.grid2,.delivery-grid,.trust{grid-template-columns:1fr}',css+'@media(max-width:580px){.langs,.recruiter-grid,.grid2,.delivery-grid,.trust{grid-template-columns:1fr}','css')
+
+          html='''<section id="recruiterScreen" class="card hidden">
+  <div class="topline"><button id="backToLanguages" type="button" class="recruiter-back"></button><span id="chosenLanguageChip" class="language-chip"></span></div>
+  <div class="hero"><div class="globe">👤</div><h1 id="recruiterTitle"></h1><p id="recruiterSub"></p></div>
+  <div id="recruiterGrid" class="recruiter-grid" role="list"></div>
+  <p id="recruiterHelp" class="recruiter-help"></p>
+</section>
+
+<section id="formScreen" class="card hidden">'''
+          r('<section id="formScreen" class="card hidden">',html,'screen')
+          r('<div class="topline"><span id="candidateChip" class="idchip ltr"></span><button id="changeLanguage" type="button" class="change-lang">🌍 Language</button></div>','''<div class="topline"><span id="candidateChip" class="idchip ltr"></span><div class="route-links"><button id="changeLanguage" type="button" class="change-lang">🌍 Language</button><button id="changeRecruiter" type="button" class="change-lang">👤 Recruiter</button></div></div>
+  <div class="selected-recruiter"><span aria-hidden="true">👤</span><span><strong id="selectedRecruiterName"></strong><small id="selectedRecruiterEmail"></small></span></div>''','controls')
+
+          r("const DEFAULT_EMAIL='oleksandr.kiris@icloud.com';\nconst RECRUITERS={oleksandr:{name:'Oleksandr',email:DEFAULT_EMAIL}};\nconst STORAGE_KEY='kiris_jobs_application_v2', LANG_KEY='kiris_jobs_language_v2';", """const RECRUITERS={yana:{name:'Yana Radushynska',email:'yana.radushynska@pposiechnice.pl'},yuliia:{name:'Yuliia Korniienko',email:'yuliia.korniienko@pposiechnice.pl'},fariz:{name:'Fariz Injaev',email:'fariz.injaev@pposiechnice.pl'},oleksandr:{name:'Oleksandr Kiris',email:'oleksandr.kiris@pposiechnice.pl'},maksym:{name:'Maksym Saliuk',email:'maksym.saliuk@pposiechnice.pl'},anastasiia:{name:'Anastasiia Derepa',email:'anastasiia.derepa@citronex.pl'}};
+const STORAGE_KEY='kiris_jobs_application_v3', LANG_KEY='kiris_jobs_language_v3';""",'directory')
+
+          i18n="""const ROUTE_I18N={
+en:['Choose your recruiter','Select the person who should receive your application.','Back to languages','Recruiter','Selected recruiter','The email will be addressed only to the recruiter you select.'],
+pl:['Wybierz rekrutera','Wybierz osobę, która ma otrzymać Twoje zgłoszenie.','Wróć do języków','Rekruter','Wybrany rekruter','Wiadomość zostanie zaadresowana tylko do wybranego rekrutera.'],
+uk:['Оберіть рекрутера','Оберіть людину, яка має отримати вашу анкету.','Назад до мов','Рекрутер','Обраний рекрутер','Лист буде адресовано лише обраному рекрутеру.'],
+ru:['Выберите рекрутера','Выберите человека, который должен получить вашу анкету.','Назад к языкам','Рекрутер','Выбранный рекрутер','Письмо будет адресовано только выбранному рекрутеру.'],
+ka:['აირჩიეთ რეკრუტერი','აირჩიეთ ადამიანი, რომელმაც უნდა მიიღოს თქვენი განაცხადი.','ენებზე დაბრუნება','რეკრუტერი','არჩეული რეკრუტერი','წერილი გაიგზავნება მხოლოდ არჩეულ რეკრუტერთან.'],
+az:['Rekruteri seçin','Müraciətinizi qəbul edəcək şəxsi seçin.','Dillərə qayıt','Rekruter','Seçilmiş rekruter','Məktub yalnız seçdiyiniz rekruterə ünvanlanacaq.'],
+hy:['Ընտրեք հավաքագրողին','Ընտրեք այն անձին, ով պետք է ստանա ձեր դիմումը։','Վերադառնալ լեզուներին','Հավաքագրող','Ընտրված հավաքագրող','Նամակը կուղղվի միայն ընտրված հավաքագրողին։'],
+tr:['İşe alım uzmanını seçin','Başvurunuzu alacak kişiyi seçin.','Dillere dön','İşe alım uzmanı','Seçilen kişi','E-posta yalnızca seçtiğiniz kişiye gönderilecektir.'],
+uz:['Rekruterni tanlang','Arizangizni qabul qiladigan shaxsni tanlang.','Tillarga qaytish','Rekruter','Tanlangan rekruter','Xat faqat tanlangan rekruterga yo‘naltiriladi.'],
+ky:['Рекрутерди тандаңыз','Арызыңызды ала турган адамды тандаңыз.','Тилдерге кайтуу','Рекрутер','Тандалган рекрутер','Кат тандалган рекрутерге гана жөнөтүлөт.'],
+tg:['Рекрутерро интихоб кунед','Шахсеро интихоб кунед, ки дархости шуморо мегирад.','Бозгашт ба забонҳо','Рекрутер','Рекрутери интихобшуда','Нома танҳо ба рекрутери интихобшуда фиристода мешавад.'],
+kk:['Рекрутерді таңдаңыз','Өтінішіңізді алатын адамды таңдаңыз.','Тілдерге оралу','Рекрутер','Таңдалған рекрутер','Хат тек таңдалған рекрутерге жіберіледі.'],
+hi:['रिक्रूटर चुनें','उस व्यक्ति को चुनें जिसे आपका आवेदन मिलना चाहिए।','भाषाओं पर वापस जाएँ','रिक्रूटर','चुना गया रिक्रूटर','ईमेल केवल चुने गए रिक्रूटर को भेजा जाएगा।'],
+bn:['রিক্রুটার নির্বাচন করুন','যিনি আপনার আবেদন গ্রহণ করবেন তাকে নির্বাচন করুন।','ভাষায় ফিরে যান','রিক্রুটার','নির্বাচিত রিক্রুটার','ইমেইল শুধু নির্বাচিত রিক্রুটারের কাছে যাবে।'],
+ne:['रिक्रुटर छान्नुहोस्','तपाईंको आवेदन प्राप्त गर्ने व्यक्ति छान्नुहोस्।','भाषामा फर्कनुहोस्','रिक्रुटर','छानिएको रिक्रुटर','इमेल छानिएको रिक्रुटरलाई मात्र पठाइनेछ।'],
+ur:['ریکروٹر منتخب کریں','اس شخص کو منتخب کریں جسے آپ کی درخواست ملنی چاہیے۔','زبانوں پر واپس جائیں','ریکروٹر','منتخب ریکروٹر','ای میل صرف منتخب ریکروٹر کو بھیجی جائے گی۔'],
+si:['බඳවාගැනීමේ නිලධාරියා තෝරන්න','ඔබගේ අයදුම්පත ලැබිය යුතු පුද්ගලයා තෝරන්න.','භාෂා වෙත ආපසු','බඳවාගැනීමේ නිලධාරියා','තෝරාගත් නිලධාරියා','විද්‍යුත් තැපෑල තෝරාගත් නිලධාරියාට පමණක් යොමු වේ.'],
+fil:['Pumili ng recruiter','Piliin ang taong dapat makatanggap ng iyong aplikasyon.','Bumalik sa mga wika','Recruiter','Napiling recruiter','Ang email ay ipapadala lamang sa napiling recruiter.'],
+id:['Pilih perekrut','Pilih orang yang harus menerima lamaran Anda.','Kembali ke bahasa','Perekrut','Perekrut terpilih','Email hanya akan dialamatkan kepada perekrut yang dipilih.'],
+vi:['Chọn chuyên viên tuyển dụng','Chọn người sẽ nhận hồ sơ của bạn.','Quay lại ngôn ngữ','Nhân viên tuyển dụng','Người đã chọn','Email chỉ được gửi đến người tuyển dụng bạn chọn.']};
+function rt(i){const a=ROUTE_I18N[lang]||ROUTE_I18N.en;return a[i]||ROUTE_I18N.en[i]}\n"""
+          r('const EN={',i18n+'const EN={','i18n')
+          r("let lang='en',step=1,id=null;","let lang='en',step=1,id=null,recruiterKey='',recruiter=null;",'state')
+          r("const params=new URLSearchParams(location.search); const campaign=clean(params.get('campaign')||''); const urlSource=clean(params.get('src')||''); const recruiterKey=(params.get('recruiter')||'').toLowerCase(); const recruiter=RECRUITERS[recruiterKey]||RECRUITERS.oleksandr;","const params=new URLSearchParams(location.search); const campaign=clean(params.get('campaign')||''); const urlSource=clean(params.get('src')||''); const requestedRecruiterKey=(params.get('recruiter')||'').toLowerCase(); if(RECRUITERS[requestedRecruiterKey]){recruiterKey=requestedRecruiterKey;recruiter=RECRUITERS[recruiterKey];}",'params')
+          r("function save(){if(!id)return;localStorage.setItem(STORAGE_KEY,JSON.stringify({id,lang,step,data:formData(),savedAt:Date.now()}));localStorage.setItem(LANG_KEY,lang)}","function save(){if(!id)return;localStorage.setItem(STORAGE_KEY,JSON.stringify({id,lang,step,recruiterKey,data:formData(),savedAt:Date.now()}));localStorage.setItem(LANG_KEY,lang)}",'save')
+          r("function restore(d){id=d.id||makeId();lang=d.lang||'en';step=Math.min(3,Math.max(1,d.step||1));setLanguage(lang,false);FIELDS.forEach(f=>{if(d.data&&d.data[f]!=null)$(f).value=d.data[f]});$('consent').checked=!!(d.data&&d.data.consent);showForm();}","function restore(d){id=d.id||makeId();lang=d.lang||'en';step=Math.min(3,Math.max(1,d.step||1));recruiterKey=RECRUITERS[d.recruiterKey]?d.recruiterKey:'';recruiter=recruiterKey?RECRUITERS[recruiterKey]:null;setLanguage(lang,false);FIELDS.forEach(f=>{if(d.data&&d.data[f]!=null)$(f).value=d.data[f]});$('consent').checked=!!(d.data&&d.data.consent);if(recruiter)showForm();else showRecruiters();}",'restore')
+          r("$('changeLanguage').textContent='🌍 '+t('changeLanguage');","$('changeLanguage').textContent='🌍 '+t('changeLanguage');$('changeRecruiter').textContent='👤 '+rt(3);$('recruiterTitle').textContent=rt(0);$('recruiterSub').textContent=rt(1);$('backToLanguages').textContent='← '+rt(2);$('recruiterHelp').textContent=rt(5);",'labels')
+          r("if(start){id=id||makeId();step=1;showForm();save()}renderStep()","if(start){id=id||makeId();step=1;showRecruiters();save()}renderStep()",'route')
+
+          funcs="""function recruiterInitials(n){return n.split(/\\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
+function updateRecruiterSummary(){if(!recruiter)return;$('selectedRecruiterName').textContent=rt(4)+': '+recruiter.name;$('selectedRecruiterEmail').textContent=recruiter.email}
+function renderRecruiters(){$('recruiterGrid').innerHTML=Object.entries(RECRUITERS).map(([k,v])=>`<button type=\"button\" class=\"recruiter-btn${k===recruiterKey?' selected':''}\" data-recruiter=\"${k}\" aria-pressed=\"${k===recruiterKey}\"><span class=\"recruiter-avatar\">${esc(recruiterInitials(v.name))}</span><span><span class=\"recruiter-name\">${esc(v.name)}</span><span class=\"recruiter-email\">${esc(v.email)}</span></span><span class=\"recruiter-arrow\">›</span></button>`).join('');document.querySelectorAll('[data-recruiter]').forEach(b=>b.addEventListener('click',()=>selectRecruiter(b.dataset.recruiter)))}
+function showRecruiters(){$('languageScreen').classList.add('hidden');$('formScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('resumeBanner').classList.add('hidden');$('recruiterScreen').classList.remove('hidden');$('recruiterTitle').textContent=rt(0);$('recruiterSub').textContent=rt(1);$('backToLanguages').textContent='← '+rt(2);$('recruiterHelp').textContent=rt(5);$('chosenLanguageChip').textContent=LANGS[lang][0]+' '+LANGS[lang][1];renderRecruiters();scrollTo({top:0,behavior:'smooth'})}
+function selectRecruiter(k){if(!RECRUITERS[k])return;recruiterKey=k;recruiter=RECRUITERS[k];updateRecruiterSummary();showForm();save()}\n"""
+          r('function renderStep(){',funcs+'function renderStep(){','functions')
+          r("function showForm(){$('languageScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('formScreen').classList.remove('hidden');$('resumeBanner').classList.add('hidden');renderStep();scrollTo({top:0,behavior:'smooth'})}","function showForm(){if(!recruiter){showRecruiters();return}$('languageScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('formScreen').classList.remove('hidden');$('resumeBanner').classList.add('hidden');updateRecruiterSummary();renderStep();scrollTo({top:0,behavior:'smooth'})}",'show form')
+          r("`Rekruter: ${recruiter.name}`,`Źródło linku: ${routeSource(d)}`","`Rekruter: ${recruiter.name}`,`E-mail rekrutera: ${recruiter.email}`,`Źródło linku: ${routeSource(d)}`",'mail recipient')
+          r("routeSource(d),campaign,recruiter.name,d.comment]","routeSource(d),campaign,recruiter.name,recruiter.email,d.comment]",'excel recipient')
+          r("function showReview(){const d=formData(),L=labels();$('formScreen').classList.add('hidden');$('reviewScreen').classList.remove('hidden');","function showReview(){const d=formData(),L=labels();$('formScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('reviewScreen').classList.remove('hidden');",'review')
+          r("function resetAll(){localStorage.removeItem(STORAGE_KEY);id=makeId();step=1;FIELDS.forEach(f=>$(f).value='');$('consent').checked=false;$('reviewScreen').classList.add('hidden');$('formScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden');scrollTo({top:0,behavior:'smooth'})}","function resetAll(){localStorage.removeItem(STORAGE_KEY);id=null;step=1;recruiterKey='';recruiter=null;FIELDS.forEach(f=>$(f).value='');$('consent').checked=false;$('reviewScreen').classList.add('hidden');$('formScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden');scrollTo({top:0,behavior:'smooth'})}",'reset')
+          r("$('changeLanguage').addEventListener('click',()=>{$('formScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden')});$('mailBtn').addEventListener('click',mail);","$('changeLanguage').addEventListener('click',()=>{$('formScreen').classList.add('hidden');$('reviewScreen').classList.add('hidden');$('recruiterScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden');save()});$('changeRecruiter').addEventListener('click',showRecruiters);$('backToLanguages').addEventListener('click',()=>{$('recruiterScreen').classList.add('hidden');$('languageScreen').classList.remove('hidden')});$('mailBtn').addEventListener('click',mail);",'events')
+
+          for a in ['yana.radushynska@pposiechnice.pl','yuliia.korniienko@pposiechnice.pl','fariz.injaev@pposiechnice.pl','oleksandr.kiris@pposiechnice.pl','maksym.saliuk@pposiechnice.pl','anastasiia.derepa@citronex.pl']:
+              assert a in s, a
+          p.write_text(s,encoding='utf-8')
+          js=s[s.index('<script>')+8:s.rindex('</script>')]
+          Path('/tmp/apply.js').write_text(js,encoding='utf-8')
+          PY
+          node --check /tmp/apply.js
+          grep -q 'id="recruiterScreen"' apply/index.html
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apply/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Add mandatory recruiter selection to application form'
+          git push
