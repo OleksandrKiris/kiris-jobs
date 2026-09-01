@@ -1,29 +1,44 @@
-# Recruitment Lite 3.0 — formularz kandydata
+# Formularz kandydata 4.0 — Rekrutacja PPO Siechnice
 
-Publiczna, statyczna ankieta rekrutacyjna dla PPO Siechnice. Nie wymaga serwera aplikacyjnego ani bazy danych.
+Publiczny, wielojęzyczny formularz rekrutacyjny działający jako statyczna strona GitHub Pages.
 
-## Adres publiczny
-
-Po poprawnym wdrożeniu GitHub Pages:
+## Adres produkcyjny
 
 `https://oleksandrkiris.github.io/kiris-jobs/apply/`
 
 ## Przebieg dla kandydata
 
-1. Kandydat otwiera jeden publiczny link na telefonie.
-2. Wybiera jeden z 20 języków.
-3. Obowiązkowo wybiera rekrutera.
-4. Wypełnia trzy krótkie etapy ankiety.
-5. Sprawdza dane i adres odbiorcy.
-6. Naciska `Otwórz pocztę i wyślij`.
-7. Telefon otwiera aplikację pocztową z gotową wiadomością do wybranego rekrutera.
-8. Kandydat sam naciska `Wyślij` w swojej poczcie.
+1. Kandydat wybiera jeden z 20 języków.
+2. Obowiązkowo wybiera rekrutera.
+3. Uzupełnia dane kontaktowe, miejsce pobytu, status dokumentów i preferencje pracy.
+4. Wybiera rodzaje dokumentów, które może przekazać.
+5. Opcjonalnie dodaje pliki dokumentów ze swojego telefonu lub komputera.
+6. Sprawdza całe zgłoszenie oraz adres wybranego rekrutera.
+7. Wysyła zgłoszenie jedną z dwóch metod e-mail.
 
-Formularz nie może wysłać wiadomości samodzielnie, ponieważ działa wyłącznie jako statyczna strona GitHub Pages.
+**W formularzu nie ma kopiowania ankiety, wiersza TSV ani ręcznego przenoszenia odpowiedzi.**
 
-## Rekruterzy i routing
+## Dwie metody wysłania
 
-Lista znajduje się w pliku [`config.js`](config.js). Dozwoleni odbiorcy:
+### 1. Gotowy plik `.eml` — metoda zalecana
+
+Przycisk tworzy kompletną, niesentowaną wiadomość e-mail zawierającą:
+
+- adres wybranego rekrutera;
+- uporządkowaną tabelę HTML z danymi kandydata;
+- tekstową wersję wiadomości;
+- plik CSV z jednym wierszem gotowym do otwarcia lub importu w Excelu;
+- wszystkie pliki dokumentów wybrane przez kandydata.
+
+Wiadomość ma nagłówek `X-Unsent: 1`. Kandydat zapisuje plik, otwiera go w Outlooku, Apple Mail albo innej zgodnej aplikacji pocztowej, sprawdza odbiorcę i załączniki, a następnie naciska `Wyślij`.
+
+### 2. Otwarcie aplikacji pocztowej przez `mailto:`
+
+Formularz otwiera gotową wiadomość do wybranego rekrutera. Przeglądarki nie pozwalają dołączyć lokalnych plików do `mailto:`, dlatego kandydat dodaje dokumenty ręcznie ikoną spinacza w swojej poczcie.
+
+## Rekruterzy i bezpieczny routing
+
+Dozwoleni odbiorcy są zapisani wyłącznie w [`config.js`](config.js):
 
 | ID linku | Rekruter | E-mail |
 |---|---|---|
@@ -34,14 +49,12 @@ Lista znajduje się w pliku [`config.js`](config.js). Dozwoleni odbiorcy:
 | `maksym` | Maksym Saliuk | `maksym.saliuk@pposiechnice.pl` |
 | `anastasiia` | Anastasiia Derepa | `anastasiia.derepa@citronex.pl` |
 
-Adres e-mail nie jest pobierany bezpośrednio z parametrów URL. Parametr może wskazać wyłącznie ID z zamkniętej listy w `config.js`, dlatego nie można podmienić odbiorcy na dowolny adres.
+Parametr URL może wskazać tylko ID z tej zamkniętej listy. Nie można wstrzyknąć dowolnego adresu e-mail. Kandydat zawsze widzi ekran wyboru i sam potwierdza rekrutera.
 
-Kandydat zawsze widzi ekran wyboru i musi nacisnąć kartę rekrutera. Parametr w linku jedynie oznacza osobę jako polecaną.
-
-Przykład:
+Przykład linku kampanii:
 
 ```text
-https://oleksandrkiris.github.io/kiris-jobs/apply/?lang=uk&recruiter=yana&src=facebook_ukraine&campaign=greenhouse_01
+https://oleksandrkiris.github.io/kiris-jobs/apply/?lang=uk&recruiter=oleksandr&src=facebook_ukraine&campaign=greenhouse_01&vacancy=siechnice
 ```
 
 Obsługiwane parametry:
@@ -50,138 +63,79 @@ Obsługiwane parametry:
 - `recruiter` — sugerowany rekruter;
 - `src` — źródło linku;
 - `campaign` — nazwa kampanii;
-- `vacancy` — kod lub nazwa oferty.
+- `vacancy` — kod albo nazwa oferty.
 
-## Wiadomość e-mail
+## Dokumenty i limity
 
-Temat zawiera:
+Obsługiwane rozszerzenia:
 
-- unikalne ID;
-- imię i nazwisko;
-- obywatelstwo;
-- stanowisko;
-- nazwisko wybranego rekrutera.
+- PDF;
+- JPG/JPEG;
+- PNG;
+- WEBP;
+- HEIC/HEIF;
+- DOC/DOCX.
 
-Treść jest zawsze uporządkowana po polsku, niezależnie od języka formularza. Odpowiedzi wpisane przez kandydata nie są tłumaczone ani zmieniane.
+Limity domyślne:
 
-Wiadomość zawiera również pojedynczy wiersz TSV do Excela. Rekruter kopiuje ten wiersz i wkleja go do pierwszej pustej komórki swojego pliku Excel.
+- maksymalnie 12 plików;
+- maksymalnie 8 MB na jeden plik;
+- maksymalnie 12 MB wszystkich plików łącznie.
 
-## Kolejność kolumn Excel
+Kandydat może zaznaczyć m.in. paszport, dokument pobytowy, PESEL UKR, dokument dotyczący prawa do pracy, prawo jazdy/Code 95, uprawnienia, CV albo inny dokument. Opcja `Brak dokumentów do załączenia` nie może być łączona z innymi typami ani z plikami.
 
-Stała kolejność jest zdefiniowana w `config.js`:
+## Prywatność
 
-1. ID zgłoszenia
-2. Data zgłoszenia
-3. Język
-4. Rekruter
-5. E-mail rekrutera
-6. Imię
-7. Nazwisko
-8. Telefon
-9. Komunikator
-10. E-mail kandydata
-11. Obywatelstwo
-12. Kraj pobytu
-13. Miasto
-14. Wiek
-15. Stanowisko
-16. Doświadczenie
-17. W Polsce
-18. Dokumenty
-19. Gotowość
-20. Praca zmianowa
-21. Zakwaterowanie
-22. Źródło deklarowane
-23. Źródło linku
-24. Kampania
-25. Wakacja / oferta
-26. Komentarz
-27. Status
-28. Pierwszy kontakt
-29. Następny kontakt
-30. Decyzja
-31. Uwagi rekrutera
+- GitHub przechowuje wyłącznie publiczny kod strony.
+- Dane wpisane w formularzu nie są wysyłane do GitHub ani do żadnej bazy.
+- Niedokończona część tekstowa formularza jest przechowywana lokalnie w `localStorage` przeglądarki.
+- Wybrane pliki **nie są zapisywane w `localStorage`** i po odświeżeniu strony trzeba wybrać je ponownie.
+- Pliki pozostają na urządzeniu kandydata do chwili utworzenia lub wysłania wiadomości e-mail.
+- Przed dołączeniem plików kandydat potwierdza osobną zgodę na ich przekazanie wybranemu rekruterowi do celów rekrutacyjnych.
 
-Początkowy status każdej nowej pozycji to `NOWY`.
+## CSV dla rekrutera
+
+CSV jest tworzony automatycznie i dołączany do pliku `.eml`. Używa kodowania UTF-8 z BOM oraz separatora `;`, dzięki czemu jest wygodny dla polskiego Excela. Pierwszy wiersz zawiera stałe nagłówki, a drugi — dane jednego kandydata.
+
+Dane zaczynające się od `=`, `+`, `-` lub `@` są zabezpieczane przed wykonaniem jako formuła arkusza kalkulacyjnego.
+
+Początkowy status każdego zgłoszenia: `NOWY`.
 
 ## Języki
 
 Formularz obsługuje 20 języków:
 
-- polski;
-- ukraiński;
-- rosyjski;
-- angielski;
-- gruziński;
-- azerski;
-- ormiański;
-- turecki;
-- uzbecki;
-- kirgiski;
-- tadżycki;
-- kazachski;
-- hindi;
-- bengalski;
-- nepalski;
-- urdu z układem RTL;
-- syngaleski;
-- filipiński;
-- indonezyjski;
-- wietnamski.
+- polski, ukraiński, rosyjski i angielski;
+- gruziński, azerski, ormiański i turecki;
+- uzbecki, kirgiski, tadżycki i kazachski;
+- hindi, bengalski, nepalski, urdu i syngaleski;
+- filipiński, indonezyjski i wietnamski.
 
-Angielski jest bezpiecznym fallbackiem dla brakującego drobnego komunikatu.
-
-## Prywatność i bezpieczeństwo
-
-- GitHub przechowuje wyłącznie publiczny kod strony.
-- Dane ankiety nie są zapisywane w repozytorium.
-- Niedokończony formularz jest przechowywany lokalnie w przeglądarce kandydata przez `localStorage`.
-- Odbiorca wiadomości pochodzi wyłącznie z zamkniętej listy rekruterów.
-- Formularz nie zbiera skanów paszportu, PESEL, danych bankowych, haseł ani dokumentacji medycznej.
-- Parametry kampanii są filtrowane i ograniczone długością.
-- Dane w wierszu Excel są czyszczone z tabulatorów i znaków nowej linii.
-
-Link do informacji o prywatności jest ustawiony w `config.js`. Przed pełnym użyciem produkcyjnym treść i właściwy dokument rekrutacyjny powinien zatwierdzić Inspektor Ochrony Danych lub dział prawny.
+Urdu działa w układzie RTL. Instrukcje dotyczące dokumentów, limitów i wysyłki mają własne tłumaczenia dla wszystkich 20 języków.
 
 ## Pliki
 
-- `index.html` — struktura ekranów;
-- `styles.css` — responsywny wygląd;
-- `config.js` — rekruterzy, adresy, kolumny Excel i ustawienia;
-- `i18n-core.js` — języki podstawowe i polskie wartości wewnętrzne;
+- `index.html` — struktura pięciu etapów i ekranu wysyłki;
+- `styles.css` — responsywny wygląd na telefon i komputer;
+- `config.js` — rekruterzy, limity, rodzaje dokumentów i kolumny CSV;
+- `i18n-core.js` — podstawowe języki i polskie wartości wewnętrzne;
 - `i18n-caucasus-central.js` — Kaukaz i Azja Centralna;
 - `i18n-asia.js` — Azja Południowa i Południowo-Wschodnia;
-- `app.js` — walidacja, wybór rekrutera, mailto, schowek, udostępnianie, TXT i localStorage;
-- `scripts/validate-apply.mjs` — kontrola konfiguracji przed publikacją.
+- `delivery-i18n.js` — instrukcje dokumentów i wysyłki w 20 językach;
+- `app.js` — walidacja, pliki lokalne, CSV, HTML, MIME `.eml`, `mailto:` i wersja robocza.
 
-## Testy
-
-Repozytorium uruchamia w GitHub Actions:
+## Kontrola przed publikacją
 
 ```bash
 npm test
 ```
 
-Test sprawdza między innymi:
+Walidacja sprawdza m.in.:
 
 - składnię wszystkich plików JavaScript;
-- dokładnie sześciu rekruterów i poprawność ich adresów;
-- unikalność ID i e-maili rekruterów;
-- co najmniej 20 języków;
-- obecność wymaganych kluczy tłumaczeń;
-- obecność ekranu wyboru rekrutera;
-- podłączenie wszystkich plików do `index.html`.
-
-## Model pracy zespołu
-
-```text
-Publiczna ankieta
-→ kandydat wybiera język
-→ kandydat wybiera rekrutera
-→ e-mail trafia bezpośrednio do wybranej osoby
-→ rekruter kopiuje wiersz TSV
-→ wkleja do własnego pliku Excel
-→ telefonuje i aktualizuje status, następny kontakt, decyzję oraz notatki
-```
-
-Każdy rekruter może pracować we własnym pliku Excel na serwerze plików. Wszystkie pliki powinny mieć identyczne kolumny, aby później można było połączyć je w pliku MASTER przez Power Query `Z folderu`.
+- sześciu właściwych rekruterów i ich adresy;
+- 20 języków oraz komplet tłumaczeń wysyłki;
+- limity i typy dokumentów;
+- obecność generatora `.eml`, HTML i CSV;
+- obecność wymaganych ekranów i pól plików;
+- brak przycisków oraz kodu do kopiowania ankiety.
