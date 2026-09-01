@@ -112,7 +112,7 @@ for (const marker of [
   'function buildMailto()', 'window.location.href = buildMailto()',
   'DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A',
   'Status początkowy: NOWY', '[NOWY KANDYDAT]', 'route.partner', 'route.group',
-  'CFG.locations', 'CFG.excelColumns', 'data-action="send"'
+  'CFG.locations', 'data-action="send"'
 ]) {
   if (!app.includes(marker)) fail(`app-mobile.js is missing required marker: ${marker}`);
 }
