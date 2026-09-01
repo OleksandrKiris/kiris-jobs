@@ -62,8 +62,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/upgrade-apply-v83.yml
-          git rm .github/workflows/upgrade-apply-v83-retry.yml
-          git add apply/config.js apply/index.html apply/app-mobile.js apply/mobile-v8.css scripts/validate-apply.mjs .github/workflows/pages.yml
+          git restore .github/workflows/pages.yml
+          git add apply/config.js apply/index.html apply/app-mobile.js apply/mobile-v8.css scripts/validate-apply.mjs
           git commit -m "Improve mobile source selection and recruiter email"
           git push
