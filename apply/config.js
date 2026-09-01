@@ -2,14 +2,14 @@
   'use strict';
 
   window.RECRUITMENT_CONFIG = Object.freeze({
-    version: '7.0.0',
+    version: '8.1.0',
     brand: 'Citronex / PPO Siechnice',
     company: 'Przedsiębiorstwo Produkcji Ogrodniczej „Siechnice” Sp. z o.o.',
     privacyUrl: 'https://pposiechnice.pl/?lang=en&page_id=981',
     timeZone: 'Europe/Warsaw',
-    storageKey: 'citronex_recruitment_application_v7',
+    storageKey: 'citronex_recruitment_application_v8_1',
     draftMaxAgeMs: 24 * 60 * 60 * 1000,
-    maxMailtoLength: 7200,
+    maxMailtoLength: 7000,
     recruiters: Object.freeze([
       Object.freeze({ id: 'yana', name: 'Yana Radushynska', email: 'yana.radushynska@pposiechnice.pl', initials: 'YR' }),
       Object.freeze({ id: 'yuliia', name: 'Yuliia Korniienko', email: 'yuliia.korniienko@pposiechnice.pl', initials: 'YK' }),
@@ -27,7 +27,8 @@
       Object.freeze({ id: 'any', name: 'Dowolna lokalizacja', subtitle: 'Rekruter dobierze ofertę', address: 'do ustalenia' })
     ]),
     queryParams: Object.freeze({
-      language: 'lang', recruiter: 'recruiter', source: 'src', campaign: 'campaign', vacancy: 'vacancy', location: 'location'
+      language: 'lang', recruiter: 'recruiter', source: 'src', campaign: 'campaign', vacancy: 'vacancy',
+      location: 'location', partner: 'partner', group: 'group'
     }),
     excelColumns: Object.freeze([
       'ID zgłoszenia', 'Data zgłoszenia', 'SLA do', 'Język', 'Rekruter', 'E-mail rekrutera',
