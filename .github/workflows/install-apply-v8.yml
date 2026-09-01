@@ -1,0 +1,71 @@
+name: Install recruitment form v8 enhancements
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/install-apply-v8.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Connect enhancements to the application
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          index_path = Path('apply/index.html')
+          index = index_path.read_text(encoding='utf-8')
+          script = '  <script src="./enhancements-v8.js?v=8.0.0"></script>\n'
+          if 'enhancements-v8.js?v=8.0.0' not in index:
+              index = index.replace('</body>', script + '</body>')
+          index_path.write_text(index, encoding='utf-8')
+
+          package_path = Path('package.json')
+          package = json.loads(package_path.read_text(encoding='utf-8'))
+          check_js = package['scripts']['check:js']
+          marker = 'node --check apply/enhancements-v8.js'
+          if marker not in check_js:
+              package['scripts']['check:js'] = check_js + ' && ' + marker
+          package_path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Validate the complete application
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check apply/enhancements-v8.js
+          grep -q 'enhancements-v8.js?v=8.0.0' apply/index.html
+          grep -q 'type="file"' apply/enhancements-v8.js
+          grep -q 'async function buildEml' apply/enhancements-v8.js
+          grep -q 'DANE DO EXCEL — SKOPIUJ TYLKO NASTĘPNY WIERSZ' apply/enhancements-v8.js
+          npm test
+
+      - name: Commit and clean up installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/install-apply-v8.yml
+          git add apply/index.html apply/enhancements-v8.js package.json
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Launch recruitment form 8.0 with documents and improved email'
+          git push
