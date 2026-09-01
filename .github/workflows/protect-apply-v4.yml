@@ -1,0 +1,100 @@
+name: Protect approved recruitment application
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: protect-approved-recruitment-application
+  cancel-in-progress: true
+
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove obsolete installers and restore approved application
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          readonly APPROVED_COMMIT="dec4b9f1d8a90a4c3aa142b80c2b9a93bcf86169"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            shopt -s nullglob
+            obsolete_workflows=(
+              .github/workflows/install-apply*.yml
+              .github/workflows/deploy-apply*.yml
+              .github/workflows/install-citronex*.yml
+              .github/workflows/upgrade-recruitment*.yml
+            )
+
+            suspicious=0
+            for path in \
+              .installer \
+              .apply-final-v4 \
+              .apply-update-v51.b64 \
+              .github/install-v5-2 \
+              .github/install-v5-3; do
+              if [[ -e "$path" ]]; then
+                suspicious=1
+              fi
+            done
+            if (( ${#obsolete_workflows[@]} > 0 )); then
+              suspicious=1
+            fi
+
+            if [[ "$suspicious" -eq 0 ]]; then
+              echo "No obsolete installer detected; approved application left unchanged."
+              exit 0
+            fi
+
+            git checkout "$APPROVED_COMMIT" -- \
+              apply \
+              scripts/validate-apply.mjs \
+              package.json
+
+            rm -rf \
+              .installer \
+              .apply-final-v4 \
+              .github/install-v5-2 \
+              .github/install-v5-3
+            rm -f .apply-update-v51.b64
+            rm -f "${obsolete_workflows[@]}"
+
+            node --check apply/config.js
+            node --check apply/delivery-i18n.js
+            node --check apply/app.js
+            node scripts/validate-apply.mjs
+
+            git add -A
+            if git diff --cached --quiet; then
+              echo "Repository is already clean."
+              exit 0
+            fi
+
+            git commit -m "Remove obsolete form installers and preserve approved application"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Main changed during cleanup; retrying from the latest revision."
+            sleep 2
+          done
+
+          echo "Could not complete cleanup after repeated concurrent updates." >&2
+          exit 1
