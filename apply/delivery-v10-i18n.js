@@ -1,0 +1,102 @@
+(() => {
+  'use strict';
+
+  const en = {
+    documentsTitle: 'CV and documents',
+    documentsText: 'You can add a CV, visa, residence card or other recruitment documents from your phone. The files stay on your device until you choose how to share them.',
+    chooseFiles: 'Choose CV or documents',
+    fileRules: 'Up to {maxFiles} files · {maxEach} MB each · {maxTotal} MB total',
+    selectedFiles: 'Selected files',
+    noFiles: 'No files selected. You can still send the application and Excel row.',
+    remove: 'Remove',
+    tooMany: 'The maximum number of files has been reached.',
+    unsupported: 'This file type is not supported:',
+    tooLarge: 'This file is too large:',
+    totalTooLarge: 'The total file size is too large.',
+    reviewDocuments: 'CV and attached documents',
+    sendTitle: 'Choose how to send the application',
+    sendText: 'The recruiter, application text and Excel row are prepared. Choose the app you use on this phone.',
+    shareAll: 'Share application + files',
+    shareAllHint: 'Recommended: opens the phone share menu with the CV, documents, application summary and Excel TSV file.',
+    email: 'Email',
+    emailHint: 'Opens a prepared email to the selected recruiter.',
+    whatsapp: 'WhatsApp',
+    whatsappHint: 'Opens a direct chat with the selected recruiter and a prepared message.',
+    telegram: 'Telegram',
+    telegramHint: 'Opens the recruiter by phone number with a prepared message.',
+    viber: 'Viber',
+    viberHint: 'Copies the message and opens the recruiter’s Viber chat.',
+    call: 'Call',
+    callHint: 'Calls the selected recruiter.',
+    filesManual: 'For direct Email, WhatsApp, Telegram or Viber, add the selected files with the paperclip before sending. Automatic file attachment is available through “Share application + files” when supported by the phone.',
+    shareUnsupported: 'This phone cannot share all selected files automatically. Use a direct channel and add them with the paperclip.',
+    shareDone: 'The phone sharing menu was opened.',
+    shareCancelled: 'Sharing was cancelled.',
+    messageCopied: 'The application text was copied. Paste it in Viber if necessary.',
+    copyFailed: 'Could not copy the message automatically.',
+    recruiterPhone: 'Recruiter phone',
+    attachments: 'Files',
+    generatedFiles: 'The application summary and Excel TSV will also be added.',
+    emailOpening: 'Opening the prepared email…',
+    directOpening: 'Opening the selected app…',
+    recipientLine: 'Send to',
+    filesIncluded: 'Files selected for sending',
+    shareTargetHint: 'In the phone sharing menu choose Mail, WhatsApp, Telegram or Viber and then select the recruiter shown above.'
+  };
+
+  const locales = {
+    en,
+    pl: {
+      documentsTitle: 'CV i dokumenty',
+      documentsText: 'Możesz dodać z telefonu CV, wizę, kartę pobytu lub inne dokumenty rekrutacyjne. Pliki pozostają na urządzeniu do czasu wybrania sposobu udostępnienia.',
+      chooseFiles: 'Wybierz CV lub dokumenty',
+      fileRules: 'Maks. {maxFiles} plików · {maxEach} MB każdy · {maxTotal} MB łącznie',
+      selectedFiles: 'Wybrane pliki', noFiles: 'Nie wybrano plików. Nadal możesz wysłać ankietę i wiersz do Excela.', remove: 'Usuń',
+      tooMany: 'Osiągnięto maksymalną liczbę plików.', unsupported: 'Niedozwolony typ pliku:', tooLarge: 'Plik jest za duży:', totalTooLarge: 'Łączny rozmiar plików jest za duży.',
+      reviewDocuments: 'CV i dołączone dokumenty', sendTitle: 'Wybierz sposób wysłania zgłoszenia', sendText: 'Rekruter, treść ankiety i wiersz do Excela są gotowe. Wybierz aplikację używaną na tym telefonie.',
+      shareAll: 'Udostępnij ankietę i pliki', shareAllHint: 'Polecane: otwiera menu telefonu z CV, dokumentami, podsumowaniem ankiety i plikiem TSV do Excela.',
+      email: 'E-mail', emailHint: 'Otwiera gotową wiadomość do wybranego rekrutera.', whatsapp: 'WhatsApp', whatsappHint: 'Otwiera bezpośredni czat z rekruterem i gotową wiadomość.',
+      telegram: 'Telegram', telegramHint: 'Otwiera rekrutera według numeru telefonu z gotową wiadomością.', viber: 'Viber', viberHint: 'Kopiuje wiadomość i otwiera czat Viber rekrutera.', call: 'Zadzwoń', callHint: 'Dzwoni do wybranego rekrutera.',
+      filesManual: 'Przy wysyłce bezpośrednio przez e-mail, WhatsApp, Telegram lub Viber dodaj wybrane pliki spinaczem. Automatyczne przekazanie plików działa przez „Udostępnij ankietę i pliki”, jeżeli telefon je obsługuje.',
+      shareUnsupported: 'Ten telefon nie może automatycznie udostępnić wszystkich plików. Wybierz kanał bezpośredni i dodaj je spinaczem.', shareDone: 'Otwarto menu udostępniania telefonu.', shareCancelled: 'Udostępnianie anulowano.', messageCopied: 'Treść ankiety została skopiowana. W razie potrzeby wklej ją w Viberze.', copyFailed: 'Nie udało się automatycznie skopiować wiadomości.', recruiterPhone: 'Telefon rekrutera', attachments: 'Pliki', generatedFiles: 'Zostaną też dodane podsumowanie ankiety i plik TSV do Excela.', emailOpening: 'Otwieranie gotowego e-maila…', directOpening: 'Otwieranie wybranej aplikacji…', recipientLine: 'Wyślij do', filesIncluded: 'Pliki wybrane do wysłania', shareTargetHint: 'W menu telefonu wybierz Mail, WhatsApp, Telegram lub Viber, a następnie rekrutera wskazanego powyżej.'
+    },
+    ru: {
+      documentsTitle: 'CV и документы', documentsText: 'Можно выбрать на телефоне CV, визу, карту побыту или другие документы для рекрутации. Файлы остаются на устройстве до выбора способа отправки.',
+      chooseFiles: 'Выбрать CV или документы', fileRules: 'До {maxFiles} файлов · до {maxEach} МБ каждый · до {maxTotal} МБ всего', selectedFiles: 'Выбранные файлы', noFiles: 'Файлы не выбраны. Анкету и строку Excel всё равно можно отправить.', remove: 'Удалить',
+      tooMany: 'Достигнуто максимальное количество файлов.', unsupported: 'Этот формат не поддерживается:', tooLarge: 'Файл слишком большой:', totalTooLarge: 'Общий размер файлов слишком большой.',
+      reviewDocuments: 'CV и приложенные документы', sendTitle: 'Выберите, как отправить анкету', sendText: 'Рекрутер, текст анкеты и строка для Excel уже подготовлены. Выберите приложение на телефоне.',
+      shareAll: 'Отправить анкету и файлы', shareAllHint: 'Рекомендуется: открывает системное меню телефона с CV, документами, анкетой и TSV-файлом для Excel.',
+      email: 'Email', emailHint: 'Открывает готовое письмо выбранному рекрутеру.', whatsapp: 'WhatsApp', whatsappHint: 'Открывает прямой чат с рекрутером и готовым сообщением.', telegram: 'Telegram', telegramHint: 'Открывает рекрутера по номеру телефона с готовым сообщением.', viber: 'Viber', viberHint: 'Копирует сообщение и открывает чат рекрутера в Viber.', call: 'Позвонить', callHint: 'Звонок выбранному рекрутеру.',
+      filesManual: 'При прямой отправке через email, WhatsApp, Telegram или Viber добавьте выбранные файлы скрепкой. Автоматически передать файлы можно через «Отправить анкету и файлы», если телефон поддерживает эту функцию.',
+      shareUnsupported: 'Этот телефон не может автоматически передать все выбранные файлы. Откройте нужный канал и добавьте их скрепкой.', shareDone: 'Открыто системное меню отправки.', shareCancelled: 'Отправка отменена.', messageCopied: 'Текст анкеты скопирован. При необходимости вставьте его в Viber.', copyFailed: 'Не удалось автоматически скопировать сообщение.', recruiterPhone: 'Телефон рекрутера', attachments: 'Файлы', generatedFiles: 'Также будут добавлены текст анкеты и TSV-файл для Excel.', emailOpening: 'Открывается готовое письмо…', directOpening: 'Открывается выбранное приложение…', recipientLine: 'Отправить', filesIncluded: 'Файлы для отправки', shareTargetHint: 'В системном меню выберите Mail, WhatsApp, Telegram или Viber, затем выберите рекрутера, указанного выше.'
+    },
+    uk: {
+      documentsTitle: 'CV і документи', documentsText: 'Можна вибрати на телефоні CV, візу, карту побиту або інші документи для рекрутації. Файли залишаються на пристрої до вибору способу надсилання.',
+      chooseFiles: 'Вибрати CV або документи', fileRules: 'До {maxFiles} файлів · до {maxEach} МБ кожен · до {maxTotal} МБ загалом', selectedFiles: 'Вибрані файли', noFiles: 'Файли не вибрано. Анкету та рядок Excel усе одно можна надіслати.', remove: 'Видалити',
+      tooMany: 'Досягнуто максимальної кількості файлів.', unsupported: 'Цей формат не підтримується:', tooLarge: 'Файл завеликий:', totalTooLarge: 'Загальний розмір файлів завеликий.',
+      reviewDocuments: 'CV і додані документи', sendTitle: 'Оберіть спосіб надсилання анкети', sendText: 'Рекрутер, текст анкети та рядок для Excel уже підготовлені. Оберіть застосунок на телефоні.',
+      shareAll: 'Надіслати анкету і файли', shareAllHint: 'Рекомендовано: відкриває системне меню телефону з CV, документами, анкетою та TSV-файлом для Excel.',
+      email: 'Email', emailHint: 'Відкриває готовий лист обраному рекрутеру.', whatsapp: 'WhatsApp', whatsappHint: 'Відкриває прямий чат із рекрутером і готовим повідомленням.', telegram: 'Telegram', telegramHint: 'Відкриває рекрутера за номером телефону з готовим повідомленням.', viber: 'Viber', viberHint: 'Копіює повідомлення та відкриває чат рекрутера у Viber.', call: 'Зателефонувати', callHint: 'Дзвінок обраному рекрутеру.',
+      filesManual: 'Під час прямого надсилання через email, WhatsApp, Telegram або Viber додайте вибрані файли скріпкою. Автоматично передати файли можна через «Надіслати анкету і файли», якщо телефон підтримує цю функцію.',
+      shareUnsupported: 'Цей телефон не може автоматично передати всі вибрані файли. Відкрийте потрібний канал і додайте їх скріпкою.', shareDone: 'Відкрито системне меню надсилання.', shareCancelled: 'Надсилання скасовано.', messageCopied: 'Текст анкети скопійовано. За потреби вставте його у Viber.', copyFailed: 'Не вдалося автоматично скопіювати повідомлення.', recruiterPhone: 'Телефон рекрутера', attachments: 'Файли', generatedFiles: 'Також буде додано текст анкети та TSV-файл для Excel.', emailOpening: 'Відкривається готовий лист…', directOpening: 'Відкривається обраний застосунок…', recipientLine: 'Надіслати', filesIncluded: 'Файли для надсилання', shareTargetHint: 'У системному меню оберіть Mail, WhatsApp, Telegram або Viber, потім оберіть рекрутера, зазначеного вище.'
+    },
+    ka: { documentsTitle: 'CV და დოკუმენტები', documentsText: 'ტელეფონიდან აირჩიეთ CV ან სამუშაოსთვის საჭირო დოკუმენტები.', chooseFiles: 'CV-ის ან დოკუმენტების არჩევა', selectedFiles: 'არჩეული ფაილები', noFiles: 'ფაილები არ არის არჩეული.', remove: 'წაშლა', reviewDocuments: 'CV და დოკუმენტები', sendTitle: 'აირჩიეთ გაგზავნის გზა', sendText: 'განაცხადი და Excel-ის სტრიქონი მზადაა.', shareAll: 'განაცხადისა და ფაილების გაზიარება', email: 'ელფოსტა', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'დარეკვა', filesManual: 'პირდაპირ აპში გაგზავნისას ფაილები დაამატეთ სამაგრის ნიშნით.', recruiterPhone: 'რეკრუტერის ტელეფონი' },
+    az: { documentsTitle: 'CV və sənədlər', documentsText: 'Telefondan CV və iş üçün lazım olan sənədləri seçin.', chooseFiles: 'CV və ya sənəd seçin', selectedFiles: 'Seçilmiş fayllar', noFiles: 'Fayl seçilməyib.', remove: 'Sil', reviewDocuments: 'CV və sənədlər', sendTitle: 'Göndərmə üsulunu seçin', sendText: 'Anket və Excel sətri hazırdır.', shareAll: 'Anketi və faylları paylaş', email: 'E-poçt', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Zəng et', filesManual: 'Birbaşa tətbiqdə göndərərkən faylları sancaq işarəsi ilə əlavə edin.', recruiterPhone: 'Rekruterin telefonu' },
+    hy: { documentsTitle: 'CV և փաստաթղթեր', documentsText: 'Հեռախոսից ընտրեք CV-ն և աշխատանքի համար անհրաժեշտ փաստաթղթերը։', chooseFiles: 'Ընտրել CV կամ փաստաթղթեր', selectedFiles: 'Ընտրված ֆայլեր', noFiles: 'Ֆայլեր ընտրված չեն։', remove: 'Հեռացնել', reviewDocuments: 'CV և փաստաթղթեր', sendTitle: 'Ընտրեք ուղարկման եղանակը', sendText: 'Հարցաթերթը և Excel-ի տողը պատրաստ են։', shareAll: 'Կիսվել հարցաթերթով և ֆայլերով', email: 'Էլ. փոստ', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Զանգահարել', filesManual: 'Ուղիղ հավելվածով ուղարկելիս ֆայլերը կցեք սեղմակի նշանով։', recruiterPhone: 'Հավաքագրողի հեռախոս' },
+    tr: { documentsTitle: 'CV ve belgeler', documentsText: 'Telefonunuzdan CV ve işe alım belgelerini seçebilirsiniz.', chooseFiles: 'CV veya belge seç', selectedFiles: 'Seçilen dosyalar', noFiles: 'Dosya seçilmedi.', remove: 'Kaldır', reviewDocuments: 'CV ve belgeler', sendTitle: 'Gönderme yöntemini seçin', sendText: 'Form ve Excel satırı hazır.', shareAll: 'Formu ve dosyaları paylaş', email: 'E-posta', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Ara', filesManual: 'Doğrudan uygulamadan gönderirken dosyaları ataç simgesiyle ekleyin.', recruiterPhone: 'İşe alım uzmanının telefonu' },
+    uz: { documentsTitle: 'CV va hujjatlar', documentsText: 'Telefondan CV va ish uchun kerakli hujjatlarni tanlang.', chooseFiles: 'CV yoki hujjat tanlash', selectedFiles: 'Tanlangan fayllar', noFiles: 'Fayl tanlanmagan.', remove: 'O‘chirish', reviewDocuments: 'CV va hujjatlar', sendTitle: 'Yuborish usulini tanlang', sendText: 'Anketa va Excel qatori tayyor.', shareAll: 'Anketa va fayllarni ulashish', email: 'E-mail', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Qo‘ng‘iroq', filesManual: 'To‘g‘ridan-to‘g‘ri ilovada yuborishda fayllarni qog‘oz qisqichi bilan qo‘shing.', recruiterPhone: 'Rekruter telefoni' },
+    ky: { documentsTitle: 'CV жана документтер', documentsText: 'Телефондон CV жана жумушка керектүү документтерди тандаңыз.', chooseFiles: 'CV же документ тандоо', selectedFiles: 'Тандалган файлдар', noFiles: 'Файл тандалган жок.', remove: 'Өчүрүү', reviewDocuments: 'CV жана документтер', sendTitle: 'Жөнөтүү жолун тандаңыз', sendText: 'Анкета жана Excel сабы даяр.', shareAll: 'Анкетаны жана файлдарды бөлүшүү', email: 'E-mail', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Чалуу', filesManual: 'Түз колдонмо аркылуу жөнөткөндө файлдарды кыстыргыч менен кошуңуз.', recruiterPhone: 'Рекрутердин телефону' },
+    tg: { documentsTitle: 'CV ва ҳуҷҷатҳо', documentsText: 'Аз телефон CV ва ҳуҷҷатҳои заруриро интихоб кунед.', chooseFiles: 'Интихоби CV ё ҳуҷҷат', selectedFiles: 'Файлҳои интихобшуда', noFiles: 'Файл интихоб нашудааст.', remove: 'Нест кардан', reviewDocuments: 'CV ва ҳуҷҷатҳо', sendTitle: 'Роҳи фиристоданро интихоб кунед', sendText: 'Анкета ва сатри Excel омода аст.', shareAll: 'Анкета ва файлҳоро мубодила кунед', email: 'E-mail', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Занг задан', filesManual: 'Ҳангоми фиристодани мустақим файлҳоро бо нишонаи замима илова кунед.', recruiterPhone: 'Телефони рекрутер' },
+    kk: { documentsTitle: 'CV және құжаттар', documentsText: 'Телефоннан CV мен жұмысқа қажетті құжаттарды таңдаңыз.', chooseFiles: 'CV немесе құжат таңдау', selectedFiles: 'Таңдалған файлдар', noFiles: 'Файл таңдалмады.', remove: 'Жою', reviewDocuments: 'CV және құжаттар', sendTitle: 'Жіберу тәсілін таңдаңыз', sendText: 'Сауалнама мен Excel жолы дайын.', shareAll: 'Сауалнама мен файлдарды бөлісу', email: 'E-mail', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Қоңырау шалу', filesManual: 'Тікелей қолданбада жібергенде файлдарды қыстырғыш белгісімен қосыңыз.', recruiterPhone: 'Рекрутердің телефоны' },
+    hi: { documentsTitle: 'CV और दस्तावेज़', documentsText: 'फ़ोन से CV और नौकरी के आवश्यक दस्तावेज़ चुनें।', chooseFiles: 'CV या दस्तावेज़ चुनें', selectedFiles: 'चुनी गई फ़ाइलें', noFiles: 'कोई फ़ाइल नहीं चुनी गई।', remove: 'हटाएँ', reviewDocuments: 'CV और दस्तावेज़', sendTitle: 'भेजने का तरीका चुनें', sendText: 'फ़ॉर्म और Excel पंक्ति तैयार हैं।', shareAll: 'फ़ॉर्म और फ़ाइलें साझा करें', email: 'ईमेल', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'कॉल करें', filesManual: 'सीधे ऐप से भेजते समय पेपरक्लिप से फ़ाइलें जोड़ें।', recruiterPhone: 'भर्तीकर्ता का फ़ोन' },
+    bn: { documentsTitle: 'CV ও নথি', documentsText: 'ফোন থেকে CV ও কাজের প্রয়োজনীয় নথি নির্বাচন করুন।', chooseFiles: 'CV বা নথি নির্বাচন করুন', selectedFiles: 'নির্বাচিত ফাইল', noFiles: 'কোনো ফাইল নির্বাচন করা হয়নি।', remove: 'মুছুন', reviewDocuments: 'CV ও নথি', sendTitle: 'পাঠানোর উপায় নির্বাচন করুন', sendText: 'ফর্ম ও Excel সারি প্রস্তুত।', shareAll: 'ফর্ম ও ফাইল শেয়ার করুন', email: 'ইমেইল', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'কল করুন', filesManual: 'সরাসরি অ্যাপে পাঠানোর সময় পেপারক্লিপ দিয়ে ফাইল যোগ করুন।', recruiterPhone: 'রিক্রুটারের ফোন' },
+    ne: { documentsTitle: 'CV र कागजात', documentsText: 'फोनबाट CV र कामका आवश्यक कागजात छान्नुहोस्।', chooseFiles: 'CV वा कागजात छान्नुहोस्', selectedFiles: 'छानिएका फाइलहरू', noFiles: 'कुनै फाइल छानिएको छैन।', remove: 'हटाउनुहोस्', reviewDocuments: 'CV र कागजात', sendTitle: 'पठाउने तरिका छान्नुहोस्', sendText: 'फारम र Excel पङ्क्ति तयार छ।', shareAll: 'फारम र फाइल साझा गर्नुहोस्', email: 'इमेल', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'फोन गर्नुहोस्', filesManual: 'सिधै एपबाट पठाउँदा पेपरक्लिपले फाइल थप्नुहोस्।', recruiterPhone: 'भर्तीकर्ताको फोन' },
+    ur: { documentsTitle: 'CV اور دستاویزات', documentsText: 'فون سے CV اور کام کے ضروری کاغذات منتخب کریں۔', chooseFiles: 'CV یا دستاویز منتخب کریں', selectedFiles: 'منتخب فائلیں', noFiles: 'کوئی فائل منتخب نہیں ہوئی۔', remove: 'حذف کریں', reviewDocuments: 'CV اور دستاویزات', sendTitle: 'بھیجنے کا طریقہ منتخب کریں', sendText: 'فارم اور Excel کی قطار تیار ہے۔', shareAll: 'فارم اور فائلیں شیئر کریں', email: 'ای میل', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'کال کریں', filesManual: 'براہ راست ایپ سے بھیجتے وقت پیپر کلپ سے فائلیں شامل کریں۔', recruiterPhone: 'ریکروٹر کا فون' },
+    si: { documentsTitle: 'CV සහ ලේඛන', documentsText: 'දුරකථනයෙන් CV සහ රැකියාවට අවශ්‍ය ලේඛන තෝරන්න.', chooseFiles: 'CV හෝ ලේඛන තෝරන්න', selectedFiles: 'තෝරාගත් ගොනු', noFiles: 'ගොනු තෝරා නැත.', remove: 'ඉවත් කරන්න', reviewDocuments: 'CV සහ ලේඛන', sendTitle: 'යැවීමේ ක්‍රමය තෝරන්න', sendText: 'පෝරමය සහ Excel පේළිය සූදානම්.', shareAll: 'පෝරමය සහ ගොනු බෙදාගන්න', email: 'ඊමේල්', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'අමතන්න', filesManual: 'යෙදුමෙන් සෘජුව යවන විට paperclip ලකුණෙන් ගොනු එක් කරන්න.', recruiterPhone: 'බඳවාගන්නාගේ දුරකථනය' },
+    fil: { documentsTitle: 'CV at mga dokumento', documentsText: 'Pumili ng CV at mga dokumentong kailangan sa trabaho mula sa telepono.', chooseFiles: 'Pumili ng CV o dokumento', selectedFiles: 'Napiling mga file', noFiles: 'Walang napiling file.', remove: 'Alisin', reviewDocuments: 'CV at mga dokumento', sendTitle: 'Piliin kung paano ipadadala', sendText: 'Handa na ang form at Excel row.', shareAll: 'Ibahagi ang form at mga file', email: 'Email', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Tumawag', filesManual: 'Kapag direktang nagpapadala sa app, idagdag ang mga file gamit ang paperclip.', recruiterPhone: 'Telepono ng recruiter' },
+    id: { documentsTitle: 'CV dan dokumen', documentsText: 'Pilih CV dan dokumen kerja dari ponsel.', chooseFiles: 'Pilih CV atau dokumen', selectedFiles: 'File yang dipilih', noFiles: 'Belum ada file dipilih.', remove: 'Hapus', reviewDocuments: 'CV dan dokumen', sendTitle: 'Pilih cara mengirim', sendText: 'Formulir dan baris Excel sudah siap.', shareAll: 'Bagikan formulir dan file', email: 'Email', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Telepon', filesManual: 'Saat mengirim langsung melalui aplikasi, tambahkan file dengan ikon penjepit kertas.', recruiterPhone: 'Telepon perekrut' },
+    vi: { documentsTitle: 'CV và tài liệu', documentsText: 'Chọn CV và tài liệu cần thiết cho công việc từ điện thoại.', chooseFiles: 'Chọn CV hoặc tài liệu', selectedFiles: 'Tệp đã chọn', noFiles: 'Chưa chọn tệp.', remove: 'Xóa', reviewDocuments: 'CV và tài liệu', sendTitle: 'Chọn cách gửi', sendText: 'Biểu mẫu và dòng Excel đã sẵn sàng.', shareAll: 'Chia sẻ biểu mẫu và tệp', email: 'Email', whatsapp: 'WhatsApp', telegram: 'Telegram', viber: 'Viber', call: 'Gọi', filesManual: 'Khi gửi trực tiếp qua ứng dụng, hãy thêm tệp bằng biểu tượng kẹp giấy.', recruiterPhone: 'Điện thoại nhà tuyển dụng' }
+  };
+
+  window.RECRUITMENT_DELIVERY_V10_I18N = Object.freeze(locales);
+})();
