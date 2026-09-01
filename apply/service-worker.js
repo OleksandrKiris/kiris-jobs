@@ -1,9 +1,9 @@
-const CACHE = 'citronex-recruitment-v14.0.2';
+const CACHE = 'citronex-recruitment-v14.0.3';
 const CORE = [
   './', './index.html', './offline-redirect.js',
   './offline.html', './offline-v12.css',
-  './offline-shared.js', './offline-candidate.js',
-  './offline-translations.js',
+  './offline-shared-v14.0.3.js', './offline-candidate-v14.0.3.js',
+  './offline-translations-v14.0.3.js',
   './manifest.webmanifest', './offline-icon.svg',
   './excel/Recruitment_Master.xlsx', './excel/Recruitment_yana.xlsx',
   './excel/Recruitment_yuliia.xlsx', './excel/Recruitment_fariz.xlsx',
@@ -25,6 +25,13 @@ self.addEventListener('fetch', (event) => {
   if (requestUrl.origin !== self.location.origin) return;
   if (event.request.mode === 'navigate') {
     event.respondWith(fetch(event.request).catch(() => caches.match('./offline.html')));
+    return;
+  }
+  if (event.request.destination === 'script' || event.request.destination === 'style') {
+    event.respondWith(fetch(event.request).then((response) => {
+      if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+      return response;
+    }).catch(() => caches.match(event.request, {ignoreSearch:true})));
     return;
   }
   event.respondWith(caches.match(event.request, {ignoreSearch:true}).then((cached) => {

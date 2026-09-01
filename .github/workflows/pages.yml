@@ -47,12 +47,18 @@ jobs:
           test -s apply/i18n-extra.js
           test -s apply/i18n-mobile.js
           test -s apply/app-mobile.js
-          test -s apply/offline-translations.js
-          node --check apply/offline-translations.js
-          grep -q 'offline-translations.js?v=14.0.2' apply/offline.html
-          grep -q 'location.href=href' apply/offline-candidate.js
-          ! grep -q 'setTimeout(()=>{location.href=O.mailto' apply/offline-candidate.js
-          grep -q 'WIERSZ DO EXCEL' apply/offline-shared.js
+          test -s apply/offline-shared-v14.0.3.js
+          test -s apply/offline-translations-v14.0.3.js
+          test -s apply/offline-candidate-v14.0.3.js
+          node --check apply/offline-shared-v14.0.3.js
+          node --check apply/offline-translations-v14.0.3.js
+          node --check apply/offline-candidate-v14.0.3.js
+          grep -q 'offline-shared-v14.0.3.js' apply/offline.html
+          grep -q 'offline-translations-v14.0.3.js' apply/offline.html
+          grep -q 'offline-candidate-v14.0.3.js' apply/offline.html
+          grep -q 'data-success-email href=' apply/offline-candidate-v14.0.3.js
+          ! grep -q 'location.href=O.mailto' apply/offline-candidate-v14.0.3.js
+          grep -q 'WIERSZ DO EXCEL' apply/offline-shared-v14.0.3.js
           grep -q 'styles.css?v=8.3.0' apply/index.html
           grep -q 'mobile-v8.css?v=8.3.0' apply/index.html
           grep -q 'ui-v9.css?v=9.0.0' apply/index.html
