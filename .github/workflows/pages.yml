@@ -17,12 +17,13 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Получить код
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Настроить Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -31,38 +32,46 @@ jobs:
 
       - name: Проверить production-файлы анкеты
         run: |
+          set -euo pipefail
           test -s apply/index.html
           test -s apply/styles.css
+          test -s apply/mobile-v8.css
           test -s apply/config.js
           test -s apply/i18n-extra.js
-          test -s apply/app.js
-          grep -q 'styles.css?v=7.0.0' apply/index.html
-          grep -q 'i18n-extra.js?v=7.0.0' apply/index.html
-          grep -q 'app.js?v=7.0.0' apply/index.html
+          test -s apply/i18n-mobile.js
+          test -s apply/app-mobile.js
+          grep -q 'styles.css?v=8.2.0' apply/index.html
+          grep -q 'mobile-v8.css?v=8.2.0' apply/index.html
+          grep -q 'i18n-mobile.js?v=8.2.0' apply/index.html
+          grep -q 'app-mobile.js?v=8.2.0' apply/index.html
           grep -q 'citronex-logo.jpg' apply/index.html
-          grep -q "version: '7.0.0'" apply/config.js
-          grep -q 'buildMailto' apply/app.js
-          grep -q 'sourceDetails' apply/app.js
-          grep -q 'representativeName' apply/app.js
+          grep -q "version: '8.2.0'" apply/config.js
+          grep -q 'nextCandidateInGroup' apply/app-mobile.js
+          grep -q 'routeContextKey' apply/app-mobile.js
+          grep -q "\['full', 'compact', 'minimal'\]" apply/app-mobile.js
+          grep -q 'sourceDetails' apply/app-mobile.js
+          grep -q 'representativeName' apply/app-mobile.js
+          ! grep -q 'enhancements-v8.js' apply/index.html
 
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: verify
     steps:
       - name: Получить код
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Настроить GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Подготовить статические файлы
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: "."
 
       - name: Опубликовать
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
