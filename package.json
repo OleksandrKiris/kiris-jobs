@@ -2,16 +2,17 @@
   "name": "kiris-jobs",
   "version": "1.0.0",
   "private": true,
-  "description": "Личная офлайн-платформа вакансий Oleksandr Kiris с подбором и прямым контактом в WhatsApp",
+  "description": "Личная офлайн-платформа вакансий Oleksandr Kiris с подбором и прямым контактом",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "check:js": "node --check assets/candidate.js && node --check assets/i18n.js && node --check assets/application-form.js && node --check sw.js && node --check data/content.js",
+    "check:js": "node --check assets/candidate.js && node --check assets/i18n.js && node --check assets/application-form.js && node --check apply/config.js && node --check apply/i18n-core.js && node --check apply/i18n-caucasus-central.js && node --check apply/i18n-asia.js && node --check apply/app.js && node --check sw.js && node --check data/content.js",
     "check:content": "node scripts/validate-content.mjs",
     "check:locales": "node scripts/validate-locales.mjs",
     "check:ui": "node scripts/validate-ui.mjs",
+    "check:apply": "node scripts/validate-apply.mjs",
     "build:css": "node scripts/build-candidate-css.mjs",
     "generate:vacancies": "node scripts/generate-vacancy-pages.mjs",
-    "test": "npm run build:css && npm run generate:vacancies && npm run check:js && npm run check:content && npm run check:locales && npm run check:ui"
+    "test": "npm run build:css && npm run generate:vacancies && npm run check:js && npm run check:content && npm run check:locales && npm run check:ui && npm run check:apply"
   },
   "engines": {
     "node": ">=20"
