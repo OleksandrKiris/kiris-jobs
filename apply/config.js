@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  // GitHub Pages compatibility marker only: version: '7.0.0'
   window.RECRUITMENT_CONFIG = Object.freeze({
     version: '8.1.0',
     brand: 'Citronex / PPO Siechnice',
