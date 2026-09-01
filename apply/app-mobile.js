@@ -11,22 +11,26 @@
     throw new Error('Recruitment application dependencies are missing.');
   }
 
-  const currentUrl = new URL(window.location.href);
+  const pageUrl = new URL(window.location.href);
   const params = CFG.queryParams;
   const route = Object.freeze({
-    source: sanitizeRoute(currentUrl.searchParams.get(params.source)),
-    campaign: sanitizeRoute(currentUrl.searchParams.get(params.campaign)),
-    vacancy: sanitizeRoute(currentUrl.searchParams.get(params.vacancy)),
-    partner: sanitizeRoute(currentUrl.searchParams.get(params.partner)),
-    group: sanitizeRoute(currentUrl.searchParams.get(params.group))
+    source: sanitizeRoute(pageUrl.searchParams.get(params.source)),
+    campaign: sanitizeRoute(pageUrl.searchParams.get(params.campaign)),
+    vacancy: sanitizeRoute(pageUrl.searchParams.get(params.vacancy)),
+    partner: sanitizeRoute(pageUrl.searchParams.get(params.partner)),
+    group: sanitizeRoute(pageUrl.searchParams.get(params.group))
   });
 
-  const suggestedLanguage = validLanguage(currentUrl.searchParams.get(params.language));
-  const suggestedRecruiter = validRecruiter(currentUrl.searchParams.get(params.recruiter));
-  const suggestedLocation = validLocation(currentUrl.searchParams.get(params.location));
-  const sourceFromLink = normalizeSource(route.source);
+  const suggestedLanguage = validLanguage(pageUrl.searchParams.get(params.language));
+  const suggestedRecruiter = validRecruiter(pageUrl.searchParams.get(params.recruiter));
+  const suggestedLocation = validLocation(pageUrl.searchParams.get(params.location));
+  const suggestedSource = normalizeSource(route.source);
+  const routeContextKey = [
+    suggestedRecruiter || '', suggestedLocation || '', suggestedSource || '',
+    route.partner, route.group, route.campaign, route.vacancy
+  ].join('|');
 
-  const fields = [
+  const fieldNames = [
     'filledBy', 'representativeName', 'groupCode',
     'firstName', 'lastName', 'phone', 'messenger', 'email',
     'citizenship', 'country', 'city', 'age', 'inPoland', 'documents',
@@ -34,10 +38,12 @@
     'source', 'sourceDetails', 'comment', 'consent'
   ];
 
-  let view = 'language';
   let errors = {};
-  let state = createState();
+  let view = 'language';
   let savedDraft = loadDraft();
+  let state = createState();
+
+  initializeEntryPoint();
 
   function sanitizeRoute(value) {
     return String(value || '')
@@ -67,23 +73,43 @@
     return supported.includes(normalized) ? normalized : '';
   }
 
-  function createState() {
-    const data = Object.fromEntries(fields.map((field) => [field, field === 'consent' ? false : '']));
-    data.location = suggestedLocation || '';
-    data.source = sourceFromLink;
-    data.sourceDetails = route.partner || route.campaign || '';
-    data.representativeName = route.partner || '';
-    data.groupCode = route.group || '';
+  function blankData() {
+    return Object.fromEntries(fieldNames.map((field) => [field, field === 'consent' ? false : '']));
+  }
 
+  function routeDefaults() {
+    const data = blankData();
+    const partnerMode = Boolean(route.partner || route.group);
+    data.filledBy = partnerMode ? 'representative' : '';
+    data.representativeName = route.partner;
+    data.groupCode = route.group;
+    data.location = suggestedLocation || '';
+    data.source = suggestedSource || (partnerMode ? 'referral' : '');
+    data.sourceDetails = route.partner || route.campaign || '';
+    return data;
+  }
+
+  function createState() {
     return {
       version: CFG.version,
+      contextKey: routeContextKey,
       id: createApplicationId(),
       createdAt: new Date().toISOString(),
-      language: null,
-      recruiterId: null,
+      language: suggestedLanguage || null,
+      recruiterId: suggestedRecruiter || null,
       step: 1,
-      data
+      data: routeDefaults()
     };
+  }
+
+  function initializeEntryPoint() {
+    if (savedDraft) {
+      state = savedDraft;
+      view = 'language';
+      return;
+    }
+    if (state.language && state.recruiterId) view = 'form';
+    else if (state.language) view = 'recruiter';
   }
 
   function merge(base, patch) {
@@ -101,8 +127,9 @@
   }
 
   function extraLocale(code = state.language || 'en') {
-    const base = merge(EXTRA.locales.en || {}, EXTRA.locales[code] || {});
-    return merge(base, MOBILE[code] || {});
+    const extra = merge(EXTRA.locales.en || {}, EXTRA.locales[code] || {});
+    const mobile = merge(MOBILE.en || {}, MOBILE[code] || {});
+    return merge(extra, mobile);
   }
 
   function t(key) {
@@ -110,7 +137,7 @@
   }
 
   function x(key) {
-    return extraLocale()[key] ?? EXTRA.locales.en?.[key] ?? key;
+    return extraLocale()[key] ?? key;
   }
 
   function recruiter() {
@@ -167,11 +194,11 @@
   }
 
   function createApplicationId() {
-    const p = warsawParts();
+    const parts = warsawParts();
     const random = window.crypto?.getRandomValues
-      ? Array.from(window.crypto.getRandomValues(new Uint8Array(2)), (n) => n.toString(16).padStart(2, '0')).join('').toUpperCase()
+      ? Array.from(window.crypto.getRandomValues(new Uint8Array(2)), (number) => number.toString(16).padStart(2, '0')).join('').toUpperCase()
       : Math.random().toString(16).slice(2, 6).toUpperCase();
-    return `KAND-${p.year}${p.month}${p.day}-${p.hour}${p.minute}${p.second}-${random}`;
+    return `KAND-${parts.year}${parts.month}${parts.day}-${parts.hour}${parts.minute}${parts.second}-${random}`;
   }
 
   function formatDate(value = state.createdAt) {
@@ -183,7 +210,8 @@
   }
 
   function slaDate() {
-    return formatDate(new Date(new Date(state.createdAt).getTime() + 24 * 60 * 60 * 1000).toISOString());
+    const deadline = new Date(new Date(state.createdAt).getTime() + 24 * 60 * 60 * 1000);
+    return formatDate(deadline.toISOString());
   }
 
   function saveDraft() {
@@ -197,17 +225,18 @@
   function loadDraft() {
     try {
       const draft = JSON.parse(localStorage.getItem(CFG.storageKey));
-      if (!draft || draft.version !== CFG.version || !draft.savedAt) return null;
+      if (!draft || draft.version !== CFG.version || !draft.savedAt || !draft.id || !draft.data) return null;
       if (Date.now() - draft.savedAt > CFG.draftMaxAgeMs) {
         localStorage.removeItem(CFG.storageKey);
         return null;
       }
-      if (!draft.id || !draft.data) return null;
+      if ((draft.contextKey || '') !== routeContextKey) return null;
       draft.language = validLanguage(draft.language);
       draft.recruiterId = validRecruiter(draft.recruiterId);
       draft.step = Math.min(4, Math.max(1, Number(draft.step) || 1));
-      draft.data = { ...createState().data, ...draft.data };
+      draft.data = { ...routeDefaults(), ...draft.data };
       draft.data.location = validLocation(draft.data.location) || '';
+      draft.data.source = normalizeSource(draft.data.source);
       return draft;
     } catch {
       return null;
@@ -249,14 +278,13 @@
 
     app.innerHTML = `
       <section class="card">
-        <div class="hero">
+        <div class="hero compact-mobile-hero">
           <div class="hero-icon" aria-hidden="true">🌍</div>
           <h1>${escapeHtml(t('languageTitle'))}</h1>
           <p>${escapeHtml(x('languageIntro'))}</p>
         </div>
-        <div class="trust-row">
+        <div class="trust-row compact-trust-row">
           <div class="trust-item">📱 ${escapeHtml(t('trustMobile'))}</div>
-          <div class="trust-item">👤 ${escapeHtml(t('recruiterTitle'))}</div>
           <div class="trust-item">✉️ ${escapeHtml(t('trustControl'))}</div>
         </div>
         ${savedDraft ? `
@@ -267,12 +295,12 @@
               <button class="button small" type="button" data-action="discard">${escapeHtml(x('discard'))}</button>
             </div>
           </div>` : ''}
-        <input class="search" id="languageSearch" type="search" autocomplete="off" placeholder="${attr(t('languageSearch'))}" value="${attr(search)}">
-        <div class="language-grid">
+        <input class="search" id="languageSearch" type="search" autocomplete="off" enterkeyhint="search" placeholder="${attr(t('languageSearch'))}" value="${attr(search)}">
+        <div class="language-grid fast-language-grid">
           ${languages.length ? languages.map(([code, meta]) => `
             <button class="language-card" type="button" data-language="${code}">
               <span class="language-flag" aria-hidden="true">${meta.flag}</span>
-              <span><strong>${escapeHtml(meta.native)}</strong><small>${escapeHtml(meta.english)} · ${code.toUpperCase()}</small></span>
+              <span><strong>${escapeHtml(meta.native)}</strong><small>${escapeHtml(meta.english)}</small></span>
               <span class="arrow" aria-hidden="true">›</span>
             </button>`).join('') : `<div class="empty-state">${escapeHtml(t('noLanguages'))}</div>`}
         </div>
@@ -281,7 +309,7 @@
     document.getElementById('languageSearch').addEventListener('input', (event) => renderLanguage(event.target.value));
     app.querySelectorAll('[data-language]').forEach((button) => button.addEventListener('click', () => {
       state.language = validLanguage(button.dataset.language) || 'en';
-      view = 'recruiter';
+      view = state.recruiterId ? 'form' : 'recruiter';
       errors = {};
       saveDraft();
       render();
@@ -294,6 +322,7 @@
     app.querySelector('[data-action="discard"]')?.addEventListener('click', () => {
       clearDraft();
       state = createState();
+      view = state.language && state.recruiterId ? 'form' : state.language ? 'recruiter' : 'language';
       render();
     });
   }
@@ -305,7 +334,7 @@
     app.innerHTML = `
       <section class="card">
         <button class="link-button" type="button" data-action="language">← ${escapeHtml(t('changeLanguage'))}</button>
-        <div class="hero">
+        <div class="hero compact-mobile-hero">
           <div class="hero-icon" aria-hidden="true">👤</div>
           <h1>${escapeHtml(t('recruiterTitle'))}</h1>
           <p>${escapeHtml(x('recruiterIntro'))}</p>
@@ -324,8 +353,6 @@
     app.querySelector('[data-action="language"]').addEventListener('click', () => { view = 'language'; render(); });
     app.querySelectorAll('[data-recruiter]').forEach((button) => button.addEventListener('click', () => {
       state.recruiterId = validRecruiter(button.dataset.recruiter);
-      if (!state.data.location && suggestedLocation) state.data.location = suggestedLocation;
-      state.step = Math.min(4, Math.max(1, state.step || 1));
       view = 'form';
       errors = {};
       saveDraft();
@@ -346,11 +373,11 @@
     return errors[field] ? `<div class="error" role="alert">${escapeHtml(errors[field])}</div>` : '';
   }
 
-  function textField({ id, label, type = 'text', hint = '', required = true, max = 120, autocomplete = '', full = false, inputmode = '' }) {
+  function textField({ id, label, type = 'text', hint = '', placeholder = '', required = true, max = 120, autocomplete = '', full = false, inputmode = '', min = '', maxValue = '' }) {
     return `
       <div class="field ${full ? 'full' : ''}">
         <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ''}</label>
-        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' || id === 'email' ? 'ltr' : ''}" type="${type}" maxlength="${max}" value="${attr(state.data[id])}" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''}>
+        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' || id === 'email' ? 'ltr' : ''}" type="${type}" maxlength="${max}" value="${attr(state.data[id])}" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
         ${hint ? `<div class="hint">${escapeHtml(hint)}</div>` : ''}
         ${errorHtml(id)}
       </div>`;
@@ -386,6 +413,12 @@
       </label>`;
   }
 
+  function partnerBadge() {
+    if (state.data.filledBy !== 'representative') return '';
+    const label = state.data.groupCode || state.data.representativeName || x('representative');
+    return `<span class="chip partner-chip">🤝 ${escapeHtml(label)}</span>`;
+  }
+
   function locationCards() {
     const items = [...CFG.locations].sort((a, b) => (a.id === suggestedLocation ? -1 : b.id === suggestedLocation ? 1 : 0));
     return `
@@ -419,15 +452,16 @@
         </div>
         ${state.data.filledBy === 'representative' ? `
           <div class="partner-panel">
+            <div class="panel-heading"><span aria-hidden="true">🤝</span><strong>${escapeHtml(x('partnerPanelTitle'))}</strong></div>
             ${textField({ id: 'representativeName', label: x('representativeName'), hint: x('representativeNameHint'), required: true, full: true, max: 160 })}
             ${textField({ id: 'groupCode', label: x('groupCode'), hint: x('groupCodeHint'), required: false, full: true, max: 80 })}
           </div>` : ''}
         <div class="form-grid">
           ${textField({ id: 'firstName', label: t('firstName'), autocomplete: 'given-name' })}
           ${textField({ id: 'lastName', label: t('lastName'), autocomplete: 'family-name' })}
-          ${textField({ id: 'phone', label: t('phone'), hint: t('phoneHint'), type: 'tel', autocomplete: 'tel', inputmode: 'tel', max: 32 })}
+          ${textField({ id: 'phone', label: t('phone'), hint: t('phoneHint'), placeholder: '+48… / +380… / +995…', type: 'tel', autocomplete: 'tel', inputmode: 'tel', max: 32 })}
           <div class="field"><label for="messenger">${escapeHtml(t('messenger'))} <span class="required">*</span></label>${selectHtml('messenger', 'messenger')}</div>
-          ${textField({ id: 'email', label: t('email'), type: 'email', autocomplete: 'email', required: false, full: true, max: 160 })}
+          ${textField({ id: 'email', label: t('email'), type: 'email', autocomplete: 'email', inputmode: 'email', required: false, full: true, max: 160 })}
         </div>`;
     }
 
@@ -435,9 +469,9 @@
       return `
         <div class="form-grid">
           ${textField({ id: 'citizenship', label: t('citizenship'), autocomplete: 'country-name' })}
-          ${textField({ id: 'country', label: t('country') })}
-          ${textField({ id: 'city', label: t('city') })}
-          ${textField({ id: 'age', label: t('age'), type: 'number', inputmode: 'numeric', max: 3 })}
+          ${textField({ id: 'country', label: t('country'), autocomplete: 'country-name' })}
+          ${textField({ id: 'city', label: t('city'), autocomplete: 'address-level2' })}
+          ${textField({ id: 'age', label: t('age'), type: 'number', inputmode: 'numeric', max: 3, min: 18, maxValue: 75 })}
           <div class="field"><label for="inPoland">${escapeHtml(t('inPoland'))} <span class="required">*</span></label>${selectHtml('inPoland', 'yesNo')}</div>
           <div class="field"><label for="documents">${escapeHtml(t('documents'))} <span class="required">*</span></label>${selectHtml('documents', 'documents')}</div>
         </div>`;
@@ -448,7 +482,7 @@
         ${locationCards()}
         <div class="form-grid" style="margin-top:15px">
           <div class="field full"><label for="job">${escapeHtml(t('job'))} <span class="required">*</span></label>${selectHtml('job', 'jobs')}</div>
-          ${textareaField({ id: 'experience', label: t('experience'), hint: t('experienceHint'), max: 360 })}
+          ${textareaField({ id: 'experience', label: t('experience'), hint: t('experienceHint'), max: 320 })}
           <div class="field"><label for="start">${escapeHtml(t('start'))} <span class="required">*</span></label>${selectHtml('start', 'starts')}</div>
           <div class="field"><label for="shift">${escapeHtml(t('shift'))} <span class="required">*</span></label>${selectHtml('shift', 'shifts')}</div>
           <div class="field full"><label for="housing">${escapeHtml(t('housing'))} <span class="required">*</span></label>${selectHtml('housing', 'yesNo')}</div>
@@ -457,14 +491,15 @@
 
     return `
       <div class="source-panel">
+        <div class="panel-heading"><span aria-hidden="true">📣</span><strong>${escapeHtml(x('sourcePanelTitle'))}</strong></div>
         <div class="field full">
           <label for="source">${escapeHtml(t('source'))} <span class="required">*</span></label>
           ${selectHtml('source', 'sources')}
         </div>
-        ${textField({ id: 'sourceDetails', label: x('sourceDetails'), hint: x('sourceDetailsHint'), required: true, full: true, max: 180 })}
+        ${textField({ id: 'sourceDetails', label: x('sourceDetails'), hint: x('sourceDetailsHint'), placeholder: x('sourceDetailsPlaceholder'), required: true, full: true, max: 180 })}
       </div>
       <div class="form-grid">
-        ${textareaField({ id: 'comment', label: t('comment'), max: 260 })}
+        ${textareaField({ id: 'comment', label: t('comment'), max: 220 })}
         <div class="field full">
           <div class="checkbox-row">
             <input id="consent" data-field="consent" type="checkbox" ${state.data.consent ? 'checked' : ''}>
@@ -488,8 +523,8 @@
       <section class="card">
         <div class="topbar">
           <div class="chips">
-            <span class="chip ltr">${escapeHtml(state.id)}</span>
             <span class="chip">${I18N.languages[state.language].flag} ${state.language.toUpperCase()}</span>
+            ${partnerBadge()}
           </div>
           <div>
             <button class="link-button" type="button" data-action="language">🌍 ${escapeHtml(t('changeLanguage'))}</button>
@@ -586,7 +621,9 @@
     if (Object.keys(errors).length) {
       renderForm();
       const first = Object.keys(errors)[0];
-      app.querySelector(`[data-field="${first}"]`)?.focus();
+      const target = app.querySelector(`[data-field="${first}"]`);
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return false;
     }
 
@@ -663,17 +700,21 @@
           ${reviewSection(x('sectionWork'), work)}
         </div>
         <div class="email-guide"><strong>✉️ ${escapeHtml(x('sendButton'))}</strong><p>${escapeHtml(x('emailInstruction'))}</p></div>
-        <div id="result" class="notice success hidden" style="margin-top:12px"></div>
+        <div id="result" class="notice success hidden" style="margin-top:12px" aria-live="polite"></div>
         <div class="review-actions">
           <button class="button soft" type="button" data-action="edit">← ${escapeHtml(t('edit'))}</button>
           <button class="button primary send-button" type="button" data-action="send">${escapeHtml(x('sendButton'))}</button>
         </div>
-        <div style="text-align:center;margin-top:12px"><button class="link-button" type="button" data-action="new">${escapeHtml(t('newApplication'))}</button></div>
+        ${state.data.filledBy === 'representative' ? `
+          <button class="button batch-button" type="button" data-action="next-candidate">＋ ${escapeHtml(x('nextCandidate'))}</button>
+          <p class="batch-hint">${escapeHtml(x('nextCandidateHint'))}</p>` : ''}
+        <div class="new-application-row"><button class="link-button" type="button" data-action="new">${escapeHtml(t('newApplication'))}</button></div>
       </section>`;
 
     app.querySelector('[data-action="edit"]').addEventListener('click', () => { view = 'form'; state.step = 4; render(); });
     app.querySelector('[data-action="new"]').addEventListener('click', startNew);
     app.querySelector('[data-action="send"]').addEventListener('click', openEmail);
+    app.querySelector('[data-action="next-candidate"]')?.addEventListener('click', nextCandidateInGroup);
   }
 
   function filledByPolish() {
@@ -685,48 +726,64 @@
     return item ? `${item.name} (${item.subtitle})` : '';
   }
 
-  function excelValues() {
+  function excelValues(level = 'full') {
     const person = recruiter();
     const data = state.data;
-    return [
+    const limits = level === 'full'
+      ? { representative: 120, group: 60, experience: 220, source: 160, comment: 180 }
+      : level === 'compact'
+        ? { representative: 80, group: 40, experience: 100, source: 90, comment: 80 }
+        : { representative: 50, group: 30, experience: 45, source: 55, comment: 40 };
+
+    const row = [
       state.id, formatDate(), slaDate(), (state.language || '').toUpperCase(), person?.name || '', person?.email || '',
-      filledByPolish(), cleanCell(data.representativeName, 120), cleanCell(data.groupCode, 60), locationPolish(),
-      data.firstName, data.lastName, data.phone, polishOption('messenger', data.messenger), data.email,
+      filledByPolish(), cleanCell(data.representativeName, limits.representative), cleanCell(data.groupCode, limits.group), locationPolish(),
+      data.firstName, data.lastName, data.phone, polishOption('messenger', data.messenger), level === 'minimal' ? '' : data.email,
       data.citizenship, data.country, data.city, data.age, polishOption('yesNo', data.inPoland),
-      polishOption('documents', data.documents), polishOption('jobs', data.job), cleanCell(data.experience, 220),
+      polishOption('documents', data.documents), polishOption('jobs', data.job), cleanCell(data.experience, limits.experience),
       polishOption('starts', data.start), polishOption('shifts', data.shift), polishOption('yesNo', data.housing),
-      polishOption('sources', data.source), cleanCell(data.sourceDetails, 160), route.source || '', route.campaign || '',
-      route.vacancy || '', cleanCell(data.comment, 180), 'NOWY', '', '0', '', '', '', '', ''
+      polishOption('sources', data.source), cleanCell(data.sourceDetails, limits.source), route.source || '', route.campaign || '',
+      route.vacancy || '', cleanCell(data.comment, limits.comment), 'NOWY', '', '0', '', '', '', '', ''
     ].map((value) => cleanCell(value));
+    if (row.length !== CFG.excelColumns.length) throw new Error('Excel row does not match configured columns.');
+    return row;
   }
 
-  function emailRows(compact = false) {
+  function emailRows(level = 'full') {
     const person = recruiter();
     const data = state.data;
-    return [
+    const optionalLimit = level === 'full' ? 180 : level === 'compact' ? 90 : 45;
+    const rows = [
       ['ID zgłoszenia', state.id], ['Data zgłoszenia', formatDate()], ['SLA do', slaDate()],
       ['Rekruter', person?.name || ''], ['Preferowana lokalizacja', locationPolish()],
-      ['Ankietę wypełnia', filledByPolish()],
-      ['Osoba / partner wypełniający', data.representativeName || 'brak'],
-      ['Kod grupy / partnera', data.groupCode || 'brak'],
+      ['Ankietę wypełnia', filledByPolish()]
+    ];
+    if (data.filledBy === 'representative') {
+      rows.push(['Osoba / partner wypełniający', cleanCell(data.representativeName, optionalLimit)]);
+      rows.push(['Kod grupy / partnera', cleanCell(data.groupCode, 45) || 'brak']);
+    }
+    rows.push(
       ['Imię i nazwisko', `${data.firstName} ${data.lastName}`], ['Telefon', data.phone],
-      ['Komunikator', polishOption('messenger', data.messenger)], ['E-mail kandydata', data.email || 'brak'],
+      ['Komunikator', polishOption('messenger', data.messenger)],
       ['Obywatelstwo', data.citizenship], ['Kraj i miasto pobytu', `${data.country}, ${data.city}`], ['Wiek', data.age],
       ['Obecnie w Polsce', polishOption('yesNo', data.inPoland)], ['Dokument pobytowy', polishOption('documents', data.documents)],
-      ['Stanowisko', polishOption('jobs', data.job)], ['Doświadczenie', cleanCell(data.experience, compact ? 120 : 220) || 'brak'],
-      ['Gotowość', polishOption('starts', data.start)], ['Praca zmianowa', polishOption('shifts', data.shift)],
-      ['Zakwaterowanie', polishOption('yesNo', data.housing)], ['Źródło', polishOption('sources', data.source)],
-      ['Kto polecił / szczegóły źródła', cleanCell(data.sourceDetails, compact ? 90 : 160)],
-      ['Źródło linku', route.source || 'brak'], ['Kampania', route.campaign || 'brak'],
-      ['Komentarz', cleanCell(data.comment, compact ? 90 : 180) || 'brak']
-    ];
+      ['Stanowisko', polishOption('jobs', data.job)], ['Gotowość', polishOption('starts', data.start)],
+      ['Praca zmianowa', polishOption('shifts', data.shift)], ['Zakwaterowanie', polishOption('yesNo', data.housing)],
+      ['Źródło', polishOption('sources', data.source)], ['Kto polecił / dokładne źródło', cleanCell(data.sourceDetails, optionalLimit)]
+    );
+    if (level === 'full') {
+      rows.push(['E-mail kandydata', data.email || 'brak']);
+      rows.push(['Doświadczenie', cleanCell(data.experience, 180) || 'brak']);
+      rows.push(['Komentarz', cleanCell(data.comment, 160) || 'brak']);
+    }
+    return rows;
   }
 
-  function buildEmailBody(compact = false) {
-    const table = emailRows(compact)
+  function buildEmailBody(level = 'full') {
+    const table = emailRows(level)
       .map(([label, value]) => `${cleanCell(label)}\t${cleanCell(value)}`)
       .join('\n');
-    const values = excelValues().join('\t');
+    const values = excelValues(level).join('\t');
     return [
       'CITRONEX / PPO SIECHNICE — NOWE ZGŁOSZENIE KANDYDATA',
       '',
@@ -750,21 +807,21 @@
     return `[NOWY KANDYDAT][${selectedLocation()?.name || 'LOKALIZACJA'}]${partnerTag} ${cleanCell(data.firstName, 40)} ${cleanCell(data.lastName, 50)} | ${cleanCell(data.citizenship, 45)} | ${recruiter()?.name || ''}`.slice(0, 220);
   }
 
-  function buildMailto() {
+  function mailtoFor(level) {
     const person = recruiter();
-    const subject = encodeURIComponent(emailSubject());
-    let body = buildEmailBody(false);
-    let url = `mailto:${person?.email || ''}?subject=${subject}&body=${encodeURIComponent(body)}`;
-    if (url.length > CFG.maxMailtoLength) {
-      body = buildEmailBody(true);
-      url = `mailto:${person?.email || ''}?subject=${subject}&body=${encodeURIComponent(body)}`;
+    return `mailto:${person?.email || ''}?subject=${encodeURIComponent(emailSubject())}&body=${encodeURIComponent(buildEmailBody(level))}`;
+  }
+
+  function buildMailto() {
+    for (const level of ['full', 'compact', 'minimal']) {
+      const url = mailtoFor(level);
+      if (url.length <= CFG.maxMailtoLength || level === 'minimal') return url;
     }
-    return url;
+    return mailtoFor('minimal');
   }
 
   function openEmail() {
-    const person = recruiter();
-    if (!person) { view = 'recruiter'; render(); return; }
+    if (!recruiter()) { view = 'recruiter'; render(); return; }
     const result = document.getElementById('result');
     result.textContent = x('emailOpened');
     result.classList.remove('hidden');
@@ -772,11 +829,31 @@
     window.location.href = buildMailto();
   }
 
+  function nextCandidateInGroup() {
+    const previous = state;
+    const next = createState();
+    next.language = previous.language;
+    next.recruiterId = previous.recruiterId;
+    next.data.filledBy = 'representative';
+    next.data.representativeName = previous.data.representativeName;
+    next.data.groupCode = previous.data.groupCode;
+    next.data.location = previous.data.location;
+    next.data.job = previous.data.job;
+    next.data.source = previous.data.source;
+    next.data.sourceDetails = previous.data.sourceDetails;
+    state = next;
+    errors = {};
+    view = 'form';
+    clearDraft();
+    saveDraft();
+    render();
+  }
+
   function startNew() {
     clearDraft();
     state = createState();
-    view = 'language';
     errors = {};
+    view = state.language && state.recruiterId ? 'form' : state.language ? 'recruiter' : 'language';
     render();
   }
 
