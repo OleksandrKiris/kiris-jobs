@@ -1,4 +1,4 @@
-const CACHE = 'citronex-recruitment-v14.0.1';
+const CACHE = 'citronex-recruitment-v14.0.2';
 const CORE = [
   './', './index.html', './offline-redirect.js',
   './offline.html', './offline-v12.css',

@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '12.0.0';
+  const VERSION = '14.0.2';
   const te = new TextEncoder();
   const td = new TextDecoder();
   const RECRUITERS = Object.freeze([
@@ -247,16 +247,7 @@
     const row=candidateRow(updated,preparedDocs);row[row.length-1]=dossier.name;updated.excelLine=row.map((value)=>String(value??'').replace(/[\t\r\n]+/g,' ')).join('\t');const interviewRows=[['ROZMOWA WIDEO - DANE DO UZUPELNIENIA',''],['ApplicationID',updated.applicationId],['CandidateKey',updated.candidateKey],['Kandydat',`${updated.firstName||''} ${updated.lastName||''}`.trim()],['Rekruter',recruiterFor(updated.recruiterId).name],['Data rozmowy',''],['Status','VIDEO_SCHEDULED'],['Tozsamosc potwierdzona',''],['Dokumenty zweryfikowane',''],['Gotowosc do pracy',''],['Potwierdzona lokalizacja',''],['Potwierdzona oferta',''],['Poziom jezyka polskiego',''],['Pozostale jezyki',''],['Motywacja 1-5',''],['Zakwaterowanie',''],['Ryzyka / przeciwwskazania',''],['Nastepny kontakt',''],['Decyzja / powod',''],['Notatka rekrutera','']];const xlsx=await buildXlsx([{name:'Candidates',rows:[COLUMNS.map(([,label])=>label),row]},{name:'Interview',rows:interviewRows},{name:'Documents',rows:[['ApplicationID','Kategoria','Nazwa','Rozmiar'],...preparedDocs.map((doc)=>[updated.applicationId,categoryLabel(doc.category),doc.name,doc.file.size])]},{name:'Calls',rows:[['ApplicationID','Status','Data rozmowy','Następny kontakt','Notatka'],[updated.applicationId,updated.status||'NEW',updated.interviewDate||'',updated.nextContact||'',updated.recruiterNotes||'']]}],`${base}_ROW_v${updated.version}.xlsx`);
     const tsv=new File([`\uFEFF${COLUMNS.map(([,label])=>label).join('\t')}\r\n${row.map((value)=>String(value??'').replace(/[\t\r\n]+/g,' ')).join('\t')}\r\n`],`${base}_ROW_v${updated.version}.tsv`,{type:'text/tab-separated-values;charset=utf-8'});
     const manifestData={schema:'citronex-candidate-package',schemaVersion:1,appVersion:VERSION,exportedAt:stamp(),candidate:updated,documents:preparedDocs.map((doc)=>({category:doc.category,label:categoryLabel(doc.category),name:doc.name,originalName:doc.file.name,size:doc.file.size,type:doc.file.type,note:doc.note||''}))};
-    const manifest=new File([JSON.stringify(manifestData,null,2)],'manifest.json',{type:'application/json'});const recruiter=recruiterFor(updated.recruiterId);const message=`KANDYDAT: ${updated.firstName} ${updated.lastName}
-Data urodzenia: ${updated.birthDate}
-Telefon: ${updated.phone}
-ID: ${updated.applicationId}
-
-PDF zawiera CV, ankietę i dokumenty.
-
---- WIERSZ DO EXCEL: SKOPIUJ CAŁĄ LINIĘ ---
-${updated.excelLine}
---- KONIEC WIERSZA ---`;
+    const manifest=new File([JSON.stringify(manifestData,null,2)],'manifest.json',{type:'application/json'});const recruiter=recruiterFor(updated.recruiterId);const message=[`KANDYDAT: ${updated.firstName} ${updated.lastName}`,`DATA URODZENIA: ${updated.birthDate}`,`TELEFON: ${updated.phone}`,`ID: ${updated.applicationId}`,`REKRUTER: ${recruiter.name} (${recruiter.email})`,'','PDF: CV, ankieta i dokumenty kandydata.','','WIERSZ DO EXCEL (skopiuj całą poniższą linię):',updated.excelLine].join('\r\n');
     const messageFile=new File([message],`${base}_MESSAGE.txt`,{type:'text/plain;charset=utf-8'});
     return {data:updated,base,manifest,dossier,xlsx,tsv,message,messageFile,documents:preparedDocs,shareFiles:[dossier]};
   }

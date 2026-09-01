@@ -89,9 +89,7 @@ function successStep(){
   function renderPreviews(){app.querySelectorAll('[data-preview]').forEach((node)=>{const doc=state.documents[Number(node.dataset.preview)];if(!doc?.file.type.startsWith('image/'))return;const url=URL.createObjectURL(doc.file),img=new Image();img.alt='';img.onload=()=>URL.revokeObjectURL(url);img.onerror=()=>URL.revokeObjectURL(url);img.src=url;node.replaceChildren(img);});}
   async function generate(){processing=true;render();state.candidateKey=state.candidateKey||await O.candidateKey(state);result=await O.buildPackage(state,state.documents);state={...state,...result.data,step:8};await O.saveReceipt(state.candidateKey,{applicationId:state.applicationId,createdAt:state.createdAt,recruiterId:state.recruiterId});processing=false;render();}
 async function successAction(action){
-    if(action==='email'){
-      if(result.dossier)O.download(result.dossier);try{await navigator.clipboard.writeText(result.message);}catch{}setTimeout(()=>{location.href=O.mailto(result);},250);
-    }else if(action==='share'){
+    if(action==='email'){       const href=O.mailto(result);try{navigator.clipboard?.writeText(result.message).catch(()=>{});}catch{}location.href=href;     }else if(action==='share'){
       try{await O.sharePackage(result);}catch(error){if(error?.name==='AbortError')return;}
     }else if(action==='dossier')O.download(result.dossier);else if(action==='excel')O.download(result.xlsx);else if(action==='new'){await O.deleteDraft('candidate-current');state=defaultState();result=null;duplicateReceipt=null;await persist();render();}
   }
