@@ -147,9 +147,11 @@ html.ui-v11{background:var(--v11-page)}
 .ui-v11 .delivery-files-heading{margin-bottom:11px}
 .ui-v11 .delivery-files-heading strong{font-size:15px}
 .ui-v11 .delivery-file-picker{
-  min-height:108px;padding:16px;border-radius:20px;border-color:#8fc5aa;background:linear-gradient(145deg,#fff,#f6fbf8)
+  min-height:112px;padding:14px;border-radius:20px;border-color:#8fc5aa;background:linear-gradient(145deg,#fff,#f6fbf8)
 }
+.ui-v11 .delivery-camera-picker{border-style:solid;background:linear-gradient(145deg,#e7f7ef,#fff)}
 .ui-v11 .delivery-picker-icon{width:50px;height:50px;border-radius:17px;background:#dff3e8;font-size:27px}
+.ui-v11 .delivery-camera-picker .delivery-picker-icon{font-size:12px;font-weight:950;letter-spacing:.04em}
 .ui-v11 .delivery-file-picker strong{font-size:15px}
 .ui-v11 .delivery-file-picker small{font-size:10px}
 .ui-v11 .delivery-file-item{border-radius:15px}

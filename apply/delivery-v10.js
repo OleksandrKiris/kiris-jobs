@@ -8,10 +8,29 @@
   if (!CFG || !I18N || !app) return;
 
   const deliveryConfig = CFG.delivery || {};
-  const MAX_FILES = Number(deliveryConfig.maxFiles) || 8;
-  const MAX_FILE_BYTES = Number(deliveryConfig.maxFileBytes) || 8 * 1024 * 1024;
-  const MAX_TOTAL_BYTES = Number(deliveryConfig.maxTotalFileBytes) || 20 * 1024 * 1024;
+  const MAX_FILES = Number(deliveryConfig.maxFiles) || 30;
+  const MAX_FILE_BYTES = Number(deliveryConfig.maxFileBytes) || 12 * 1024 * 1024;
+  const MAX_TOTAL_BYTES = Number(deliveryConfig.maxTotalFileBytes) || 80 * 1024 * 1024;
   const ALLOWED_EXTENSIONS = new Set(deliveryConfig.allowedExtensions || ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'doc', 'docx']);
+  const ALLOWED_MIME_TYPES = new Set([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ]);
+  const DOCUMENT_CATEGORIES = Object.freeze([
+    ['passport-main', 'categoryPassportMain'],
+    ['passport-pages', 'categoryPassportPages'],
+    ['identity-card', 'categoryIdentityCard'],
+    ['visa', 'categoryVisa'],
+    ['residence-front', 'categoryResidenceFront'],
+    ['residence-back', 'categoryResidenceBack'],
+    ['driver-license', 'categoryDriverLicense'],
+    ['cv', 'categoryCv'],
+    ['other', 'categoryOther']
+  ]);
+  const MAX_IMAGE_EDGE = 2200;
+  const IMAGE_QUALITY = 0.84;
+  const MIN_READABLE_EDGE = 900;
   const routeUrl = new URL(window.location.href);
   const route = Object.freeze({
     source: cleanRoute(routeUrl.searchParams.get(CFG.queryParams.source)),
@@ -20,6 +39,8 @@
   });
 
   let selectedFiles = [];
+  let fileCategories = [];
+  let fileNotes = [];
   let activeApplicationId = '';
   let scheduled = false;
 
@@ -34,6 +55,17 @@
 
   function interpolate(value, replacements) {
     return Object.entries(replacements).reduce((result, [key, replacement]) => result.replaceAll(`{${key}}`, String(replacement)), String(value));
+  }
+
+  function categoryLabel(category) {
+    const entry = DOCUMENT_CATEGORIES.find(([value]) => value === category) || DOCUMENT_CATEGORIES.at(-1);
+    return text(entry[1]);
+  }
+
+  function categoryOptions(selected = 'passport-main') {
+    return DOCUMENT_CATEGORIES.map(([value, labelKey]) =>
+      `<option value="${value}"${value === selected ? ' selected' : ''}>${escapeHtml(text(labelKey))}</option>`
+    ).join('');
   }
 
   function cleanRoute(value) {
@@ -63,7 +95,11 @@
     try {
       const state = JSON.parse(localStorage.getItem(CFG.storageKey));
       if (!state?.id || !state?.data) return null;
-      if (activeApplicationId && activeApplicationId !== state.id) selectedFiles = [];
+      if (activeApplicationId && activeApplicationId !== state.id) {
+        selectedFiles = [];
+        fileCategories = [];
+        fileNotes = [];
+      }
       activeApplicationId = state.id;
       return state;
     } catch {
@@ -99,7 +135,25 @@
   }
 
   function fileNames(limit = 400) {
-    return cleanCell(selectedFiles.map((file) => file.name).join('; '), limit);
+    return cleanCell(selectedFiles.map((file, index) => `${categoryLabel(fileCategories[index])}: ${file.name}`).join('; '), limit);
+  }
+
+  function safeFilePart(value, fallback) {
+    const cleaned = String(value || '').trim().normalize('NFKD')
+      .replace(/[^\p{L}\p{N}]+/gu, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 50);
+    return cleaned || fallback;
+  }
+
+  function filesForSharing(state) {
+    const candidate = `${safeFilePart(state?.data?.lastName, 'Candidate')}_${safeFilePart(state?.data?.firstName, '')}`.replace(/_+$/g, '');
+    return selectedFiles.map((file, index) => {
+      const extension = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : 'bin';
+      const category = safeFilePart(fileCategories[index], 'document');
+      const name = `${candidate}_${safeFilePart(state?.id, 'application')}_${category}_${String(index + 1).padStart(2, '0')}.${extension}`;
+      return new File([file], name, { type: file.type, lastModified: file.lastModified });
+    });
   }
 
   function warsawParts(date = new Date()) {
@@ -304,7 +358,7 @@
     }
 
     const generated = createGeneratedFiles(state);
-    const allFiles = [...generated, ...selectedFiles];
+    const allFiles = [...generated, ...filesForSharing(state)];
     const baseData = { title: subject(state), text: `${text('recipientLine')}: ${person.name} · ${person.email} · ${person.phone}\n\n${compactMessage(state)}` };
     try {
       if (navigator.canShare?.({ files: allFiles })) {
@@ -365,21 +419,76 @@
 
   function validateFile(file) {
     const extension = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
-    if (!ALLOWED_EXTENSIONS.has(extension)) return `${text('unsupported')} ${file.name}`;
+    const supportedMime = String(file.type || '').startsWith('image/') || ALLOWED_MIME_TYPES.has(file.type);
+    if (!ALLOWED_EXTENSIONS.has(extension) && !supportedMime) return `${text('unsupported')} ${file.name}`;
     if (file.size > MAX_FILE_BYTES) return `${text('tooLarge')} ${file.name}`;
     return '';
   }
 
-  function addFiles(files, panel) {
+  function isImageFile(file) {
+    return String(file.type || '').startsWith('image/') || /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
+  }
+
+  async function optimizeImageFile(file) {
+    if (!/^image\/(jpeg|png|webp)$/i.test(file.type) || !window.createImageBitmap) {
+      return { file, note: '' };
+    }
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      const largestEdge = Math.max(bitmap.width, bitmap.height);
+      const smallestEdge = Math.min(bitmap.width, bitmap.height);
+      const scale = Math.min(1, MAX_IMAGE_EDGE / largestEdge);
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const qualityWarning = smallestEdge < MIN_READABLE_EDGE ? text('lowResolution') : '';
+
+      if (scale === 1 && file.size <= 2.5 * 1024 * 1024) {
+        bitmap.close();
+        return { file, note: qualityWarning };
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d', { alpha: false });
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, width, height);
+      context.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close();
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', IMAGE_QUALITY));
+      if (!blob || blob.size >= file.size) return { file, note: qualityWarning };
+
+      const baseName = file.name.replace(/\.[^.]+$/, '') || 'document-photo';
+      const optimized = new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: file.lastModified });
+      const optimizedNote = interpolate(text('optimizedPhoto'), { before: formatBytes(file.size), after: formatBytes(optimized.size) });
+      return { file: optimized, note: [optimizedNote, qualityWarning].filter(Boolean).join(' ') };
+    } catch {
+      return { file, note: '' };
+    }
+  }
+
+  async function addFiles(files, panel) {
     const errors = [];
-    for (const file of files) {
+    const defaultCategory = panel.querySelector('[data-delivery-default-category]')?.value || 'passport-main';
+    const inputs = panel.querySelectorAll('[data-delivery-file-input]');
+    inputs.forEach((input) => { input.disabled = true; });
+    renderFileList(panel, text('optimizingPhotos'));
+
+    for (const sourceFile of files) {
       if (selectedFiles.length >= MAX_FILES) { errors.push(text('tooMany')); break; }
+      const unsupported = validateFile(sourceFile).startsWith(text('unsupported'));
+      if (unsupported) { errors.push(`${text('unsupported')} ${sourceFile.name}`); continue; }
+      const optimized = await optimizeImageFile(sourceFile);
+      const file = optimized.file;
       const validation = validateFile(file);
       if (validation) { errors.push(validation); continue; }
       if (selectedFiles.some((item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified)) continue;
       if (totalBytes() + file.size > MAX_TOTAL_BYTES) { errors.push(text('totalTooLarge')); continue; }
       selectedFiles.push(file);
+      fileCategories.push(defaultCategory);
+      fileNotes.push(optimized.note);
     }
+    inputs.forEach((input) => { input.disabled = false; });
     renderFileList(panel, errors.join(' '));
   }
 
@@ -394,15 +503,37 @@
     list.innerHTML = selectedFiles.length
       ? selectedFiles.map((file, index) => `
           <div class="delivery-file-item">
-            <span class="delivery-file-icon" aria-hidden="true">${/\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name) ? '▧' : /\.pdf$/i.test(file.name) ? 'PDF' : 'DOC'}</span>
-            <span><strong>${escapeHtml(file.name)}</strong><small>${formatBytes(file.size)}</small></span>
+            <span class="delivery-file-icon delivery-file-preview" data-delivery-file-preview="${index}" aria-hidden="true">${isImageFile(file) ? 'IMG' : /\.pdf$/i.test(file.name) ? 'PDF' : 'DOC'}</span>
+            <span class="delivery-file-meta"><strong>${escapeHtml(file.name)}</strong><small>${formatBytes(file.size)}</small>${fileNotes[index] ? `<em>${escapeHtml(fileNotes[index])}</em>` : ''}</span>
             <button type="button" data-remove-delivery-file="${index}">${escapeHtml(text('remove'))}</button>
+            <label class="delivery-file-category"><span>${escapeHtml(text('documentType'))}</span><select data-delivery-file-category="${index}">${categoryOptions(fileCategories[index])}</select></label>
           </div>`).join('')
       : `<div class="delivery-empty-files">${escapeHtml(text('noFiles'))}</div>`;
 
+    list.querySelectorAll('[data-delivery-file-preview]').forEach((preview) => {
+      const file = selectedFiles[Number(preview.dataset.deliveryFilePreview)];
+      if (!file || !isImageFile(file)) return;
+      const previewUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.alt = '';
+      image.onload = () => URL.revokeObjectURL(previewUrl);
+      image.onerror = () => {
+        URL.revokeObjectURL(previewUrl);
+        image.remove();
+      };
+      image.src = previewUrl;
+      preview.replaceChildren(image);
+    });
+
     list.querySelectorAll('[data-remove-delivery-file]').forEach((button) => button.addEventListener('click', () => {
-      selectedFiles.splice(Number(button.dataset.removeDeliveryFile), 1);
+      const index = Number(button.dataset.removeDeliveryFile);
+      selectedFiles.splice(index, 1);
+      fileCategories.splice(index, 1);
+      fileNotes.splice(index, 1);
       renderFileList(panel);
+    }));
+    list.querySelectorAll('[data-delivery-file-category]').forEach((select) => select.addEventListener('change', () => {
+      fileCategories[Number(select.dataset.deliveryFileCategory)] = select.value;
     }));
   }
 
@@ -416,19 +547,33 @@
         <span aria-hidden="true">▣</span>
         <span><strong>${escapeHtml(text('documentsTitle'))}</strong><small>${escapeHtml(text('documentsText'))}</small></span>
       </div>
-      <label class="delivery-file-picker">
-        <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.doc,.docx" data-delivery-file-input>
-        <span class="delivery-picker-icon" aria-hidden="true">＋</span>
-        <span><strong>${escapeHtml(text('chooseFiles'))}</strong><small>${escapeHtml(interpolate(text('fileRules'), { maxFiles: MAX_FILES, maxEach: Math.round(MAX_FILE_BYTES / 1024 / 1024), maxTotal: Math.round(MAX_TOTAL_BYTES / 1024 / 1024) }))}</small></span>
+      <label class="delivery-default-category">
+        <span>${escapeHtml(text('chooseDocumentType'))}</span>
+        <select data-delivery-default-category>${categoryOptions()}</select>
       </label>
+      <div class="delivery-file-actions">
+        <label class="delivery-file-picker delivery-camera-picker">
+          <input type="file" multiple accept="image/*" capture="environment" data-delivery-file-input>
+          <span class="delivery-picker-icon" aria-hidden="true">CAM</span>
+          <span><strong>${escapeHtml(text('takePhoto'))}</strong><small>${escapeHtml(text('takePhotoHint'))}</small></span>
+        </label>
+        <label class="delivery-file-picker delivery-gallery-picker">
+          <input type="file" multiple accept="image/*,.pdf,.doc,.docx" data-delivery-file-input>
+          <span class="delivery-picker-icon" aria-hidden="true">＋</span>
+          <span><strong>${escapeHtml(text('chooseFiles'))}</strong><small>${escapeHtml(text('chooseFilesHint'))}</small></span>
+        </label>
+      </div>
+      <p class="delivery-photo-tip">${escapeHtml(text('photoTip'))}</p>
+      <p class="delivery-file-rules">${escapeHtml(interpolate(text('fileRules'), { maxFiles: MAX_FILES, maxEach: Math.round(MAX_FILE_BYTES / 1024 / 1024), maxTotal: Math.round(MAX_TOTAL_BYTES / 1024 / 1024) }))}</p>
       <div class="delivery-selected-heading"><strong>${escapeHtml(text('selectedFiles'))}</strong><span data-delivery-file-count></span></div>
       <div data-delivery-file-list></div>
       <div class="delivery-file-error" data-delivery-file-error role="alert"></div>`;
     sourcePanel.insertAdjacentElement('afterend', panel);
-    panel.querySelector('[data-delivery-file-input]').addEventListener('change', (event) => {
-      addFiles([...event.target.files], panel);
+    panel.querySelectorAll('[data-delivery-file-input]').forEach((input) => input.addEventListener('change', async (event) => {
+      const files = [...event.target.files];
       event.target.value = '';
-    });
+      await addFiles(files, panel);
+    }));
     renderFileList(panel);
   }
 
@@ -454,7 +599,7 @@
 
   function documentsReviewSection() {
     const files = selectedFiles.length
-      ? selectedFiles.map((file) => `<li><strong>${escapeHtml(file.name)}</strong><span>${formatBytes(file.size)}</span></li>`).join('')
+      ? selectedFiles.map((file, index) => `<li><strong>${escapeHtml(categoryLabel(fileCategories[index]))}<small>${escapeHtml(file.name)}</small></strong><span>${formatBytes(file.size)}</span></li>`).join('')
       : `<li class="delivery-no-review-files">${escapeHtml(text('noFiles'))}</li>`;
     return `
       <section class="review-section delivery-document-review">

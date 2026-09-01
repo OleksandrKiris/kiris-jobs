@@ -27,9 +27,9 @@
       Object.freeze({ id: 'any', name: 'Dowolna lokalizacja', subtitle: 'Rekruter dobierze ofertę', address: 'do ustalenia' })
     ]),
     delivery: Object.freeze({
-      maxFiles: 8,
-      maxFileBytes: 8 * 1024 * 1024,
-      maxTotalFileBytes: 20 * 1024 * 1024,
+      maxFiles: 30,
+      maxFileBytes: 12 * 1024 * 1024,
+      maxTotalFileBytes: 80 * 1024 * 1024,
       allowedExtensions: Object.freeze(['pdf', 'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'doc', 'docx'])
     }),
     queryParams: Object.freeze({
