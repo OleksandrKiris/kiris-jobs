@@ -38,6 +38,11 @@ jobs:
           test -s apply/mobile-v8.css
           test -s apply/ui-v9.css
           test -s apply/ui-v9.js
+          test -s apply/ui-v11.css
+          test -s apply/ui-v11.js
+          test -s apply/delivery-v10.css
+          test -s apply/delivery-v10-i18n.js
+          test -s apply/delivery-v10.js
           test -s apply/config.js
           test -s apply/i18n-extra.js
           test -s apply/i18n-mobile.js
@@ -45,7 +50,11 @@ jobs:
           grep -q 'styles.css?v=8.3.0' apply/index.html
           grep -q 'mobile-v8.css?v=8.3.0' apply/index.html
           grep -q 'ui-v9.css?v=9.0.0' apply/index.html
+          grep -q 'delivery-v10.css?v=10.0.0' apply/index.html
+          grep -q 'ui-v11.css?v=11.0.0' apply/index.html
           grep -q 'ui-v9.js?v=9.0.0' apply/index.html
+          grep -q 'delivery-v10.js?v=10.0.0' apply/index.html
+          grep -q 'ui-v11.js?v=11.0.0' apply/index.html
           grep -q 'i18n-mobile.js?v=8.3.0' apply/index.html
           grep -q 'app-mobile.js?v=8.3.0' apply/index.html
           grep -q 'citronex-logo.jpg' apply/index.html
@@ -61,6 +70,11 @@ jobs:
           grep -q 'TAP_FIELDS' apply/ui-v9.js
           grep -q 'ui-tap-options' apply/ui-v9.css
           grep -q 'ui-step-heading' apply/ui-v9.css
+          grep -q 'shareApplication' apply/delivery-v10.js
+          grep -q 'delivery-share-primary' apply/delivery-v10.css
+          grep -q 'PRIORITY_LANGUAGES' apply/ui-v11.js
+          grep -q 'makeReviewAccordions' apply/ui-v11.js
+          grep -q 'ui-file-count-badge' apply/ui-v11.css
           ! grep -q 'enhancements-v8.js' apply/index.html
 
   deploy:
