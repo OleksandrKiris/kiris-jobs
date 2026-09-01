@@ -119,8 +119,8 @@
       badge.className = 'ui-file-count-badge';
       textColumn.appendChild(badge);
     }
-    const countText = app.querySelector('[data-delivery-file-count]')?.textContent?.trim();
-    badge.textContent = countText || '0';
+    const nextText = app.querySelector('[data-delivery-file-count]')?.textContent?.trim() || '0';
+    if (badge.textContent !== nextText) badge.textContent = nextText;
   }
 
   function enhance() {
