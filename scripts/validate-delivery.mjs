@@ -46,9 +46,9 @@ if (config.delivery?.maxTotalFileBytes !== 80 * 1024 * 1024) fail('maxTotalFileB
 if (!Array.isArray(config.excelColumns) || config.excelColumns.length !== 40) fail('Excel queue must keep 40 columns.');
 
 for (const marker of [
-  'delivery-v10.css?v=10.0.0',
-  'delivery-v10-i18n.js?v=10.0.0',
-  'delivery-v10.js?v=10.0.0'
+  'delivery-v10.css?v=10.2.0',
+  'delivery-v10-i18n.js?v=10.2.0',
+  'delivery-v10.js?v=10.2.0'
 ]) requireMarker(index, marker, 'apply/index.html');
 
 for (const marker of [
