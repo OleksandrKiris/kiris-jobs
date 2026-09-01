@@ -40,7 +40,7 @@ for (const recruiter of config.recruiters) {
   }
 }
 
-if (config.delivery?.maxFiles !== 8) fail('maxFiles must be 8.');
+if (config.delivery?.maxFiles !== 30) fail('maxFiles must be 30.');
 if (config.delivery?.maxFileBytes !== 8 * 1024 * 1024) fail('maxFileBytes must be 8 MB.');
 if (config.delivery?.maxTotalFileBytes !== 20 * 1024 * 1024) fail('maxTotalFileBytes must be 20 MB.');
 if (!Array.isArray(config.excelColumns) || config.excelColumns.length !== 40) fail('Excel queue must keep 40 columns.');
