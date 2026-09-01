@@ -1,305 +1,38 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="pl" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b6b4f">
-  <meta name="description" content="Multilingual candidate application for PPO Siechnice with recruiter routing and secure local document preparation">
-  <meta name="robots" content="index,follow">
-  <title>Rekrutacja PPO Siechnice — formularz kandydata</title>
-  <link rel="stylesheet" href="./styles.css?v=4.0.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#075c39">
+  <meta name="description" content="Publiczny wielojęzyczny formularz rekrutacyjny Citronex / PPO Siechnice">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';">
+  <title>Citronex / PPO Siechnice — Rekrutacja</title>
+  <link rel="icon" href="../assets/icon-192.png">
+  <link rel="stylesheet" href="assets/styles.css?v=6.0.0">
+  <script defer src="config.js?v=6.0.0"></script>
+  <script defer src="i18n-core.js?v=6.0.0"></script>
+  <script defer src="i18n-caucasus-central.js?v=6.0.0"></script>
+  <script defer src="i18n-asia.js?v=6.0.0"></script>
+  <script defer src="delivery-i18n.js?v=6.0.0"></script>
+  <script defer src="assets/app.js?v=6.0.0"></script>
 </head>
 <body>
-  <main class="app-shell">
-    <header class="brandbar">
-      <a class="brand-name" href="../" aria-label="Citronex / PPO Siechnice"><img class="brand-logo" src="../assets/citronex-logo.jpg" alt="Citronex"><span>Rekrutacja PPO Siechnice</span></a>
-      <span class="version-badge">Kandydat 4.0</span>
-    </header>
+  <noscript><div class="noscript">Ta strona wymaga włączonego JavaScript.</div></noscript>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-block" href="./" aria-label="Citronex / PPO Siechnice — Rekrutacja">
+        <span class="logo-frame"><img src="../assets/citronex-logo.jpg" alt="Citronex" width="138" height="52"></span>
+        <span class="brand-copy"><strong>Citronex / PPO Siechnice</strong><small id="headerSubtitle">Formularz kandydata</small></span>
+      </a>
+      <span class="privacy-badge"><span aria-hidden="true">●</span><span id="privacyBadgeText">Dane pozostają na urządzeniu do czasu wysłania e-maila</span></span>
+    </div>
+  </header>
 
-    <section id="languageScreen" class="card" aria-labelledby="languageTitle">
-      <div class="hero">
-        <div class="hero-icon" aria-hidden="true">🌍</div>
-        <h1 id="languageTitle" tabindex="-1">Choose your language</h1>
-        <p id="languageSubtitle">The whole application will be displayed in the selected language.</p>
-      </div>
-      <div class="trust-grid" aria-label="Form information">
-        <div id="trustPrivate" class="trust-item">🔒 Files stay on your device</div>
-        <div id="trustMobile" class="trust-item">📱 Works on a phone</div>
-        <div id="trustControl" class="trust-item">📨 You confirm sending</div>
-      </div>
-      <label class="visually-hidden" for="languageSearch">Search language</label>
-      <input id="languageSearch" class="search-input" type="search" autocomplete="off" placeholder="Search language…">
-      <div id="languageGrid" class="language-grid"></div>
-    </section>
+  <main id="app" class="app-shell" aria-live="polite"></main>
 
-    <section id="recruiterScreen" class="card hidden" aria-labelledby="recruiterTitle">
-      <button id="recruiterBackLanguage" class="link-button" type="button">← Change language</button>
-      <div class="hero compact-hero">
-        <div class="hero-icon" aria-hidden="true">👤</div>
-        <h1 id="recruiterTitle" tabindex="-1">Choose your recruiter</h1>
-        <p id="recruiterSubtitle">Select the person who sent you this link.</p>
-      </div>
-      <div id="recruiterRequired" class="selection-note"></div>
-      <div id="recruiterGrid" class="recruiter-grid"></div>
-    </section>
-
-    <section id="formScreen" class="card hidden" aria-labelledby="formStepTitle">
-      <div class="topline">
-        <div class="topline-group">
-          <span id="applicationIdChip" class="chip ltr-value"></span>
-          <span id="recruiterChip" class="chip"></span>
-        </div>
-        <div class="topline-group">
-          <button id="changeLanguage" class="link-button" type="button">🌍 Language</button>
-          <button id="changeRecruiter" class="link-button" type="button">👤 Recruiter</button>
-        </div>
-      </div>
-
-      <div class="progress" aria-label="Application progress">
-        <span id="progress1"></span><span id="progress2"></span><span id="progress3"></span><span id="progress4"></span><span id="progress5"></span>
-      </div>
-
-      <h2 id="formStepTitle" class="form-step-title" tabindex="-1"></h2>
-      <p id="formStepSubtitle" class="form-step-subtitle"></p>
-
-      <form id="candidateForm" novalidate>
-        <div id="step1">
-          <div class="two-columns">
-            <div class="field">
-              <label for="firstName" data-label="firstName"></label>
-              <input id="firstName" type="text" autocomplete="given-name" maxlength="100">
-              <div class="field-error" data-error="firstName" aria-live="polite"></div>
-            </div>
-            <div class="field">
-              <label for="lastName" data-label="lastName"></label>
-              <input id="lastName" type="text" autocomplete="family-name" maxlength="100">
-              <div class="field-error" data-error="lastName" aria-live="polite"></div>
-            </div>
-          </div>
-          <div class="field">
-            <label for="phone" data-label="phone"></label>
-            <input id="phone" class="ltr-value" type="tel" inputmode="tel" autocomplete="tel" maxlength="32" placeholder="+48… / +380… / +995…">
-            <div id="phoneHint" class="field-hint"></div>
-            <div class="field-error" data-error="phone" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="messenger" data-label="messenger"></label>
-            <select id="messenger"></select>
-            <div class="field-error" data-error="messenger" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="email" data-label-optional="email"></label>
-            <input id="email" class="ltr-value" type="email" autocomplete="email" maxlength="160">
-            <div class="field-error" data-error="email" aria-live="polite"></div>
-          </div>
-        </div>
-
-        <div id="step2" class="hidden">
-          <div class="field">
-            <label for="citizenship" data-label="citizenship"></label>
-            <input id="citizenship" type="text" autocomplete="country-name" maxlength="100">
-            <div class="field-error" data-error="citizenship" aria-live="polite"></div>
-          </div>
-          <div class="two-columns">
-            <div class="field">
-              <label for="country" data-label="country"></label>
-              <input id="country" type="text" maxlength="100">
-              <div class="field-error" data-error="country" aria-live="polite"></div>
-            </div>
-            <div class="field">
-              <label for="city" data-label="city"></label>
-              <input id="city" type="text" maxlength="100">
-              <div class="field-error" data-error="city" aria-live="polite"></div>
-            </div>
-          </div>
-          <div class="field">
-            <label for="age" data-label="age"></label>
-            <input id="age" class="ltr-value" type="number" inputmode="numeric" min="18" max="75">
-            <div class="field-error" data-error="age" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="inPoland" data-label="inPoland"></label>
-            <select id="inPoland"></select>
-            <div class="field-error" data-error="inPoland" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="documents" data-label="documents"></label>
-            <select id="documents"></select>
-            <div class="field-error" data-error="documents" aria-live="polite"></div>
-          </div>
-        </div>
-
-        <div id="step3" class="hidden">
-          <div class="field">
-            <label for="job" data-label="job"></label>
-            <select id="job"></select>
-            <div class="field-error" data-error="job" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="experience" data-label-optional="experience"></label>
-            <textarea id="experience" maxlength="900"></textarea>
-            <div id="experienceHint" class="field-hint"></div>
-          </div>
-          <div class="field">
-            <label for="start" data-label="start"></label>
-            <select id="start"></select>
-            <div class="field-error" data-error="start" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="shift" data-label="shift"></label>
-            <select id="shift"></select>
-            <div class="field-error" data-error="shift" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="housing" data-label="housing"></label>
-            <select id="housing"></select>
-            <div class="field-error" data-error="housing" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="source" data-label="source"></label>
-            <select id="source"></select>
-            <div class="field-error" data-error="source" aria-live="polite"></div>
-          </div>
-          <div class="field">
-            <label for="comment" data-label-optional="comment"></label>
-            <textarea id="comment" maxlength="900"></textarea>
-          </div>
-        </div>
-
-        <div id="step4" class="hidden">
-          <div class="notice privacy-notice">
-            <strong id="filePrivacyTitle"></strong>
-            <span id="filePrivacyText"></span>
-          </div>
-
-          <fieldset class="document-fieldset">
-            <legend id="documentTypesLabel"></legend>
-            <p id="documentTypesHint" class="field-hint"></p>
-            <div id="documentTypeGrid" class="document-type-grid"></div>
-            <div class="field-error" data-error="documentTypes" aria-live="polite"></div>
-          </fieldset>
-
-          <div class="field upload-field">
-            <label id="fileUploadLabel" for="documentFiles"></label>
-            <input id="documentFiles" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.doc,.docx,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-            <div id="fileUploadHint" class="field-hint"></div>
-            <div id="fileError" class="field-error" aria-live="polite"></div>
-          </div>
-
-          <div id="selectedFilesPanel" class="files-panel hidden">
-            <div class="files-panel-header">
-              <strong id="selectedFilesTitle"></strong>
-              <span id="selectedFilesSize" class="chip"></span>
-            </div>
-            <ul id="selectedFilesList" class="file-list"></ul>
-          </div>
-
-          <div id="filesReloadNotice" class="notice warning"></div>
-
-          <div class="field">
-            <div class="consent-row">
-              <input id="consent" type="checkbox">
-              <label id="consentLabel" for="consent"></label>
-            </div>
-            <div class="field-error" data-error="consent" aria-live="polite"></div>
-          </div>
-          <div id="documentConsentField" class="field hidden">
-            <div class="consent-row">
-              <input id="documentConsent" type="checkbox">
-              <label id="documentConsentLabel" for="documentConsent"></label>
-            </div>
-            <div class="field-error" data-error="documentConsent" aria-live="polite"></div>
-          </div>
-        </div>
-
-        <div class="actions sticky-actions">
-          <button id="backButton" class="button soft" type="button"></button>
-          <button id="nextButton" class="button primary" type="button"></button>
-        </div>
-      </form>
-    </section>
-
-    <section id="reviewScreen" class="card hidden" aria-labelledby="reviewTitle">
-      <div class="review-header">
-        <div>
-          <div class="topline-group">
-            <span id="reviewIdChip" class="chip ltr-value"></span>
-            <span id="reviewLanguageChip" class="chip"></span>
-          </div>
-          <h2 id="reviewTitle" class="screen-title" tabindex="-1"></h2>
-          <p id="reviewSubtitle" class="screen-subtitle"></p>
-        </div>
-        <button id="reviewChangeRecruiter" class="link-button" type="button"></button>
-      </div>
-
-      <div class="recipient-card">
-        <div id="recipientLabel" class="recipient-label"></div>
-        <div id="recipientName" class="recipient-name"></div>
-        <div id="recipientEmail" class="recipient-email ltr-value"></div>
-        <div id="recipientInfo" class="field-hint"></div>
-      </div>
-
-      <dl id="reviewList" class="review-list"></dl>
-
-      <section class="review-documents" aria-labelledby="reviewDocumentsTitle">
-        <h3 id="reviewDocumentsTitle"></h3>
-        <div id="reviewDocumentTypes" class="review-document-types"></div>
-        <ul id="reviewFileList" class="review-file-list"></ul>
-      </section>
-
-      <section class="delivery-section" aria-labelledby="deliveryTitle">
-        <div class="section-heading">
-          <span class="section-icon" aria-hidden="true">📨</span>
-          <div>
-            <h3 id="deliveryTitle"></h3>
-            <p id="deliverySubtitle"></p>
-          </div>
-        </div>
-
-        <article class="delivery-card recommended">
-          <div class="method-badge" id="recommendedBadge"></div>
-          <h4 id="emlTitle"></h4>
-          <p id="emlDescription"></p>
-          <ol id="emlSteps" class="instruction-list"></ol>
-          <button id="prepareEmlButton" class="button primary full-width" type="button"></button>
-        </article>
-
-        <article class="delivery-card">
-          <h4 id="mailtoTitle"></h4>
-          <p id="mailtoDescription"></p>
-          <ol id="mailtoSteps" class="instruction-list"></ol>
-          <button id="mailButton" class="button full-width" type="button"></button>
-        </article>
-
-        <div id="mailNotice" class="notice"></div>
-        <div id="resultMessage" class="notice success hidden" aria-live="polite"></div>
-      </section>
-
-      <div class="actions">
-        <button id="editButton" class="button soft" type="button"></button>
-        <button id="newButton" class="button" type="button"></button>
-      </div>
-    </section>
-
-    <section id="resumeBanner" class="card hidden resume-banner" aria-live="polite">
-      <strong id="resumeText"></strong>
-      <div class="actions">
-        <button id="resumeButton" class="button primary" type="button"></button>
-        <button id="discardButton" class="button" type="button"></button>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <span id="footerPrivacy">This static page does not upload candidate data or selected files to GitHub. Files remain on the device until the candidate sends the email.</span>
-      <a id="footerPrivacyLink" href="https://pposiechnice.pl/?lang=en&page_id=981" target="_blank" rel="noopener noreferrer">Privacy information</a>.
-    </footer>
-  </main>
-
-  <script src="./config.js?v=4.0.0"></script>
-  <script src="./i18n-core.js?v=4.0.0"></script>
-  <script src="./i18n-caucasus-central.js?v=4.0.0"></script>
-  <script src="./i18n-asia.js?v=4.0.0"></script>
-  <script src="./delivery-i18n.js?v=4.0.0"></script>
-  <script src="./app.js?v=4.0.0"></script>
+  <footer class="site-footer">
+    <p><span id="footerText">Ta statyczna strona nie przesyła danych ani plików kandydata do GitHub.</span> · <a id="footerPrivacyLink" href="privacy.html">Informacja o prywatności</a></p>
+  </footer>
 </body>
 </html>
