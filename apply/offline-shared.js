@@ -181,7 +181,7 @@
     cover.y+=18;cover.ctx.fillStyle='#f3c84b';cover.ctx.fillRect(82,cover.y,150,7);cover.y+=48;cover.ctx.font='22px Arial';cover.ctx.fillStyle='#263f33';
     for(const line of [`Data urodzenia: ${data.birthDate||'—'}`,`ApplicationID: ${data.applicationId}`,`CandidateKey: ${data.candidateKey||'—'}`,`Rekruter: ${recruiterFor(data.recruiterId).name}`,`Telefon: ${data.phone||'—'}`,`Dokumenty źródłowe: ${documents.length}`]){cover.ctx.fillText(line,82,cover.y);cover.y+=39;}
     cover.y+=42;cover.ctx.fillStyle='#075436';cover.ctx.font='700 25px Georgia';cover.ctx.fillText('ZAWARTOŚĆ',82,cover.y);cover.y+=48;cover.ctx.fillStyle='#263f33';cover.ctx.font='21px Arial';
-    ['1. CV w języku polskim','2. Formularz kandydata','3. Rejestr dokumentów','4. Czytelne zdjęcia dokumentów','5. Oryginalne pliki wysyłane oddzielnie'].forEach((line)=>{cover.ctx.fillText(line,96,cover.y);cover.y+=37;});
+    ['1. CV w języku polskim','2. Formularz kandydata','3. Czytelne zdjęcia dokumentów'].forEach((line)=>{cover.ctx.fillText(line,96,cover.y);cover.y+=37;});
     await finishPage(cover);
 
     const addSectionGroup=async(groupTitle,sections)=>{
@@ -201,8 +201,8 @@
       const doc=documents[index];const page=newPdfCanvas(pages.length+1,'DOKUMENTY KANDYDATA');const ctx=page.ctx;
       ctx.fillStyle='#173426';ctx.font='700 31px Georgia';ctx.fillText(`${index+1}. ${categoryLabel(doc.category)}`,82,page.y);page.y+=43;ctx.fillStyle='#586c61';ctx.font='18px Arial';ctx.fillText(doc.name,82,page.y);page.y+=38;
       if(doc.file.type.startsWith('image/')&&window.createImageBitmap){
-        try{const bitmap=await createImageBitmap(doc.file,{imageOrientation:'from-image'});const maxW=1076,maxH=1250,scale=Math.min(maxW/bitmap.width,maxH/bitmap.height,1),width=Math.round(bitmap.width*scale),height=Math.round(bitmap.height*scale),x=Math.round((1240-width)/2),y=page.y+10;ctx.fillStyle='#eef2ef';ctx.fillRect(x-8,y-8,width+16,height+16);ctx.drawImage(bitmap,x,y,width,height);bitmap.close();}catch{ctx.fillStyle='#8a3e33';ctx.font='22px Arial';ctx.fillText('Nie udało się osadzić podglądu. Oryginał jest wysyłany oddzielnie.',82,page.y+90);}
-      }else{ctx.fillStyle='#F3F6F4';ctx.fillRect(82,page.y+18,1076,330);ctx.fillStyle='#173426';ctx.font='700 28px Georgia';ctx.fillText('PLIK ŹRÓDŁOWY',122,page.y+105);ctx.font='21px Arial';ctx.fillStyle='#263f33';for(const line of wrap(ctx,`Format ${doc.file.type||'plik'} nie jest konwertowany na obraz. Oryginalny plik ${doc.name} jest wysyłany oddzielnie razem z dossier.`,950)){ctx.fillText(line,122,page.y+165);page.y+=31;}}
+        try{const bitmap=await createImageBitmap(doc.file,{imageOrientation:'from-image'});const maxW=1076,maxH=1250,scale=Math.min(maxW/bitmap.width,maxH/bitmap.height,1),width=Math.round(bitmap.width*scale),height=Math.round(bitmap.height*scale),x=Math.round((1240-width)/2),y=page.y+10;ctx.fillStyle='#eef2ef';ctx.fillRect(x-8,y-8,width+16,height+16);ctx.drawImage(bitmap,x,y,width,height);bitmap.close();}catch{ctx.fillStyle='#8a3e33';ctx.font='22px Arial';ctx.fillText('Nie udało się osadzić zdjęcia dokumentu.',82,page.y+90);}
+      }else{ctx.fillStyle='#F3F6F4';ctx.fillRect(82,page.y+18,1076,330);ctx.fillStyle='#173426';ctx.font='700 28px Georgia';ctx.fillText('PLIK ŹRÓDŁOWY',122,page.y+105);ctx.font='21px Arial';ctx.fillStyle='#263f33';for(const line of wrap(ctx,`Nieobsługiwany format ${doc.file.type||'pliku'}. Dodaj dokument ponownie jako zdjęcie.`,950)){ctx.fillText(line,122,page.y+165);page.y+=31;}}
       await finishPage(page);
     }
     return pdfFromJpegs(pages,fileName);
@@ -247,13 +247,22 @@
     const row=candidateRow(updated,preparedDocs);row[row.length-1]=dossier.name;updated.excelLine=row.map((value)=>String(value??'').replace(/[\t\r\n]+/g,' ')).join('\t');const interviewRows=[['ROZMOWA WIDEO - DANE DO UZUPELNIENIA',''],['ApplicationID',updated.applicationId],['CandidateKey',updated.candidateKey],['Kandydat',`${updated.firstName||''} ${updated.lastName||''}`.trim()],['Rekruter',recruiterFor(updated.recruiterId).name],['Data rozmowy',''],['Status','VIDEO_SCHEDULED'],['Tozsamosc potwierdzona',''],['Dokumenty zweryfikowane',''],['Gotowosc do pracy',''],['Potwierdzona lokalizacja',''],['Potwierdzona oferta',''],['Poziom jezyka polskiego',''],['Pozostale jezyki',''],['Motywacja 1-5',''],['Zakwaterowanie',''],['Ryzyka / przeciwwskazania',''],['Nastepny kontakt',''],['Decyzja / powod',''],['Notatka rekrutera','']];const xlsx=await buildXlsx([{name:'Candidates',rows:[COLUMNS.map(([,label])=>label),row]},{name:'Interview',rows:interviewRows},{name:'Documents',rows:[['ApplicationID','Kategoria','Nazwa','Rozmiar'],...preparedDocs.map((doc)=>[updated.applicationId,categoryLabel(doc.category),doc.name,doc.file.size])]},{name:'Calls',rows:[['ApplicationID','Status','Data rozmowy','Następny kontakt','Notatka'],[updated.applicationId,updated.status||'NEW',updated.interviewDate||'',updated.nextContact||'',updated.recruiterNotes||'']]}],`${base}_ROW_v${updated.version}.xlsx`);
     const tsv=new File([`\uFEFF${COLUMNS.map(([,label])=>label).join('\t')}\r\n${row.map((value)=>String(value??'').replace(/[\t\r\n]+/g,' ')).join('\t')}\r\n`],`${base}_ROW_v${updated.version}.tsv`,{type:'text/tab-separated-values;charset=utf-8'});
     const manifestData={schema:'citronex-candidate-package',schemaVersion:1,appVersion:VERSION,exportedAt:stamp(),candidate:updated,documents:preparedDocs.map((doc)=>({category:doc.category,label:categoryLabel(doc.category),name:doc.name,originalName:doc.file.name,size:doc.file.size,type:doc.file.type,note:doc.note||''}))};
-    const manifest=new File([JSON.stringify(manifestData,null,2)],'manifest.json',{type:'application/json'});const recruiter=recruiterFor(updated.recruiterId);const message=`CITRONEX / PPO — KANDYDAT\nID: ${updated.applicationId}\nKandydat: ${updated.firstName} ${updated.lastName}\nData urodzenia: ${updated.birthDate}\nTelefon: ${updated.phone}\nRekruter: ${recruiter.name}\nDokumenty w PDF: ${preparedDocs.length}\nPDF: ${dossier.name}\n\nWIERSZ DO EXCEL / СТРОКА ДЛЯ EXCEL:\n${updated.excelLine}`;
+    const manifest=new File([JSON.stringify(manifestData,null,2)],'manifest.json',{type:'application/json'});const recruiter=recruiterFor(updated.recruiterId);const message=`KANDYDAT: ${updated.firstName} ${updated.lastName}
+Data urodzenia: ${updated.birthDate}
+Telefon: ${updated.phone}
+ID: ${updated.applicationId}
+
+PDF zawiera CV, ankietę i dokumenty.
+
+--- WIERSZ DO EXCEL: SKOPIUJ CAŁĄ LINIĘ ---
+${updated.excelLine}
+--- KONIEC WIERSZA ---`;
     const messageFile=new File([message],`${base}_MESSAGE.txt`,{type:'text/plain;charset=utf-8'});
     return {data:updated,base,manifest,dossier,xlsx,tsv,message,messageFile,documents:preparedDocs,shareFiles:[dossier]};
   }
 
   function download(file){const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
-  async function sharePackage(result){const files=[result.dossier].filter(Boolean);if(navigator.canShare?.({files})){await navigator.share({title:`Kandydat ${result.data.firstName} ${result.data.lastName}`,text:result.message,files});return true;}if(result.dossier)download(result.dossier);return false;}
+  async function sharePackage(result){const files=[result.dossier].filter(Boolean);let supported=false;try{supported=!!navigator.share&&(!navigator.canShare||navigator.canShare({files}));}catch{}if(supported){await navigator.share({title:`Kandydat ${result.data.firstName} ${result.data.lastName}`,text:result.message,files});return true;}if(result.dossier)download(result.dossier);return false;}
   async function extractManifest(file){if(file.name.toLowerCase().endsWith('.json'))return JSON.parse(await file.text());const bytes=new Uint8Array(await file.arrayBuffer());let offset=0;while(offset+30<=bytes.length){const view=new DataView(bytes.buffer,bytes.byteOffset+offset);if(view.getUint32(0,true)!==0x04034b50)break;const method=view.getUint16(8,true),size=view.getUint32(18,true),nameLength=view.getUint16(26,true),extraLength=view.getUint16(28,true),name=td.decode(bytes.slice(offset+30,offset+30+nameLength)),start=offset+30+nameLength+extraLength;if(name==='manifest.json'&&method===0)return JSON.parse(td.decode(bytes.slice(start,start+size)));offset=start+size;}throw new Error('manifest.json not found');}
 
   const DB_NAME='citronex-recruitment-offline';

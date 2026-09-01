@@ -1,8 +1,9 @@
-const CACHE = 'citronex-recruitment-v12.7.0';
+const CACHE = 'citronex-recruitment-v14.0.0';
 const CORE = [
-  './', './index.html', './offline-redirect.js?v=12.0.0',
-  './offline.html', './offline-v12.css?v=12.0.0',
-  './offline-shared.js?v=12.7.0', './offline-candidate.js?v=12.7.0',
+  './', './index.html', './offline-redirect.js',
+  './offline.html', './offline-v12.css',
+  './offline-shared.js', './offline-candidate.js',
+  './offline-translations.js',
   './manifest.webmanifest', './offline-icon.svg',
   './excel/Recruitment_Master.xlsx', './excel/Recruitment_yana.xlsx',
   './excel/Recruitment_yuliia.xlsx', './excel/Recruitment_fariz.xlsx',
@@ -20,9 +21,17 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-    const copy = response.clone();
-    caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-    return response;
-  }).catch(() => caches.match('./offline.html'))));
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).catch(() => caches.match('./offline.html')));
+    return;
+  }
+  event.respondWith(caches.match(event.request, {ignoreSearch:true}).then((cached) => {
+    if (cached) return cached;
+    return fetch(event.request).then((response) => {
+      if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+      return response;
+    }).catch(() => new Response('Offline resource unavailable', {status:503, headers:{'Content-Type':'text/plain; charset=utf-8'}}));
+  }));
 });

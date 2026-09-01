@@ -36,3 +36,32 @@ h1,h2,h3{font-family:Georgia,"Times New Roman",serif}h1{margin:0;font-size:clamp
 @media(max-width:620px){.field-grid,.choice-grid,.task-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.language-grid{grid-template-columns:1fr 1fr}.hero{padding:18px;border-radius:25px}.page{width:min(100% - 20px,720px);padding-top:13px}.review-row{grid-template-columns:1fr}.documents-toolbar{grid-template-columns:1fr 1fr}.doc-item{grid-template-columns:48px minmax(0,1fr) auto}.doc-preview{width:48px;height:48px}}
 @media(max-width:380px){.language-grid,.documents-toolbar,.button-row,.channel-grid{grid-template-columns:1fr}.topbar{padding-inline:10px}.status-pill{display:none}.sticky-actions{padding-inline:10px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* compact-email-ui-v13 */
+body{background:linear-gradient(180deg,#f8f8f4 0,#f0f4ef 100%)}
+.topbar{padding:10px max(16px,calc((100vw - 720px)/2));background:#fff;border-bottom:1px solid #dfe6e1;backdrop-filter:none}
+.brand{gap:9px}.brand-mark{display:none}.brand::before{content:"";width:4px;height:30px;border-radius:4px;background:var(--gold)}
+.brand strong{font-family:"Trebuchet MS",sans-serif;font-size:12px;line-height:1;text-transform:uppercase;letter-spacing:.075em}.brand small{font-size:9px;margin-top:4px}
+.status-pill{padding:6px 9px;background:#edf5f0;font-size:9px}
+.page{width:min(100% - 24px,680px);padding:14px 0 26px}.hero,.section-card{border-radius:19px;box-shadow:0 5px 18px rgba(23,52,38,.05)}
+.hero{padding:17px;background:#fff}.section-card{padding:16px}h1{font-size:clamp(27px,7vw,37px);line-height:1.06}.lead{margin-top:9px;line-height:1.45}
+.compact-success{text-align:left;margin-top:0}.success-top{display:flex;align-items:center;gap:13px}.success-top .eyebrow{margin-bottom:5px}.success-top h1{font-size:clamp(25px,7vw,34px)}
+.success-mark{flex:none;width:48px;height:48px;margin:0;border-radius:15px;font-size:24px}
+.email-recipient{display:grid;gap:3px;margin-top:16px;padding:13px 14px;border:1px solid #d6e2db;border-radius:14px;background:#f7faf8}.email-recipient span{color:var(--forest-2);font-size:9px;font-weight:900;letter-spacing:.12em}.email-recipient strong{font-size:13px;overflow-wrap:anywhere}.email-recipient small{color:var(--muted);font-size:10px}
+.email-main{margin-top:11px;min-height:58px;border-radius:14px;font-size:14px}.delivery-note{margin:8px 2px 0;color:var(--muted);font-size:10px;line-height:1.4;text-align:center}
+.result-details{margin-top:11px;border:1px solid #d8e2dc;border-radius:14px;background:#fff}.result-details summary{cursor:pointer;padding:13px 14px;color:var(--forest);font-size:11px;font-weight:900}.result-details[open] summary{border-bottom:1px solid #e6ece8}.result-details textarea{width:calc(100% - 24px);min-height:76px;margin:12px;padding:10px;border:1px solid #d5dfd9;border-radius:10px;resize:vertical;font:10px/1.4 Consolas,monospace}.result-details .button{margin:0 12px 12px;min-height:46px}.result-details .button-row{margin:12px}.result-details .button-row .button{margin:0}.result-details .package-name{margin:0 12px 12px;padding:9px;font-size:8px}
+.button.quiet{min-height:44px;margin-top:10px;background:transparent;color:var(--muted);font-size:11px;box-shadow:none}.compact-success>.lead{font-size:13px}.compact-success .button-row{grid-template-columns:1fr 1fr}
+@media(max-width:620px){.topbar{padding-inline:12px}.page{width:min(100% - 16px,680px);padding-top:8px}.hero,.section-card{padding:14px;border-radius:17px}.language-grid{margin-top:13px}.language-button{min-height:56px}.success-top h1{font-size:27px}}
+
+
+/* share-menu-v13-1 */
+.delivery-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}.delivery-actions.single{grid-template-columns:1fr}.delivery-actions .button{min-height:58px;border-radius:14px;font-size:13px;padding-inline:12px}
+@media(max-width:360px){.delivery-actions{grid-template-columns:1fr}.delivery-actions .button{min-height:52px}}
+
+/* CITRONEX_RTL */
+html[dir="rtl"] body { direction: rtl; }
+html[dir="rtl"] .topbar, html[dir="rtl"] .section-head, html[dir="rtl"] .notice, html[dir="rtl"] .field, html[dir="rtl"] .upload-card, html[dir="rtl"] .summary-card { text-align: right; }
+html[dir="rtl"] input, html[dir="rtl"] select, html[dir="rtl"] textarea { text-align: right; }
+html[dir="rtl"] input[type="email"], html[dir="rtl"] input[type="tel"] { direction: ltr; text-align: left; }
+html[dir="rtl"] .arrow { transform: scaleX(-1); }
