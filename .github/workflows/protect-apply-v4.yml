@@ -36,6 +36,11 @@ jobs:
             git reset --hard origin/main
 
             shopt -s nullglob
+            installer_payloads=(
+              .installer
+              .apply-*
+              .github/install-*
+            )
             obsolete_workflows=(
               .github/workflows/install-apply*.yml
               .github/workflows/deploy-apply*.yml
@@ -43,22 +48,7 @@ jobs:
               .github/workflows/upgrade-recruitment*.yml
             )
 
-            suspicious=0
-            for path in \
-              .installer \
-              .apply-final-v4 \
-              .apply-update-v51.b64 \
-              .github/install-v5-2 \
-              .github/install-v5-3; do
-              if [[ -e "$path" ]]; then
-                suspicious=1
-              fi
-            done
-            if (( ${#obsolete_workflows[@]} > 0 )); then
-              suspicious=1
-            fi
-
-            if [[ "$suspicious" -eq 0 ]]; then
+            if (( ${#installer_payloads[@]} == 0 && ${#obsolete_workflows[@]} == 0 )); then
               echo "No obsolete installer detected; approved application left unchanged."
               exit 0
             fi
@@ -68,12 +58,7 @@ jobs:
               scripts/validate-apply.mjs \
               package.json
 
-            rm -rf \
-              .installer \
-              .apply-final-v4 \
-              .github/install-v5-2 \
-              .github/install-v5-3
-            rm -f .apply-update-v51.b64
+            rm -rf "${installer_payloads[@]}"
             rm -f "${obsolete_workflows[@]}"
 
             node --check apply/config.js
