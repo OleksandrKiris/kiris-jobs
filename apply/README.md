@@ -1,4 +1,4 @@
-# Citronex / PPO Siechnice — mobilna ankieta rekrutacyjna 8.3
+# Citronex / PPO Siechnice — publiczna ankieta rekrutacyjna
 
 Adres produkcyjny:
 
@@ -7,88 +7,68 @@ Adres produkcyjny:
 ## Główny proces
 
 1. Kandydat otwiera link na telefonie.
-2. Wybiera język.
-3. Wybiera rekrutera albo korzysta z linku przypisanego do konkretnego rekrutera.
-4. Wskazuje, czy formularz wypełnia sam kandydat, czy przedstawiciel / partner.
-5. Wpisuje dane kontaktowe i podstawowe informacje o pobycie.
-6. Wybiera stanowisko oraz preferowaną lokalizację pracy.
-7. Wybiera źródło kandydata za pomocą dużych kart: Facebook, Instagram, TikTok, Telegram, WhatsApp, Viber, polecenie, rekruter / agencja albo inne.
-8. Wpisuje dokładnie, kto przekazał kandydata: osobę, partnera, grupę, stronę, profil lub kampanię.
-9. Sprawdza całe zgłoszenie.
-10. Naciska jeden przycisk: **Otwórz pocztę i wyślij zgłoszenie**.
-11. Telefon otwiera aplikację pocztową z gotowym odbiorcą, tematem i treścią wiadomości.
-12. Kandydat sprawdza wiadomość i sam naciska **Wyślij**.
+2. Wybiera język i swojego rekrutera.
+3. Zaznacza, czy wypełnia formularz osobiście, czy jako partner / przedstawiciel grupy.
+4. Uzupełnia dane kandydata, sytuację pobytową, lokalizację i preferencje pracy.
+5. Wskazuje kanał pozyskania oraz konkretną osobę, partnera, profil, stronę lub grupę.
+6. Sprawdza dane i naciska **„Otwórz pocztę i wyślij zgłoszenie”**.
+7. Telefon otwiera aplikację pocztową z gotowym odbiorcą, tematem, tabelą kandydata i wierszem TSV do Excela.
+8. Kandydat sprawdza wiadomość i samodzielnie naciska **„Wyślij”**.
 
-Strona jest statyczna. Nie przesyła danych do GitHub, bazy danych ani zewnętrznego formularza.
+Strona nie używa backendu, bazy danych ani zewnętrznego formularza.
 
-## Tryb partnera / grupy
+## Interfejs mobilny
 
-Dostępne są dwa warianty:
+Formularz jest projektowany przede wszystkim dla telefonu:
 
-- `Wypełniam swoją ankietę`
-- `Wypełniam za kandydata / grupę`
+- duże pola i przyciski;
+- cztery krótkie etapy;
+- karty wyboru rekrutera, lokalizacji, stanowiska, komunikatora i źródła;
+- stałe przyciski „Wstecz” i „Dalej” w dolnej części ekranu;
+- automatyczne zapisywanie niedokończonej ankiety przez 24 godziny;
+- czytelne oznaczenie wypełnionych pól;
+- ochrona przed podwójnym otwarciem wiadomości;
+- obsługa RTL dla języka urdu.
 
-W trybie partnera formularz zapisuje:
+## Partner / grupa
 
-- nazwę partnera, przedstawiciela lub firmy;
-- kod grupy / partnera;
-- dokładne źródło kandydata.
+Po wyborze **„Wypełniam za kandydata / grupę”** pojawiają się pola:
 
-Po przygotowaniu jednego zgłoszenia partner może wybrać **Następny kandydat z tej grupy**. Rekruter, partner, kod grupy, źródło, stanowisko i lokalizacja zostają zachowane, natomiast dane osobowe poprzedniego kandydata są czyszczone.
+- osoba / partner wypełniający;
+- kod grupy / partnera.
 
-## Rekruterzy
-
-Formularz kieruje wiadomość wyłącznie do jednego z sześciu adresów zapisanych w `config.js`. Adres odbiorcy nie może zostać podmieniony parametrem URL.
+Po przygotowaniu pierwszego zgłoszenia można użyć przycisku **„Następny kandydat z tej grupy”**. Formularz zachowuje rekrutera, partnera, kod grupy, lokalizację, stanowisko i źródło, a usuwa dane osobowe poprzedniego kandydata.
 
 ## Lokalizacje
 
-- Siechnice — szklarnie / sortownia
-- Ryczywół / Kozienice — szklarnie
-- Bogatynia — szklarnie / sortownia
-- Zgorzelec — banany / sprzątanie
-- Pruszcz Gdański — magazyn bananów
-- dowolna lokalizacja — ofertę dobiera rekruter
+- Siechnice — szklarnie / sortownia;
+- Ryczywół / Kozienice — szklarnie;
+- Bogatynia — szklarnie / sortownia;
+- Zgorzelec — banany / sprzątanie;
+- Pruszcz Gdański — magazyn bananów;
+- dowolna lokalizacja — ofertę dobiera rekruter.
 
-Lokalizacja wskazana w formularzu jest preferencją. Dostępność miejsca potwierdza rekruter.
+## E-mail i Excel
 
-## Wiadomość e-mail
+Wiadomość trafia wyłącznie do rekrutera wybranego z zatwierdzonej listy. Adresu nie można podmienić przez URL.
 
-Temat wiadomości zawiera:
+Temat zawiera status nowego kandydata, SLA 24 h, lokalizację, dane kandydata oraz nazwę rekrutera.
 
-- oznaczenie `NOWY KANDYDAT`;
-- oznaczenie `SLA 24H`;
-- lokalizację;
-- kod partnera, jeżeli dotyczy;
-- imię i nazwisko;
-- obywatelstwo;
-- wybranego rekrutera.
-
-Na początku treści znajdują się najważniejsze informacje operacyjne:
-
-- ID zgłoszenia;
-- termin pierwszego kontaktu;
-- rekruter;
-- telefon;
-- komunikator;
-- lokalizacja;
-- stanowisko;
-- źródło.
-
-Niżej znajduje się pełna tabela kandydata oraz jeden wiersz TSV do wspólnego Excela.
-
-## Excel
-
-W wiadomości znajduje się blok:
+W treści znajduje się blok:
 
 `DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A`
 
-Rekruter kopiuje dokładnie jeden następny wiersz i wkleja go do pierwszej pustej komórki kolumny A we wspólnym Excelu. Kolejność 40 kolumn jest zdefiniowana w `config.js`.
-
-Początkowy status: `NOWY`.
-
-SLA pierwszego kontaktu: 24 godziny od utworzenia zgłoszenia.
+Rekruter kopiuje jeden wiersz TSV i wkleja go do pierwszej pustej komórki kolumny A wspólnego Excela. Początkowy status to `NOWY`.
 
 ## Parametry linku
+
+Przykład zwykły:
+
+`?lang=uk&recruiter=yana&location=siechnice&src=facebook&campaign=greenhouse_01`
+
+Przykład dla partnera:
+
+`?lang=ka&recruiter=oleksandr&location=siechnice&src=referral&partner=Giorgi%20Beridze&group=GE-BOLNISI`
 
 Obsługiwane parametry:
 
@@ -101,38 +81,10 @@ Obsługiwane parametry:
 - `partner`
 - `group`
 
-Przykład zwykłego linku:
-
-`https://oleksandrkiris.github.io/kiris-jobs/apply/?lang=uk&recruiter=yana&location=siechnice&src=facebook&campaign=greenhouse_01`
-
-Przykład linku partnera:
-
-`https://oleksandrkiris.github.io/kiris-jobs/apply/?lang=ka&recruiter=oleksandr&location=siechnice&src=referral&partner=Giorgi%20Beridze&group=GE-BOLNISI`
-
-## Czego formularz nie robi
-
-- nie wysyła wiadomości automatycznie;
-- nie przechowuje kandydatów w bazie;
-- nie przesyła dokumentów;
-- nie tworzy plików EML;
-- nie kopiuje całej ankiety do schowka;
-- nie pobiera pliku TXT;
-- nie używa Google Forms, Microsoft Forms, Firebase ani Supabase.
-
 ## Test
 
 ```bash
 npm test
 ```
 
-Test kontroluje między innymi:
-
-- 20 języków;
-- 6 rekruterów;
-- 6 lokalizacji;
-- tryb kandydata i partnera;
-- obowiązkowe dokładne źródło;
-- układ mobilny;
-- wiadomość e-mail;
-- zgodność 40 kolumn Excel;
-- brak dodatkowych sposobów wysyłki.
+Test sprawdza JavaScript, 20 języków, sześciu rekruterów, sześć lokalizacji, partnerów, źródła, strukturę wiadomości, 40 kolumn Excela oraz pliki interfejsu mobilnego.
