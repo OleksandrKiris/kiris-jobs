@@ -3,79 +3,47 @@
 
   const CFG = window.RECRUITMENT_CONFIG;
   const I18N = window.RECRUITMENT_I18N;
-  const DELIVERY = window.RECRUITMENT_DELIVERY_I18N;
-  if (!CFG || !I18N || !DELIVERY) throw new Error('Recruitment configuration or translations are missing.');
+  const EXTRA = window.RECRUITMENT_EXTRA_I18N;
+  if (!CFG || !I18N || !EXTRA) throw new Error('Recruitment configuration or translations are missing.');
 
-  const $ = (id) => document.getElementById(id);
-  const fieldIds = [
-    'firstName', 'lastName', 'phone', 'messenger', 'email', 'citizenship',
-    'country', 'city', 'age', 'inPoland', 'documents', 'job', 'workLocation',
-    'experience', 'start', 'shift', 'housing', 'source', 'comment'
-  ];
-  const requiredByStep = {
-    1: ['firstName', 'lastName', 'phone', 'messenger'],
-    2: ['citizenship', 'country', 'city', 'age', 'inPoland', 'documents'],
-    3: ['job', 'workLocation', 'start', 'shift', 'housing', 'source']
-  };
-  const selectMaps = {
-    messenger: 'messenger',
-    inPoland: 'yesNo',
-    documents: 'documents',
-    job: 'jobs',
-    workLocation: 'locations',
-    start: 'starts',
-    shift: 'shifts',
-    housing: 'yesNo',
-    source: 'sources'
-  };
-  const reviewGroups = [
-    { icon: '☎️', title: 'stepContactTitle', fields: ['firstName', 'lastName', 'phone', 'messenger', 'email'] },
-    { icon: '📍', title: 'stepLocationTitle', fields: ['citizenship', 'country', 'city', 'age', 'inPoland', 'documents'] },
-    { icon: '💼', title: 'stepWorkTitle', fields: ['job', 'workLocation', 'experience', 'start', 'shift', 'housing', 'source', 'comment'] }
+  const app = document.getElementById('app');
+  const query = new URL(window.location.href);
+  const route = Object.freeze({
+    source: sanitizeRoute(query.searchParams.get(CFG.queryParams.source)),
+    campaign: sanitizeRoute(query.searchParams.get(CFG.queryParams.campaign)),
+    vacancy: sanitizeRoute(query.searchParams.get(CFG.queryParams.vacancy))
+  });
+  const suggestedLanguage = validLanguage(query.searchParams.get(CFG.queryParams.language));
+  const suggestedRecruiter = validRecruiter(query.searchParams.get(CFG.queryParams.recruiter));
+  const suggestedLocation = validLocation(query.searchParams.get(CFG.queryParams.location));
+
+  const fields = [
+    'filledBy', 'representativeName', 'groupCode',
+    'firstName', 'lastName', 'phone', 'messenger', 'email',
+    'citizenship', 'country', 'city', 'age', 'inPoland', 'documents',
+    'location', 'job', 'experience', 'start', 'shift', 'housing',
+    'source', 'sourceDetails', 'comment', 'consent'
   ];
 
-  const url = new URL(window.location.href);
-  const route = {
-    source: sanitizeRoute(url.searchParams.get(CFG.queryParams.source)),
-    campaign: sanitizeRoute(url.searchParams.get(CFG.queryParams.campaign)),
-    vacancy: sanitizeRoute(url.searchParams.get(CFG.queryParams.vacancy))
-  };
-  const suggestedLanguage = validLanguage(url.searchParams.get(CFG.queryParams.language));
-  const suggestedRecruiter = validRecruiterId(url.searchParams.get(CFG.queryParams.recruiter));
-  const suggestedLocation = validLocationId(url.searchParams.get(CFG.queryParams.location));
+  let view = 'language';
+  let errors = {};
+  let state = createState();
+  let savedDraft = loadDraft();
 
-  let selectedFiles = [];
-  let filesLostAfterResume = false;
-  let state = newState();
-
-  function newState() {
+  function createState() {
     return {
+      version: CFG.version,
       id: createApplicationId(),
       createdAt: new Date().toISOString(),
-      submittedAt: '',
       language: null,
       recruiterId: null,
       step: 1,
-      data: emptyData(),
-      documentTypes: [],
-      hadFiles: false,
-      savedAt: Date.now()
+      data: Object.fromEntries(fields.map((field) => [field, field === 'consent' ? false : '']))
     };
   }
 
-  function emptyData() {
-    return Object.fromEntries([
-      ...fieldIds.map((id) => [id, '']),
-      ['consent', false],
-      ['documentConsent', false]
-    ]);
-  }
-
   function sanitizeRoute(value) {
-    return String(value || '')
-      .trim()
-      .replace(/[^\p{L}\p{N}_.+\- /]/gu, '')
-      .slice(0, 100);
+    return String(value || '').trim().replace(/[^\p{L}\p{N}_.+\- ]/gu, '').slice(0, 100);
   }
 
   function validLanguage(code) {
@@ -83,50 +51,48 @@
     return I18N.languages[normalized] ? normalized : null;
   }
 
-  function validRecruiterId(id) {
+  function validRecruiter(id) {
     const normalized = String(id || '').toLowerCase();
     return CFG.recruiters.some((item) => item.id === normalized) ? normalized : null;
   }
 
-  function validLocationId(id) {
+  function validLocation(id) {
     const normalized = String(id || '').toLowerCase();
     return CFG.locations.some((item) => item.id === normalized) ? normalized : null;
   }
 
-  function recruiterById(id = state.recruiterId) {
-    return CFG.recruiters.find((item) => item.id === id) || null;
+  function recruiter() {
+    return CFG.recruiters.find((item) => item.id === state.recruiterId) || null;
   }
 
-  function locationById(id = state.data.workLocation) {
-    return CFG.locations.find((item) => item.id === id) || null;
+  function location() {
+    return CFG.locations.find((item) => item.id === state.data.location) || null;
   }
 
-  function deepMerge(base, patch) {
-    const result = Array.isArray(base) ? [...base] : { ...base };
+  function merge(base, patch) {
+    const output = Array.isArray(base) ? [...base] : { ...base };
     Object.entries(patch || {}).forEach(([key, value]) => {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        result[key] = deepMerge(base?.[key] || {}, value);
-      } else {
-        result[key] = value;
-      }
+      output[key] = value && typeof value === 'object' && !Array.isArray(value)
+        ? merge(base?.[key] || {}, value)
+        : value;
     });
-    return result;
+    return output;
   }
 
-  function locale(code = state.language) {
-    return deepMerge(I18N.locales.en, I18N.locales[code] || {});
+  function coreLocale(code = state.language || 'en') {
+    return merge(I18N.locales.en, I18N.locales[code] || {});
   }
 
-  function deliveryLocale(code = state.language) {
-    return deepMerge(DELIVERY.locales.en, DELIVERY.locales[code] || {});
+  function extraLocale(code = state.language || 'en') {
+    return merge(EXTRA.locales.en || {}, EXTRA.locales[code] || {});
   }
 
   function t(key) {
-    return locale()[key] ?? I18N.locales.en[key] ?? key;
+    return coreLocale()[key] ?? I18N.locales.en[key] ?? key;
   }
 
-  function dt(key) {
-    return deliveryLocale()[key] ?? DELIVERY.locales.en[key] ?? key;
+  function x(key) {
+    return extraLocale()[key] ?? EXTRA.locales.en?.[key] ?? key;
   }
 
   function escapeHtml(value) {
@@ -138,17 +104,19 @@
       .replace(/'/g, '&#039;');
   }
 
+  function attr(value) {
+    return escapeHtml(value);
+  }
+
   function warsawParts(date = new Date()) {
     const formatter = new Intl.DateTimeFormat('en-GB', {
       timeZone: CFG.timeZone,
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
     });
-    return Object.fromEntries(
-      formatter.formatToParts(date)
-        .filter((part) => part.type !== 'literal')
-        .map((part) => [part.type, part.value])
-    );
+    return Object.fromEntries(formatter.formatToParts(date)
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value]));
   }
 
   function createApplicationId() {
@@ -160,76 +128,36 @@
     return `KAND-${p.year}${p.month}${p.day}-${p.hour}${p.minute}${p.second}-${random}`;
   }
 
-  function formatWarsawDate(iso) {
+  function formatDate(value = state.createdAt) {
     return new Intl.DateTimeFormat('pl-PL', {
       timeZone: CFG.timeZone,
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit'
-    }).format(new Date(iso));
+    }).format(new Date(value));
   }
 
-  function submissionIso() {
-    return state.submittedAt || state.createdAt;
-  }
-
-  function slaIso() {
-    return new Date(new Date(submissionIso()).getTime() + CFG.slaHours * 60 * 60 * 1000).toISOString();
-  }
-
-  function normalizePhone(raw) {
-    const input = String(raw || '').trim();
-    const startsWithPlus = input.startsWith('+');
-    const digits = input.replace(/\D/g, '');
-    return `${startsWithPlus ? '+' : ''}${digits}`;
+  function slaDate() {
+    return formatDate(new Date(new Date(state.createdAt).getTime() + 24 * 60 * 60 * 1000).toISOString());
   }
 
   function cleanText(value) {
     return String(value ?? '').replace(/\r\n?/g, '\n').trim();
   }
 
-  function singleLine(value) {
-    return cleanText(value).replace(/[\t\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  function cleanCell(value) {
+    const text = cleanText(value).replace(/[\t\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    return /^[=+\-@]/.test(text) ? `'${text}` : text;
   }
 
-  function truncate(value, max = CFG.limits.mailLongText) {
-    const text = singleLine(value);
-    return text.length > max ? `${text.slice(0, max - 1)}…` : text;
-  }
-
-  function readForm() {
-    const data = {};
-    fieldIds.forEach((id) => { data[id] = cleanText($(id)?.value); });
-    data.phone = normalizePhone(data.phone);
-    data.consent = Boolean($('consent')?.checked);
-    data.documentConsent = Boolean($('documentConsent')?.checked);
-    return data;
-  }
-
-  function readDocumentTypes() {
-    return Array.from(document.querySelectorAll('[data-document-type]:checked'), (input) => input.value);
-  }
-
-  function writeForm(data) {
-    fieldIds.forEach((id) => { if ($(id)) $(id).value = data?.[id] ?? ''; });
-    if ($('consent')) $('consent').checked = Boolean(data?.consent);
-    if ($('documentConsent')) $('documentConsent').checked = Boolean(data?.documentConsent);
-    document.querySelectorAll('[data-document-type]').forEach((input) => {
-      input.checked = state.documentTypes.includes(input.value);
-    });
-    updateDocumentConsentVisibility();
+  function normalizePhone(value) {
+    const raw = String(value || '').trim();
+    const digits = raw.replace(/\D/g, '');
+    return `${raw.startsWith('+') ? '+' : ''}${digits}`;
   }
 
   function saveDraft() {
-    if ($('formScreen') && !$('formScreen').classList.contains('hidden')) {
-      state.data = readForm();
-      state.documentTypes = readDocumentTypes();
-    }
-    state.hadFiles = selectedFiles.length > 0 || state.hadFiles;
-    state.savedAt = Date.now();
     try {
-      localStorage.setItem(CFG.storageKey, JSON.stringify({ ...state, route, version: CFG.version }));
-      if (state.language) localStorage.setItem(CFG.languageKey, state.language);
-      if (state.recruiterId) localStorage.setItem(CFG.recruiterKey, state.recruiterId);
+      localStorage.setItem(CFG.storageKey, JSON.stringify({ ...state, savedAt: Date.now() }));
     } catch (error) {
       console.warn('Draft could not be saved.', error);
     }
@@ -238,18 +166,12 @@
   function loadDraft() {
     try {
       const draft = JSON.parse(localStorage.getItem(CFG.storageKey));
-      if (!draft || !draft.id || !draft.data) return null;
-      if (Date.now() - Number(draft.savedAt || 0) > CFG.draftMaxAgeMs) {
-        localStorage.removeItem(CFG.storageKey);
-        return null;
-      }
+      if (!draft || draft.version !== CFG.version || !draft.savedAt || Date.now() - draft.savedAt > CFG.draftMaxAgeMs) return null;
+      if (!draft.id || !draft.data) return null;
       draft.language = validLanguage(draft.language);
-      draft.recruiterId = validRecruiterId(draft.recruiterId);
+      draft.recruiterId = validRecruiter(draft.recruiterId);
       draft.step = Math.min(4, Math.max(1, Number(draft.step) || 1));
-      draft.documentTypes = Array.isArray(draft.documentTypes)
-        ? draft.documentTypes.filter((id) => CFG.documentTypes.some((item) => item.id === id))
-        : [];
-      if (!validLocationId(draft.data.workLocation)) draft.data.workLocation = '';
+      draft.data.location = validLocation(draft.data.location) || '';
       return draft;
     } catch {
       return null;
@@ -258,990 +180,458 @@
 
   function clearDraft() {
     try { localStorage.removeItem(CFG.storageKey); } catch { /* no-op */ }
+    savedDraft = null;
   }
 
-  function applyDocumentLanguage() {
+  function updateDocumentLanguage() {
     const code = state.language || 'en';
     const metadata = I18N.languages[code] || I18N.languages.en;
     document.documentElement.lang = code;
-    document.documentElement.dir = metadata.direction;
+    document.documentElement.dir = metadata.direction || 'ltr';
     document.title = `${CFG.brand} — ${t('languageTitle')}`;
-    renderFooter();
+    document.getElementById('headerSubtitle').textContent = x('headerSubtitle');
+    document.getElementById('privacyBadgeText').textContent = x('privacyBadge');
+    document.getElementById('footerText').textContent = x('footerText');
+    document.getElementById('footerPrivacyLink').textContent = t('privacyLink');
   }
 
-  function renderFooter() {
-    $('footerPrivacy').textContent = dt('footerPrivacy');
-    $('footerPrivacyLink').textContent = dt('footerPrivacyLink');
-    $('footerPrivacyLink').href = CFG.privacyUrl;
-  }
-
-  function showScreen(screenId) {
-    ['languageScreen', 'recruiterScreen', 'formScreen', 'reviewScreen'].forEach((id) => {
-      $(id).classList.toggle('hidden', id !== screenId);
-    });
+  function render() {
+    updateDocumentLanguage();
+    if (view === 'language') renderLanguage();
+    else if (view === 'recruiter') renderRecruiter();
+    else if (view === 'form') renderForm();
+    else renderReview();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    requestAnimationFrame(() => {
-      const heading = $(screenId)?.querySelector('h1, h2, input, button');
-      if (heading && typeof heading.focus === 'function') heading.focus({ preventScroll: true });
+  }
+
+  function renderLanguage(search = '') {
+    const queryText = String(search).trim().toLocaleLowerCase();
+    let languages = Object.entries(I18N.languages);
+    const preferred = suggestedLanguage || savedDraft?.language;
+    if (preferred) languages.sort(([a], [b]) => (a === preferred ? -1 : b === preferred ? 1 : 0));
+    languages = languages.filter(([code, meta]) => `${code} ${meta.native} ${meta.english}`.toLocaleLowerCase().includes(queryText));
+
+    app.innerHTML = `
+      <section class="card">
+        <div class="hero">
+          <div class="hero-icon" aria-hidden="true">🌍</div>
+          <h1>${escapeHtml(t('languageTitle'))}</h1>
+          <p>${escapeHtml(x('languageIntro'))}</p>
+        </div>
+        <div class="trust-row">
+          <div class="trust-item">📱 ${escapeHtml(t('trustMobile'))}</div>
+          <div class="trust-item">👤 ${escapeHtml(t('recruiterTitle'))}</div>
+          <div class="trust-item">✉️ ${escapeHtml(t('trustControl'))}</div>
+        </div>
+        ${savedDraft ? `<div class="resume"><strong>${escapeHtml(x('resumeTitle'))}</strong><div class="resume-actions"><button class="button small primary" type="button" data-action="resume">${escapeHtml(x('resume'))}</button><button class="button small" type="button" data-action="discard">${escapeHtml(x('discard'))}</button></div></div>` : ''}
+        <input class="search" id="languageSearch" type="search" autocomplete="off" placeholder="${attr(t('languageSearch'))}" value="${attr(search)}">
+        <div class="language-grid">
+          ${languages.length ? languages.map(([code, meta]) => `
+            <button class="language-card" type="button" data-language="${code}">
+              <span class="language-flag" aria-hidden="true">${meta.flag}</span>
+              <span><strong>${escapeHtml(meta.native)}</strong><small>${escapeHtml(meta.english)} · ${code.toUpperCase()}</small></span>
+              <span class="arrow" aria-hidden="true">›</span>
+            </button>`).join('') : `<div class="empty-state">${escapeHtml(t('noLanguages'))}</div>`}
+        </div>
+      </section>`;
+
+    document.getElementById('languageSearch').addEventListener('input', (event) => renderLanguage(event.target.value));
+    app.querySelectorAll('[data-language]').forEach((button) => button.addEventListener('click', () => {
+      state.language = validLanguage(button.dataset.language) || 'en';
+      view = 'recruiter';
+      errors = {};
+      saveDraft();
+      render();
+    }));
+    app.querySelector('[data-action="resume"]')?.addEventListener('click', () => {
+      state = savedDraft;
+      view = state.language && state.recruiterId ? 'form' : state.language ? 'recruiter' : 'language';
+      render();
+    });
+    app.querySelector('[data-action="discard"]')?.addEventListener('click', () => {
+      clearDraft();
+      state = createState();
+      render();
     });
   }
 
-  function renderLanguages(query = '') {
-    const search = query.trim().toLocaleLowerCase();
-    let entries = Object.entries(I18N.languages);
-    const preferred = suggestedLanguage || validLanguage(localStorage.getItem(CFG.languageKey));
-    if (preferred) entries.sort(([a], [b]) => (a === preferred ? -1 : b === preferred ? 1 : 0));
-    entries = entries.filter(([code, meta]) => {
-      const haystack = `${code} ${meta.native} ${meta.english}`.toLocaleLowerCase();
-      return !search || haystack.includes(search);
-    });
-    $('languageGrid').innerHTML = entries.length
-      ? entries.map(([code, meta]) => `
-          <button class="language-button" type="button" data-language="${code}">
-            <span class="language-flag" aria-hidden="true">${meta.flag}</span>
-            <span class="language-copy"><strong>${escapeHtml(meta.native)}</strong><small>${escapeHtml(meta.english)} · ${code.toUpperCase()}</small></span>
-            <span class="choice-arrow" aria-hidden="true">›</span>
-          </button>`).join('')
-      : `<div class="empty-state">${escapeHtml((state.language ? t('noLanguages') : I18N.locales.en.noLanguages))}</div>`;
-    document.querySelectorAll('[data-language]').forEach((button) => {
-      button.addEventListener('click', () => chooseLanguage(button.dataset.language));
-    });
-  }
-
-  function chooseLanguage(code) {
-    state.language = validLanguage(code) || 'en';
-    applyDocumentLanguage();
-    renderRecruiterScreen();
-    showScreen('recruiterScreen');
-    saveDraft();
-  }
-
-  function renderRecruiterScreen() {
-    $('recruiterTitle').textContent = t('recruiterTitle');
-    $('recruiterSubtitle').textContent = t('recruiterSubtitle');
-    $('recruiterRequired').textContent = t('recruiterRequired');
-    $('recruiterBackLanguage').textContent = `← ${t('changeLanguage')}`;
-    const preferred = suggestedRecruiter || validRecruiterId(localStorage.getItem(CFG.recruiterKey));
+  function renderRecruiter() {
+    const preferred = suggestedRecruiter || savedDraft?.recruiterId;
     const recruiters = [...CFG.recruiters].sort((a, b) => (a.id === preferred ? -1 : b.id === preferred ? 1 : 0));
-    $('recruiterGrid').innerHTML = recruiters.map((item) => `
-      <button class="recruiter-button ${item.id === suggestedRecruiter ? 'recommended' : ''}" type="button" data-recruiter="${item.id}">
-        <span class="recruiter-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
-        <span class="recruiter-copy">
-          <strong>${escapeHtml(item.name)}</strong>
-          <small class="ltr-value">${escapeHtml(item.email)}</small>
-          ${item.id === suggestedRecruiter ? `<em>${escapeHtml(t('suggested'))}</em>` : ''}
-        </span>
-        <span class="choice-arrow" aria-hidden="true">›</span>
-      </button>`).join('');
-    document.querySelectorAll('[data-recruiter]').forEach((button) => {
-      button.addEventListener('click', () => chooseRecruiter(button.dataset.recruiter));
+    app.innerHTML = `
+      <section class="card">
+        <button class="link-button" type="button" data-action="language">← ${escapeHtml(t('changeLanguage'))}</button>
+        <div class="hero">
+          <div class="hero-icon" aria-hidden="true">👤</div>
+          <h1>${escapeHtml(t('recruiterTitle'))}</h1>
+          <p>${escapeHtml(x('recruiterIntro'))}</p>
+        </div>
+        <div class="recruiter-grid">
+          ${recruiters.map((item) => `
+            <button class="recruiter-card" type="button" data-recruiter="${item.id}">
+              ${item.id === suggestedRecruiter ? `<span class="suggested">${escapeHtml(t('suggested'))}</span>` : ''}
+              <span class="avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+              <span><strong>${escapeHtml(item.name)}</strong><small class="ltr">${escapeHtml(item.email)}</small></span>
+              <span class="arrow" aria-hidden="true">›</span>
+            </button>`).join('')}
+        </div>
+      </section>`;
+
+    app.querySelector('[data-action="language"]').addEventListener('click', () => { view = 'language'; render(); });
+    app.querySelectorAll('[data-recruiter]').forEach((button) => button.addEventListener('click', () => {
+      state.recruiterId = validRecruiter(button.dataset.recruiter);
+      state.step = Math.min(4, Math.max(1, state.step || 1));
+      if (!state.data.location && suggestedLocation) state.data.location = suggestedLocation;
+      view = 'form';
+      errors = {};
+      saveDraft();
+      render();
+    }));
+  }
+
+  function optionLabel(group, value, language = state.language) {
+    const base = merge(I18N.locales.en, I18N.locales[language] || {});
+    return base.options?.[group]?.[value] || I18N.locales.en.options?.[group]?.[value] || value;
+  }
+
+  function polishOption(group, value) {
+    return I18N.internal?.[group]?.[value] || I18N.locales.pl?.options?.[group]?.[value] || value;
+  }
+
+  function selectHtml(field, group) {
+    const options = coreLocale().options?.[group] || I18N.locales.en.options[group];
+    return `<select id="${field}" data-field="${field}" class="${errors[field] ? 'invalid' : ''}">
+      <option value="">${escapeHtml(t('selectOption'))}</option>
+      ${Object.entries(options).map(([value, label]) => `<option value="${attr(value)}" ${state.data[field] === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+    </select>${errorHtml(field)}`;
+  }
+
+  function errorHtml(field) {
+    return errors[field] ? `<div class="error" role="alert">${escapeHtml(errors[field])}</div>` : '';
+  }
+
+  function textField({ id, label, type = 'text', hint = '', required = true, max = 120, autocomplete = '', full = false, inputmode = '' }) {
+    return `<div class="field ${full ? 'full' : ''}">
+      <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ''}</label>
+      <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' || id === 'email' ? 'ltr' : ''}" type="${type}" maxlength="${max}" value="${attr(state.data[id])}" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''}>
+      ${hint ? `<div class="hint">${escapeHtml(hint)}</div>` : ''}${errorHtml(id)}
+    </div>`;
+  }
+
+  function textareaField({ id, label, hint = '', max = 400, full = true }) {
+    return `<div class="field ${full ? 'full' : ''}"><label for="${id}">${escapeHtml(label)}</label><textarea id="${id}" data-field="${id}" maxlength="${max}" class="${errors[id] ? 'invalid' : ''}">${escapeHtml(state.data[id])}</textarea>${hint ? `<div class="hint">${escapeHtml(hint)}</div>` : ''}${errorHtml(id)}</div>`;
+  }
+
+  function choiceCard(field, value, icon, label) {
+    const selected = state.data[field] === value;
+    return `<label class="choice-card ${selected ? 'selected' : ''}"><input type="radio" name="${field}" data-field="${field}" value="${value}" ${selected ? 'checked' : ''}><span class="choice-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(label)}</span></label>`;
+  }
+
+  function stepContent() {
+    if (state.step === 1) {
+      return `
+        <div class="field full">
+          <span class="fieldset-title">${escapeHtml(x('filledBy'))} <span class="required">*</span></span>
+          <div class="choice-grid">${choiceCard('filledBy', 'self', '👤', x('self'))}${choiceCard('filledBy', 'representative', '🤝', x('representative'))}</div>
+          ${errorHtml('filledBy')}
+        </div>
+        ${state.data.filledBy === 'representative' ? `<div class="form-grid">
+          ${textField({ id:'representativeName', label:x('representativeName'), hint:x('representativeNameHint'), required:true, full:true, max:160 })}
+          ${textField({ id:'groupCode', label:x('groupCode'), hint:x('groupCodeHint'), required:false, full:true, max:80 })}
+        </div>` : ''}
+        <div class="form-grid">
+          ${textField({ id:'firstName', label:t('firstName'), required:true, autocomplete:'given-name' })}
+          ${textField({ id:'lastName', label:t('lastName'), required:true, autocomplete:'family-name' })}
+          ${textField({ id:'phone', label:t('phone'), hint:t('phoneHint'), required:true, type:'tel', autocomplete:'tel', inputmode:'tel', max:32 })}
+          <div class="field"><label for="messenger">${escapeHtml(t('messenger'))} <span class="required">*</span></label>${selectHtml('messenger','messenger')}</div>
+          ${textField({ id:'email', label:t('email'), required:false, type:'email', autocomplete:'email', max:160, full:true })}
+        </div>`;
+    }
+    if (state.step === 2) {
+      return `<div class="form-grid">
+        ${textField({ id:'citizenship', label:t('citizenship'), required:true, autocomplete:'country-name' })}
+        ${textField({ id:'country', label:t('country'), required:true })}
+        ${textField({ id:'city', label:t('city'), required:true })}
+        ${textField({ id:'age', label:t('age'), required:true, type:'number', inputmode:'numeric', max:3 })}
+        <div class="field"><label for="inPoland">${escapeHtml(t('inPoland'))} <span class="required">*</span></label>${selectHtml('inPoland','yesNo')}</div>
+        <div class="field"><label for="documents">${escapeHtml(t('documents'))} <span class="required">*</span></label>${selectHtml('documents','documents')}</div>
+      </div>`;
+    }
+    if (state.step === 3) {
+      const locations = [...CFG.locations].sort((a, b) => (a.id === suggestedLocation ? -1 : b.id === suggestedLocation ? 1 : 0));
+      return `
+        <div class="field full">
+          <span class="fieldset-title">${escapeHtml(x('preferredLocation'))} <span class="required">*</span></span>
+          <div class="hint">${escapeHtml(x('preferredLocationHint'))}</div>
+          <div class="location-grid" style="margin-top:10px">
+            ${locations.map((item) => `<label class="location-card ${state.data.location === item.id ? 'selected' : ''}">
+              <input type="radio" name="location" data-field="location" value="${item.id}" ${state.data.location === item.id ? 'checked' : ''}>
+              ${item.id === suggestedLocation ? `<span class="suggested">${escapeHtml(x('suggestedLocation'))}</span>` : ''}
+              <span class="location-check" aria-hidden="true">✓</span>
+              <strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.subtitle)} · ${escapeHtml(item.address)}</small>
+            </label>`).join('')}
+          </div>${errorHtml('location')}
+        </div>
+        <div class="form-grid" style="margin-top:15px">
+          <div class="field full"><label for="job">${escapeHtml(t('job'))} <span class="required">*</span></label>${selectHtml('job','jobs')}</div>
+          ${textareaField({ id:'experience', label:t('experience'), hint:t('experienceHint'), max:420 })}
+          <div class="field"><label for="start">${escapeHtml(t('start'))} <span class="required">*</span></label>${selectHtml('start','starts')}</div>
+          <div class="field"><label for="shift">${escapeHtml(t('shift'))} <span class="required">*</span></label>${selectHtml('shift','shifts')}</div>
+          <div class="field full"><label for="housing">${escapeHtml(t('housing'))} <span class="required">*</span></label>${selectHtml('housing','yesNo')}</div>
+        </div>`;
+    }
+    const detailsRequired = ['referral','recruiter','other'].includes(state.data.source);
+    return `<div class="form-grid">
+      <div class="field full"><label for="source">${escapeHtml(t('source'))} <span class="required">*</span></label>${selectHtml('source','sources')}</div>
+      ${textField({ id:'sourceDetails', label:x('sourceDetails'), hint:x('sourceDetailsHint'), required:detailsRequired, full:true, max:180 })}
+      ${textareaField({ id:'comment', label:t('comment'), max:300 })}
+      <div class="field full">
+        <div class="checkbox-row"><input id="consent" data-field="consent" type="checkbox" ${state.data.consent ? 'checked' : ''}><label for="consent">${escapeHtml(t('consentBefore'))} <a href="${attr(CFG.privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('privacyLink'))}</a>. <span class="required">*</span></label></div>
+        ${errorHtml('consent')}
+      </div>
+    </div>`;
+  }
+
+  function renderForm() {
+    const person = recruiter();
+    if (!state.language) { view = 'language'; render(); return; }
+    if (!person) { view = 'recruiter'; render(); return; }
+    const titles = [x('step1Title'), x('step2Title'), x('step3Title'), x('step4Title')];
+    const subtitles = [x('step1Subtitle'), x('step2Subtitle'), x('step3Subtitle'), x('step4Subtitle')];
+    const percent = state.step * 25;
+    app.innerHTML = `
+      <section class="card">
+        <div class="topbar">
+          <div class="chips"><span class="chip ltr">${escapeHtml(state.id)}</span><span class="chip">${I18N.languages[state.language].flag} ${state.language.toUpperCase()}</span></div>
+          <div><button class="link-button" type="button" data-action="language">🌍 ${escapeHtml(t('changeLanguage'))}</button><button class="link-button" type="button" data-action="recruiter">👤 ${escapeHtml(t('changeRecruiter'))}</button></div>
+        </div>
+        <div class="selected-recruiter"><span class="avatar">${escapeHtml(person.initials)}</span><span><span class="selected-label">${escapeHtml(t('selectedRecruiter'))}</span><strong>${escapeHtml(person.name)}</strong><small class="ltr">${escapeHtml(person.email)}</small></span></div>
+        <div class="stepper"><div class="stepper-meta"><strong>${state.step} / 4</strong><span>${percent}%</span></div><div class="progress"><div class="progress-fill" style="width:${percent}%"></div></div><div class="step-labels">${titles.map((title,index)=>`<span class="${index < state.step ? 'active' : ''}">${escapeHtml(title)}</span>`).join('')}</div></div>
+        <h1 class="screen-title">${escapeHtml(titles[state.step - 1])}</h1><p class="screen-subtitle">${escapeHtml(subtitles[state.step - 1])}</p>
+        <form id="candidateForm" novalidate>${stepContent()}</form>
+        <div class="actions">
+          <button class="button soft ${state.step === 1 ? 'hidden' : ''}" type="button" data-action="back">← ${escapeHtml(t('back'))}</button>
+          <button class="button primary" type="button" data-action="next">${escapeHtml(state.step === 4 ? t('checkApplication') : t('continue'))} →</button>
+        </div>
+      </section>`;
+
+    app.querySelector('[data-action="language"]').addEventListener('click', () => { view = 'language'; saveDraft(); render(); });
+    app.querySelector('[data-action="recruiter"]').addEventListener('click', () => { view = 'recruiter'; saveDraft(); render(); });
+    app.querySelector('[data-action="back"]')?.addEventListener('click', () => { state.step = Math.max(1, state.step - 1); errors = {}; saveDraft(); render(); });
+    app.querySelector('[data-action="next"]').addEventListener('click', () => {
+      if (!validateStep()) return;
+      if (state.step < 4) { state.step += 1; errors = {}; saveDraft(); render(); }
+      else { view = 'review'; errors = {}; saveDraft(); render(); }
     });
-  }
 
-  function chooseRecruiter(id) {
-    const recruiterId = validRecruiterId(id);
-    if (!recruiterId) return;
-    state.recruiterId = recruiterId;
-    state.step = Math.min(4, Math.max(1, state.step || 1));
-    if (!state.data.workLocation && suggestedLocation) state.data.workLocation = suggestedLocation;
-    renderFormText();
-    writeForm(state.data);
-    renderStep();
-    showScreen('formScreen');
-    saveDraft();
-  }
-
-  function optionEntries(group) {
-    return Object.entries(locale().options?.[group] || I18N.locales.en.options?.[group] || {});
-  }
-
-  function fillSelect(id, group) {
-    const current = state.data[id] || $(id)?.value || '';
-    $(id).innerHTML = `<option value="">${escapeHtml(t('selectOption'))}</option>` +
-      optionEntries(group).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
-    $(id).value = current;
-  }
-
-  function renderDocumentTypes() {
-    const labels = deliveryLocale().documentTypes || DELIVERY.locales.en.documentTypes;
-    $('documentTypeGrid').innerHTML = CFG.documentTypes.map((item) => `
-      <label class="document-option">
-        <input type="checkbox" value="${item.id}" data-document-type ${state.documentTypes.includes(item.id) ? 'checked' : ''}>
-        <span class="document-check" aria-hidden="true">✓</span>
-        <span>${escapeHtml(labels[item.id] || item.internal)}</span>
-      </label>`).join('');
-    document.querySelectorAll('[data-document-type]').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (input.value === 'noneYet' && input.checked) {
-          if (selectedFiles.length) {
-            input.checked = false;
-            showFileError(dt('noneConflict'));
-          } else {
-            document.querySelectorAll('[data-document-type]').forEach((other) => {
-              if (other !== input) other.checked = false;
-            });
-          }
-        } else if (input.checked) {
-          const none = document.querySelector('[data-document-type="noneYet"]');
-          if (none) none.checked = false;
+    app.querySelectorAll('[data-field]').forEach((element) => {
+      const eventName = element.type === 'radio' || element.type === 'checkbox' || element.tagName === 'SELECT' ? 'change' : 'input';
+      element.addEventListener(eventName, () => {
+        const field = element.dataset.field;
+        if (element.type === 'checkbox') state.data[field] = element.checked;
+        else if (element.type === 'radio') state.data[field] = element.value;
+        else state.data[field] = element.value;
+        if (field === 'filledBy' && state.data.filledBy === 'self') {
+          state.data.representativeName = '';
+          state.data.groupCode = '';
         }
-        state.documentTypes = readDocumentTypes();
-        clearDocumentTypeError();
+        delete errors[field];
         saveDraft();
+        if (['filledBy','location','source'].includes(field)) renderForm();
       });
     });
   }
 
-  function renderProgressLabels() {
-    const labels = [t('progressContact'), t('progressLocation'), t('progressWork'), t('progressDocuments'), t('progressReview')];
-    labels.forEach((label, index) => {
-      const element = $(`progressLabel${index + 1}`);
-      if (element) element.textContent = label;
+  function validateStep() {
+    errors = {};
+    const data = state.data;
+    const required = {
+      1: ['filledBy','firstName','lastName','phone','messenger'],
+      2: ['citizenship','country','city','age','inPoland','documents'],
+      3: ['location','job','start','shift','housing'],
+      4: ['source','consent']
+    }[state.step];
+    required.forEach((field) => {
+      if (field === 'consent' ? !data.consent : !cleanText(data[field])) errors[field] = t('required');
     });
-  }
-
-  function renderSelectedRecruiter() {
-    const recruiter = recruiterById();
-    if (!recruiter) return;
-    $('selectedRecruiterAvatar').textContent = recruiter.initials;
-    $('selectedRecruiterLabel').textContent = t('selectedRecruiter');
-    $('selectedRecruiterName').textContent = recruiter.name;
-    $('selectedRecruiterEmail').textContent = recruiter.email;
-    $('applicationIdChip').textContent = state.id;
-  }
-
-  function renderFormText() {
-    document.querySelectorAll('[data-label]').forEach((element) => {
-      const key = element.dataset.label;
-      element.innerHTML = `${escapeHtml(t(key))} <span class="required-star" aria-hidden="true">*</span>`;
-    });
-    document.querySelectorAll('[data-label-optional]').forEach((element) => {
-      element.textContent = t(element.dataset.labelOptional);
-    });
-    $('phoneHint').textContent = t('phoneHint');
-    $('experienceHint').textContent = t('experienceHint');
-    $('workLocationHint').textContent = t('workLocationHint');
-    $('locationAvailability').textContent = t('locationAvailability');
-    $('consentLabel').innerHTML = `${escapeHtml(t('consentBefore'))} <a href="${escapeHtml(CFG.privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('privacyLink'))}</a>. <span class="required-star" aria-hidden="true">*</span>`;
-    $('documentConsentLabel').innerHTML = `${escapeHtml(dt('documentConsent'))} <span class="required-star" aria-hidden="true">*</span>`;
-    $('changeLanguage').textContent = `🌍 ${t('changeLanguage')}`;
-    $('changeRecruiter').textContent = `👤 ${t('changeRecruiter')}`;
-    $('backButton').textContent = t('back');
-
-    $('filePrivacyTitle').textContent = dt('filePrivacyTitle');
-    $('filePrivacyText').textContent = dt('filePrivacyText');
-    $('documentTypesLabel').innerHTML = `${escapeHtml(dt('documentTypesLabel'))} <span class="required-star" aria-hidden="true">*</span>`;
-    $('documentTypesHint').textContent = dt('documentTypesHint');
-    $('fileUploadLabel').textContent = dt('fileUploadLabel');
-    $('uploadActionText').textContent = dt('fileUploadLabel');
-    $('fileUploadHint').textContent = dt('fileUploadHint');
-    $('selectedFilesTitle').textContent = dt('selectedFilesTitle');
-    $('filesReloadNotice').textContent = dt('filesReloadNotice');
-    $('filesReloadNotice').classList.toggle('hidden', !filesLostAfterResume && !state.hadFiles);
-
-    fillSelect('messenger', 'messenger');
-    fillSelect('inPoland', 'yesNo');
-    fillSelect('documents', 'documents');
-    fillSelect('job', 'jobs');
-    fillSelect('workLocation', 'locations');
-    fillSelect('start', 'starts');
-    fillSelect('shift', 'shifts');
-    fillSelect('housing', 'yesNo');
-    fillSelect('source', 'sources');
-    renderDocumentTypes();
-    renderSelectedFiles();
-    renderProgressLabels();
-    renderSelectedRecruiter();
-  }
-
-  function renderStep() {
-    [1, 2, 3, 4].forEach((number) => $('step' + number).classList.toggle('hidden', number !== state.step));
-    [1, 2, 3, 4, 5].forEach((number) => {
-      $(`progress${number}`).classList.toggle('active', number <= state.step);
-      $(`progressLabel${number}`)?.classList.toggle('active', number === state.step);
-    });
-    const keys = {
-      1: ['stepContactTitle', 'stepContactSubtitle'],
-      2: ['stepLocationTitle', 'stepLocationSubtitle'],
-      3: ['stepWorkTitle', 'stepWorkSubtitle']
-    };
-    if (state.step === 4) {
-      $('formStepTitle').textContent = dt('stepDocumentsTitle');
-      $('formStepSubtitle').textContent = dt('stepDocumentsSubtitle');
-    } else {
-      $('formStepTitle').textContent = t(keys[state.step][0]);
-      $('formStepSubtitle').textContent = t(keys[state.step][1]);
+    if (state.step === 1) {
+      if (data.filledBy === 'representative' && !cleanText(data.representativeName)) errors.representativeName = t('required');
+      const normalized = normalizePhone(data.phone);
+      if (!/^\+\d{7,15}$/.test(normalized)) errors.phone = t('invalidPhone');
+      else data.phone = normalized;
+      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(data.email)) errors.email = t('invalidEmail');
     }
-    $('stepCounter').textContent = `${state.step} / 4`;
-    $('backButton').classList.toggle('hidden', state.step === 1);
-    $('nextButton').textContent = state.step === 4 ? t('checkApplication') : t('continue');
-    state.step = Math.min(4, Math.max(1, state.step));
-  }
-
-  function clearErrors() {
-    document.querySelectorAll('.field-error').forEach((element) => { element.textContent = ''; });
-    document.querySelectorAll('.invalid').forEach((element) => element.classList.remove('invalid'));
-  }
-
-  function showFieldError(id, message) {
-    const input = $(id);
-    const error = document.querySelector(`[data-error="${id}"]`);
-    if (input) input.classList.add('invalid');
-    if (error) error.textContent = message;
-  }
-
-  function clearDocumentTypeError() {
-    const error = document.querySelector('[data-error="documentTypes"]');
-    if (error) error.textContent = '';
-  }
-
-  function validateStep(step) {
-    clearErrors();
-    const data = readForm();
-    let valid = true;
-
-    (requiredByStep[step] || []).forEach((id) => {
-      if (!String(data[id] || '').trim()) {
-        showFieldError(id, t('required'));
-        valid = false;
-      }
-    });
-
-    if (step === 1) {
-      const digits = data.phone.replace(/\D/g, '');
-      if (!data.phone.startsWith('+') || digits.length < 7 || digits.length > 15) {
-        showFieldError('phone', t('invalidPhone'));
-        valid = false;
-      }
-      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(data.email)) {
-        showFieldError('email', t('invalidEmail'));
-        valid = false;
-      }
-    }
-
-    if (step === 2) {
+    if (state.step === 2) {
       const age = Number(data.age);
-      if (!Number.isInteger(age) || age < 18 || age > 75) {
-        showFieldError('age', t('invalidAge'));
-        valid = false;
-      }
+      if (!Number.isInteger(age) || age < 18 || age > 75) errors.age = t('invalidAge');
     }
-
-    if (step === 4) {
-      const types = readDocumentTypes();
-      const hasNone = types.includes('noneYet');
-      if (!types.length) {
-        showFieldError('documentTypes', dt('selectDocumentType'));
-        valid = false;
-      }
-      if (hasNone && (types.length > 1 || selectedFiles.length > 0)) {
-        showFieldError('documentTypes', dt('noneConflict'));
-        valid = false;
-      }
-      if (!data.consent) {
-        showFieldError('consent', t('required'));
-        valid = false;
-      }
-      if (selectedFiles.length > 0 && !data.documentConsent) {
-        showFieldError('documentConsent', t('required'));
-        valid = false;
-      }
-      state.documentTypes = types;
+    if (state.step === 4 && ['referral','recruiter','other'].includes(data.source) && !cleanText(data.sourceDetails)) {
+      errors.sourceDetails = x('sourceDetailsRequired');
     }
-
-    if (!valid) {
-      const current = $('step' + step);
-      const first = current.querySelector('.invalid, .field-error:not(:empty)');
-      const focusTarget = first?.matches('input, select, textarea, button')
-        ? first
-        : first?.closest('.field, fieldset')?.querySelector('input, select, textarea, button');
-      focusTarget?.focus();
+    if (Object.keys(errors).length) {
+      renderForm();
+      const first = Object.keys(errors)[0];
+      app.querySelector(`[data-field="${first}"]`)?.focus();
+      return false;
     }
-
-    state.data = data;
     saveDraft();
-    return valid;
+    return true;
   }
 
-  function fileExtension(name) {
-    return String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || '';
+  function display(field) {
+    const value = state.data[field];
+    if (!value && value !== false) return x('summaryEmpty');
+    const groups = { messenger:'messenger', inPoland:'yesNo', documents:'documents', job:'jobs', start:'starts', shift:'shifts', housing:'yesNo', source:'sources' };
+    if (field === 'filledBy') return value === 'representative' ? x('fillingRepresentative') : x('fillingSelf');
+    if (field === 'location') return location()?.name || value;
+    if (field === 'consent') return value ? optionLabel('yesNo','yes') : optionLabel('yesNo','no');
+    return groups[field] ? optionLabel(groups[field], value) : value;
   }
 
-  function fileKey(file) {
-    return `${file.name}::${file.size}::${file.lastModified}`;
+  function reviewItem(label, value) {
+    return `<div class="review-item"><span class="review-label">${escapeHtml(label)}</span><span class="review-value">${escapeHtml(value || x('summaryEmpty'))}</span></div>`;
   }
 
-  function totalFileSize(files = selectedFiles) {
-    return files.reduce((sum, file) => sum + Number(file.size || 0), 0);
+  function reviewSection(title, items) {
+    return `<section class="review-section"><h2>${escapeHtml(title)}</h2><div class="review-grid">${items.map(([label,value])=>reviewItem(label,value)).join('')}</div></section>`;
   }
 
-  function formatBytes(bytes) {
-    if (!Number.isFinite(bytes) || bytes <= 0) return '0 KB';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-    const value = bytes / (1024 ** exponent);
-    return `${value.toFixed(exponent === 0 ? 0 : value >= 10 ? 1 : 2)} ${units[exponent]}`;
+  function renderReview() {
+    const person = recruiter();
+    if (!person) { view = 'recruiter'; render(); return; }
+    const submission = [
+      [x('filledBy'), display('filledBy')],
+      [x('representativeName'), state.data.representativeName || x('summaryEmpty')],
+      [x('groupCode'), state.data.groupCode || x('summaryEmpty')],
+      [t('source'), display('source')],
+      [x('sourceDetails'), state.data.sourceDetails || x('summaryEmpty')]
+    ];
+    const candidate = [
+      [t('firstName'), state.data.firstName], [t('lastName'), state.data.lastName], [t('citizenship'), state.data.citizenship],
+      [t('country'), state.data.country], [t('city'), state.data.city], [t('age'), state.data.age],
+      [t('inPoland'), display('inPoland')], [t('documents'), display('documents')]
+    ];
+    const contact = [[t('phone'), state.data.phone],[t('messenger'), display('messenger')],[t('email'), state.data.email || x('summaryEmpty')]];
+    const work = [[x('preferredLocation'), display('location')],[t('job'), display('job')],[t('experience'), state.data.experience || x('summaryEmpty')],[t('start'), display('start')],[t('shift'), display('shift')],[t('housing'), display('housing')],[t('comment'), state.data.comment || x('summaryEmpty')]];
+
+    app.innerHTML = `
+      <section class="card">
+        <div class="review-header"><div class="hero-icon" aria-hidden="true">✓</div><h1 class="screen-title">${escapeHtml(t('reviewTitle'))}</h1><p class="screen-subtitle">${escapeHtml(x('reviewIntro'))}</p></div>
+        <div class="recipient"><span class="avatar">${escapeHtml(person.initials)}</span><span><strong>${escapeHtml(person.name)}</strong><small class="ltr">${escapeHtml(person.email)}</small></span><span class="recipient-check" aria-hidden="true">✓</span></div>
+        <div class="review-sections">
+          ${reviewSection(x('sectionSubmission'), submission)}
+          ${reviewSection(x('sectionCandidate'), candidate)}
+          ${reviewSection(x('sectionContact'), contact)}
+          ${reviewSection(x('sectionWork'), work)}
+        </div>
+        <div class="email-guide"><strong>✉️ ${escapeHtml(x('sendButton'))}</strong><p>${escapeHtml(x('emailInstruction'))}</p></div>
+        <div id="result" class="notice success hidden" style="margin-top:12px"></div>
+        <div class="review-actions">
+          <button class="button soft" type="button" data-action="edit">← ${escapeHtml(t('edit'))}</button>
+          <button class="button primary send-button" type="button" data-action="send">${escapeHtml(x('sendButton'))}</button>
+        </div>
+        <div style="text-align:center;margin-top:12px"><button class="link-button" type="button" data-action="new">${escapeHtml(t('newApplication'))}</button></div>
+      </section>`;
+
+    app.querySelector('[data-action="edit"]').addEventListener('click', () => { view = 'form'; state.step = 4; render(); });
+    app.querySelector('[data-action="new"]').addEventListener('click', startNew);
+    app.querySelector('[data-action="send"]').addEventListener('click', openEmail);
   }
 
-  function showFileError(message) {
-    $('fileError').textContent = message;
+  function filledByPolish() {
+    return state.data.filledBy === 'representative' ? 'Przedstawiciel / partner' : 'Kandydat';
   }
 
-  function clearFileError() {
-    $('fileError').textContent = '';
+  function locationPolish() {
+    const item = location();
+    return item ? `${item.name} (${item.subtitle})` : '';
   }
 
-  function addFiles(fileList) {
-    clearFileError();
-    const incoming = Array.from(fileList || []);
-    if (!incoming.length) return;
-
-    const existingKeys = new Set(selectedFiles.map(fileKey));
-    const accepted = [];
-    for (const file of incoming) {
-      if (existingKeys.has(fileKey(file))) continue;
-      const ext = fileExtension(file.name);
-      if (!CFG.allowedExtensions.includes(ext)) {
-        showFileError(`${dt('unsupportedFile')} ${file.name}`);
-        continue;
-      }
-      if (file.size > CFG.maxFileBytes) {
-        showFileError(`${dt('fileTooLarge')} ${file.name}`);
-        continue;
-      }
-      accepted.push(file);
-      existingKeys.add(fileKey(file));
-    }
-
-    if (selectedFiles.length + accepted.length > CFG.maxFiles) {
-      showFileError(dt('tooManyFiles'));
-      $('documentFiles').value = '';
-      return;
-    }
-    if (totalFileSize([...selectedFiles, ...accepted]) > CFG.maxTotalFileBytes) {
-      showFileError(dt('totalTooLarge'));
-      $('documentFiles').value = '';
-      return;
-    }
-
-    selectedFiles = [...selectedFiles, ...accepted];
-    state.hadFiles = selectedFiles.length > 0;
-    filesLostAfterResume = false;
-    const none = document.querySelector('[data-document-type="noneYet"]');
-    if (none?.checked) {
-      none.checked = false;
-      state.documentTypes = readDocumentTypes();
-    }
-    $('documentFiles').value = '';
-    renderSelectedFiles();
-    saveDraft();
-  }
-
-  function removeFile(index) {
-    selectedFiles = selectedFiles.filter((_, fileIndex) => fileIndex !== index);
-    state.hadFiles = selectedFiles.length > 0;
-    if (!selectedFiles.length) state.data.documentConsent = false;
-    renderSelectedFiles();
-    saveDraft();
-  }
-
-  function updateDocumentConsentVisibility() {
-    const field = $('documentConsentField');
-    if (!field) return;
-    field.classList.toggle('hidden', selectedFiles.length === 0);
-    if (!selectedFiles.length) $('documentConsent').checked = false;
-  }
-
-  function renderSelectedFiles() {
-    const hasFiles = selectedFiles.length > 0;
-    $('selectedFilesPanel').classList.toggle('hidden', !hasFiles);
-    $('selectedFilesSize').textContent = hasFiles ? `${selectedFiles.length} · ${formatBytes(totalFileSize())}` : '';
-    $('selectedFilesList').innerHTML = selectedFiles.map((file, index) => `
-      <li class="file-item">
-        <span class="file-icon" aria-hidden="true">📄</span>
-        <span class="file-main"><strong class="ltr-value">${escapeHtml(file.name)}</strong><small>${escapeHtml(formatBytes(file.size))}</small></span>
-        <button class="remove-file" type="button" data-remove-file="${index}" aria-label="${escapeHtml(dt('removeFile'))}: ${escapeHtml(file.name)}">×</button>
-      </li>`).join('');
-    document.querySelectorAll('[data-remove-file]').forEach((button) => {
-      button.addEventListener('click', () => removeFile(Number(button.dataset.removeFile)));
-    });
-    updateDocumentConsentVisibility();
-  }
-
-  function localizedValue(field, code) {
-    const group = selectMaps[field];
-    if (!group) return code;
-    return locale().options?.[group]?.[code] || I18N.locales.en.options?.[group]?.[code] || code;
-  }
-
-  function polishValue(field, code) {
-    const group = selectMaps[field];
-    if (!group) return code;
-    return I18N.internal?.[group]?.[code] || code;
-  }
-
-  function fieldDisplayValue(field, data = state.data) {
-    if (selectMaps[field]) return localizedValue(field, data[field]);
-    return data[field] || '—';
-  }
-
-  function routeSource() {
-    return route.source || 'brak';
-  }
-
-  function documentTypeLabel(id, language = state.language) {
-    return deliveryLocale(language).documentTypes?.[id]
-      || DELIVERY.locales.en.documentTypes?.[id]
-      || CFG.documentTypes.find((item) => item.id === id)?.internal
-      || id;
-  }
-
-  function documentTypeInternal(id) {
-    return CFG.documentTypes.find((item) => item.id === id)?.internal || id;
-  }
-
-  function spreadsheetSafe(value) {
-    const clean = singleLine(value);
-    return /^[=+\-@]/.test(clean) ? `'${clean}` : clean;
-  }
-
-  function excelValues({ concise = false } = {}) {
-    const data = state.data;
-    const recruiter = recruiterById();
-    const experience = concise ? truncate(data.experience) : data.experience;
-    const comment = concise ? truncate(data.comment) : data.comment;
+  function excelValues() {
+    const person = recruiter();
+    const d = state.data;
     return [
-      state.id,
-      formatWarsawDate(submissionIso()),
-      formatWarsawDate(slaIso()),
-      state.language?.toUpperCase() || '',
-      recruiter?.name || '',
-      recruiter?.email || '',
-      data.firstName,
-      data.lastName,
-      data.phone,
-      polishValue('messenger', data.messenger),
-      data.email,
-      data.citizenship,
-      data.country,
-      data.city,
-      data.age,
-      polishValue('inPoland', data.inPoland),
-      polishValue('documents', data.documents),
-      polishValue('job', data.job),
-      polishValue('workLocation', data.workLocation),
-      experience,
-      polishValue('start', data.start),
-      polishValue('shift', data.shift),
-      polishValue('housing', data.housing),
-      polishValue('source', data.source),
-      routeSource(),
-      route.campaign || '',
-      route.vacancy || '',
-      comment,
-      state.documentTypes.map(documentTypeInternal).join(' | '),
-      selectedFiles.map((file) => file.name).join(' | '),
-      selectedFiles.length,
-      (totalFileSize() / (1024 * 1024)).toFixed(2),
-      'NOWY',
-      '', '', '', '', '', '', '', ''
-    ].map(spreadsheetSafe);
+      state.id, formatDate(), slaDate(), (state.language || '').toUpperCase(), person?.name || '', person?.email || '',
+      filledByPolish(), d.representativeName, d.groupCode, locationPolish(), d.firstName, d.lastName, d.phone,
+      polishOption('messenger', d.messenger), d.email, d.citizenship, d.country, d.city, d.age,
+      polishOption('yesNo', d.inPoland), polishOption('documents', d.documents), polishOption('jobs', d.job),
+      d.experience, polishOption('starts', d.start), polishOption('shifts', d.shift), polishOption('yesNo', d.housing),
+      polishOption('sources', d.source), d.sourceDetails, route.source || '', route.campaign || '', route.vacancy || '',
+      d.comment, 'NOWY', '', '0', '', '', '', '', ''
+    ].map(cleanCell);
   }
 
-  function buildTsvRow(options) {
-    return excelValues(options).join('\t');
-  }
-
-  function csvCell(value) {
-    return `"${spreadsheetSafe(value).replace(/"/g, '""')}"`;
-  }
-
-  function buildCsv() {
-    const rows = [CFG.excelColumns, excelValues()];
-    return `\uFEFF${rows.map((row) => row.map(csvCell).join(';')).join('\r\n')}\r\n`;
-  }
-
-  function emailSubject(data = state.data) {
-    const recruiter = recruiterById();
-    const location = polishValue('workLocation', data.workLocation);
-    return `[NOWY KANDYDAT][${location.split('—')[0].trim()}] ${state.id} | ${data.firstName} ${data.lastName} | ${data.citizenship} | ${polishValue('job', data.job)} | ${recruiter?.name || ''}`.slice(0, 240);
-  }
-
-  function attachmentNames() {
-    return selectedFiles.length ? selectedFiles.map((file) => file.name).join(', ') : 'brak plików';
-  }
-
-  function candidateRows({ concise = false } = {}) {
-    const data = state.data;
-    const recruiter = recruiterById();
+  function emailRows() {
+    const person = recruiter();
+    const d = state.data;
     return [
-      ['ID zgłoszenia', state.id],
-      ['Data zgłoszenia', formatWarsawDate(submissionIso())],
-      ['SLA — pierwszy kontakt do', formatWarsawDate(slaIso())],
-      ['Status początkowy', 'NOWY'],
-      ['Język formularza', (state.language || '').toUpperCase()],
-      ['Rekruter', recruiter?.name || ''],
-      ['E-mail rekrutera', recruiter?.email || ''],
-      ['Imię', data.firstName],
-      ['Nazwisko', data.lastName],
-      ['Telefon', data.phone],
-      ['Komunikator', polishValue('messenger', data.messenger)],
-      ['E-mail kandydata', data.email || 'brak'],
-      ['Obywatelstwo', data.citizenship],
-      ['Kraj pobytu', data.country],
-      ['Miasto', data.city],
-      ['Wiek', data.age],
-      ['Obecnie w Polsce', polishValue('inPoland', data.inPoland)],
-      ['Dokumenty pobytowe / status', polishValue('documents', data.documents)],
-      ['Stanowisko', polishValue('job', data.job)],
-      ['Preferowana lokalizacja', polishValue('workLocation', data.workLocation)],
-      ['Doświadczenie', concise ? truncate(data.experience) || 'brak informacji' : data.experience || 'brak informacji'],
-      ['Gotowość do rozpoczęcia', polishValue('start', data.start)],
-      ['Praca zmianowa', polishValue('shift', data.shift)],
-      ['Zakwaterowanie', polishValue('housing', data.housing)],
-      ['Źródło deklarowane', polishValue('source', data.source)],
-      ['Źródło linku', routeSource()],
-      ['Kampania', route.campaign || 'brak'],
-      ['Wakacja / oferta', route.vacancy || 'brak'],
-      ['Komentarz', concise ? truncate(data.comment) || 'brak' : data.comment || 'brak'],
-      ['Rodzaje dokumentów', state.documentTypes.map(documentTypeInternal).join(' | ') || 'brak'],
-      ['Nazwy załączników', attachmentNames()],
-      ['Liczba załączników', String(selectedFiles.length)],
-      ['Łączny rozmiar załączników', formatBytes(totalFileSize())]
+      ['ID zgłoszenia', state.id], ['Data zgłoszenia', formatDate()], ['SLA do', slaDate()],
+      ['Język formularza', (state.language || '').toUpperCase()], ['Rekruter', person?.name || ''], ['E-mail rekrutera', person?.email || ''],
+      ['Ankietę wypełnia', filledByPolish()], ['Osoba / partner wypełniający', d.representativeName || 'brak'], ['Kod grupy / partnera', d.groupCode || 'brak'],
+      ['Preferowana lokalizacja', locationPolish()], ['Imię', d.firstName], ['Nazwisko', d.lastName], ['Telefon', d.phone],
+      ['Komunikator', polishOption('messenger', d.messenger)], ['E-mail kandydata', d.email || 'brak'],
+      ['Obywatelstwo', d.citizenship], ['Kraj pobytu', d.country], ['Miasto', d.city], ['Wiek', d.age],
+      ['Obecnie w Polsce', polishOption('yesNo', d.inPoland)], ['Dokument pobytowy', polishOption('documents', d.documents)],
+      ['Stanowisko', polishOption('jobs', d.job)], ['Doświadczenie', cleanCell(d.experience).slice(0, 360) || 'brak'],
+      ['Gotowość', polishOption('starts', d.start)], ['Praca zmianowa', polishOption('shifts', d.shift)], ['Zakwaterowanie', polishOption('yesNo', d.housing)],
+      ['Źródło deklarowane', polishOption('sources', d.source)], ['Szczegóły źródła / polecający', cleanCell(d.sourceDetails).slice(0, 220) || 'brak'],
+      ['Źródło linku', route.source || 'brak'], ['Kampania', route.campaign || 'brak'], ['Wakacja / oferta', route.vacancy || 'brak'],
+      ['Komentarz', cleanCell(d.comment).slice(0, 300) || 'brak']
     ];
   }
 
-  function buildPlainMessage({ concise = false } = {}) {
-    const recruiter = recruiterById();
-    const rows = candidateRows({ concise });
+  function buildEmailBody() {
+    const table = emailRows().map(([label,value]) => `${cleanCell(label)}\t${cleanCell(value)}`).join('\n');
+    const headers = CFG.excelColumns.map(cleanCell).join('\t');
+    const values = excelValues().join('\t');
     return [
       'CITRONEX / PPO SIECHNICE — NOWE ZGŁOSZENIE KANDYDATA',
       '',
-      `ODBIORCA: ${recruiter?.name || ''} <${recruiter?.email || ''}>`,
-      `STATUS: NOWY`,
-      `SLA: pierwsza próba kontaktu do ${formatWarsawDate(slaIso())}`,
-      '',
-      'TABELA KANDYDATA — POLE / WARTOŚĆ',
+      'TABELA KANDYDATA (2 KOLUMNY)',
       'Pole\tWartość',
-      ...rows.map(([label, value]) => `${singleLine(label)}\t${singleLine(value)}`),
+      table,
       '',
-      'DOKUMENTY',
-      selectedFiles.length
-        ? 'Dokumenty powinny być dołączone do tej wiadomości. Lista znajduje się w tabeli powyżej.'
-        : 'Kandydat nie wybrał plików. W razie potrzeby poproś o dokumenty w odpowiedzi.',
+      'DANE DO EXCEL — NAGŁÓWKI TSV',
+      headers,
       '',
-      'DANE DO EXCEL — SKOPIUJ TYLKO NASTĘPNY WIERSZ',
-      buildTsvRow({ concise }),
+      'DANE DO EXCEL — WIERSZ KANDYDATA',
+      values,
       '',
+      'Status początkowy: NOWY',
       `Wersja formularza: ${CFG.version}`
     ].join('\n');
   }
 
-  function htmlRow(label, value) {
-    return `<tr><th style="padding:9px 12px;border:1px solid #d9e4de;background:#f4f8f6;text-align:left;vertical-align:top;width:35%;font:700 12px Arial,sans-serif;color:#52645b;">${escapeHtml(label)}</th><td style="padding:9px 12px;border:1px solid #d9e4de;text-align:left;vertical-align:top;font:14px Arial,sans-serif;color:#17211d;white-space:pre-wrap;">${escapeHtml(value || '—')}</td></tr>`;
-  }
-
-  function buildHtmlMessage() {
-    const recruiter = recruiterById();
-    const rows = candidateRows();
-    const tsv = buildTsvRow();
-    const fileList = selectedFiles.length
-      ? `<ul style="margin:8px 0 0;padding-left:20px;">${selectedFiles.map((file) => `<li style="margin:4px 0;">${escapeHtml(file.name)} — ${escapeHtml(formatBytes(file.size))}</li>`).join('')}</ul>`
-      : '<p style="margin:8px 0 0;">Brak plików dołączonych przez kandydata.</p>';
-    return `<!doctype html><html><body style="margin:0;padding:22px;background:#eef4f0;color:#17211d;">
-      <div style="max-width:860px;margin:0 auto;background:#ffffff;border:1px solid #d9e4de;border-radius:18px;overflow:hidden;font-family:Arial,sans-serif;">
-        <div style="padding:22px 24px;background:linear-gradient(135deg,#075c39,#0b7a4b);color:#ffffff;">
-          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.82;">Citronex / PPO Siechnice</div>
-          <h1 style="margin:6px 0 0;font-size:24px;line-height:1.25;">Nowe zgłoszenie kandydata</h1>
-          <p style="margin:9px 0 0;font-size:14px;opacity:.9;">${escapeHtml(state.id)} · ${escapeHtml(polishValue('workLocation', state.data.workLocation))}</p>
-        </div>
-        <div style="padding:20px 24px;">
-          <div style="display:block;margin-bottom:16px;padding:14px 16px;border-radius:12px;background:#ecf8f1;border:1px solid #b8dfc8;color:#174c35;">
-            <strong>Rekruter: ${escapeHtml(recruiter?.name || '')}</strong><br>
-            <span>${escapeHtml(recruiter?.email || '')}</span><br>
-            <span>SLA pierwszego kontaktu: <strong>${escapeHtml(formatWarsawDate(slaIso()))}</strong></span>
-          </div>
-          <h2 style="margin:0 0 10px;font-size:18px;color:#075c39;">Tabela kandydata</h2>
-          <table role="presentation" style="width:100%;border-collapse:collapse;border-spacing:0;">${rows.map(([label, value]) => htmlRow(label, String(value ?? ''))).join('')}</table>
-          <div style="margin-top:18px;padding:15px 16px;border-radius:12px;background:#f8faf9;border:1px solid #d9e4de;">
-            <strong style="color:#075c39;">Załączniki</strong>${fileList}
-          </div>
-          <div style="margin-top:18px;padding:15px 16px;border-radius:12px;background:#fff8e8;border:1px solid #efd28d;">
-            <strong style="display:block;margin-bottom:7px;color:#7a4b00;">DANE DO EXCEL — skopiuj tylko następny wiersz</strong>
-            <div style="font:12px/1.5 Consolas,Monaco,monospace;white-space:pre-wrap;word-break:break-all;color:#3b352a;">${escapeHtml(tsv)}</div>
-          </div>
-          <p style="margin:16px 0 0;color:#738078;font-size:11px;">W załączniku znajduje się również plik CSV zgodny z kolejką rekrutacyjną. Wersja formularza ${escapeHtml(CFG.version)}.</p>
-        </div>
-      </div>
-    </body></html>`;
+  function emailSubject() {
+    const d = state.data;
+    return `[REKRUTACJA] ${state.id} | ${d.firstName} ${d.lastName} | ${d.citizenship} | ${location()?.name || ''} | ${recruiter()?.name || ''}`.slice(0, 230);
   }
 
   function buildMailto() {
-    const recruiter = recruiterById();
-    return `mailto:${recruiter?.email || ''}?subject=${encodeURIComponent(emailSubject())}&body=${encodeURIComponent(buildPlainMessage({ concise: true }))}`;
-  }
-
-  function showResult(message, type = 'success') {
-    $('resultMessage').textContent = message;
-    $('resultMessage').className = `notice ${type}`;
+    const person = recruiter();
+    const body = buildEmailBody();
+    return `mailto:${person?.email || ''}?subject=${encodeURIComponent(emailSubject())}&body=${encodeURIComponent(body)}`;
   }
 
   function openEmail() {
-    const recruiter = recruiterById();
-    if (!recruiter) {
-      renderRecruiterScreen();
-      showScreen('recruiterScreen');
-      return;
-    }
-    showResult(dt('mailOpened'), 'success');
+    const person = recruiter();
+    if (!person) { view = 'recruiter'; render(); return; }
+    const result = document.getElementById('result');
+    result.textContent = x('emailOpened');
+    result.classList.remove('hidden');
+    saveDraft();
     window.location.href = buildMailto();
   }
 
-  function bytesToBase64(bytes) {
-    let binary = '';
-    const chunkSize = 0x8000;
-    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-      const chunk = bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length));
-      binary += String.fromCharCode(...chunk);
-    }
-    return btoa(binary);
-  }
-
-  function utf8ToBase64(text) {
-    return bytesToBase64(new TextEncoder().encode(String(text)));
-  }
-
-  function wrapBase64(value) {
-    return String(value).replace(/.{1,76}/g, '$&\r\n').trimEnd();
-  }
-
-  function encodedHeader(value) {
-    return `=?UTF-8?B?${utf8ToBase64(value)}?=`;
-  }
-
-  function fallbackFilename(name) {
-    return String(name || 'attachment')
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9._-]+/g, '_')
-      .replace(/_+/g, '_')
-      .slice(0, 110) || 'attachment';
-  }
-
-  function mimeTypeFor(file) {
-    const ext = fileExtension(file.name);
-    const known = {
-      pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-      webp: 'image/webp', heic: 'image/heic', heif: 'image/heif', doc: 'application/msword',
-      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    };
-    return file.type || known[ext] || 'application/octet-stream';
-  }
-
-  async function buildEml() {
-    const recruiter = recruiterById();
-    if (!recruiter) throw new Error('Recruiter missing.');
-    const mixed = `mix_${state.id.replace(/[^a-zA-Z0-9]/g, '')}`;
-    const alternative = `alt_${Date.now()}`;
-    const replyTo = state.data.email ? `Reply-To: ${state.data.email}` : '';
-    const lines = [
-      'MIME-Version: 1.0',
-      'X-Unsent: 1',
-      `To: ${encodedHeader(recruiter.name)} <${recruiter.email}>`,
-      `Subject: ${encodedHeader(emailSubject())}`,
-      ...(replyTo ? [replyTo] : []),
-      `Date: ${new Date().toUTCString()}`,
-      `Content-Type: multipart/mixed; boundary="${mixed}"`,
-      '',
-      `--${mixed}`,
-      `Content-Type: multipart/alternative; boundary="${alternative}"`,
-      '',
-      `--${alternative}`,
-      'Content-Type: text/plain; charset="UTF-8"',
-      'Content-Transfer-Encoding: base64',
-      '',
-      wrapBase64(utf8ToBase64(buildPlainMessage())),
-      '',
-      `--${alternative}`,
-      'Content-Type: text/html; charset="UTF-8"',
-      'Content-Transfer-Encoding: base64',
-      '',
-      wrapBase64(utf8ToBase64(buildHtmlMessage())),
-      '',
-      `--${alternative}--`,
-      '',
-      `--${mixed}`,
-      `Content-Type: text/csv; charset="UTF-8"; name="${state.id}.csv"`,
-      'Content-Transfer-Encoding: base64',
-      `Content-Disposition: attachment; filename="${state.id}.csv"`,
-      '',
-      wrapBase64(utf8ToBase64(buildCsv())),
-      ''
-    ];
-
-    for (const file of selectedFiles) {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const fallback = fallbackFilename(file.name);
-      lines.push(
-        `--${mixed}`,
-        `Content-Type: ${mimeTypeFor(file)}; name="${fallback}"`,
-        'Content-Transfer-Encoding: base64',
-        `Content-Disposition: attachment; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(file.name)}`,
-        '',
-        wrapBase64(bytesToBase64(bytes)),
-        ''
-      );
-    }
-
-    lines.push(`--${mixed}--`, '');
-    return lines.join('\r\n');
-  }
-
-  async function prepareEml() {
-    const button = $('prepareEmlButton');
-    button.disabled = true;
-    button.textContent = dt('emlBuilding');
-    showResult(dt('emlBuilding'), 'success');
-    try {
-      const eml = await buildEml();
-      const blob = new Blob([eml], { type: 'message/rfc822;charset=utf-8' });
-      const anchor = document.createElement('a');
-      const safeName = fallbackFilename(`${state.id}_${state.data.firstName}_${state.data.lastName}`);
-      anchor.href = URL.createObjectURL(blob);
-      anchor.download = `${safeName}.eml`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      window.setTimeout(() => {
-        URL.revokeObjectURL(anchor.href);
-        anchor.remove();
-      }, 1500);
-      showResult(dt('emlReady'), 'success');
-    } catch (error) {
-      console.error('EML generation failed.', error);
-      showResult(dt('emlError'), 'error');
-    } finally {
-      button.disabled = false;
-      button.textContent = `📎 ${dt('prepareEml')}`;
-    }
-  }
-
-  function reviewSection(group) {
-    return `<section class="review-section">
-      <header><span aria-hidden="true">${group.icon}</span><h3>${escapeHtml(t(group.title))}</h3></header>
-      <dl>${group.fields.map((field) => `
-        <div class="review-row">
-          <dt>${escapeHtml(t(field))}</dt>
-          <dd class="${['phone', 'email'].includes(field) ? 'ltr-value' : ''}">${escapeHtml(fieldDisplayValue(field))}</dd>
-        </div>`).join('')}</dl>
-    </section>`;
-  }
-
-  function showReview() {
-    state.data = readForm();
-    state.documentTypes = readDocumentTypes();
-    state.submittedAt = new Date().toISOString();
-    const recruiter = recruiterById();
-    if (!recruiter) {
-      renderRecruiterScreen();
-      showScreen('recruiterScreen');
-      return;
-    }
-
-    $('reviewTitle').textContent = t('reviewTitle');
-    $('reviewSubtitle').textContent = t('reviewSubtitle');
-    $('reviewIdChip').textContent = state.id;
-    $('reviewLanguageChip').textContent = `${I18N.languages[state.language].flag} ${I18N.languages[state.language].native}`;
-    $('recipientLabel').textContent = t('recipient');
-    $('recipientName').textContent = recruiter.name;
-    $('recipientEmail').textContent = recruiter.email;
-    $('recipientInfo').textContent = t('recruiterEmail');
-    $('reviewChangeRecruiter').textContent = t('changeRecruiter');
-    $('reviewList').innerHTML = reviewGroups.map(reviewSection).join('');
-
-    $('reviewDocumentsTitle').textContent = dt('reviewDocumentsTitle');
-    $('reviewDocumentTypes').innerHTML = state.documentTypes
-      .map((id) => `<span class="chip">${escapeHtml(documentTypeLabel(id))}</span>`)
-      .join('');
-    $('reviewFileList').innerHTML = selectedFiles.length
-      ? selectedFiles.map((file) => `<li class="ltr-value">📎 ${escapeHtml(file.name)} · ${escapeHtml(formatBytes(file.size))}</li>`).join('')
-      : `<li>${escapeHtml(dt('noFilesSelected'))}</li>`;
-
-    $('reviewSla').textContent = `SLA: ${formatWarsawDate(slaIso())}`;
-    $('reviewLocation').textContent = polishValue('workLocation', state.data.workLocation);
-    $('deliveryTitle').textContent = dt('deliveryTitle');
-    $('deliverySubtitle').textContent = dt('deliverySubtitle');
-    $('recommendedBadge').textContent = dt('recommended');
-    $('emlTitle').textContent = dt('emlTitle');
-    $('emlDescription').textContent = dt('emlDescription');
-    $('emlSteps').innerHTML = (deliveryLocale().emlSteps || DELIVERY.locales.en.emlSteps).map((step) => `<li>${escapeHtml(step)}</li>`).join('');
-    $('prepareEmlButton').textContent = `📎 ${dt('prepareEml')}`;
-    $('mailtoTitle').textContent = dt('mailtoTitle');
-    $('mailtoDescription').textContent = dt('mailtoDescription');
-    $('mailtoSteps').innerHTML = (deliveryLocale().mailtoSteps || DELIVERY.locales.en.mailtoSteps).map((step) => `<li>${escapeHtml(step)}</li>`).join('');
-    $('mailButton').textContent = `✉️ ${dt('openEmail')}`;
-    $('editButton').textContent = t('edit');
-    $('newButton').textContent = t('newApplication');
-
-    const mailtoLength = buildMailto().length;
-    $('mailNotice').textContent = mailtoLength > CFG.maxMailtoLength ? dt('mailLong') : dt('mailtoDescription');
-    $('mailNotice').className = mailtoLength > CFG.maxMailtoLength ? 'notice warning' : 'notice';
-    $('resultMessage').classList.add('hidden');
-    [1, 2, 3, 4, 5].forEach((number) => {
-      $(`progress${number}`).classList.add('active');
-      $(`progressLabel${number}`)?.classList.toggle('active', number === 5);
-    });
-    saveDraft();
-    showScreen('reviewScreen');
-  }
-
-  function resetApplication() {
+  function startNew() {
     clearDraft();
-    selectedFiles = [];
-    filesLostAfterResume = false;
-    state = newState();
-    $('languageSearch').value = '';
-    applyDocumentLanguage();
-    renderLanguages();
-    showScreen('languageScreen');
+    state = createState();
+    view = 'language';
+    errors = {};
+    render();
   }
 
-  function resumeDraft(draft) {
-    selectedFiles = [];
-    filesLostAfterResume = Boolean(draft.hadFiles);
-    state = {
-      ...newState(),
-      ...draft,
-      data: { ...emptyData(), ...draft.data, documentConsent: false },
-      documentTypes: draft.documentTypes || [],
-      hadFiles: Boolean(draft.hadFiles),
-      submittedAt: ''
-    };
-    applyDocumentLanguage();
-    $('resumeBanner').classList.add('hidden');
-    if (!state.recruiterId) {
-      renderRecruiterScreen();
-      showScreen('recruiterScreen');
-      return;
-    }
-    renderFormText();
-    writeForm(state.data);
-    renderStep();
-    showScreen('formScreen');
-  }
-
-  function renderInitialStaticText() {
-    const initialLocale = I18N.locales.en;
-    const initialDelivery = DELIVERY.locales.en;
-    $('languageTitle').textContent = initialLocale.languageTitle;
-    $('languageSubtitle').textContent = initialLocale.languageSubtitle;
-    $('languageSearch').placeholder = initialLocale.languageSearch;
-    $('trustPrivate').textContent = `🔒 ${initialDelivery.trustPrivate}`;
-    $('trustMobile').textContent = `📱 ${initialLocale.trustMobile}`;
-    $('trustControl').textContent = `📨 ${initialLocale.trustControl}`;
-    renderFooter();
-  }
-
-  function updateLanguageScreenText() {
-    const L = locale(state.language || 'en');
-    $('languageTitle').textContent = L.languageTitle;
-    $('languageSubtitle').textContent = L.languageSubtitle;
-    $('languageSearch').placeholder = L.languageSearch;
-    $('trustPrivate').textContent = `🔒 ${dt('trustPrivate')}`;
-    $('trustMobile').textContent = `📱 ${L.trustMobile}`;
-    $('trustControl').textContent = `📨 ${L.trustControl}`;
-    renderFooter();
-  }
-
-  function bindEvents() {
-    $('languageSearch').addEventListener('input', (event) => renderLanguages(event.target.value));
-    $('recruiterBackLanguage').addEventListener('click', () => {
-      updateLanguageScreenText();
-      showScreen('languageScreen');
-    });
-    $('changeLanguage').addEventListener('click', () => {
-      state.data = readForm();
-      state.documentTypes = readDocumentTypes();
-      updateLanguageScreenText();
-      showScreen('languageScreen');
-      saveDraft();
-    });
-    $('changeRecruiter').addEventListener('click', () => {
-      state.data = readForm();
-      state.documentTypes = readDocumentTypes();
-      renderRecruiterScreen();
-      showScreen('recruiterScreen');
-      saveDraft();
-    });
-    $('reviewChangeRecruiter').addEventListener('click', () => {
-      renderRecruiterScreen();
-      showScreen('recruiterScreen');
-    });
-    $('backButton').addEventListener('click', () => {
-      if (state.step > 1) {
-        state.data = readForm();
-        state.documentTypes = readDocumentTypes();
-        state.step -= 1;
-        renderStep();
-        saveDraft();
-      }
-    });
-    $('nextButton').addEventListener('click', () => {
-      if (!validateStep(state.step)) return;
-      if (state.step < 4) {
-        state.step += 1;
-        renderStep();
-        saveDraft();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        showReview();
-      }
-    });
-    $('editButton').addEventListener('click', () => {
-      state.step = 3;
-      renderFormText();
-      writeForm(state.data);
-      renderStep();
-      showScreen('formScreen');
-    });
-    $('prepareEmlButton').addEventListener('click', prepareEml);
-    $('mailButton').addEventListener('click', openEmail);
-    $('newButton').addEventListener('click', resetApplication);
-    $('documentFiles').addEventListener('change', (event) => addFiles(event.target.files));
-    $('candidateForm').addEventListener('input', (event) => {
-      if (event.target?.type === 'file') return;
-      state.data = readForm();
-      saveDraft();
-    });
-    $('candidateForm').addEventListener('change', (event) => {
-      if (event.target?.type === 'file') return;
-      state.data = readForm();
-      state.documentTypes = readDocumentTypes();
-      saveDraft();
-    });
-    $('resumeButton').addEventListener('click', () => {
-      const draft = loadDraft();
-      if (draft) resumeDraft(draft);
-    });
-    $('discardButton').addEventListener('click', () => {
-      $('resumeBanner').classList.add('hidden');
-      resetApplication();
-    });
-  }
-
-  function initialize() {
-    renderInitialStaticText();
-    renderLanguages();
-    bindEvents();
-    applyDocumentLanguage();
-    const draft = loadDraft();
-    if (draft) {
-      const draftLocale = deepMerge(I18N.locales.en, I18N.locales[draft.language || 'en'] || {});
-      $('resumeText').textContent = draftLocale.draftFound;
-      $('resumeButton').textContent = draftLocale.resumeDraft;
-      $('discardButton').textContent = draftLocale.discardDraft;
-      $('resumeBanner').classList.remove('hidden');
-    }
-  }
-
-  initialize();
+  window.addEventListener('pagehide', saveDraft);
+  updateDocumentLanguage();
+  render();
 })();
