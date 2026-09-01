@@ -29,7 +29,7 @@ assert(config, 'RECRUITMENT_CONFIG was not created.');
 assert(i18n, 'RECRUITMENT_I18N was not created.');
 assert(extra, 'RECRUITMENT_EXTRA_I18N was not created.');
 assert(mobile, 'RECRUITMENT_MOBILE_I18N was not created.');
-assert(config.version === '8.2.0', `expected version 8.2.0, found ${config.version}.`);
+assert(config.version === '8.3.0', `expected version 8.3.0, found ${config.version}.`);
 assert(config.maxMailtoLength >= 5000 && config.maxMailtoLength <= 7000, 'mobile mailto limit is unsafe.');
 
 const expectedRecruiters = new Map([
@@ -87,10 +87,10 @@ for (const column of [
 
 const index = read('apply/index.html');
 for (const asset of [
-  'styles.css?v=8.2.0', 'mobile-v8.css?v=8.2.0', 'config.js?v=8.2.0',
-  'i18n-core.js?v=8.2.0', 'i18n-caucasus-central.js?v=8.2.0',
-  'i18n-asia.js?v=8.2.0', 'i18n-extra.js?v=8.2.0',
-  'i18n-mobile.js?v=8.2.0', 'app-mobile.js?v=8.2.0', '../assets/citronex-logo.jpg'
+  'styles.css?v=8.3.0', 'mobile-v8.css?v=8.3.0', 'config.js?v=8.3.0',
+  'i18n-core.js?v=8.3.0', 'i18n-caucasus-central.js?v=8.3.0',
+  'i18n-asia.js?v=8.3.0', 'i18n-extra.js?v=8.3.0',
+  'i18n-mobile.js?v=8.3.0', 'app-mobile.js?v=8.3.0', '../assets/citronex-logo.jpg'
 ]) {
   assert(index.includes(asset), `index.html does not reference ${asset}.`);
 }
@@ -106,10 +106,11 @@ for (const marker of [
   'routeContextKey', "view = state.recruiterId ? 'form' : 'recruiter'",
   "4: ['source', 'sourceDetails', 'consent']", 'function nextCandidateInGroup()',
   "for (const level of ['full', 'compact', 'minimal'])", 'function buildMailto()',
-  'window.location.href = buildMailto()', 'CFG.excelColumns.length',
+  'window.location.assign(mailto)', 'CFG.excelColumns.length',
   'DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A',
   'Status początkowy: NOWY', '[NOWY KANDYDAT]', 'route.partner', 'route.group',
-  'data-action="send"', 'data-action="next-candidate"'
+  'data-action="send"', 'data-action="next-candidate"', 'function sourceCards()',
+  "['filledBy', 'location', 'source']", 'PRIORYTET — PIERWSZY KONTAKT DO 24 GODZIN'
 ]) {
   assert(app.includes(marker), `app-mobile.js is missing required marker: ${marker}`);
 }
@@ -148,7 +149,7 @@ const css = `${read('apply/styles.css')}\n${read('apply/mobile-v8.css')}`;
 for (const marker of [
   '.site-header', '.language-grid', '.recruiter-grid', '.location-grid', '.choice-grid',
   '.actions{position:sticky', '.partner-panel', '.source-panel', '.partner-chip',
-  '.batch-button', '.fast-language-grid', 'font-size:16px', '@media(max-width:520px)'
+  '.batch-button', '.fast-language-grid', '.source-choice-grid', '.source-choice-card', 'font-size:16px', '@media(max-width:520px)'
 ]) {
   assert(css.includes(marker), `CSS is missing mobile marker: ${marker}`);
 }

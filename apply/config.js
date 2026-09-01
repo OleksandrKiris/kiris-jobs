@@ -2,12 +2,12 @@
   'use strict';
 
   window.RECRUITMENT_CONFIG = Object.freeze({
-    version: '8.2.0',
+    version: '8.3.0',
     brand: 'Citronex / PPO Siechnice',
     company: 'Przedsiębiorstwo Produkcji Ogrodniczej „Siechnice” Sp. z o.o.',
     privacyUrl: 'https://pposiechnice.pl/?lang=en&page_id=981',
     timeZone: 'Europe/Warsaw',
-    storageKey: 'citronex_recruitment_application_v8_2',
+    storageKey: 'citronex_recruitment_application_v8_3',
     draftMaxAgeMs: 24 * 60 * 60 * 1000,
     maxMailtoLength: 6200,
     recruiters: Object.freeze([

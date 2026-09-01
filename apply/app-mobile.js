@@ -377,7 +377,7 @@
     return `
       <div class="field ${full ? 'full' : ''}">
         <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ''}</label>
-        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' || id === 'email' ? 'ltr' : ''}" type="${type}" maxlength="${max}" value="${attr(state.data[id])}" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
+        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' || id === 'email' ? 'ltr' : ''}" type="${type}" enterkeyhint="next" maxlength="${max}" value="${attr(state.data[id])}" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
         ${hint ? `<div class="hint">${escapeHtml(hint)}</div>` : ''}
         ${errorHtml(id)}
       </div>`;
@@ -412,6 +412,33 @@
         <span>${escapeHtml(label)}</span>
       </label>`;
   }
+
+
+function sourceIcon(value) {
+  return ({
+    facebook: '📘', instagram: '📸', tiktok: '🎵', telegram: '✈️',
+    whatsapp: '💬', viber: '📞', referral: '🤝', recruiter: '👤', other: '＋'
+  })[value] || '•';
+}
+
+function sourceCards() {
+  const options = coreLocale().options?.sources || I18N.locales.en.options.sources;
+  return `
+    <div class="source-choice-grid">
+      ${Object.entries(options).map(([value, label]) => {
+        const selected = state.data.source === value;
+        return `
+          <label class="source-choice-card ${selected ? 'selected' : ''}">
+            <input type="radio" name="source" data-field="source" value="${attr(value)}" ${selected ? 'checked' : ''}>
+            <span class="source-choice-icon" aria-hidden="true">${sourceIcon(value)}</span>
+            <span class="source-choice-label">${escapeHtml(label)}</span>
+            <span class="source-choice-check" aria-hidden="true">✓</span>
+          </label>`;
+      }).join('')}
+    </div>
+    ${errorHtml('source')}`;
+}
+
 
   function partnerBadge() {
     if (state.data.filledBy !== 'representative') return '';
@@ -493,8 +520,8 @@
       <div class="source-panel">
         <div class="panel-heading"><span aria-hidden="true">📣</span><strong>${escapeHtml(x('sourcePanelTitle'))}</strong></div>
         <div class="field full">
-          <label for="source">${escapeHtml(t('source'))} <span class="required">*</span></label>
-          ${selectHtml('source', 'sources')}
+          <span class="fieldset-title">${escapeHtml(t('source'))} <span class="required">*</span></span>
+          ${sourceCards()}
         </div>
         ${textField({ id: 'sourceDetails', label: x('sourceDetails'), hint: x('sourceDetailsHint'), placeholder: x('sourceDetailsPlaceholder'), required: true, full: true, max: 180 })}
       </div>
@@ -583,7 +610,7 @@
         }
         delete errors[field];
         saveDraft();
-        if (['filledBy', 'location'].includes(field)) renderForm();
+        if (['filledBy', 'location', 'source'].includes(field)) renderForm();
       });
     });
   }
@@ -780,31 +807,43 @@
   }
 
   function buildEmailBody(level = 'full') {
-    const table = emailRows(level)
-      .map(([label, value]) => `${cleanCell(label)}\t${cleanCell(value)}`)
-      .join('\n');
-    const values = excelValues(level).join('\t');
-    return [
-      'CITRONEX / PPO SIECHNICE — NOWE ZGŁOSZENIE KANDYDATA',
-      '',
-      'TABELA KANDYDATA',
-      'Pole\tWartość',
-      table,
-      '',
-      'DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A',
-      values,
-      '',
-      'Status początkowy: NOWY',
-      `Wersja formularza: ${CFG.version}`
-    ].join('\n');
-  }
+  const data = state.data;
+  const person = recruiter();
+  const table = emailRows(level)
+    .map(([label, value]) => `${cleanCell(label)}\t${cleanCell(value)}`)
+    .join('\n');
+  const values = excelValues(level).join('\t');
+  return [
+    'CITRONEX / PPO SIECHNICE — NOWE ZGŁOSZENIE KANDYDATA',
+    '',
+    'PRIORYTET — PIERWSZY KONTAKT DO 24 GODZIN',
+    `ID\t${state.id}`,
+    `SLA do\t${slaDate()}`,
+    `Rekruter\t${person?.name || ''}`,
+    `Telefon\t${cleanCell(data.phone)}`,
+    `Komunikator\t${polishOption('messenger', data.messenger)}`,
+    `Lokalizacja\t${locationPolish()}`,
+    `Stanowisko\t${polishOption('jobs', data.job)}`,
+    `Źródło\t${polishOption('sources', data.source)} — ${cleanCell(data.sourceDetails, 100)}`,
+    '',
+    'SZCZEGÓŁY KANDYDATA',
+    'Pole\tWartość',
+    table,
+    '',
+    'DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A',
+    values,
+    '',
+    'Status początkowy: NOWY',
+    `Wersja formularza: ${CFG.version}`
+  ].join('\n');
+}
 
   function emailSubject() {
     const data = state.data;
     const partnerTag = data.filledBy === 'representative'
       ? `[PARTNER${data.groupCode ? ` ${cleanCell(data.groupCode, 24)}` : ''}]`
       : '';
-    return `[NOWY KANDYDAT][${selectedLocation()?.name || 'LOKALIZACJA'}]${partnerTag} ${cleanCell(data.firstName, 40)} ${cleanCell(data.lastName, 50)} | ${cleanCell(data.citizenship, 45)} | ${recruiter()?.name || ''}`.slice(0, 220);
+    return `[NOWY KANDYDAT][SLA 24H][${selectedLocation()?.name || 'LOKALIZACJA'}]${partnerTag} ${cleanCell(data.firstName, 40)} ${cleanCell(data.lastName, 50)} | ${cleanCell(data.citizenship, 45)} | ${recruiter()?.name || ''}`.slice(0, 220);
   }
 
   function mailtoFor(level) {
@@ -821,13 +860,25 @@
   }
 
   function openEmail() {
-    if (!recruiter()) { view = 'recruiter'; render(); return; }
-    const result = document.getElementById('result');
-    result.textContent = x('emailOpened');
-    result.classList.remove('hidden');
-    saveDraft();
-    window.location.href = buildMailto();
+  if (!recruiter()) { view = 'recruiter'; render(); return; }
+  const button = app.querySelector('[data-action="send"]');
+  if (button?.disabled) return;
+  if (button) {
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
   }
+  const result = document.getElementById('result');
+  result.textContent = x('emailOpened');
+  result.classList.remove('hidden');
+  saveDraft();
+  const mailto = buildMailto();
+  window.setTimeout(() => {
+    if (!button) return;
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+  }, 2500);
+  window.location.assign(mailto);
+}
 
   function nextCandidateInGroup() {
     const previous = state;
