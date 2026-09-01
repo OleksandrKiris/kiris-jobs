@@ -20,12 +20,54 @@ jobs:
     steps:
       - name: Получить код
         uses: actions/checkout@v4
+
       - name: Настроить Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Проверить JavaScript и контент
-        run: npm test
+
+      - name: Подготовить статические файлы
+        run: |
+          node scripts/build-candidate-css.mjs
+          node scripts/generate-vacancy-pages.mjs
+
+      - name: Проверить JavaScript
+        run: |
+          node --check assets/candidate.js
+          node --check assets/i18n.js
+          node --check assets/application-form.js
+          node --check apply/config.js
+          node --check apply/i18n-core.js
+          node --check apply/i18n-caucasus-central.js
+          node --check apply/i18n-asia.js
+          node --check apply/delivery-i18n.js
+          node --check apply/assets/extra-i18n.js
+          node --check apply/assets/mail.js
+          node --check apply/assets/app-core.js
+          node --check apply/assets/app-ui.js
+          node --check apply/assets/app.js
+          node --check sw.js
+          node --check data/content.js
+
+      - name: Проверить контент и интерфейсы
+        run: |
+          node scripts/validate-content.mjs
+          node scripts/validate-locales.mjs
+          node scripts/validate-ui.mjs
+          node scripts/validate-apply.mjs
+
+      - name: Проверить обязательные файлы анкеты
+        run: |
+          test -s apply/index.html
+          test -s apply/privacy.html
+          test -s apply/assets/styles.css
+          test -s apply/assets/app.js
+          test -s apply/assets/app-core.js
+          test -s apply/assets/app-ui.js
+          test -s apply/assets/mail.js
+          grep -q 'assets/app-core.js?v=6.0.0' apply/index.html
+          grep -q 'assets/mail.js?v=6.0.0' apply/index.html
+          grep -q 'location' apply/config.js
 
   deploy:
     environment:
@@ -36,12 +78,15 @@ jobs:
     steps:
       - name: Получить код
         uses: actions/checkout@v4
+
       - name: Настроить GitHub Pages
         uses: actions/configure-pages@v5
+
       - name: Подготовить статические файлы
         uses: actions/upload-pages-artifact@v3
         with:
           path: "."
+
       - name: Опубликовать
         id: deployment
         uses: actions/deploy-pages@v4
