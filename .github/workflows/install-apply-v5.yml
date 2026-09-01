@@ -25,26 +25,37 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify and install complete application package
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(find .github/install-apply-v5 -maxdepth 1 -type f -name 'part*' | wc -l)" -eq 5
-          cat .github/install-apply-v5/part* | base64 --decode > /tmp/apply-v5.tar.gz
-          echo "399ebf0aa40c58e804b972324def7796ae6de9e9282e4027797fc0a95772719e  /tmp/apply-v5.tar.gz" | sha256sum -c -
-          tar -xzf /tmp/apply-v5.tar.gz -C .
-          node --check apply/config.js
-          node --check apply/location-i18n.js
-          node --check apply/app.js
-          node scripts/validate-apply.mjs
-
-      - name: Commit production application
+      - name: Install, validate and publish production application
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm -r .github/install-apply-v5 .github/workflows/install-apply-v5.yml
-          git add apply package.json scripts/validate-apply.mjs
-          git commit -m "Launch recruitment application v5 with locations and Excel email workflow"
-          git push
+
+          prepare_release() {
+            git fetch origin main
+            git reset --hard origin/main
+            test "$(find .github/install-apply-v5 -maxdepth 1 -type f -name 'part*' | wc -l)" -eq 5
+            cat .github/install-apply-v5/part* | base64 --decode > /tmp/apply-v5.tar.gz
+            echo "399ebf0aa40c58e804b972324def7796ae6de9e9282e4027797fc0a95772719e  /tmp/apply-v5.tar.gz" | sha256sum -c -
+            tar -xzf /tmp/apply-v5.tar.gz -C .
+            node --check apply/config.js
+            node --check apply/location-i18n.js
+            node --check apply/app.js
+            node scripts/validate-apply.mjs
+            git rm -r .github/install-apply-v5 .github/workflows/install-apply-v5.yml
+            git add apply package.json scripts/validate-apply.mjs
+            git commit -m "Launch recruitment application v5 with locations and Excel email workflow"
+          }
+
+          for attempt in 1 2 3 4; do
+            prepare_release
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push conflict on attempt ${attempt}; rebuilding on current main."
+            sleep $((attempt * 2))
+          done
+
+          echo "Could not publish the production application after four attempts."
+          exit 1
