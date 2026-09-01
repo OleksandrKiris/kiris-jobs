@@ -2,18 +2,14 @@
   'use strict';
 
   window.RECRUITMENT_CONFIG = Object.freeze({
-    version: '6.0.0',
+    version: '7.0.0',
     brand: 'Citronex / PPO Siechnice',
     company: 'Przedsiębiorstwo Produkcji Ogrodniczej „Siechnice” Sp. z o.o.',
-    privacyUrl: './privacy.html',
+    privacyUrl: 'https://pposiechnice.pl/?lang=en&page_id=981',
     timeZone: 'Europe/Warsaw',
-    storageKey: 'citronex_recruitment_application_v6',
+    storageKey: 'citronex_recruitment_application_v7',
     draftMaxAgeMs: 24 * 60 * 60 * 1000,
-    maxFiles: 12,
-    maxFileBytes: 8 * 1024 * 1024,
-    maxTotalFileBytes: 12 * 1024 * 1024,
-    maxMailtoLength: 7000,
-    allowedExtensions: Object.freeze(['pdf', 'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'doc', 'docx']),
+    maxMailtoLength: 7200,
     recruiters: Object.freeze([
       Object.freeze({ id: 'yana', name: 'Yana Radushynska', email: 'yana.radushynska@pposiechnice.pl', initials: 'YR' }),
       Object.freeze({ id: 'yuliia', name: 'Yuliia Korniienko', email: 'yuliia.korniienko@pposiechnice.pl', initials: 'YK' }),
@@ -23,35 +19,24 @@
       Object.freeze({ id: 'anastasiia', name: 'Anastasiia Derepa', email: 'anastasiia.derepa@citronex.pl', initials: 'AD' })
     ]),
     locations: Object.freeze([
-      Object.freeze({ id: 'siechnice', name: 'Siechnice', detailKey: 'greenhouseSorting', address: 'ul. Opolska 30, Siechnice' }),
-      Object.freeze({ id: 'ryczywol', name: 'Ryczywół / Kozienice', detailKey: 'greenhouse', address: 'woj. mazowieckie' }),
-      Object.freeze({ id: 'bogatynia', name: 'Bogatynia', detailKey: 'greenhouseSorting', address: 'woj. dolnośląskie' }),
-      Object.freeze({ id: 'zgorzelec', name: 'Zgorzelec', detailKey: 'bananaCleaning', address: 'woj. dolnośląskie' }),
-      Object.freeze({ id: 'pruszcz', name: 'Pruszcz Gdański', detailKey: 'bananaWarehouse', address: 'woj. pomorskie' }),
-      Object.freeze({ id: 'any', name: 'Dowolna lokalizacja', detailKey: 'recruiterChoice', address: 'do ustalenia' })
-    ]),
-    documentTypes: Object.freeze([
-      Object.freeze({ id: 'passport' }),
-      Object.freeze({ id: 'visaResidence' }),
-      Object.freeze({ id: 'peselUkr' }),
-      Object.freeze({ id: 'workPermit' }),
-      Object.freeze({ id: 'driver' }),
-      Object.freeze({ id: 'qualification' }),
-      Object.freeze({ id: 'cv' }),
-      Object.freeze({ id: 'other' }),
-      Object.freeze({ id: 'noneYet' })
+      Object.freeze({ id: 'siechnice', name: 'Siechnice', subtitle: 'Szklarnie · sortownia', address: 'ul. Opolska 30' }),
+      Object.freeze({ id: 'ryczywol', name: 'Ryczywół / Kozienice', subtitle: 'Szklarnie', address: 'woj. mazowieckie' }),
+      Object.freeze({ id: 'bogatynia', name: 'Bogatynia', subtitle: 'Szklarnie · sortownia', address: 'woj. dolnośląskie' }),
+      Object.freeze({ id: 'zgorzelec', name: 'Zgorzelec', subtitle: 'Banany · sprzątanie', address: 'woj. dolnośląskie' }),
+      Object.freeze({ id: 'pruszcz', name: 'Pruszcz Gdański', subtitle: 'Magazyn bananów', address: 'woj. pomorskie' }),
+      Object.freeze({ id: 'any', name: 'Dowolna lokalizacja', subtitle: 'Rekruter dobierze ofertę', address: 'do ustalenia' })
     ]),
     queryParams: Object.freeze({
       language: 'lang', recruiter: 'recruiter', source: 'src', campaign: 'campaign', vacancy: 'vacancy', location: 'location'
     }),
     excelColumns: Object.freeze([
       'ID zgłoszenia', 'Data zgłoszenia', 'SLA do', 'Język', 'Rekruter', 'E-mail rekrutera',
+      'Ankietę wypełnia', 'Osoba / partner wypełniający', 'Kod grupy / partnera',
       'Preferowana lokalizacja', 'Imię', 'Nazwisko', 'Telefon', 'Komunikator', 'E-mail kandydata',
       'Obywatelstwo', 'Kraj pobytu', 'Miasto', 'Wiek', 'W Polsce', 'Dokument pobytowy',
       'Stanowisko', 'Doświadczenie', 'Gotowość', 'Praca zmianowa', 'Zakwaterowanie',
-      'Źródło deklarowane', 'Źródło linku', 'Kampania', 'Wakacja / oferta',
-      'Typy dokumentów', 'Nazwy załączników', 'Liczba załączników', 'Komentarz',
-      'Status', 'Data pierwszego kontaktu', 'Liczba prób kontaktu', 'Następny kontakt',
+      'Źródło deklarowane', 'Szczegóły źródła / polecający', 'Źródło linku', 'Kampania', 'Wakacja / oferta',
+      'Komentarz', 'Status', 'Data pierwszego kontaktu', 'Liczba prób kontaktu', 'Następny kontakt',
       'Wynik rozmowy', 'Decyzja', 'Powód odmowy', 'Uwagi rekrutera'
     ])
   });
