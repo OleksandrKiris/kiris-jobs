@@ -1,0 +1,24 @@
+html{-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{touch-action:manipulation}
+.header-inner,.app-shell{max-width:760px}
+.partner-panel,.source-panel{margin:2px 0 16px;padding:14px;border:1px solid #b8ddc8;border-radius:18px;background:linear-gradient(145deg,#f2fbf6,#ffffff)}
+.partner-panel .field:last-child,.source-panel .field:last-child{margin-bottom:0}
+.source-panel{border-color:#efd19a;background:linear-gradient(145deg,#fff9ec,#ffffff)}
+.source-panel .hint{font-weight:650;color:#6f5a2a}
+.send-button{box-shadow:0 12px 26px rgba(7,92,57,.2)}
+@media(max-width:720px){
+  .app-shell{width:100%;padding-left:8px;padding-right:8px}
+  .card{min-height:calc(100dvh - 116px)}
+  .field input,.field select,.field textarea,.search{font-size:16px}
+  .language-card,.recruiter-card,.location-card,.choice-card{min-height:64px}
+  .partner-panel,.source-panel{padding:12px;margin-left:-2px;margin-right:-2px}
+  .review-actions{position:sticky;bottom:0;z-index:9;margin:16px -19px -19px;padding:12px 19px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(14px)}
+}
+@media(max-width:520px){
+  .site-header{position:sticky}
+  .brand-copy small{display:none}
+  .topbar>div:last-child{display:flex;width:100%;justify-content:space-between}
+  .choice-card{min-height:72px}
+  .choice-card span:last-child{font-size:14px}
+  .send-button{min-height:60px;font-size:15px}
+}
