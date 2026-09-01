@@ -1,9 +1,9 @@
-const CACHE = 'citronex-recruitment-v14.0.3';
+const CACHE = 'citronex-recruitment-v14.0.4';
 const CORE = [
   './', './index.html', './offline-redirect.js',
   './offline.html', './offline-v12.css',
-  './offline-shared-v14.0.3.js', './offline-candidate-v14.0.3.js',
-  './offline-translations-v14.0.3.js',
+  './offline-shared-v14.0.3.js', './offline-candidate-v14.0.4.js',
+  './offline-translations-v14.0.4.js',
   './manifest.webmanifest', './offline-icon.svg',
   './excel/Recruitment_Master.xlsx', './excel/Recruitment_yana.xlsx',
   './excel/Recruitment_yuliia.xlsx', './excel/Recruitment_fariz.xlsx',
