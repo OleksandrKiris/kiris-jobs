@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   verify:
@@ -40,17 +40,20 @@ jobs:
           test -s apply/i18n-extra.js
           test -s apply/i18n-mobile.js
           test -s apply/app-mobile.js
-          grep -q 'styles.css?v=8.2.0' apply/index.html
-          grep -q 'mobile-v8.css?v=8.2.0' apply/index.html
-          grep -q 'i18n-mobile.js?v=8.2.0' apply/index.html
-          grep -q 'app-mobile.js?v=8.2.0' apply/index.html
+          grep -q 'styles.css?v=8.3.0' apply/index.html
+          grep -q 'mobile-v8.css?v=8.3.0' apply/index.html
+          grep -q 'i18n-mobile.js?v=8.3.0' apply/index.html
+          grep -q 'app-mobile.js?v=8.3.0' apply/index.html
           grep -q 'citronex-logo.jpg' apply/index.html
-          grep -q "version: '8.2.0'" apply/config.js
+          grep -q "version: '8.3.0'" apply/config.js
           grep -q 'nextCandidateInGroup' apply/app-mobile.js
           grep -q 'routeContextKey' apply/app-mobile.js
           grep -q "\['full', 'compact', 'minimal'\]" apply/app-mobile.js
           grep -q 'sourceDetails' apply/app-mobile.js
           grep -q 'representativeName' apply/app-mobile.js
+          grep -q 'function sourceCards' apply/app-mobile.js
+          grep -q 'PRIORYTET — PIERWSZY KONTAKT DO 24 GODZIN' apply/app-mobile.js
+          grep -q 'source-choice-grid' apply/mobile-v8.css
           ! grep -q 'enhancements-v8.js' apply/index.html
 
   deploy:
