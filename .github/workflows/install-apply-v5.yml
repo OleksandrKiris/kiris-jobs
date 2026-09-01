@@ -25,10 +25,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify and install application package
+      - name: Verify and install complete application package
         shell: bash
         run: |
           set -euo pipefail
+          test "$(find .github/install-apply-v5 -maxdepth 1 -type f -name 'part*' | wc -l)" -eq 5
           cat .github/install-apply-v5/part* | base64 --decode > /tmp/apply-v5.tar.gz
           echo "399ebf0aa40c58e804b972324def7796ae6de9e9282e4027797fc0a95772719e  /tmp/apply-v5.tar.gz" | sha256sum -c -
           tar -xzf /tmp/apply-v5.tar.gz -C .
