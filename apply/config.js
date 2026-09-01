@@ -1,16 +1,15 @@
 (() => {
   'use strict';
 
-  // GitHub Pages compatibility marker only: version: '7.0.0'
   window.RECRUITMENT_CONFIG = Object.freeze({
-    version: '8.1.0',
+    version: '8.2.0',
     brand: 'Citronex / PPO Siechnice',
     company: 'Przedsiębiorstwo Produkcji Ogrodniczej „Siechnice” Sp. z o.o.',
     privacyUrl: 'https://pposiechnice.pl/?lang=en&page_id=981',
     timeZone: 'Europe/Warsaw',
-    storageKey: 'citronex_recruitment_application_v8_1',
+    storageKey: 'citronex_recruitment_application_v8_2',
     draftMaxAgeMs: 24 * 60 * 60 * 1000,
-    maxMailtoLength: 7000,
+    maxMailtoLength: 6200,
     recruiters: Object.freeze([
       Object.freeze({ id: 'yana', name: 'Yana Radushynska', email: 'yana.radushynska@pposiechnice.pl', initials: 'YR' }),
       Object.freeze({ id: 'yuliia', name: 'Yuliia Korniienko', email: 'yuliia.korniienko@pposiechnice.pl', initials: 'YK' }),
