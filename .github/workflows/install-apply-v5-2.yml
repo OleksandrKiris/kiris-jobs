@@ -1,0 +1,64 @@
+name: Install branded recruitment form v5.2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/install-apply-v5-2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Rebuild and install branded application
+        shell: bash
+        run: |
+          cat .github/install-v5-2/part0* > /tmp/apply-v5-2.b85
+          python - <<'PY'
+          import base64
+          import hashlib
+          from pathlib import Path
+
+          encoded = b''.join(Path('/tmp/apply-v5-2.b85').read_bytes().split())
+          archive = base64.b85decode(encoded)
+          digest = hashlib.sha256(archive).hexdigest()
+          expected = 'faf64fbe6f4aec34178c608255e2c9245b7f37c49c9741948435f3b129d4d842'
+          if digest != expected:
+              raise SystemExit(f'Archive checksum mismatch: {digest}')
+          Path('/tmp/apply-v5-2.tar.xz').write_bytes(archive)
+          print(f'Archive verified: {digest}')
+          PY
+          rm -rf apply
+          tar -xJf /tmp/apply-v5-2.tar.xz
+          npm test
+
+      - name: Commit application update and remove installers
+        shell: bash
+        run: |
+          rm -rf .github/install-v5-2
+          rm -f .github/workflows/install-apply-v5-2.yml
+          rm -f .github/workflows/install-apply-v51.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -- apply package.json scripts/validate-apply.mjs .github/install-v5-2 .github/workflows/install-apply-v5-2.yml .github/workflows/install-apply-v51.yml
+          if git diff --cached --quiet; then
+            echo 'No application changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Upgrade recruitment form to branded v5.2 interface'
+          git push
