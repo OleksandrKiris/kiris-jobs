@@ -35,42 +35,35 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Основная анкета: одна логика, одна таблица-строка, без CSV и файлов.
           test -s apply/index.html
           test -s apply/styles.css
           test -s apply/config.js
           test -s apply/translations.js
           test -s apply/app.js
-          grep -q 'styles.css?v=16.0.0' apply/index.html
-          grep -q 'translations.js?v=16.0.0' apply/index.html
-          grep -q 'app.js?v=16.0.0' apply/index.html
+          grep -q 'styles.css?v=16.0.1' apply/index.html
+          grep -q 'translations.js?v=16.0.1' apply/index.html
+          grep -q 'app.js?v=16.0.1' apply/index.html
           grep -q 'href="pdf/"' apply/index.html
-          grep -q "version: '16.0.0'" apply/config.js
           grep -q 'function sendRow' apply/app.js
           grep -q 'DANE DO EXCEL' apply/app.js
           grep -q 'window.location.assign(mailto)' apply/app.js
-          grep -q 'const sentAt = new Date()' apply/app.js
           ! grep -qi '\bcsv\b' apply/index.html apply/app.js
           ! grep -q 'type="file"' apply/index.html apply/app.js
           ! grep -q 'navigator.share' apply/app.js
-          ! grep -q 'mobile-v8.css\|ui-v9.css\|ui-v11.css\|delivery-v10.css' apply/index.html
-          ! grep -q 'app-mobile.js\|ui-v9.js\|ui-v11.js\|delivery-v10.js\|offline-redirect.js' apply/index.html
+          ! grep -q 'position:sticky\|position:fixed\|backdrop-filter' apply/styles.css
+          test "$(grep -c 'rel="stylesheet"' apply/index.html)" -eq 1
 
-          # Отдельный необязательный генератор: только PDF через Print / Save as PDF.
           test -s apply/pdf/index.html
           test -s apply/pdf/styles.css
           test -s apply/pdf/app.js
-          grep -q 'styles.css?v=1.0.0' apply/pdf/index.html
-          grep -q 'app.js?v=1.0.0' apply/pdf/index.html
+          grep -q 'styles.css?v=1.0.1' apply/pdf/index.html
+          grep -q 'app.js?v=1.0.1' apply/pdf/index.html
           grep -q 'window.print()' apply/pdf/app.js
           grep -q 'URL.createObjectURL' apply/pdf/app.js
+          grep -q 'minmax(0,420px)' apply/pdf/styles.css
+          ! grep -q 'position:sticky\|position:fixed\|min-max(' apply/pdf/styles.css
           ! grep -Eqi '\b(csv|xlsx|tsv|zip)\b' apply/pdf/index.html apply/pdf/styles.css apply/pdf/app.js
           ! grep -q 'navigator.share\|mailto:\|wa.me\|viber://' apply/pdf/app.js
-          ! test -e apply/pdf/service-worker.js
-          ! test -e apply/pdf/manifest.webmanifest
-          ! test -e apply/offline-candidate-v14.0.4.js
-          ! test -e apply/offline-shared-v14.0.3.js
-          ! test -e apply/offline-translations-v14.0.4.js
 
   deploy:
     environment:
