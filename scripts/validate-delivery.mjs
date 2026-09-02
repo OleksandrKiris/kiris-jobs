@@ -5,26 +5,40 @@ const fail = (message) => { console.error(`PDF generator validation failed: ${me
 const assert = (condition, message) => { if (!condition) fail(message); };
 
 const mainIndex = read('apply/index.html');
+const mainApp = read('apply/app.js');
 const pdfIndex = read('apply/pdf/index.html');
+const pdfCss = read('apply/pdf/styles.css');
+const pdfApp = read('apply/pdf/app.js');
 const redirect = read('apply/offline.html');
-const sw = read('apply/pdf/service-worker.js');
-const manifest = JSON.parse(read('apply/pdf/manifest.webmanifest'));
 const packageJson = JSON.parse(read('package.json'));
 
 assert(mainIndex.includes('href="pdf/"'), 'main page does not link to the separate PDF generator.');
-assert(!mainIndex.includes('offline-candidate'), 'main page still loads generator code.');
-assert(!mainIndex.includes('type="file"'), 'main page still contains file upload.');
-for (const marker of ['../offline-v12.css?v=14.0.4','../offline-shared-v14.0.3.js','../offline-translations-v14.0.4.js','../offline-candidate-v14.0.4.js','data-mode="candidate"']) {
-  assert(pdfIndex.includes(marker), `PDF generator page is missing ${marker}.`);
+assert(!mainIndex.includes('type="file"'), 'main form still contains a file input.');
+assert(!mainIndex.includes('offline-candidate') && !mainIndex.includes('delivery-v10'), 'main form still loads generator/package code.');
+assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), 'main form still creates or shares files.');
+assert(!/\bcsv\b/i.test(`${mainIndex}\n${mainApp}`), 'main form still contains CSV workflow.');
+
+for (const marker of [
+  'styles.css?v=1.0.0', 'app.js?v=1.0.0', 'id="pdfApp"',
+  '../../assets/citronex-logo.jpg', 'connect-src \'none\''
+]) assert(pdfIndex.includes(marker), `PDF page is missing ${marker}.`);
+for (const marker of [
+  'window.print()', 'URL.createObjectURL', 'type="file"',
+  'image/jpeg,image/png,image/webp,image/heic,image/heif',
+  "const LANGUAGES", "pl:['🇵🇱'", "ru:['🇷🇺'", "uk:['🇺🇦'"
+]) assert(pdfApp.includes(marker), `PDF app is missing ${marker}.`);
+for (const marker of ['@page{size:A4', '@media print', '.pdf-sheet', '.photo-sheet']) {
+  assert(pdfCss.includes(marker), `PDF styles are missing ${marker}.`);
 }
-for (const file of [
-  'apply/offline-v12.css','apply/offline-shared-v14.0.3.js','apply/offline-translations-v14.0.4.js','apply/offline-candidate-v14.0.4.js',
-  'apply/pdf/service-worker.js','apply/pdf/manifest.webmanifest','apply/offline-icon.svg'
-]) assert(fs.existsSync(file) && fs.statSync(file).size > 0, `missing PDF generator asset: ${file}`);
-assert(redirect.includes('url=pdf/'), 'legacy offline.html does not redirect to the generator.');
-assert(sw.includes("const CACHE = 'citronex-pdf-generator-v16'"), 'PDF generator service worker has wrong cache.');
-assert(sw.includes("caches.match('./index.html')"), 'PDF generator has no offline navigation fallback.');
-assert(manifest.start_url === './' && manifest.scope === './', 'PDF generator manifest must be isolated to /apply/pdf/.');
-assert(packageJson.scripts['check:js'].includes('apply/app.js'), 'package.json does not syntax-check the simple form.');
-assert(packageJson.scripts['check:js'].includes('apply/offline-candidate-v14.0.4.js'), 'package.json does not syntax-check the PDF generator.');
-console.log('PDF generator validation passed: isolated optional generator, main form remains row-only.');
+
+const pdfCombined = `${pdfIndex}\n${pdfCss}\n${pdfApp}`;
+for (const forbidden of [
+  /\bcsv\b/i, /\bxlsx\b/i, /\btsv\b/i, /\bzip\b/i,
+  /navigator\.share/, /mailto:/i, /wa\.me/i, /viber:\/\//i,
+  /fetch\s*\(/, /XMLHttpRequest/, /serviceWorker\.register/
+]) assert(!forbidden.test(pdfCombined), `PDF generator contains forbidden workflow: ${forbidden}.`);
+
+assert(redirect.includes('url=pdf/'), 'legacy offline.html does not redirect to /apply/pdf/.');
+assert(packageJson.scripts['check:js'].includes('apply/pdf/app.js'), 'package.json does not syntax-check the PDF generator.');
+assert(!packageJson.scripts['check:js'].includes('offline-candidate'), 'package.json still checks old PDF package modules.');
+console.log('PDF generator validation passed: separate print-only PDF tool, no CSV/XLSX/TSV/ZIP or server upload.');

@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Основная анкета: один интерфейс, одна логика, без файлов и CSV.
+          # Основная анкета: одна логика, одна таблица-строка, без CSV и файлов.
           test -s apply/index.html
           test -s apply/styles.css
           test -s apply/config.js
@@ -50,25 +50,27 @@ jobs:
           grep -q 'DANE DO EXCEL' apply/app.js
           grep -q 'window.location.assign(mailto)' apply/app.js
           grep -q 'const sentAt = new Date()' apply/app.js
-
-          ! grep -qi 'csv' apply/index.html apply/app.js apply/translations.js
+          ! grep -qi '\bcsv\b' apply/index.html apply/app.js
           ! grep -q 'type="file"' apply/index.html apply/app.js
           ! grep -q 'navigator.share' apply/app.js
           ! grep -q 'mobile-v8.css\|ui-v9.css\|ui-v11.css\|delivery-v10.css' apply/index.html
           ! grep -q 'app-mobile.js\|ui-v9.js\|ui-v11.js\|delivery-v10.js\|offline-redirect.js' apply/index.html
 
-          # Необязательный генератор PDF живёт отдельно и не вмешивается в анкету.
+          # Отдельный необязательный генератор: только PDF через Print / Save as PDF.
           test -s apply/pdf/index.html
-          test -s apply/pdf/manifest.webmanifest
-          test -s apply/pdf/service-worker.js
-          test -s apply/offline-v12.css
-          test -s apply/offline-shared-v14.0.3.js
-          test -s apply/offline-translations-v14.0.4.js
-          test -s apply/offline-candidate-v14.0.4.js
-          grep -q 'Generator PDF' apply/pdf/index.html
-          grep -q '../offline-shared-v14.0.3.js' apply/pdf/index.html
-          grep -q '../offline-translations-v14.0.4.js' apply/pdf/index.html
-          grep -q '../offline-candidate-v14.0.4.js' apply/pdf/index.html
+          test -s apply/pdf/styles.css
+          test -s apply/pdf/app.js
+          grep -q 'styles.css?v=1.0.0' apply/pdf/index.html
+          grep -q 'app.js?v=1.0.0' apply/pdf/index.html
+          grep -q 'window.print()' apply/pdf/app.js
+          grep -q 'URL.createObjectURL' apply/pdf/app.js
+          ! grep -Eqi '\b(csv|xlsx|tsv|zip)\b' apply/pdf/index.html apply/pdf/styles.css apply/pdf/app.js
+          ! grep -q 'navigator.share\|mailto:\|wa.me\|viber://' apply/pdf/app.js
+          ! test -e apply/pdf/service-worker.js
+          ! test -e apply/pdf/manifest.webmanifest
+          ! test -e apply/offline-candidate-v14.0.4.js
+          ! test -e apply/offline-shared-v14.0.3.js
+          ! test -e apply/offline-translations-v14.0.4.js
 
   deploy:
     environment:
