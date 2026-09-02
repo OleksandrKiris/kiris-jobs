@@ -1,90 +1,37 @@
-# Citronex / PPO Siechnice — publiczna ankieta rekrutacyjna
+# Citronex / PPO Siechnice — prosta ankieta rekrutacyjna
 
-Adres produkcyjny:
+## Linki produkcyjne
 
-`https://oleksandrkiris.github.io/kiris-jobs/apply/`
+- Ankieta: `https://oleksandrkiris.github.io/kiris-jobs/apply/`
+- Opcjonalny generator PDF: `https://oleksandrkiris.github.io/kiris-jobs/apply/pdf/`
 
-## Główny proces
+## Jak działa ankieta
 
-1. Kandydat otwiera link na telefonie.
-2. Wybiera język i swojego rekrutera.
-3. Zaznacza, czy wypełnia formularz osobiście, czy jako partner / przedstawiciel grupy.
-4. Uzupełnia dane kandydata, sytuację pobytową, lokalizację i preferencje pracy.
-5. Wskazuje kanał pozyskania oraz konkretną osobę, partnera, profil, stronę lub grupę.
-6. Sprawdza dane i naciska **„Otwórz pocztę i wyślij zgłoszenie”**.
-7. Telefon otwiera aplikację pocztową z gotowym odbiorcą, tematem, tabelą kandydata i wierszem TSV do Excela.
-8. Kandydat sprawdza wiadomość i samodzielnie naciska **„Wyślij”**.
+1. Kandydat wybiera język.
+2. Wybiera jednego rekrutera.
+3. Podaje podstawowe dane, lokalizację pracy i źródło kontaktu.
+4. Sprawdza zgłoszenie.
+5. Naciska **„Otwórz e-mail i wyślij wiersz”**.
+6. Otwiera się aplikacja pocztowa z odbiorcą i jedną linią TSV do wspólnego Excela.
+7. Kandydat sam naciska **Wyślij**.
 
-Strona nie używa backendu, bazy danych ani zewnętrznego formularza.
+Główna ankieta **nie tworzy CV, nie przyjmuje plików i nie generuje PDF**. Dzięki temu działa szybko na telefonie i nie miesza dwóch różnych procesów.
 
-## Interfejs mobilny
+## Wiersz Excel
 
-Formularz jest projektowany przede wszystkim dla telefonu:
+Wiadomość zawiera tylko krótką instrukcję po polsku i jeden wiersz rozdzielony tabulatorami. Rekruter kopiuje wiersz do pierwszej pustej komórki kolumny A wspólnego Excela. Układ zachowuje 40 kolumn dotychczasowej kolejki, a pola operacyjne zaczynają się od statusu `NOWY`.
 
-- duże pola i przyciski;
-- cztery krótkie etapy;
-- karty wyboru rekrutera, lokalizacji, stanowiska, komunikatora i źródła;
-- stałe przyciski „Wstecz” i „Dalej” w dolnej części ekranu;
-- automatyczne zapisywanie niedokończonej ankiety przez 24 godziny;
-- czytelne oznaczenie wypełnionych pól;
-- ochrona przed podwójnym otwarciem wiadomości;
-- obsługa RTL dla języka urdu.
+## Generator PDF
 
-## Partner / grupa
+Generator pod `/apply/pdf/` jest osobną, opcjonalną funkcją. Można w nim przygotować PDF, arkusz Excel i pakiet dokumentów, ale nie jest potrzebny do wysłania zwykłej ankiety.
 
-Po wyborze **„Wypełniam za kandydata / grupę”** pojawiają się pola:
+---
 
-- osoba / partner wypełniający;
-- kod grupy / partnera.
+# Русская инструкция
 
-Po przygotowaniu pierwszego zgłoszenia można użyć przycisku **„Następny kandydat z tej grupy”**. Formularz zachowuje rekrutera, partnera, kod grupy, lokalizację, stanowisko i źródło, a usuwa dane osobowe poprzedniego kandydata.
+Основная анкета и генератор PDF разделены.
 
-## Lokalizacje
+- Анкета: `https://oleksandrkiris.github.io/kiris-jobs/apply/`
+- Отдельный генератор PDF: `https://oleksandrkiris.github.io/kiris-jobs/apply/pdf/`
 
-- Siechnice — szklarnie / sortownia;
-- Ryczywół / Kozienice — szklarnie;
-- Bogatynia — szklarnie / sortownia;
-- Zgorzelec — banany / sprzątanie;
-- Pruszcz Gdański — magazyn bananów;
-- dowolna lokalizacja — ofertę dobiera rekruter.
-
-## E-mail i Excel
-
-Wiadomość trafia wyłącznie do rekrutera wybranego z zatwierdzonej listy. Adresu nie można podmienić przez URL.
-
-Temat zawiera status nowego kandydata, SLA 24 h, lokalizację, dane kandydata oraz nazwę rekrutera.
-
-W treści znajduje się blok:
-
-`DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A`
-
-Rekruter kopiuje jeden wiersz TSV i wkleja go do pierwszej pustej komórki kolumny A wspólnego Excela. Początkowy status to `NOWY`.
-
-## Parametry linku
-
-Przykład zwykły:
-
-`?lang=uk&recruiter=yana&location=siechnice&src=facebook&campaign=greenhouse_01`
-
-Przykład dla partnera:
-
-`?lang=ka&recruiter=oleksandr&location=siechnice&src=referral&partner=Giorgi%20Beridze&group=GE-BOLNISI`
-
-Obsługiwane parametry:
-
-- `lang`
-- `recruiter`
-- `location`
-- `src`
-- `campaign`
-- `vacancy`
-- `partner`
-- `group`
-
-## Test
-
-```bash
-npm test
-```
-
-Test sprawdza JavaScript, 20 języków, sześciu rekruterów, sześć lokalizacji, partnerów, źródła, strukturę wiadomości, 40 kolumn Excela oraz pliki interfejsu mobilnego.
+Основная анкета не создаёт CV, не загружает документы и не формирует PDF. После заполнения открывается почта выбранного рекрутера, а в письме находится одна строка TSV для вставки в общий Excel. Генератор PDF используется отдельно и только при необходимости.

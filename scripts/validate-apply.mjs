@@ -2,127 +2,81 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const read = (path) => fs.readFileSync(path, 'utf8');
-const fail = (message) => {
-  console.error(`Application validation failed: ${message}`);
-  process.exit(1);
-};
+const fail = (message) => { console.error(`Application validation failed: ${message}`); process.exit(1); };
 const assert = (condition, message) => { if (!condition) fail(message); };
 
-const context = vm.createContext({ window: {}, console, URL, Intl });
-for (const path of [
-  'apply/config.js',
-  'apply/i18n-core.js',
-  'apply/i18n-caucasus-central.js',
-  'apply/i18n-asia.js',
-  'apply/i18n-extra.js',
-  'apply/i18n-mobile.js'
-]) {
+const context = vm.createContext({ window: {}, console, URL, Intl, Object });
+for (const path of ['apply/config.js','apply/i18n-core.js','apply/i18n-caucasus-central.js','apply/i18n-asia.js','apply/i18n-extra.js','apply/i18n-mobile.js','apply/translations.js']) {
   vm.runInContext(read(path), context, { filename: path });
 }
 
-const config = context.window.RECRUITMENT_CONFIG;
-const i18n = context.window.RECRUITMENT_I18N;
-const extra = context.window.RECRUITMENT_EXTRA_I18N;
-const mobile = context.window.RECRUITMENT_MOBILE_I18N;
+const config = context.window.CITRONEX_SIMPLE_CONFIG;
+const i18n = context.window.CITRONEX_SIMPLE_I18N;
+assert(config, 'CITRONEX_SIMPLE_CONFIG was not created.');
+assert(i18n, 'CITRONEX_SIMPLE_I18N was not created.');
+assert(config.version === '16.0.0', `expected version 16.0.0, found ${config.version}.`);
+assert(config.pdfGeneratorUrl === './pdf/', 'PDF generator must use a separate /apply/pdf/ route.');
 
-assert(config, 'RECRUITMENT_CONFIG was not created.');
-assert(i18n, 'RECRUITMENT_I18N was not created.');
-assert(extra, 'RECRUITMENT_EXTRA_I18N was not created.');
-assert(mobile, 'RECRUITMENT_MOBILE_I18N was not created.');
-assert(config.version === '8.3.0', `expected version 8.3.0, found ${config.version}.`);
-assert(config.maxMailtoLength >= 5000 && config.maxMailtoLength <= 7000, 'mobile mailto limit is unsafe.');
-
-const expectedRecruiters = new Map([
-  ['Yana Radushynska', 'yana.radushynska@pposiechnice.pl'],
-  ['Yuliia Korniienko', 'yuliia.korniienko@pposiechnice.pl'],
-  ['Fariz Injaev', 'fariz.injaev@pposiechnice.pl'],
-  ['Oleksandr Kiris', 'oleksandr.kiris@pposiechnice.pl'],
-  ['Maksym Saliuk', 'maksym.saliuk@pposiechnice.pl'],
-  ['Anastasiia Derepa', 'anastasiia.derepa@citronex.pl']
+const expectedContacts = new Map([
+  ['yana', ['Yana Radushynska', 'yana.radushynska@pposiechnice.pl', '+48 797 066 987']],
+  ['yuliia', ['Yuliia Korniienko', 'yuliia.korniienko@pposiechnice.pl', '+48 506 845 667']],
+  ['fariz', ['Fariz Injaev', 'fariz.injaev@pposiechnice.pl', '+48 504 165 739']],
+  ['oleksandr', ['Oleksandr Kiris', 'oleksandr.kiris@pposiechnice.pl', '+48 502 251 384']],
+  ['maksym', ['Maksym Saliuk', 'maksym.saliuk@pposiechnice.pl', '+48 506 845 637']],
+  ['anastasiia', ['Anastasiia Derepa', 'anastasiia.derepa@citronex.pl', '+48 797 684 159']]
 ]);
-assert(config.recruiters.length === expectedRecruiters.size, `expected ${expectedRecruiters.size} recruiters, found ${config.recruiters.length}.`);
-const recruiterIds = new Set();
-const recruiterEmails = new Set();
-for (const recruiter of config.recruiters) {
-  assert(recruiter.id && !recruiterIds.has(recruiter.id), `duplicate or missing recruiter id: ${recruiter.id}`);
-  recruiterIds.add(recruiter.id);
-  assert(expectedRecruiters.get(recruiter.name) === recruiter.email, `incorrect recruiter or email: ${recruiter.name}`);
-  assert(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recruiter.email), `invalid email: ${recruiter.email}`);
-  assert(!recruiterEmails.has(recruiter.email.toLowerCase()), `duplicate recruiter email: ${recruiter.email}`);
-  recruiterEmails.add(recruiter.email.toLowerCase());
+assert(config.recruiters.length === 6, `expected 6 recruiters, found ${config.recruiters.length}.`);
+for (const person of config.recruiters) {
+  const expected = expectedContacts.get(person.id);
+  assert(expected, `unexpected recruiter: ${person.id}`);
+  assert(person.name === expected[0] && person.email === expected[1] && person.phone === expected[2], `incorrect contact data for ${person.id}.`);
 }
-
-const expectedLocations = ['siechnice', 'ryczywol', 'bogatynia', 'zgorzelec', 'pruszcz', 'any'];
-assert(JSON.stringify(config.locations.map((item) => item.id)) === JSON.stringify(expectedLocations), `unexpected locations: ${config.locations.map((item) => item.id).join(', ')}`);
-for (const item of config.locations) assert(item.name && item.subtitle && item.address, `incomplete location: ${item.id}`);
-
-for (const parameter of ['language', 'recruiter', 'source', 'campaign', 'vacancy', 'location', 'partner', 'group']) {
-  assert(config.queryParams[parameter], `missing query parameter: ${parameter}`);
-}
-
-const languageCodes = Object.keys(i18n.languages);
-assert(languageCodes.length === 20, `expected exactly 20 languages, found ${languageCodes.length}.`);
-for (const code of languageCodes) {
-  assert(i18n.locales[code], `missing main locale: ${code}`);
-  assert(extra.locales[code], `missing extra locale: ${code}`);
-}
-
-const primaryLanguages = ['en', 'pl', 'ru', 'uk', 'ka', 'az', 'hy', 'tr', 'uz'];
-const mobileKeys = [
-  'self', 'representative', 'step1Subtitle', 'step4Title', 'step4Subtitle',
-  'sourceDetails', 'sourceDetailsHint', 'sourceDetailsPlaceholder', 'emailInstruction',
-  'partnerPanelTitle', 'sourcePanelTitle', 'nextCandidate', 'nextCandidateHint'
-];
-for (const code of primaryLanguages) {
-  for (const key of mobileKeys) assert(mobile[code]?.[key], `missing mobile translation ${code}.${key}`);
-}
-
+assert(JSON.stringify(config.locations) === JSON.stringify(['siechnice','ryczywol','bogatynia','zgorzelec','pruszcz','any']), 'location list changed unexpectedly.');
 assert(config.excelColumns.length === 40, `expected 40 Excel columns, found ${config.excelColumns.length}.`);
-for (const column of [
-  'Ankietę wypełnia', 'Osoba / partner wypełniający', 'Kod grupy / partnera',
-  'Preferowana lokalizacja', 'Szczegóły źródła / polecający', 'Status', 'Następny kontakt'
-]) {
+for (const column of ['ID zgłoszenia','SLA do','Rekruter','Preferowana lokalizacja','Szczegóły źródła / polecający','Status','Następny kontakt']) {
   assert(config.excelColumns.includes(column), `missing Excel column: ${column}`);
 }
 
+const codes = Object.keys(i18n.languages);
+assert(codes.length === 20, `expected 20 languages, found ${codes.length}.`);
+assert(i18n.priority.length === 9, `expected 9 priority languages, found ${i18n.priority.length}.`);
+for (const code of ['pl','uk','ru','en','ka','az','hy','tr','uz']) assert(i18n.priority.includes(code), `missing priority language: ${code}`);
+for (const code of codes) {
+  const locale = i18n.locales[code];
+  assert(locale, `missing locale: ${code}`);
+  for (const key of ['chooseLanguage','chooseRecruiter','step1Title','step2Title','step3Title','step4Title','sendRow','pdfOpen','options']) {
+    assert(locale[key], `missing ${code}.${key}`);
+  }
+}
+
 const index = read('apply/index.html');
-for (const asset of [
-  'styles.css?v=8.3.0', 'mobile-v8.css?v=8.3.0', 'config.js?v=8.3.0',
-  'i18n-core.js?v=8.3.0', 'i18n-caucasus-central.js?v=8.3.0',
-  'i18n-asia.js?v=8.3.0', 'i18n-extra.js?v=8.3.0',
-  'i18n-mobile.js?v=8.3.0', 'app-mobile.js?v=8.3.0', '../assets/citronex-logo.jpg'
-]) {
-  assert(index.includes(asset), `index.html does not reference ${asset}.`);
+for (const marker of ['styles.css?v=16.0.0','config.js?v=16.0.0','i18n-core.js?v=16.0.0','i18n-caucasus-central.js?v=16.0.0','i18n-asia.js?v=16.0.0','i18n-extra.js?v=16.0.0','i18n-mobile.js?v=16.0.0','translations.js?v=16.0.0','app.js?v=16.0.0','../assets/citronex-logo.jpg','href="pdf/"','id="app"']) {
+  assert(index.includes(marker), `index.html is missing ${marker}.`);
 }
-assert(index.includes('id="app"'), 'index.html is missing #app.');
-assert(index.includes('viewport-fit=cover'), 'mobile viewport is incomplete.');
-assert(index.includes('apple-mobile-web-app-capable'), 'iPhone web-app metadata is missing.');
-assert(!index.includes('compatibility markers'), 'obsolete compatibility markers are still present.');
+for (const obsolete of ['mobile-v8.css','ui-v9','ui-v11','delivery-v10','app-mobile.js','offline-redirect.js']) {
+  assert(!index.includes(obsolete), `index.html still loads obsolete layer: ${obsolete}`);
+}
 
-const app = read('apply/app-mobile.js');
+const app = read('apply/app.js');
 for (const marker of [
-  "data.filledBy = partnerMode ? 'representative' : ''",
-  "data.source = suggestedSource || (partnerMode ? 'referral' : '')",
-  'routeContextKey', "view = state.recruiterId ? 'form' : 'recruiter'",
-  "4: ['source', 'sourceDetails', 'consent']", 'function nextCandidateInGroup()',
-  "for (const level of ['full', 'compact', 'minimal'])", 'function buildMailto()',
-  'window.location.assign(mailto)', 'CFG.excelColumns.length',
+  'CITRONEX_SIMPLE_CONFIG','CITRONEX_SIMPLE_I18N','function rowValues','function sendRow',
+  "const sentAt = new Date()",'window.location.assign(mailto)',
   'DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A',
-  'Status początkowy: NOWY', '[NOWY KANDYDAT]', 'route.partner', 'route.group',
-  'data-action="send"', 'data-action="next-candidate"', 'function sourceCards()',
-  "['filledBy', 'location', 'source']", 'PRIORYTET — PIERWSZY KONTAKT DO 24 GODZIN'
-]) {
-  assert(app.includes(marker), `app-mobile.js is missing required marker: ${marker}`);
-}
+  "'NOWY'",'CFG.excelColumns.length','pdfGeneratorUrl','cleanupLegacyServiceWorker',
+  "4: ['source', 'sourceDetails', 'consent']"
+]) assert(app.includes(marker), `app.js is missing required marker: ${marker}`);
 
-const rowStart = app.indexOf('    const row = [', app.indexOf('function excelValues'));
+for (const forbidden of ['type="file"','navigator.share','new File(','buildPdf','createPdf','delivery-v10','ui-v11','app-mobile']) {
+  assert(!app.includes(forbidden), `main application still contains removed workflow: ${forbidden}`);
+}
+assert(!app.includes('TABELA KANDYDATA'), 'main email must send one row, not a full table.');
+assert(!app.includes('WIERSZ DO EXCEL — NAGŁÓWKI'), 'main email must not send headers.');
+
+const rowStart = app.indexOf('    const values = [', app.indexOf('function rowValues'));
 const rowEnd = app.indexOf('\n    ].map', rowStart);
 assert(rowStart >= 0 && rowEnd > rowStart, 'Excel row definition could not be inspected.');
-const rowSource = app.slice(rowStart + '    const row = ['.length, rowEnd);
-let depth = 0;
-let quote = '';
-let escaped = false;
-let items = 1;
+const rowSource = app.slice(rowStart + '    const values = ['.length, rowEnd);
+let depth = 0, quote = '', escaped = false, items = 1;
 for (const character of rowSource) {
   if (quote) {
     if (escaped) escaped = false;
@@ -130,28 +84,15 @@ for (const character of rowSource) {
     else if (character === quote) quote = '';
     continue;
   }
-  if (character === "'" || character === '"' || character === '`') quote = character;
+  if (["'", '"', '`'].includes(character)) quote = character;
   else if ('([{'.includes(character)) depth += 1;
   else if (')]}'.includes(character)) depth -= 1;
   else if (character === ',' && depth === 0) items += 1;
 }
 assert(items === config.excelColumns.length, `Excel row has ${items} values but config has ${config.excelColumns.length} columns.`);
 
-const combined = `${index}\n${app}`.toLowerCase();
-for (const forbidden of [
-  'enhancements-v8.js', 'type="file"', 'buildeml', '.eml', 'prepareemlbutton',
-  'downloadtxt', 'copyapplication', 'navigator.clipboard', 'formsubmit', 'firebase', 'supabase'
-]) {
-  assert(!combined.includes(forbidden), `unwanted workflow is still present: ${forbidden}`);
+const css = read('apply/styles.css');
+for (const marker of ['.language-grid','.recruiter-list','.sticky-actions','.choice-card','.send-box','.pdf-card','@media(max-width:440px)','font-size:16px']) {
+  assert(css.includes(marker), `styles.css is missing mobile marker: ${marker}`);
 }
-
-const css = `${read('apply/styles.css')}\n${read('apply/mobile-v8.css')}`;
-for (const marker of [
-  '.site-header', '.language-grid', '.recruiter-grid', '.location-grid', '.choice-grid',
-  '.actions{position:sticky', '.partner-panel', '.source-panel', '.partner-chip',
-  '.batch-button', '.fast-language-grid', '.source-choice-grid', '.source-choice-card', 'font-size:16px', '@media(max-width:520px)'
-]) {
-  assert(css.includes(marker), `CSS is missing mobile marker: ${marker}`);
-}
-
-console.log(`Application validation passed: v${config.version}, ${config.recruiters.length} recruiters, ${config.locations.length} locations, ${languageCodes.length} languages, ${config.excelColumns.length} Excel columns.`);
+console.log(`Application validation passed: clean v${config.version}, ${codes.length} languages, ${config.recruiters.length} recruiters, ${config.excelColumns.length} Excel columns.`);
