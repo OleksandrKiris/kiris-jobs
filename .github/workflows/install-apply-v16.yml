@@ -1,0 +1,73 @@
+name: Install simplified Citronex form v16
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/install-apply-v16.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: install-apply-v16
+  cancel-in-progress: false
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Restore clean v16 files
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .automation/apply-v16-part-* > /tmp/apply-v16.b64
+          base64 --decode /tmp/apply-v16.b64 > /tmp/apply-v16.tar.gz
+          echo "fa6ba337cbbc56fff4f3b88ad5441f5138a7ed22c94151d4091902bcafcfdace  /tmp/apply-v16.tar.gz" | sha256sum --check
+          rm -rf /tmp/apply-v16
+          mkdir -p /tmp/apply-v16
+          tar -xzf /tmp/apply-v16.tar.gz -C /tmp/apply-v16
+          cp -a /tmp/apply-v16/repository-files/. .
+
+          rm -rf .automation .github/install-apply-v5 apply/assets
+          rm -f \
+            apply/app-mobile.js \
+            apply/mobile-v8.css \
+            apply/ui-v9.css apply/ui-v9.js \
+            apply/ui-v11.css apply/ui-v11.js \
+            apply/delivery-v10.css apply/delivery-v10.js apply/delivery-v10-i18n.js \
+            apply/delivery-i18n.js apply/offline-redirect.js apply/location-i18n.js \
+            apply/service-worker.js apply/manifest.webmanifest \
+            apply/OFFLINE-SYSTEM.md apply/privacy.html \
+            apply/offline-candidate.js apply/offline-candidate-v14.0.3.js \
+            apply/offline-shared.js \
+            apply/offline-translations.js apply/offline-translations-v14.0.3.js
+
+          npm test
+
+      - name: Commit clean production version
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/install-apply-v16.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Simplify recruitment form and separate PDF generator"
+          git push
