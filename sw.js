@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v200-consistent-styles-2026-07-28";
+const CACHE_VERSION = "kiris-jobs-v201-apply-layout-fix-2026-09-02";
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -73,6 +73,15 @@ self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) return;
 
+  const isRecruitmentPage = requestUrl.pathname.includes("/kiris-jobs/apply/");
+  if (isRecruitmentPage) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
@@ -103,8 +112,6 @@ self.addEventListener("fetch", (event) => {
 
   event.waitUntil(networkUpdate.then(() => undefined).catch(() => undefined));
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || networkUpdate.catch(() => cached);
-    })
+    caches.match(event.request).then((cached) => cached || networkUpdate.catch(() => cached))
   );
 });
