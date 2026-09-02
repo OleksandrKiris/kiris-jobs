@@ -25,7 +25,7 @@ for (const marker of [
 for (const marker of [
   'window.print()', 'URL.createObjectURL', 'type="file"',
   'image/jpeg,image/png,image/webp,image/heic,image/heif',
-  "const LANGUAGES", "pl:['🇵🇱'", "ru:['🇷🇺'", "uk:['🇺🇦'"
+  "const L={", "pl:['🇵🇱'", "ru:['🇷🇺'", "uk:['🇺🇦'"
 ]) assert(pdfApp.includes(marker), `PDF app is missing ${marker}.`);
 for (const marker of ['@page{size:A4', '@media print', '.pdf-sheet', '.photo-sheet']) {
   assert(pdfCss.includes(marker), `PDF styles are missing ${marker}.`);
