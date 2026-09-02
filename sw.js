@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v201-apply-layout-fix-2026-09-02";
+const CACHE_VERSION = "kiris-jobs-v200-apply-layout-fix-2026-09-02-1";
 const CORE_SHELL = [
   "./",
   "./index.html",
