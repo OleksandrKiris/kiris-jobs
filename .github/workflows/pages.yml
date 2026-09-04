@@ -40,9 +40,9 @@ jobs:
           test -s apply/config.js
           test -s apply/translations.js
           test -s apply/app.js
-          grep -q 'styles.css?v=17.1.2' apply/index.html
+          grep -q 'styles.css?v=17.2.0' apply/index.html
           grep -q 'translations.js?v=17.0.0' apply/index.html
-          grep -q 'app.js?v=17.1.1' apply/index.html
+          grep -q 'app.js?v=17.2.0' apply/index.html
           grep -q 'href="pdf/"' apply/index.html
           grep -q 'function sendRow' apply/app.js
           grep -q 'CFG.excelColumns.length' apply/app.js

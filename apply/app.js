@@ -359,6 +359,17 @@
       ${errorHtml(field)}`;
   }
 
+  function syncChoiceState(element) {
+    if (element.type === 'radio') {
+      app.querySelectorAll(`input[type="radio"][name="${element.name}"]`).forEach((input) => {
+        input.closest('.choice-card')?.classList.toggle('selected', input.checked);
+      });
+    }
+    if (element.type === 'checkbox') {
+      element.closest('.consent-box')?.classList.toggle('selected', element.checked);
+    }
+  }
+
   function yesNoQuestion(field, label, hint = '') {
     return `
       <section class="screening-question">
@@ -404,7 +415,7 @@
         ${yesNoQuestion('longHours', t('longHours'), t('longHoursHint'))}
       </div>
       <div class="field consent-field">
-        <label class="consent-box" for="consent">
+        <label class="consent-box ${state.data.consent ? 'selected' : ''}" for="consent">
           <input id="consent" data-field="consent" type="checkbox" ${state.data.consent ? 'checked' : ''}>
           <span>${escapeHtml(t('consent'))} <a href="${attr(CFG.privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('privacyLink'))}</a>. <span class="required">*</span></span>
         </label>
@@ -449,6 +460,7 @@
       element.addEventListener(eventName, () => {
         const field = element.dataset.field;
         state.data[field] = element.type === 'checkbox' ? element.checked : element.value;
+        syncChoiceState(element);
         if (field === 'physicalWork' && state.data.physicalWork === 'no') state.data.physicalDetails = '';
         delete errors[field];
         saveDraft();

@@ -54,10 +54,10 @@ for (const code of codes) {
 
 const index = read('apply/index.html');
 for (const marker of [
-  'styles.css?v=17.1.2',
+  'styles.css?v=17.2.0',
   'config.js?v=17.0.0',
   'translations.js?v=17.0.0',
-  'app.js?v=17.1.1',
+  'app.js?v=17.2.0',
   '../assets/citronex-logo.jpg',
   'href="pdf/"',
   'id="app"'
@@ -80,6 +80,7 @@ for (const marker of [
   'WSKAŹNIKI:',
   'FILMY:',
   'single-action',
+  'function syncChoiceState(element)',
   '<em class="ltr"><span>',
   'CFG.excelColumns.length',
   'pdfGeneratorUrl'
@@ -98,6 +99,8 @@ for (const marker of [
   '.sticky-actions',
   '.sticky-actions.single-action',
   '.choice-card',
+  '.choice-card:has(input:checked)',
+  '.consent-box.selected,.consent-box:has(input:checked)',
   '.choice-grid.three .choice-card:last-child:nth-child(3)',
   '.screening-question',
   '.professional-note',

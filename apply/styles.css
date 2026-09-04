@@ -505,6 +505,7 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
 }
 .choice-card input{position:absolute;opacity:0;pointer-events:none}
 .choice-card.selected{border-color:var(--green-light);background:#effaf4;box-shadow:0 0 0 3px rgba(21,147,90,.10)}
+.choice-card:has(input:checked){border-color:var(--green-light);background:#effaf4;box-shadow:0 0 0 3px rgba(21,147,90,.10)}
 .choice-icon{
   width:42px;
   height:42px;
@@ -530,6 +531,7 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
   font-weight:950;
 }
 .choice-card.selected .choice-check{border-color:var(--green);background:var(--green);color:#fff}
+.choice-card:has(input:checked) .choice-check{border-color:var(--green);background:var(--green);color:#fff}
 .consent-box{
   display:flex!important;
   align-items:flex-start;
@@ -551,6 +553,7 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
   margin:1px 0 0;
   padding:0!important;
 }
+.consent-box.selected,.consent-box:has(input:checked){border-color:var(--green-light);background:#effaf4;box-shadow:0 0 0 3px rgba(21,147,90,.10)}
 .professional-note{
   display:grid;
   grid-template-columns:auto minmax(0,1fr);
