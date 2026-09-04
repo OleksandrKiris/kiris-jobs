@@ -9,7 +9,7 @@
 
 1. Kandydat wybiera język.
 2. Wybiera jednego rekrutera.
-3. Podaje podstawowe dane, lokalizację pracy i źródło kontaktu.
+3. W trzech krótkich krokach podaje kontakt, narodowość, płeć, wiek, lokalizację, planowany okres przyjazdu i odpowiedzi dotyczące realnych warunków pracy.
 4. Sprawdza zgłoszenie.
 5. Naciska **„Otwórz e-mail i wyślij wiersz”**.
 6. Otwiera się aplikacja pocztowa z odbiorcą i jedną linią TSV do wspólnego Excela.
@@ -19,7 +19,24 @@ Główna ankieta **nie tworzy CV, nie przyjmuje plików i nie generuje PDF**. Dz
 
 ## Wiersz Excel
 
-Wiadomość zawiera tylko krótką instrukcję po polsku i jeden wiersz rozdzielony tabulatorami. Rekruter kopiuje wiersz do pierwszej pustej komórki kolumny A wspólnego Excela. Układ zachowuje 40 kolumn dotychczasowej kolejki, a pola operacyjne zaczynają się od statusu `NOWY`.
+Wiadomość zawiera tylko krótką instrukcję po polsku i jeden wiersz rozdzielony tabulatorami. Rekruter kopiuje wiersz do pierwszej pustej komórki kolumny A wspólnego Excela.
+
+Wiersz ma 12 kolumn zgodnych z roboczą tabelą zespołu:
+
+1. dane osobowe, telefon i komunikator;
+2. narodowość;
+3. płeć;
+4. wiek;
+5. lokalizacja;
+6. planowany okres przyjazdu;
+7. doświadczenie w pracy fizycznej;
+8. wskaźniki wydajności, jakości i szybkie tempo;
+9. filmy oraz zrozumienie warunków pracy;
+10. doświadczenie w pracy po 10–12 godzin;
+11. ocena rekrutera — pozostaje pusta;
+12. decyzja — pozostaje pusta.
+
+Pola `UWAGI`, `wideorozmowa`, `Czy jest ogarnięty?` i decyzja są oceną wewnętrzną. Kandydat ich nie widzi i nie wypełnia.
 
 ## Generator PDF
 
@@ -34,4 +51,4 @@ Generator pod `/apply/pdf/` jest osobną, opcjonalną funkcją. Można w nim prz
 - Анкета: `https://oleksandrkiris.github.io/kiris-jobs/apply/`
 - Отдельный генератор PDF: `https://oleksandrkiris.github.io/kiris-jobs/apply/pdf/`
 
-Основная анкета не создаёт CV, не загружает документы и не формирует PDF. После заполнения открывается почта выбранного рекрутера, а в письме находится одна строка TSV для вставки в общий Excel. Генератор PDF используется отдельно и только при необходимости.
+Основная анкета не создаёт CV, не загружает документы и не формирует PDF. Она состоит из трёх коротких шагов и собирает только данные из рабочей таблицы рекрутеров. После заполнения открывается почта выбранного рекрутера, а в письме находится одна строка TSV из 12 колонок для вставки в общий Excel. Последние две служебные колонки остаются пустыми. Генератор PDF используется отдельно и только при необходимости.

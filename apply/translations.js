@@ -115,6 +115,84 @@ const custom = {
     chooseOneRecruiter:'Bitta rekruterni tanlang. Qator faqat unga yuboriladi.'
   }
 };
+const screening = {
+  en: {
+    trustLabel:'Form benefits', trustShort:'About 3 minutes', trustNoCv:'No CV or files', trustControl:'You confirm sending',
+    step1Title:'Contact details', step1Lead:'Enter the information the recruiter needs to contact and identify you.',
+    step2Title:'Arrival and experience', step2Lead:'Choose a location, planned length of stay and describe physical work experience.',
+    step3Title:'Work conditions', step3Lead:'Answer five short questions so the recruiter can prepare a relevant conversation.',
+    citizenshipHint:'You may enter a country or a short code, for example UKR, GEO or AZE.', citizenshipPlaceholder:'For example UKR',
+    gender:'Gender', stayDuration:'How long are you planning to come for?', physicalWork:'Have you done physical work before?',
+    physicalDetails:'Where did you work and for how long?', physicalDetailsHint:'Briefly state the workplace, duties and approximate duration.',
+    workNoteTitle:'Please answer honestly', workNote:'These answers help the recruiter explain the actual conditions and do not send any documents.',
+    performanceMetrics:'Were you assessed using productivity or quality targets?', performanceMetricsHint:'For example output per hour, quality standards or task targets.',
+    fastPace:'Are you comfortable working at a fast pace?', watchedVideos:'Have you watched the videos showing the work?',
+    understandsRole:'Do you understand what the work involves?', longHours:'Have you worked 10–12 hour shifts?', longHoursHint:'The recruiter will confirm the actual schedule before arrival.',
+    yesShort:'YES', noShort:'NO',
+    copyRow:'Copy the Excel row', rowCopied:'The Excel row has been copied.', copyFailed:'The row could not be copied. Open email instead.',
+    sectionAvailability:'Arrival', sectionExperience:'Physical work', sectionExpectations:'Work conditions',
+    genderOptions:{ female:'Woman', male:'Man', undisclosed:'Prefer not to say' },
+    stayDurationOptions:{ short:'Less than 6 months', six:'About 6 months', long:'Longer than 6 months' },
+    locationOptions:{ siechnice:'Siechnice', ryczywol:'Ryczywół', bogatynia:'Bogatynia', any:'To be agreed with the recruiter' }
+  },
+  pl: {
+    trustLabel:'Najważniejsze informacje', trustShort:'Około 3 minuty', trustNoCv:'Bez CV i plików', trustControl:'Ty potwierdzasz wysłanie',
+    step1Title:'Dane kontaktowe', step1Lead:'Podaj informacje potrzebne rekruterowi do kontaktu i identyfikacji kandydata.',
+    step2Title:'Przyjazd i doświadczenie', step2Lead:'Wybierz lokalizację, planowany okres pobytu i opisz doświadczenie w pracy fizycznej.',
+    step3Title:'Warunki pracy', step3Lead:'Odpowiedz na pięć krótkich pytań, aby rekruter mógł przygotować konkretną rozmowę.',
+    citizenshipHint:'Możesz wpisać kraj albo krótki kod, np. UKR, GEO lub AZE.', citizenshipPlaceholder:'Np. UKR',
+    gender:'Płeć', stayDuration:'Na jak długo planujesz przyjazd?', physicalWork:'Czy wcześniej pracowałeś/-aś fizycznie?',
+    physicalDetails:'Gdzie i jak długo pracowałeś/-aś?', physicalDetailsHint:'Krótko podaj miejsce, obowiązki i przybliżony okres pracy.',
+    workNoteTitle:'Odpowiedz zgodnie z prawdą', workNote:'Odpowiedzi pomagają omówić realne warunki pracy. Formularz nie wysyła żadnych dokumentów.',
+    performanceMetrics:'Czy rozliczano Cię ze wskaźników wydajności lub jakości?', performanceMetricsHint:'Np. wynik na godzinę, normy jakości albo wykonanie planu.',
+    fastPace:'Czy dobrze czujesz się w szybkim tempie pracy?', watchedVideos:'Czy widziałeś/-aś filmy pokazujące tę pracę?',
+    understandsRole:'Czy rozumiesz, na czym polega ta praca?', longHours:'Czy pracowałeś/-aś po 10–12 godzin?', longHoursHint:'Rzeczywisty grafik rekruter potwierdzi przed przyjazdem.',
+    yesShort:'TAK', noShort:'NIE',
+    copyRow:'Skopiuj wiersz do Excela', rowCopied:'Wiersz do Excela został skopiowany.', copyFailed:'Nie udało się skopiować wiersza. Otwórz wiadomość e-mail.',
+    sectionAvailability:'Przyjazd', sectionExperience:'Praca fizyczna', sectionExpectations:'Warunki pracy',
+    genderOptions:{ female:'Kobieta', male:'Mężczyzna', undisclosed:'Wolę nie podawać' },
+    stayDurationOptions:{ short:'Poniżej 6 miesięcy', six:'Około 6 miesięcy', long:'Dłużej niż 6 miesięcy' },
+    locationOptions:{ siechnice:'Siechnice', ryczywol:'Ryczywół', bogatynia:'Bogatynia', any:'Do ustalenia z rekruterem' }
+  },
+  ru: {
+    trustLabel:'Основная информация', trustShort:'Около 3 минут', trustNoCv:'Без CV и файлов', trustControl:'Отправку подтверждаете вы',
+    step1Title:'Контактные данные', step1Lead:'Укажите данные, необходимые рекрутеру для связи и идентификации кандидата.',
+    step2Title:'Приезд и опыт', step2Lead:'Выберите локацию, срок приезда и опишите опыт физической работы.',
+    step3Title:'Условия работы', step3Lead:'Ответьте на пять коротких вопросов, чтобы рекрутер подготовил предметный разговор.',
+    citizenshipHint:'Можно указать страну или короткий код, например UKR, GEO или AZE.', citizenshipPlaceholder:'Например UKR',
+    gender:'Пол', stayDuration:'На какой срок планируете приехать?', physicalWork:'Работали ли вы раньше физически?',
+    physicalDetails:'Где и как долго вы работали?', physicalDetailsHint:'Коротко укажите место, обязанности и примерный период работы.',
+    workNoteTitle:'Отвечайте честно', workNote:'Ответы помогут объяснить реальные условия работы. Форма не отправляет документы.',
+    performanceMetrics:'Оценивали ли вашу работу по показателям производительности или качества?', performanceMetricsHint:'Например результат в час, нормы качества или выполнение плана.',
+    fastPace:'Комфортно ли вам работать в быстром темпе?', watchedVideos:'Смотрели ли вы видео, показывающие эту работу?',
+    understandsRole:'Понимаете ли вы, в чём заключается эта работа?', longHours:'Работали ли вы по 10–12 часов?', longHoursHint:'Фактический график рекрутер подтвердит перед приездом.',
+    yesShort:'ДА', noShort:'НЕТ',
+    copyRow:'Скопировать строку для Excel', rowCopied:'Строка для Excel скопирована.', copyFailed:'Не удалось скопировать строку. Откройте email.',
+    sectionAvailability:'Приезд', sectionExperience:'Физическая работа', sectionExpectations:'Условия работы',
+    genderOptions:{ female:'Женщина', male:'Мужчина', undisclosed:'Не хочу указывать' },
+    stayDurationOptions:{ short:'Менее 6 месяцев', six:'Около 6 месяцев', long:'Более 6 месяцев' },
+    locationOptions:{ siechnice:'Siechnice', ryczywol:'Ryczywół', bogatynia:'Bogatynia', any:'Согласовать с рекрутером' }
+  },
+  uk: {
+    trustLabel:'Основна інформація', trustShort:'Близько 3 хвилин', trustNoCv:'Без CV і файлів', trustControl:'Відправлення підтверджуєте ви',
+    step1Title:'Контактні дані', step1Lead:'Вкажіть дані, потрібні рекрутеру для зв’язку та ідентифікації кандидата.',
+    step2Title:'Приїзд і досвід', step2Lead:'Оберіть локацію, термін приїзду та опишіть досвід фізичної роботи.',
+    step3Title:'Умови роботи', step3Lead:'Дайте відповідь на п’ять коротких запитань, щоб рекрутер підготував змістовну розмову.',
+    citizenshipHint:'Можна вказати країну або короткий код, наприклад UKR, GEO чи AZE.', citizenshipPlaceholder:'Наприклад UKR',
+    gender:'Стать', stayDuration:'На який термін плануєте приїхати?', physicalWork:'Чи працювали ви раніше фізично?',
+    physicalDetails:'Де і як довго ви працювали?', physicalDetailsHint:'Коротко вкажіть місце, обов’язки та приблизний період роботи.',
+    workNoteTitle:'Відповідайте чесно', workNote:'Відповіді допоможуть пояснити реальні умови роботи. Форма не надсилає документи.',
+    performanceMetrics:'Чи оцінювали вашу роботу за показниками продуктивності або якості?', performanceMetricsHint:'Наприклад результат за годину, норми якості або виконання плану.',
+    fastPace:'Чи комфортно вам працювати у швидкому темпі?', watchedVideos:'Чи дивилися ви відео, які показують цю роботу?',
+    understandsRole:'Чи розумієте ви, у чому полягає ця робота?', longHours:'Чи працювали ви по 10–12 годин?', longHoursHint:'Фактичний графік рекрутер підтвердить перед приїздом.',
+    yesShort:'ТАК', noShort:'НІ',
+    copyRow:'Скопіювати рядок для Excel', rowCopied:'Рядок для Excel скопійовано.', copyFailed:'Не вдалося скопіювати рядок. Відкрийте email.',
+    sectionAvailability:'Приїзд', sectionExperience:'Фізична робота', sectionExpectations:'Умови роботи',
+    genderOptions:{ female:'Жінка', male:'Чоловік', undisclosed:'Не хочу вказувати' },
+    stayDurationOptions:{ short:'Менше 6 місяців', six:'Близько 6 місяців', long:'Понад 6 місяців' },
+    locationOptions:{ siechnice:'Siechnice', ryczywol:'Ryczywół', bogatynia:'Bogatynia', any:'Узгодити з рекрутером' }
+  }
+};
 const enCustom = custom.en;
 const locales = {};
 for (const [code, meta] of Object.entries(I.languages)) {
@@ -122,7 +200,8 @@ for (const [code, meta] of Object.entries(I.languages)) {
   const extra = (E.locales && E.locales[code]) || (E.locales && E.locales.en) || {};
   const mobile = M[code] || M.en || {};
   const c = { ...enCustom, ...(custom[code] || {}) };
-  locales[code] = {
+  const s = { ...screening.en, ...(screening[code] || {}) };
+  const base = {
     chooseLanguage: core.languageTitle || I.locales.en.languageTitle,
     languageLead: extra.languageIntro || core.languageSubtitle || I.locales.en.languageSubtitle,
     languageSearch: core.languageSearch || I.locales.en.languageSearch,
@@ -218,6 +297,16 @@ for (const [code, meta] of Object.entries(I.languages)) {
       locations: core.options?.locations || I.locales.en.options.locations
     }
   };
+  locales[code] = {
+    ...base,
+    ...s,
+    options: {
+      ...base.options,
+      gender: s.genderOptions,
+      stayDurations: s.stayDurationOptions,
+      locations: s.locationOptions
+    }
+  };
 }
 const internal = {
   messenger: I.internal?.messenger || I.locales.pl.options.messenger,
@@ -227,8 +316,10 @@ const internal = {
   starts: I.internal?.starts || I.locales.pl.options.starts,
   shifts: I.internal?.shifts || I.locales.pl.options.shifts,
   sources: I.internal?.sources || I.locales.pl.options.sources,
-  locations: I.internal?.locations || I.locales.pl.options.locations
+  gender: Object.freeze({ female:'K', male:'M', undisclosed:'' }),
+  stayDurations: Object.freeze({ short:'PONIŻEJ 6 MSC', six:'6 MSC', long:'NA DŁUŻEJ' }),
+  locations: Object.freeze({ siechnice:'SIECHNICE', ryczywol:'RYCZYWÓŁ', bogatynia:'BOGATYNIA', any:'DO USTALENIA' })
 };
 
-  window.CITRONEX_SIMPLE_I18N = Object.freeze({ version:'16.0.0', priority, languages:I.languages, locales, internal });
+  window.CITRONEX_SIMPLE_I18N = Object.freeze({ version:'17.0.0', priority, languages:I.languages, locales, internal });
 })();

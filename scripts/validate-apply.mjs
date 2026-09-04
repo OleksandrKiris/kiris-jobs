@@ -20,11 +20,13 @@ const config = context.window.CITRONEX_SIMPLE_CONFIG;
 const i18n = context.window.CITRONEX_SIMPLE_I18N;
 assert(config, 'CITRONEX_SIMPLE_CONFIG was not created.');
 assert(i18n, 'CITRONEX_SIMPLE_I18N was not created.');
-assert(config.version === '16.0.0', `expected version 16.0.0, found ${config.version}.`);
+assert(config.version === '17.0.0', `expected version 17.0.0, found ${config.version}.`);
 assert(config.pdfGeneratorUrl === './pdf/', 'PDF generator must use the separate /apply/pdf/ route.');
 assert(config.recruiters.length === 6, `expected 6 recruiters, found ${config.recruiters.length}.`);
-assert(config.locations.length === 6, `expected 6 locations, found ${config.locations.length}.`);
-assert(config.excelColumns.length === 40, `expected 40 Excel columns, found ${config.excelColumns.length}.`);
+assert(config.locations.length === 4, `expected 4 locations, found ${config.locations.length}.`);
+assert(config.excelColumns.length === 12, `expected 12 Excel columns, found ${config.excelColumns.length}.`);
+assert(config.excelColumns[0] === 'Dane osobowe / telefon / komunikator', 'first Excel column must match the operating sheet.');
+assert(config.excelColumns[10] === 'Ocena rekrutera' && config.excelColumns[11] === 'Decyzja', 'last two columns must remain recruiter-only.');
 
 const contacts = new Map([
   ['yana', ['Yana Radushynska', 'yana.radushynska@pposiechnice.pl', '+48 797 066 987']],
@@ -45,17 +47,17 @@ assert(codes.length === 20, `expected 20 languages, found ${codes.length}.`);
 for (const code of codes) {
   const locale = i18n.locales[code];
   assert(locale, `missing locale: ${code}`);
-  for (const key of ['chooseLanguage','chooseRecruiter','step1Title','step2Title','step3Title','step4Title','sendRow','pdfOpen','options']) {
+  for (const key of ['chooseLanguage','chooseRecruiter','step1Title','step2Title','step3Title','sendRow','copyRow','pdfOpen','options']) {
     assert(locale[key], `missing ${code}.${key}`);
   }
 }
 
 const index = read('apply/index.html');
 for (const marker of [
-  'styles.css?v=16.0.1',
-  'config.js?v=16.0.1',
-  'translations.js?v=16.0.1',
-  'app.js?v=16.0.1',
+  'styles.css?v=17.0.0',
+  'config.js?v=17.0.0',
+  'translations.js?v=17.0.0',
+  'app.js?v=17.0.0',
   '../assets/citronex-logo.jpg',
   'href="pdf/"',
   'id="app"'
@@ -70,12 +72,13 @@ const app = read('apply/app.js');
 for (const marker of [
   'CITRONEX_SIMPLE_CONFIG',
   'CITRONEX_SIMPLE_I18N',
+  'const TOTAL_STEPS = 3',
   'function rowValues',
   'function sendRow',
-  'const sentAt = new Date()',
+  'function copyRow',
   'window.location.assign(mailto)',
-  'DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A',
-  "'NOWY'",
+  'WSKAŹNIKI:',
+  'FILMY:',
   'CFG.excelColumns.length',
   'pdfGeneratorUrl'
 ]) assert(app.includes(marker), `app.js is missing required marker: ${marker}`);
@@ -92,6 +95,8 @@ for (const marker of [
   '.recruiter-list',
   '.sticky-actions',
   '.choice-card',
+  '.screening-question',
+  '.professional-note',
   '.send-box',
   '.pdf-card',
   '@media(max-width:380px)',
@@ -101,4 +106,4 @@ assert(!css.includes('position:sticky'), 'main form must not use sticky position
 assert(!css.includes('position:fixed'), 'main form must not use fixed positioning.');
 assert(!css.includes('backdrop-filter'), 'main form must not use overlay blur layers.');
 
-console.log(`Application validation passed: stable layout v16.0.1, ${codes.length} languages, ${config.recruiters.length} recruiters, ${config.excelColumns.length} Excel columns.`);
+console.log(`Application validation passed: screening layout v17.0.0, ${codes.length} languages, ${config.recruiters.length} recruiters, ${config.excelColumns.length} Excel columns.`);

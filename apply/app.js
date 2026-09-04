@@ -6,27 +6,23 @@
   const app = document.getElementById('app');
   if (!CFG || !I18N || !app) throw new Error('Citronex form dependencies are missing.');
 
+  const TOTAL_STEPS = 3;
   const pageUrl = new URL(window.location.href);
   const qp = CFG.queryParams;
   const route = Object.freeze({
     source: cleanRoute(pageUrl.searchParams.get(qp.source)),
     campaign: cleanRoute(pageUrl.searchParams.get(qp.campaign)),
-    vacancy: cleanRoute(pageUrl.searchParams.get(qp.vacancy)),
-    partner: cleanRoute(pageUrl.searchParams.get(qp.partner)),
-    group: cleanRoute(pageUrl.searchParams.get(qp.group))
+    vacancy: cleanRoute(pageUrl.searchParams.get(qp.vacancy))
   });
   const suggestedLanguage = validLanguage(pageUrl.searchParams.get(qp.language));
   const suggestedRecruiter = validRecruiter(pageUrl.searchParams.get(qp.recruiter));
   const suggestedLocation = validLocation(pageUrl.searchParams.get(qp.location));
-  const suggestedSource = normalizeSource(route.source);
-  const routeKey = [suggestedRecruiter, suggestedLocation, suggestedSource, route.partner, route.group, route.campaign, route.vacancy].join('|');
+  const routeKey = [suggestedRecruiter, suggestedLocation, route.source, route.campaign, route.vacancy].join('|');
 
   const fieldNames = [
-    'filledBy', 'representativeName', 'groupCode',
-    'firstName', 'lastName', 'phone', 'messenger', 'email',
-    'citizenship', 'country', 'city', 'age', 'inPoland', 'documents',
-    'location', 'job', 'start', 'shift', 'housing',
-    'source', 'sourceDetails', 'comment', 'consent'
+    'firstName', 'lastName', 'phone', 'messenger', 'citizenship', 'gender', 'age',
+    'location', 'stayDuration', 'physicalWork', 'physicalDetails',
+    'performanceMetrics', 'fastPace', 'watchedVideos', 'understandsRole', 'longHours', 'consent'
   ];
 
   let view = 'language';
@@ -38,7 +34,6 @@
 
   cleanupLegacyServiceWorker();
 
-
   function cleanupLegacyServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     const rootPath = new URL('./', window.location.href).pathname;
@@ -48,11 +43,6 @@
         if (scopePath === rootPath) registration.unregister().catch(() => {});
       }
     }).catch(() => {});
-    if ('caches' in window) {
-      caches.keys().then((keys) => Promise.all(
-        keys.filter((key) => key.startsWith('citronex-recruitment-')).map((key) => caches.delete(key))
-      )).catch(() => {});
-    }
   }
 
   function blankData() {
@@ -61,13 +51,7 @@
 
   function createState() {
     const data = blankData();
-    const partnerMode = Boolean(route.partner || route.group);
-    data.filledBy = partnerMode ? 'representative' : '';
-    data.representativeName = route.partner;
-    data.groupCode = route.group;
     data.location = suggestedLocation || '';
-    data.source = suggestedSource || (partnerMode ? 'referral' : '');
-    data.sourceDetails = route.partner || route.campaign || '';
     return {
       version: CFG.version,
       routeKey,
@@ -132,11 +116,6 @@
     return CFG.locations.includes(id) ? id : null;
   }
 
-  function normalizeSource(value) {
-    const id = String(value || '').toLowerCase();
-    return ['facebook', 'instagram', 'tiktok', 'telegram', 'whatsapp', 'viber', 'referral', 'recruiter', 'other'].includes(id) ? id : '';
-  }
-
   function recruiter() {
     return CFG.recruiters.find((person) => person.id === state.recruiterId) || null;
   }
@@ -152,21 +131,16 @@
     const random = window.crypto?.getRandomValues
       ? Array.from(window.crypto.getRandomValues(new Uint8Array(2)), (number) => number.toString(16).padStart(2, '0')).join('').toUpperCase()
       : Math.random().toString(16).slice(2, 6).toUpperCase();
-    return `KAND-${parts.year}${parts.month}${parts.day}-${parts.hour}${parts.minute}${parts.second}-${random}`;
+    return `KAND-${parts.year}${parts.month}${parts.day}-${parts.hour}${parts.minute}-${random}`;
   }
 
   function warsawParts(date) {
     const formatter = new Intl.DateTimeFormat('en-GB', {
       timeZone: CFG.timeZone,
       year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
     });
     return Object.fromEntries(formatter.formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
-  }
-
-  function formatDate(date) {
-    const p = warsawParts(date);
-    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
   }
 
   function saveDraft() {
@@ -187,10 +161,9 @@
       }
       draft.language = validLanguage(draft.language);
       draft.recruiterId = validRecruiter(draft.recruiterId);
-      draft.step = Math.max(1, Math.min(4, Number(draft.step) || 1));
+      draft.step = Math.max(1, Math.min(TOTAL_STEPS, Number(draft.step) || 1));
       draft.data = { ...blankData(), ...draft.data };
       draft.data.location = validLocation(draft.data.location) || '';
-      draft.data.source = normalizeSource(draft.data.source);
       return draft;
     } catch {
       return null;
@@ -240,9 +213,14 @@
       <section class="panel opening-panel">
         <div class="opening-copy">
           <span class="eyebrow">CITRONEX · PPO SIECHNICE</span>
-          <div class="opening-icon" aria-hidden="true">🌍</div>
+          <div class="opening-icon letter-icon" aria-hidden="true">Aa</div>
           <h1>${escapeHtml(t('chooseLanguage'))}</h1>
           <p>${escapeHtml(t('languageLead'))}</p>
+        </div>
+        <div class="trust-row" aria-label="${attr(t('trustLabel'))}">
+          <span>✓ ${escapeHtml(t('trustShort'))}</span>
+          <span>✓ ${escapeHtml(t('trustNoCv'))}</span>
+          <span>✓ ${escapeHtml(t('trustControl'))}</span>
         </div>
         ${savedDraft ? `
           <div class="draft-box">
@@ -295,7 +273,7 @@
       <section class="panel opening-panel">
         <button type="button" class="text-button back-top" data-action="language">← ${escapeHtml(t('changeLanguage'))}</button>
         <div class="opening-copy compact">
-          <div class="opening-icon" aria-hidden="true">👤</div>
+          <div class="opening-icon letter-icon" aria-hidden="true">01</div>
           <h1>${escapeHtml(t('chooseRecruiter'))}</h1>
           <p>${escapeHtml(t('recruiterLead'))}</p>
         </div>
@@ -338,23 +316,24 @@
     return `
       <div class="field ${full ? 'full' : ''}">
         <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ` <span class="optional">(${escapeHtml(t('optional'))})</span>`}</label>
-        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${['phone', 'email'].includes(id) ? 'ltr' : ''}" type="${type}" value="${attr(state.data[id])}" maxlength="${max}" enterkeyhint="next" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
+        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' ? 'ltr' : ''}" type="${type}" value="${attr(state.data[id])}" maxlength="${max}" enterkeyhint="next" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
         ${hint ? `<small class="field-hint">${escapeHtml(hint)}</small>` : ''}
         ${errorHtml(id)}
       </div>`;
   }
 
-  function textareaField(id, label, max = 220) {
+  function textareaField({ id, label, hint = '', required = false, max = 260 }) {
     return `
       <div class="field full">
-        <label for="${id}">${escapeHtml(label)} <span class="optional">(${escapeHtml(t('optional'))})</span></label>
+        <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ` <span class="optional">(${escapeHtml(t('optional'))})</span>`}</label>
         <textarea id="${id}" data-field="${id}" maxlength="${max}" class="${errors[id] ? 'invalid' : ''}">${escapeHtml(state.data[id])}</textarea>
+        ${hint ? `<small class="field-hint">${escapeHtml(hint)}</small>` : ''}
         ${errorHtml(id)}
       </div>`;
   }
 
   function selectField(id, label, group, full = false) {
-    const options = locale().options[group] || I18N.locales.en.options[group];
+    const options = locale().options[group] || I18N.locales.en.options[group] || {};
     return `
       <div class="field ${full ? 'full' : ''}">
         <label for="${id}">${escapeHtml(label)} <span class="required">*</span></label>
@@ -372,12 +351,20 @@
         ${Object.entries(options).map(([value, label]) => `
           <label class="choice-card ${state.data[field] === value ? 'selected' : ''}">
             <input type="radio" name="${field}" data-field="${field}" value="${attr(value)}" ${state.data[field] === value ? 'checked' : ''}>
-            <span class="choice-icon" aria-hidden="true">${icons[value] || '•'}</span>
+            <span class="choice-icon" aria-hidden="true">${escapeHtml(icons[value] || '•')}</span>
             <span>${escapeHtml(label)}</span>
             <span class="choice-check" aria-hidden="true">✓</span>
           </label>`).join('')}
       </div>
       ${errorHtml(field)}`;
+  }
+
+  function yesNoQuestion(field, label, hint = '') {
+    return `
+      <section class="screening-question">
+        <div class="question-copy"><span class="field-label">${escapeHtml(label)} <span class="required">*</span></span>${hint ? `<small>${escapeHtml(hint)}</small>` : ''}</div>
+        ${choiceCards(field, locale().options.yesNo, { yes: t('yesShort'), no: t('noShort') })}
+      </section>`;
   }
 
   function errorHtml(id) {
@@ -388,67 +375,48 @@
     const options = locale().options;
     if (state.step === 1) {
       return `
-        <div class="field full">
-          <span class="field-label">${escapeHtml(t('filledBy'))} <span class="required">*</span></span>
-          ${choiceCards('filledBy', { self: t('self'), representative: t('representative') }, { self: '👤', representative: '🤝' })}
-        </div>
-        ${state.data.filledBy === 'representative' ? `
-          <div class="partner-box">
-            ${textField({ id: 'representativeName', label: t('representativeName'), hint: t('representativeHint'), full: true, max: 160 })}
-            ${textField({ id: 'groupCode', label: t('groupCode'), hint: t('groupHint'), required: false, full: true, max: 80 })}
-          </div>` : ''}
         <div class="form-grid">
           ${textField({ id: 'firstName', label: t('firstName'), autocomplete: 'given-name' })}
           ${textField({ id: 'lastName', label: t('lastName'), autocomplete: 'family-name' })}
           ${textField({ id: 'phone', label: t('phone'), hint: t('phoneHint'), type: 'tel', inputmode: 'tel', autocomplete: 'tel', placeholder: '+48… / +380… / +995…', max: 32 })}
           ${selectField('messenger', t('messenger'), 'messenger')}
-          ${textField({ id: 'email', label: t('email'), type: 'email', inputmode: 'email', autocomplete: 'email', required: false, full: true, max: 160 })}
+          ${textField({ id: 'citizenship', label: t('citizenship'), hint: t('citizenshipHint'), placeholder: t('citizenshipPlaceholder'), autocomplete: 'country-name' })}
+          ${textField({ id: 'age', label: t('age'), type: 'number', inputmode: 'numeric', min: 18, maxValue: 99, max: 3 })}
+          <div class="field full"><span class="field-label">${escapeHtml(t('gender'))} <span class="required">*</span></span>${choiceCards('gender', options.gender, { female: 'K', male: 'M', undisclosed: '—' }, 'three')}</div>
         </div>`;
     }
     if (state.step === 2) {
       return `
         <div class="form-grid">
-          ${textField({ id: 'citizenship', label: t('citizenship'), autocomplete: 'country-name' })}
-          ${textField({ id: 'country', label: t('country'), autocomplete: 'country-name' })}
-          ${textField({ id: 'city', label: t('city'), autocomplete: 'address-level2' })}
-          ${textField({ id: 'age', label: t('age'), type: 'number', inputmode: 'numeric', min: 18, maxValue: 75, max: 3 })}
-          <div class="field full"><span class="field-label">${escapeHtml(t('inPoland'))} <span class="required">*</span></span>${choiceCards('inPoland', options.yesNo, { yes: '✓', no: '×' })}</div>
-          ${selectField('documents', t('documents'), 'documents', true)}
-        </div>`;
-    }
-    if (state.step === 3) {
-      return `
-        <div class="form-grid">
           ${selectField('location', t('location'), 'locations', true)}
-          ${selectField('job', t('job'), 'jobs', true)}
-          ${selectField('start', t('start'), 'starts')}
-          <div class="field"><span class="field-label">${escapeHtml(t('shift'))} <span class="required">*</span></span>${choiceCards('shift', options.shifts, { yes: '✓', no: '×', depends: '≈' }, 'one')}</div>
-          <div class="field full"><span class="field-label">${escapeHtml(t('housing'))} <span class="required">*</span></span>${choiceCards('housing', options.yesNo, { yes: '⌂', no: '—' })}</div>
-        </div>`;
+          ${selectField('stayDuration', t('stayDuration'), 'stayDurations', true)}
+          <div class="field full"><span class="field-label">${escapeHtml(t('physicalWork'))} <span class="required">*</span></span>${choiceCards('physicalWork', options.yesNo, { yes: t('yesShort'), no: t('noShort') })}</div>
+          ${state.data.physicalWork === 'yes' ? textareaField({ id: 'physicalDetails', label: t('physicalDetails'), hint: t('physicalDetailsHint'), required: true }) : ''}
+        </div>
+        <div class="professional-note"><strong>${escapeHtml(t('workNoteTitle'))}</strong><span>${escapeHtml(t('workNote'))}</span></div>`;
     }
     return `
-      <div class="field full">
-        <span class="field-label">${escapeHtml(t('source'))} <span class="required">*</span></span>
-        ${choiceCards('source', options.sources, { facebook: 'f', instagram: '◎', tiktok: '♪', telegram: '➤', whatsapp: 'WA', viber: 'VI', referral: '🤝', recruiter: '👤', other: '+' }, 'three')}
+      <div class="screening-list">
+        ${yesNoQuestion('performanceMetrics', t('performanceMetrics'), t('performanceMetricsHint'))}
+        ${yesNoQuestion('fastPace', t('fastPace'))}
+        ${yesNoQuestion('watchedVideos', t('watchedVideos'))}
+        ${yesNoQuestion('understandsRole', t('understandsRole'))}
+        ${yesNoQuestion('longHours', t('longHours'), t('longHoursHint'))}
       </div>
-      <div class="form-grid">
-        ${textField({ id: 'sourceDetails', label: t('sourceDetails'), hint: t('sourceDetailsHint'), placeholder: t('sourceDetailsPlaceholder'), full: true, max: 180 })}
-        ${textareaField('comment', t('comment'))}
-        <div class="field full">
-          <label class="consent-box" for="consent">
-            <input id="consent" data-field="consent" type="checkbox" ${state.data.consent ? 'checked' : ''}>
-            <span>${escapeHtml(t('consent'))} <a href="${attr(CFG.privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('privacyLink'))}</a>. <span class="required">*</span></span>
-          </label>
-          ${errorHtml('consent')}
-        </div>
+      <div class="field consent-field">
+        <label class="consent-box" for="consent">
+          <input id="consent" data-field="consent" type="checkbox" ${state.data.consent ? 'checked' : ''}>
+          <span>${escapeHtml(t('consent'))} <a href="${attr(CFG.privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('privacyLink'))}</a>. <span class="required">*</span></span>
+        </label>
+        ${errorHtml('consent')}
       </div>`;
   }
 
   function renderForm() {
     if (!state.language) { view = 'language'; render(); return; }
     if (!recruiter()) { view = 'recruiter'; render(); return; }
-    const titles = [t('step1Title'), t('step2Title'), t('step3Title'), t('step4Title')];
-    const leads = [t('step1Lead'), t('step2Lead'), t('step3Lead'), t('step4Lead')];
+    const titles = [t('step1Title'), t('step2Title'), t('step3Title')];
+    const leads = [t('step1Lead'), t('step2Lead'), t('step3Lead')];
     app.innerHTML = `
       <section class="panel form-panel">
         <div class="form-topbar">
@@ -457,14 +425,14 @@
         </div>
         ${selectedRecruiterHtml()}
         <div class="progress-box">
-          <div class="progress-meta"><strong>${state.step} / 4</strong><span>${escapeHtml(titles[state.step - 1])}</span></div>
+          <div class="progress-meta"><strong>${state.step} / ${TOTAL_STEPS}</strong><span>${escapeHtml(titles[state.step - 1])}</span></div>
           <div class="progress-track"><span class="progress-fill progress-${state.step}"></span></div>
         </div>
         <div class="step-heading"><span class="step-number">${state.step}</span><div><h1>${escapeHtml(titles[state.step - 1])}</h1><p>${escapeHtml(leads[state.step - 1])}</p></div></div>
         <form id="candidateForm" novalidate>${stepContent()}</form>
         <div class="sticky-actions">
           <button type="button" class="button secondary ${state.step === 1 ? 'invisible' : ''}" data-action="back">← ${escapeHtml(t('back'))}</button>
-          <button type="button" class="button primary" data-action="next">${escapeHtml(state.step === 4 ? t('review') : t('next'))} →</button>
+          <button type="button" class="button primary" data-action="next">${escapeHtml(state.step === TOTAL_STEPS ? t('review') : t('next'))} →</button>
         </div>
       </section>`;
 
@@ -473,7 +441,7 @@
     app.querySelector('[data-action="back"]')?.addEventListener('click', () => { state.step = Math.max(1, state.step - 1); errors = {}; saveDraft(); render(); });
     app.querySelector('[data-action="next"]').addEventListener('click', () => {
       if (!validateStep()) return;
-      if (state.step < 4) { state.step += 1; errors = {}; saveDraft(); render(); }
+      if (state.step < TOTAL_STEPS) { state.step += 1; errors = {}; saveDraft(); render(); }
       else { view = 'review'; errors = {}; saveDraft(); render(); }
     });
     app.querySelectorAll('[data-field]').forEach((element) => {
@@ -481,13 +449,10 @@
       element.addEventListener(eventName, () => {
         const field = element.dataset.field;
         state.data[field] = element.type === 'checkbox' ? element.checked : element.value;
-        if (field === 'filledBy' && state.data.filledBy === 'self') {
-          state.data.representativeName = '';
-          state.data.groupCode = '';
-        }
+        if (field === 'physicalWork' && state.data.physicalWork === 'no') state.data.physicalDetails = '';
         delete errors[field];
         saveDraft();
-        if (field === 'filledBy') renderForm();
+        if (field === 'physicalWork') renderForm();
       });
     });
   }
@@ -495,25 +460,23 @@
   function validateStep() {
     errors = {};
     const requiredByStep = {
-      1: ['filledBy', 'firstName', 'lastName', 'phone', 'messenger'],
-      2: ['citizenship', 'country', 'city', 'age', 'inPoland', 'documents'],
-      3: ['location', 'job', 'start', 'shift', 'housing'],
-      4: ['source', 'sourceDetails', 'consent']
+      1: ['firstName', 'lastName', 'phone', 'messenger', 'citizenship', 'gender', 'age'],
+      2: ['location', 'stayDuration', 'physicalWork'],
+      3: ['performanceMetrics', 'fastPace', 'watchedVideos', 'understandsRole', 'longHours', 'consent']
     };
     requiredByStep[state.step].forEach((field) => {
       const empty = field === 'consent' ? !state.data.consent : !cleanText(state.data[field]);
       if (empty) errors[field] = t('required');
     });
     if (state.step === 1) {
-      if (state.data.filledBy === 'representative' && !cleanText(state.data.representativeName)) errors.representativeName = t('required');
       const phone = normalizePhone(state.data.phone);
       if (!/^\+\d{7,15}$/.test(phone)) errors.phone = t('invalidPhone');
       else state.data.phone = phone;
-      if (state.data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(state.data.email)) errors.email = t('invalidEmail');
-    }
-    if (state.step === 2) {
       const age = Number(state.data.age);
-      if (!Number.isInteger(age) || age < 18 || age > 75) errors.age = t('invalidAge');
+      if (!Number.isInteger(age) || age < 18 || age > 99) errors.age = t('invalidAge');
+    }
+    if (state.step === 2 && state.data.physicalWork === 'yes' && !cleanText(state.data.physicalDetails)) {
+      errors.physicalDetails = t('required');
     }
     if (Object.keys(errors).length) {
       renderForm();
@@ -528,8 +491,11 @@
   function display(field) {
     const value = state.data[field];
     if (!value && value !== false) return t('noValue');
-    const groups = { messenger: 'messenger', inPoland: 'yesNo', documents: 'documents', location: 'locations', job: 'jobs', start: 'starts', shift: 'shifts', housing: 'yesNo', source: 'sources' };
-    if (field === 'filledBy') return value === 'representative' ? t('representative') : t('self');
+    const groups = {
+      messenger: 'messenger', gender: 'gender', location: 'locations', stayDuration: 'stayDurations',
+      physicalWork: 'yesNo', performanceMetrics: 'yesNo', fastPace: 'yesNo', watchedVideos: 'yesNo',
+      understandsRole: 'yesNo', longHours: 'yesNo'
+    };
     return groups[field] ? locale().options[groups[field]]?.[value] || value : value;
   }
 
@@ -540,29 +506,27 @@
   function renderReview() {
     const person = recruiter();
     if (!person) { view = 'recruiter'; render(); return; }
-    const submission = [[t('filledBy'), display('filledBy')]];
-    if (state.data.filledBy === 'representative') {
-      submission.push([t('representativeName'), state.data.representativeName]);
-      submission.push([t('groupCode'), state.data.groupCode || t('noValue')]);
-    }
-    submission.push([t('source'), display('source')], [t('sourceDetails'), state.data.sourceDetails]);
-    const candidate = [[t('firstName'), state.data.firstName], [t('lastName'), state.data.lastName], [t('citizenship'), state.data.citizenship], [t('country'), state.data.country], [t('city'), state.data.city], [t('age'), state.data.age], [t('inPoland'), display('inPoland')], [t('documents'), display('documents')]];
-    const contact = [[t('phone'), state.data.phone], [t('messenger'), display('messenger')], [t('email'), state.data.email || t('noValue')]];
-    const work = [[t('location'), display('location')], [t('job'), display('job')], [t('start'), display('start')], [t('shift'), display('shift')], [t('housing'), display('housing')], [t('comment'), state.data.comment || t('noValue')]];
+    const candidate = [[t('firstName'), state.data.firstName], [t('lastName'), state.data.lastName], [t('citizenship'), state.data.citizenship], [t('gender'), display('gender')], [t('age'), state.data.age]];
+    const contact = [[t('phone'), state.data.phone], [t('messenger'), display('messenger')]];
+    const availability = [[t('location'), display('location')], [t('stayDuration'), display('stayDuration')]];
+    const experience = [[t('physicalWork'), display('physicalWork')], [t('physicalDetails'), state.data.physicalDetails || t('noValue')]];
+    const expectations = [[t('performanceMetrics'), display('performanceMetrics')], [t('fastPace'), display('fastPace')], [t('watchedVideos'), display('watchedVideos')], [t('understandsRole'), display('understandsRole')], [t('longHours'), display('longHours')]];
     app.innerHTML = `
       <section class="panel review-panel">
         <div class="review-heading"><span class="success-icon" aria-hidden="true">✓</span><div><h1>${escapeHtml(t('reviewTitle'))}</h1><p>${escapeHtml(t('reviewLead'))}</p></div></div>
         <div class="recipient-card"><span class="avatar">${escapeHtml(person.initials)}</span><span><small>${escapeHtml(t('selectedRecruiter'))}</small><strong>${escapeHtml(person.name)}</strong><em class="ltr">${escapeHtml(person.email)} · ${escapeHtml(person.phone)}</em></span></div>
         <div class="review-sections">
-          ${reviewSection(t('sectionSubmission'), submission)}
           ${reviewSection(t('sectionCandidate'), candidate)}
           ${reviewSection(t('sectionContact'), contact)}
-          ${reviewSection(t('sectionWork'), work)}
+          ${reviewSection(t('sectionAvailability'), availability)}
+          ${reviewSection(t('sectionExperience'), experience)}
+          ${reviewSection(t('sectionExpectations'), expectations)}
         </div>
         <div class="send-box">
-          <div class="send-icon" aria-hidden="true">✉</div>
+          <div class="send-icon" aria-hidden="true">→</div>
           <div><h2>${escapeHtml(t('sendRow'))}</h2><p>${escapeHtml(t('sendHint'))}</p></div>
           <button type="button" class="button primary send-button" data-action="send">${escapeHtml(t('sendRow'))}</button>
+          <button type="button" class="button secondary copy-button" data-action="copy">${escapeHtml(t('copyRow'))}</button>
           <div id="sendResult" class="send-result hidden" aria-live="polite"></div>
         </div>
         <a class="pdf-card" href="${attr(CFG.pdfGeneratorUrl)}" target="_blank" rel="noopener noreferrer">
@@ -570,47 +534,61 @@
         </a>
         <div class="review-actions"><button type="button" class="button secondary" data-action="edit">← ${escapeHtml(t('edit'))}</button><button type="button" class="text-button" data-action="new">${escapeHtml(t('newApplication'))}</button></div>
       </section>`;
-    app.querySelector('[data-action="edit"]').addEventListener('click', () => { state.step = 4; view = 'form'; render(); });
+    app.querySelector('[data-action="edit"]').addEventListener('click', () => { state.step = TOTAL_STEPS; view = 'form'; render(); });
     app.querySelector('[data-action="new"]').addEventListener('click', startNew);
     app.querySelector('[data-action="send"]').addEventListener('click', sendRow);
+    app.querySelector('[data-action="copy"]').addEventListener('click', copyRow);
   }
 
   function polishOption(group, value) {
     return I18N.internal[group]?.[value] || value || '';
   }
 
-  function filledByPolish() {
-    return state.data.filledBy === 'representative' ? 'Przedstawiciel / partner' : 'Kandydat';
+  function yesNoPolish(value) {
+    return value === 'yes' ? 'TAK' : value === 'no' ? 'NIE' : '';
   }
 
-  function rowValues(sentAt, level = 'full') {
-    const person = recruiter();
+  function rowValues() {
     const data = state.data;
-    const deadline = new Date(sentAt.getTime() + 24 * 60 * 60 * 1000);
-    const limits = level === 'full'
-      ? { partner: 100, group: 60, source: 140, comment: 120 }
-      : level === 'compact'
-        ? { partner: 60, group: 35, source: 80, comment: 60 }
-        : { partner: 35, group: 24, source: 45, comment: 30 };
+    const fullContact = `${cleanCell(data.lastName, 55).toLocaleUpperCase('pl-PL')} ${cleanCell(data.firstName, 55).toLocaleUpperCase('pl-PL')} | ${data.phone} | ${polishOption('messenger', data.messenger)}`;
+    const physical = data.physicalWork === 'yes' ? `TAK — ${cleanCell(data.physicalDetails, 180)}` : 'NIE';
+    const performance = `WSKAŹNIKI: ${yesNoPolish(data.performanceMetrics)}; SZYBKIE TEMPO: ${yesNoPolish(data.fastPace)}`;
+    const preparation = `FILMY: ${yesNoPolish(data.watchedVideos)}; WARUNKI PRACY: ${yesNoPolish(data.understandsRole)}`;
     const values = [
-      state.id, formatDate(sentAt), formatDate(deadline), (state.language || 'en').toUpperCase(), person.name, person.email,
-      filledByPolish(), cleanCell(data.representativeName, limits.partner), cleanCell(data.groupCode, limits.group),
-      polishOption('locations', data.location), data.firstName, data.lastName, data.phone, polishOption('messenger', data.messenger), data.email,
-      data.citizenship, data.country, data.city, data.age, polishOption('yesNo', data.inPoland), polishOption('documents', data.documents),
-      polishOption('jobs', data.job), '', polishOption('starts', data.start), polishOption('shifts', data.shift), polishOption('yesNo', data.housing),
-      polishOption('sources', data.source), cleanCell(data.sourceDetails, limits.source), route.source, route.campaign, route.vacancy,
-      cleanCell(data.comment, limits.comment), 'NOWY', '', '0', '', '', '', '', ''
+      fullContact,
+      cleanCell(data.citizenship, 50).toLocaleUpperCase('pl-PL'),
+      polishOption('gender', data.gender),
+      data.age,
+      polishOption('locations', data.location),
+      polishOption('stayDurations', data.stayDuration),
+      physical,
+      performance,
+      preparation,
+      yesNoPolish(data.longHours),
+      '',
+      ''
     ].map((value) => excelCell(value));
     if (values.length !== CFG.excelColumns.length) throw new Error(`Excel row mismatch: ${values.length}/${CFG.excelColumns.length}`);
     return values;
   }
 
-  function mailtoFor(sentAt, level) {
+  function rowText() {
+    return rowValues().join('\t');
+  }
+
+  function mailtoFor() {
     const person = recruiter();
-    const row = rowValues(sentAt, level).join('\t');
-    const subject = `[NOWY KANDYDAT] ${cleanCell(state.data.firstName, 35)} ${cleanCell(state.data.lastName, 45)} | ${polishOption('locations', state.data.location)} | ${person.name}`.slice(0, 220);
-    const body = `DANE DO EXCEL — WKLEJ PONIŻSZY WIERSZ DO PIERWSZEJ PUSTEJ KOMÓRKI A\n\n${row}`;
+    const routeContext = [route.source, route.campaign, route.vacancy].filter(Boolean).join(' / ');
+    const subject = `[ANKIETA] ${cleanCell(state.data.lastName, 45)} ${cleanCell(state.data.firstName, 35)} | ${polishOption('locations', state.data.location)} | ${state.id}${routeContext ? ` | ${routeContext}` : ''}`.slice(0, 220);
+    const body = `${t('rowInstruction')}\n\n${rowText()}`;
     return `mailto:${encodeURIComponent(person.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  function setResult(message) {
+    const result = document.getElementById('sendResult');
+    if (!result) return;
+    result.textContent = message;
+    result.classList.remove('hidden');
   }
 
   function sendRow() {
@@ -618,16 +596,31 @@
     sending = true;
     const button = app.querySelector('[data-action="send"]');
     button.disabled = true;
-    const sentAt = new Date();
-    let mailto = mailtoFor(sentAt, 'full');
-    if (mailto.length > CFG.maxMailtoLength) mailto = mailtoFor(sentAt, 'compact');
-    if (mailto.length > CFG.maxMailtoLength) mailto = mailtoFor(sentAt, 'minimal');
-    const result = document.getElementById('sendResult');
-    result.textContent = t('emailOpened');
-    result.classList.remove('hidden');
+    const mailto = mailtoFor();
+    setResult(t('emailOpened'));
     saveDraft();
     window.setTimeout(() => { sending = false; button.disabled = false; }, 2500);
     window.location.assign(mailto);
+  }
+
+  async function copyRow() {
+    const text = rowText();
+    try {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      else {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+      setResult(t('rowCopied'));
+    } catch {
+      setResult(t('copyFailed'));
+    }
   }
 
   function startNew() {
