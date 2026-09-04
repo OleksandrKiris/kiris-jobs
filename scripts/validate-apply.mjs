@@ -54,10 +54,10 @@ for (const code of codes) {
 
 const index = read('apply/index.html');
 for (const marker of [
-  'styles.css?v=17.0.1',
+  'styles.css?v=17.1.2',
   'config.js?v=17.0.0',
   'translations.js?v=17.0.0',
-  'app.js?v=17.0.0',
+  'app.js?v=17.1.1',
   '../assets/citronex-logo.jpg',
   'href="pdf/"',
   'id="app"'
@@ -79,6 +79,8 @@ for (const marker of [
   'window.location.assign(mailto)',
   'WSKAŹNIKI:',
   'FILMY:',
+  'single-action',
+  '<em class="ltr"><span>',
   'CFG.excelColumns.length',
   'pdfGeneratorUrl'
 ]) assert(app.includes(marker), `app.js is missing required marker: ${marker}`);
@@ -94,7 +96,9 @@ for (const marker of [
   '.language-grid',
   '.recruiter-list',
   '.sticky-actions',
+  '.sticky-actions.single-action',
   '.choice-card',
+  '.choice-grid.three .choice-card:last-child:nth-child(3)',
   '.screening-question',
   '.professional-note',
   '.send-box',

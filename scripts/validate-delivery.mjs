@@ -13,7 +13,8 @@ const redirect = read('apply/offline.html');
 const packageJson = JSON.parse(read('package.json'));
 
 assert(mainIndex.includes('href="pdf/"'), 'main page does not link to the separate PDF generator.');
-assert(mainIndex.includes('styles.css?v=17.0.1'), 'main form does not load the current accessibility styles.');
+assert(mainIndex.includes('styles.css?v=17.1.2'), 'main form does not load the current interface styles.');
+assert(mainIndex.includes('app.js?v=17.1.1'), 'main form does not load the current interface logic.');
 assert(!mainIndex.includes('type="file"'), 'main form still contains a file input.');
 assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), 'main form still creates or shares files.');
 assert(!/\bcsv\b/i.test(`${mainIndex}\n${mainApp}`), 'main form still contains CSV workflow.');

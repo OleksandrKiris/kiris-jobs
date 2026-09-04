@@ -430,7 +430,7 @@
         </div>
         <div class="step-heading"><span class="step-number">${state.step}</span><div><h1>${escapeHtml(titles[state.step - 1])}</h1><p>${escapeHtml(leads[state.step - 1])}</p></div></div>
         <form id="candidateForm" novalidate>${stepContent()}</form>
-        <div class="sticky-actions">
+        <div class="sticky-actions ${state.step === 1 ? 'single-action' : ''}">
           <button type="button" class="button secondary ${state.step === 1 ? 'invisible' : ''}" data-action="back">← ${escapeHtml(t('back'))}</button>
           <button type="button" class="button primary" data-action="next">${escapeHtml(state.step === TOTAL_STEPS ? t('review') : t('next'))} →</button>
         </div>
@@ -514,7 +514,7 @@
     app.innerHTML = `
       <section class="panel review-panel">
         <div class="review-heading"><span class="success-icon" aria-hidden="true">✓</span><div><h1>${escapeHtml(t('reviewTitle'))}</h1><p>${escapeHtml(t('reviewLead'))}</p></div></div>
-        <div class="recipient-card"><span class="avatar">${escapeHtml(person.initials)}</span><span><small>${escapeHtml(t('selectedRecruiter'))}</small><strong>${escapeHtml(person.name)}</strong><em class="ltr">${escapeHtml(person.email)} · ${escapeHtml(person.phone)}</em></span></div>
+        <div class="recipient-card"><span class="avatar">${escapeHtml(person.initials)}</span><span><small>${escapeHtml(t('selectedRecruiter'))}</small><strong>${escapeHtml(person.name)}</strong><em class="ltr"><span>${escapeHtml(person.email)}</span><span>${escapeHtml(person.phone)}</span></em></span></div>
         <div class="review-sections">
           ${reviewSection(t('sectionCandidate'), candidate)}
           ${reviewSection(t('sectionContact'), contact)}
