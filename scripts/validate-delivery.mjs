@@ -10,6 +10,7 @@ const pdfIndex = read('apply/pdf/index.html');
 const pdfCss = read('apply/pdf/styles.css');
 const pdfApp = read('apply/pdf/app.js');
 const redirect = read('apply/offline.html');
+const workflow = read('.github/workflows/pages.yml');
 const packageJson = JSON.parse(read('package.json'));
 
 assert(mainIndex.includes('href="pdf/"'), 'main page does not link to the separate PDF generator.');
@@ -64,5 +65,14 @@ for (const forbidden of [
 
 assert(redirect.includes('url=pdf/'), 'legacy offline.html does not redirect to /apply/pdf/.');
 assert(packageJson.scripts['check:js'].includes('apply/pdf/app.js'), 'package.json does not syntax-check the PDF generator.');
+
+for (const marker of [
+  'styles.css?v=17.1.2',
+  'translations.js?v=17.0.0',
+  'app.js?v=17.1.1',
+  'styles.css?v=1.1.0',
+  'app.js?v=1.1.1',
+  'CFG.excelColumns.length'
+]) assert(workflow.includes(marker), `GitHub Pages workflow is missing current marker: ${marker}`);
 
 console.log('PDF generator validation passed: stable non-overlapping print-only PDF tool.');

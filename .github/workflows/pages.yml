@@ -40,12 +40,12 @@ jobs:
           test -s apply/config.js
           test -s apply/translations.js
           test -s apply/app.js
-          grep -q 'styles.css?v=16.0.1' apply/index.html
-          grep -q 'translations.js?v=16.0.1' apply/index.html
-          grep -q 'app.js?v=16.0.1' apply/index.html
+          grep -q 'styles.css?v=17.1.2' apply/index.html
+          grep -q 'translations.js?v=17.0.0' apply/index.html
+          grep -q 'app.js?v=17.1.1' apply/index.html
           grep -q 'href="pdf/"' apply/index.html
           grep -q 'function sendRow' apply/app.js
-          grep -q 'DANE DO EXCEL' apply/app.js
+          grep -q 'CFG.excelColumns.length' apply/app.js
           grep -q 'window.location.assign(mailto)' apply/app.js
           ! grep -qi '\bcsv\b' apply/index.html apply/app.js
           ! grep -q 'type="file"' apply/index.html apply/app.js
@@ -56,8 +56,8 @@ jobs:
           test -s apply/pdf/index.html
           test -s apply/pdf/styles.css
           test -s apply/pdf/app.js
-          grep -q 'styles.css?v=1.0.1' apply/pdf/index.html
-          grep -q 'app.js?v=1.0.1' apply/pdf/index.html
+          grep -q 'styles.css?v=1.1.0' apply/pdf/index.html
+          grep -q 'app.js?v=1.1.1' apply/pdf/index.html
           grep -q 'window.print()' apply/pdf/app.js
           grep -q 'URL.createObjectURL' apply/pdf/app.js
           grep -q 'minmax(0,420px)' apply/pdf/styles.css
