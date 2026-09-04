@@ -13,13 +13,14 @@ const redirect = read('apply/offline.html');
 const packageJson = JSON.parse(read('package.json'));
 
 assert(mainIndex.includes('href="pdf/"'), 'main page does not link to the separate PDF generator.');
+assert(mainIndex.includes('styles.css?v=17.0.1'), 'main form does not load the current accessibility styles.');
 assert(!mainIndex.includes('type="file"'), 'main form still contains a file input.');
 assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), 'main form still creates or shares files.');
 assert(!/\bcsv\b/i.test(`${mainIndex}\n${mainApp}`), 'main form still contains CSV workflow.');
 
 for (const marker of [
-  'styles.css?v=1.0.1',
-  'app.js?v=1.0.1',
+  'styles.css?v=1.1.0',
+  'app.js?v=1.1.1',
   'id="pdfApp"',
   '../../assets/citronex-logo.jpg',
   "connect-src 'none'"
@@ -28,6 +29,9 @@ assert((pdfIndex.match(/rel="stylesheet"/g) || []).length === 1, 'PDF generator 
 
 for (const marker of [
   'window.print()',
+  'function renderPreview()',
+  'function pageWord(n)',
+  'renderPreview()});',
   'URL.createObjectURL',
   'type="file"',
   'image/jpeg,image/png,image/webp,image/heic,image/heif',
