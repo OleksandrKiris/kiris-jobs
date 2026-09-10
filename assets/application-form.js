@@ -55,12 +55,14 @@
   const DRAFT_VERSION = 3;
   const DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
   const DRAFT_PREFIX = "kiris-jobs-application:";
+  const APPLICATION_API_URL = "https://candidate-form-flow.lovable.app/api/public/applications";
   const SENSITIVE_DRAFT_FIELDS = new Set([
     "pesel",
     "passportNumber",
     "passportExpiry",
     "emergencyContactName",
-    "emergencyContactPhone"
+    "emergencyContactPhone",
+    "companyWebsite"
   ]);
   const PHYSICAL_JOB_IDS = new Set([
     "greenhouse-tomatoes",
@@ -269,77 +271,77 @@
     const copy = {
       ru: {
         birthDate: "Дата рождения",
-        birthHint: "Возраст рассчитывается на вашем устройстве и попадёт только в подготовленное сообщение WhatsApp.",
+        birthHint: "Возраст рассчитывается на вашем устройстве и попадёт только в анкету, отправленную рекрутеру.",
         age: "Возраст",
         underage: "Анкету можно отправить только после достижения 18 лет.",
         source: "Источник ссылки"
       },
       uk: {
         birthDate: "Дата народження",
-        birthHint: "Вік обчислюється на вашому пристрої та потрапить лише до підготовленого повідомлення WhatsApp.",
+        birthHint: "Вік обчислюється на вашому пристрої та потрапить лише до анкети, надісланої рекрутеру.",
         age: "Вік",
         underage: "Анкету можна надіслати лише після досягнення 18 років.",
         source: "Джерело посилання"
       },
       pl: {
         birthDate: "Data urodzenia",
-        birthHint: "Wiek jest obliczany na urządzeniu i trafia wyłącznie do przygotowanej wiadomości WhatsApp.",
+        birthHint: "Wiek jest obliczany na urządzeniu i trafia wyłącznie do ankiety wysłanej rekruterowi.",
         age: "Wiek",
         underage: "Zgłoszenie można wysłać dopiero po ukończeniu 18 lat.",
         source: "Źródło linku"
       },
       en: {
         birthDate: "Date of birth",
-        birthHint: "Age is calculated on your device and appears only in the prepared WhatsApp message.",
+        birthHint: "Age is calculated on your device and appears only in the application sent to the recruiter.",
         age: "Age",
         underage: "You must be at least 18 to send the application.",
         source: "Link source"
       },
       az: {
         birthDate: "Doğum tarixi",
-        birthHint: "Yaş cihazınızda hesablanır və yalnız hazırlanmış WhatsApp mesajına əlavə olunur.",
+        birthHint: "Yaş cihazınızda hesablanır və yalnız işə qəbul üzrə mütəxəssisə göndərilən ərizəyə əlavə olunur.",
         age: "Yaş",
         underage: "Müraciət yalnız 18 yaşdan sonra göndərilə bilər.",
         source: "Link mənbəyi"
       },
       ka: {
         birthDate: "დაბადების თარიღი",
-        birthHint: "ასაკი ითვლება თქვენს მოწყობილობაზე და მხოლოდ მომზადებულ WhatsApp შეტყობინებაში ხვდება.",
+        birthHint: "ასაკი ითვლება თქვენს მოწყობილობაზე და მხოლოდ რეკრუტერისთვის გაგზავნილ განაცხადში ხვდება.",
         age: "ასაკი",
         underage: "განაცხადის გაგზავნა შესაძლებელია მხოლოდ 18 წლის შემდეგ.",
         source: "ბმულის წყარო"
       },
       id: {
         birthDate: "Tanggal lahir",
-        birthHint: "Usia dihitung di perangkat Anda dan hanya masuk ke pesan WhatsApp yang disiapkan.",
+        birthHint: "Usia dihitung di perangkat Anda dan hanya dimasukkan ke lamaran yang dikirim kepada perekrut.",
         age: "Usia",
         underage: "Lamaran hanya dapat dikirim setelah berusia 18 tahun.",
         source: "Sumber tautan"
       },
       es: {
         birthDate: "Fecha de nacimiento",
-        birthHint: "La edad se calcula en su dispositivo y solo aparece en el mensaje preparado para WhatsApp.",
+        birthHint: "La edad se calcula en su dispositivo y solo aparece en la solicitud enviada al reclutador.",
         age: "Edad",
         underage: "La solicitud solo puede enviarse a partir de los 18 años.",
         source: "Origen del enlace"
       },
       fil: {
         birthDate: "Petsa ng kapanganakan",
-        birthHint: "Kinakalkula ang edad sa iyong device at isinasama lamang sa inihandang WhatsApp message.",
+        birthHint: "Kinakalkula ang edad sa iyong device at isinasama lamang sa aplikasyong ipinadala sa recruiter.",
         age: "Edad",
         underage: "Maipapadala lamang ang aplikasyon kapag 18 taong gulang o higit pa.",
         source: "Pinagmulan ng link"
       },
       ne: {
         birthDate: "जन्म मिति",
-        birthHint: "उमेर तपाईंको उपकरणमै गणना हुन्छ र तयार गरिएको WhatsApp सन्देशमा मात्र समावेश हुन्छ।",
+        birthHint: "उमेर तपाईंको उपकरणमै गणना हुन्छ र भर्तीकर्तालाई पठाइएको आवेदनमा मात्र समावेश हुन्छ।",
         age: "उमेर",
         underage: "१८ वर्ष पूरा भएपछि मात्र आवेदन पठाउन सकिन्छ।",
         source: "लिङ्क स्रोत"
       },
       hy: {
         birthDate: "Ծննդյան ամսաթիվ",
-        birthHint: "Տարիքը հաշվարկվում է ձեր սարքում և ավելացվում է միայն պատրաստված WhatsApp հաղորդագրությանը։",
+        birthHint: "Տարիքը հաշվարկվում է ձեր սարքում և ավելացվում է միայն հավաքագրողին ուղարկված դիմումին։",
         age: "Տարիք",
         underage: "Հայտը կարելի է ուղարկել միայն 18 տարին լրանալուց հետո։",
         source: "Հղման աղբյուր"
@@ -1209,6 +1211,9 @@
         <span>${escapeHTML(t("form.consent"))}</span>
         ${state.invalidFields[0] === "consent" ? `<small class="application-field-error">${escapeHTML(state.error)}</small>` : ""}
       </label>
+      <div class="application-honeypot" aria-hidden="true">
+        <label>Company website <input name="companyWebsite" type="text" value="${escapeHTML(state.values.companyWebsite || "")}" tabindex="-1" autocomplete="off"></label>
+      </div>
     `;
   }
 
@@ -2240,6 +2245,56 @@
     window.open(url.toString(), "_blank", "noopener,noreferrer");
   }
 
+  function submissionErrorMessage(code) {
+    const messages = {
+      configuration_error: "form.emailConfigurationError",
+      invalid_request: "form.emailInvalidRequest",
+      rate_limited: "form.emailRateLimited",
+      delivery_failed: "form.emailDeliveryFailed"
+    };
+    return t(messages[code] || "form.emailDeliveryFailed");
+  }
+
+  async function deliverApplication(record, message) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 25000);
+    try {
+      const response = await fetch(APPLICATION_API_URL, {
+        method: "POST",
+        credentials: "omit",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          version: 1,
+          applicationId: record.id,
+          submittedAt: record.at,
+          locale: state.values.preferredLanguage || i18n.locale,
+          jobId: record.jid,
+          jobTitle: record.j,
+          firstName: record.fn,
+          lastName: record.ln,
+          phone: record.p,
+          email: record.e || undefined,
+          message,
+          consent: Boolean(state.values.consent),
+          honeypot: state.values.companyWebsite || ""
+        })
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || (body.ok !== true && body.success !== true)) {
+        const error = new Error("Application delivery failed");
+        error.code = body.error || body.code || (response.status === 429 ? "rate_limited" : "delivery_failed");
+        throw error;
+      }
+      return body;
+    } catch (error) {
+      if (error?.name === "AbortError") error.code = "delivery_failed";
+      throw error;
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  }
+
   function clearDraft() {
     if (!state.jobId || !window.confirm(t("form.clearDraftConfirm"))) return;
     try {
@@ -2272,6 +2327,7 @@
       return;
     }
     const message = buildMessage();
+    const record = buildApplicationRecord();
     if (!navigator.onLine) {
       state.error = t("form.unavailableOffline");
       render();
@@ -2282,26 +2338,41 @@
     if (submitButton) {
       submitButton.disabled = true;
       submitButton.setAttribute("aria-busy", "true");
+      submitButton.textContent = t("form.sendingApplication");
     }
     try {
-      const copyPromise = writeMessageToClipboard(message);
-      openWhatsApp(message);
-      const copied = await copyPromise;
-      const confirmation = copied ? t("form.whatsappReady") : t("form.reviewHint");
+      await deliverApplication(record, message);
+      const confirmation = t("form.whatsappReady");
+      try {
+        localStorage.removeItem(draftKey(state.jobId));
+      } catch {
+        // Delivery succeeded even if local storage is unavailable.
+      }
+      state.hasDraft = false;
       const status = document.getElementById("application-submit-status");
       if (status) {
         status.textContent = confirmation;
         status.hidden = false;
       }
+      if (submitButton?.isConnected) submitButton.textContent = `✓ ${confirmation}`;
       window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: confirmation } }));
+    } catch (error) {
+      const messageText = submissionErrorMessage(error?.code);
+      state.error = messageText;
+      const alert = document.getElementById("application-error");
+      if (alert) {
+        alert.textContent = messageText;
+        alert.hidden = false;
+        alert.focus();
+      }
+      window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: messageText } }));
     } finally {
-      window.setTimeout(() => {
-        state.submitting = false;
-        if (submitButton?.isConnected) {
-          submitButton.disabled = false;
-          submitButton.removeAttribute("aria-busy");
-        }
-      }, 1800);
+      state.submitting = false;
+      if (submitButton?.isConnected) {
+        submitButton.disabled = false;
+        submitButton.removeAttribute("aria-busy");
+        if (state.error) submitButton.textContent = `${t("form.sendWhatsapp")} ↗`;
+      }
     }
   }
 

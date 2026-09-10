@@ -302,8 +302,9 @@ assert(
     && cleanCss.includes(".application-submit-status")
     && applicationScript.includes('class="application-review-summary"')
     && applicationScript.includes('id="application-submit-status"')
-    && applicationScript.includes("const copyPromise = writeMessageToClipboard(message)")
-    && applicationScript.includes('t("form.whatsappReady")'),
+    && applicationScript.includes("await deliverApplication(record, message)")
+    && applicationScript.includes('t("form.whatsappReady")')
+    && applicationScript.includes("localStorage.removeItem(draftKey(state.jobId))"),
   "The focused four-part application flow improvement is incomplete."
 );
 assert(
@@ -315,7 +316,20 @@ assert(
     && applicationScript.includes('t("form.sendWhatsapp")')
     && applicationScript.includes("if (state.submitting) return")
     && applicationScript.includes('submitButton.setAttribute("aria-busy", "true")'),
-  "The focused validation and final WhatsApp action improvements are incomplete."
+  "The focused validation and final application action improvements are incomplete."
+);
+assert(
+  applicationScript.includes('const APPLICATION_API_URL = "https://')
+    && applicationScript.includes('method: "POST"')
+    && applicationScript.includes('credentials: "omit"')
+    && applicationScript.includes("function deliverApplication(record, message)")
+    && applicationScript.includes("applicationId: record.id")
+    && applicationScript.includes("honeypot: state.values.companyWebsite")
+    && applicationScript.includes("configuration_error")
+    && applicationScript.includes("rate_limited")
+    && cleanCss.includes("v201 · email delivery abuse protection")
+    && cleanCss.includes(".application-honeypot"),
+  "The production email delivery integration and abuse protection are incomplete."
 );
 assert(
   cleanCss.includes("v198 · faster candidate decision page")
@@ -343,7 +357,7 @@ assert(
   html.includes('data-i18n="ui.availableJobs"')
     && html.includes("Znajdź pracę dla siebie")
     && html.includes("Szukaj stanowiska lub miejscowości")
-    && html.includes("Bez rejestracji. Dane otrzymam dopiero po wysłaniu wiadomości.")
+    && html.includes("Bez rejestracji. Dane zostaną wysłane dopiero po naciśnięciu przycisku wysłania ankiety.")
     && !html.includes("Wszystkie aktualne oferty")
     && !html.includes("Katalog z dnia"),
   "The concise candidate-facing homepage copy is incomplete."

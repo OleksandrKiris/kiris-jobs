@@ -6193,6 +6193,17 @@ body.candidate-site {
   }
 }
 
+/* v201 · email delivery abuse protection */
+.application-honeypot {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* v198 · faster candidate decision page */
 .direct-vacancy-page:not(.standalone-application-page) .vacancy-sidebar > .vacancy-status-note {
   margin: 12px 2px 0;

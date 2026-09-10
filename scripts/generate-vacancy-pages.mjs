@@ -55,7 +55,7 @@ for (const job of content.jobs) {
     localized.summary,
     localized.location ? `${localized.format}, ${localized.location}.` : "",
     salaryText(job, localized) ? `Stawka: ${salaryText(job, localized).replace(/[.]+$/, "")}.` : "",
-    "Warunki, zdjęcia zakwaterowania i ankieta do wysłania przez WhatsApp."
+    "Warunki, zdjęcia zakwaterowania i bezpieczna ankieta wysyłana do rekrutera."
   ].filter(Boolean).join(" ");
 
   let html = template;
