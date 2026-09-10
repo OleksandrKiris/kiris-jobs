@@ -264,8 +264,8 @@ assert(
     && candidateScript.includes('data-country-filter="${escapeHTML(item.value)}"')
     && candidateScript.includes("const statusPriority =")
     && candidateScript.includes("function openJobCount()")
-    && candidateScript.includes('result.filter((job) => job.status === "open")')
-    && candidateScript.includes('result.filter((job) => job.status !== "open")')
+    && candidateScript.includes("const available = result.filter(canApply)")
+    && candidateScript.includes("const other = result.filter((job) => !canApply(job))")
     && candidateScript.includes("function catalogDate()")
     && candidateScript.includes("function resetFilters()")
     && candidateScript.includes('setAttribute("aria-busy", "false")')
@@ -302,7 +302,7 @@ assert(
     && cleanCss.includes(".application-submit-status")
     && applicationScript.includes('class="application-review-summary"')
     && applicationScript.includes('id="application-submit-status"')
-    && applicationScript.includes("await deliverApplication(record, message)")
+    && applicationScript.includes("const delivery = await deliverApplication(record, message)")
     && applicationScript.includes('t("form.whatsappReady")')
     && applicationScript.includes("localStorage.removeItem(draftKey(state.jobId))"),
   "The focused four-part application flow improvement is incomplete."
@@ -345,7 +345,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=203"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=204"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -406,6 +406,26 @@ assert(
     && applicationScript.includes("renderStepTrack(stepLabels, state.step + 1)")
     && applicationScript.includes("requiredFieldsRemaining(form)"),
   "The v203 interface, draft recovery and safe submission controls are incomplete."
+);
+assert(
+  cleanCss.includes("v204 · branded WhatsApp control and explicit delivery confirmation")
+    && homepageCss.includes("v204 · smart vacancy filters and clearer mobile language controls")
+    && html.includes('id="feature-filter"')
+    && html.includes('class="whatsapp-mark"')
+    && candidateScript.includes("const VACANCY_FRESHNESS_DAYS = 60")
+    && candidateScript.includes("function effectiveStatus(job)")
+    && candidateScript.includes("function renderFeatureFilter()")
+    && candidateScript.includes("function trackFunnel(event, jobId")
+    && candidateScript.includes('trackFunnel("catalog_view", directJobId)')
+    && candidateScript.includes("document.title =")
+    && applicationScript.includes('"consent",')
+    && applicationScript.includes("consent: false")
+    && applicationScript.includes("function renderSuccess(applicationId, message)")
+    && applicationScript.includes("currentCountry: state.values.currentCountry")
+    && applicationScript.includes("screeningStatus: record.decision?.status")
+    && applicationScript.includes('event: "application_complete"')
+    && serviceWorker.includes("kiris-jobs-v204"),
+  "The v204 smart filters, freshness, localized metadata and safe success flow are incomplete."
 );
 
 const requiredOfflineFonts = [

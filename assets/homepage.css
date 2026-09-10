@@ -187,10 +187,25 @@
   border: 0;
 }
 
+/* v204 · smart vacancy filters and clearer mobile language controls */
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-control {
+  min-width: 0;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-buttons {
   display: flex;
   height: 100%;
   align-items: stretch;
+  gap: 6px;
+}
+
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
@@ -208,12 +223,37 @@
   white-space: nowrap;
 }
 
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons button {
+  min-height: 34px;
+  padding: 0 11px;
+  color: #536158;
+  background: #edf2ef;
+  border: 1px solid #dbe4de;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-buttons button:hover {
   color: var(--homepage-accent-dark);
   border-color: var(--homepage-line-strong);
 }
 
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons button:hover {
+  color: var(--homepage-accent-dark);
+  background: #e4ede8;
+  border-color: var(--homepage-line-strong);
+}
+
 .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-buttons button.is-active {
+  color: #fff;
+  background: var(--homepage-accent);
+  border-color: var(--homepage-accent);
+}
+
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons button.is-active {
   color: #fff;
   background: var(--homepage-accent);
   border-color: var(--homepage-accent);
@@ -576,9 +616,29 @@
     flex: 0 0 auto;
   }
 
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-control {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-buttons {
     overflow: visible;
     flex-wrap: nowrap;
+  }
+
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons {
+    width: 100%;
+    padding: 1px 2px 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons::-webkit-scrollbar {
+    display: none;
   }
 
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-buttons button {
@@ -804,8 +864,8 @@
 
 @media (max-width: 560px) {
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .language-switcher-button {
-    width: 57px;
-    min-width: 57px;
+    width: 62px;
+    min-width: 62px;
     grid-template-columns: 26px 15px;
     gap: 3px;
   }

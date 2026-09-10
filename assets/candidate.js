@@ -6,7 +6,7 @@
   const jobs = content.jobs || [];
   const profile = content.profile || {};
   const housing = content.housingLocations || {};
-  const state = { query: "", country: "", openJobId: "" };
+  const state = { query: "", country: "", feature: "", openJobId: "" };
   const lightboxState = {
     items: [],
     index: 0,
@@ -16,18 +16,20 @@
   const directPathMatch = location.pathname.match(/\/vacancies\/([^/]+)\/?$/);
   const directJobId = directPathMatch ? decodeURIComponent(directPathMatch[1]) : "";
   const CATALOG_COPY = {
-    ru: { housing: "Жильё", noExperience: "Без опыта", pairs: "Для пар", official: "Официально", hoursExample: "Пример за 200 ч" },
-    uk: { housing: "Житло", noExperience: "Без досвіду", pairs: "Для пар", official: "Офіційно", hoursExample: "Приклад за 200 год" },
-    pl: { housing: "Zakwaterowanie", noExperience: "Bez doświadczenia", pairs: "Dla par", official: "Legalnie", hoursExample: "Przykład za 200 godz." },
-    en: { housing: "Housing", noExperience: "No experience", pairs: "Couples", official: "Official contract", hoursExample: "Example for 200 h" },
-    az: { housing: "Yaşayış yeri", noExperience: "Təcrübəsiz", pairs: "Cütlüklər üçün", official: "Rəsmi", hoursExample: "200 saat üçün nümunə" },
-    ka: { housing: "საცხოვრებელი", noExperience: "გამოცდილების გარეშე", pairs: "წყვილებისთვის", official: "ოფიციალურად", hoursExample: "მაგალითი 200 საათზე" },
-    id: { housing: "Tempat tinggal", noExperience: "Tanpa pengalaman", pairs: "Untuk pasangan", official: "Resmi", hoursExample: "Contoh untuk 200 jam" },
-    es: { housing: "Alojamiento", noExperience: "Sin experiencia", pairs: "Para parejas", official: "Contrato oficial", hoursExample: "Ejemplo por 200 h" },
-    fil: { housing: "Tirahan", noExperience: "Walang karanasan", pairs: "Para sa magkapareha", official: "Opisyal", hoursExample: "Halimbawa sa 200 oras" },
-    ne: { housing: "आवास", noExperience: "अनुभव नचाहिने", pairs: "जोडीका लागि", official: "आधिकारिक", hoursExample: "२०० घण्टाको उदाहरण" },
-    hy: { housing: "Բնակարան", noExperience: "Առանց փորձի", pairs: "Զույգերի համար", official: "Պաշտոնական", hoursExample: "Օրինակ՝ 200 ժամի համար" }
+    ru: { allConditions: "Все условия", housing: "Жильё", noExperience: "Без опыта", pairs: "Для пар", official: "Официально", hoursExample: "Пример за 200 ч" },
+    uk: { allConditions: "Усі умови", housing: "Житло", noExperience: "Без досвіду", pairs: "Для пар", official: "Офіційно", hoursExample: "Приклад за 200 год" },
+    pl: { allConditions: "Wszystkie warunki", housing: "Zakwaterowanie", noExperience: "Bez doświadczenia", pairs: "Dla par", official: "Legalnie", hoursExample: "Przykład za 200 godz." },
+    en: { allConditions: "All conditions", housing: "Housing", noExperience: "No experience", pairs: "Couples", official: "Official contract", hoursExample: "Example for 200 h" },
+    az: { allConditions: "Bütün şərtlər", housing: "Yaşayış yeri", noExperience: "Təcrübəsiz", pairs: "Cütlüklər üçün", official: "Rəsmi", hoursExample: "200 saat üçün nümunə" },
+    ka: { allConditions: "ყველა პირობა", housing: "საცხოვრებელი", noExperience: "გამოცდილების გარეშე", pairs: "წყვილებისთვის", official: "ოფიციალურად", hoursExample: "მაგალითი 200 საათზე" },
+    id: { allConditions: "Semua kondisi", housing: "Tempat tinggal", noExperience: "Tanpa pengalaman", pairs: "Untuk pasangan", official: "Resmi", hoursExample: "Contoh untuk 200 jam" },
+    es: { allConditions: "Todas las condiciones", housing: "Alojamiento", noExperience: "Sin experiencia", pairs: "Para parejas", official: "Contrato oficial", hoursExample: "Ejemplo por 200 h" },
+    fil: { allConditions: "Lahat ng kondisyon", housing: "Tirahan", noExperience: "Walang karanasan", pairs: "Para sa magkapareha", official: "Opisyal", hoursExample: "Halimbawa sa 200 oras" },
+    ne: { allConditions: "सबै सर्तहरू", housing: "आवास", noExperience: "अनुभव नचाहिने", pairs: "जोडीका लागि", official: "आधिकारिक", hoursExample: "२०० घण्टाको उदाहरण" },
+    hy: { allConditions: "Բոլոր պայմանները", housing: "Բնակարան", noExperience: "Առանց փորձի", pairs: "Զույգերի համար", official: "Պաշտոնական", hoursExample: "Օրինակ՝ 200 ժամի համար" }
   };
+  const VACANCY_FRESHNESS_DAYS = 60;
+  const FUNNEL_API_URL = "https://candidate-form-flow.lovable.app/api/public/funnel";
 
   const $ = (id) => document.getElementById(id);
   const escapeHTML = (value) => String(value ?? "")
@@ -37,6 +39,23 @@
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
   const catalogCopy = (key) => CATALOG_COPY[i18n.locale]?.[key] || CATALOG_COPY.en[key] || key;
+
+  function trackFunnel(event, jobId = "") {
+    const key = `kiris-funnel:${event}:${jobId || "catalog"}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      // Aggregate metrics remain optional when browser storage is unavailable.
+    }
+    fetch(FUNNEL_API_URL, {
+      method: "POST",
+      credentials: "omit",
+      keepalive: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event, jobId, locale: i18n.locale })
+    }).catch(() => {});
+  }
 
   function countryCode(job) {
     const format = String(job.format || "").toLowerCase();
@@ -50,8 +69,15 @@
     return i18n.job(job);
   }
 
+  function effectiveStatus(job) {
+    if (job?.status !== "open" || !job.updatedAt) return job?.status || "verify";
+    const checkedAt = Date.parse(`${job.updatedAt}T23:59:59Z`);
+    const expiresAt = checkedAt + VACANCY_FRESHNESS_DAYS * 24 * 60 * 60 * 1000;
+    return Number.isFinite(checkedAt) && Date.now() > expiresAt ? "verify" : "open";
+  }
+
   function canApply(job) {
-    return job?.status === "open" || job?.status === "verify";
+    return ["open", "verify"].includes(effectiveStatus(job));
   }
 
   function statusLabel(job) {
@@ -61,7 +87,7 @@
       paused: "ui.recruitmentPaused",
       closed: "ui.recruitmentClosed"
     };
-    return i18n.t(labels[job?.status] || labels.verify);
+    return i18n.t(labels[effectiveStatus(job)] || labels.verify);
   }
 
   function salary(job) {
@@ -108,13 +134,17 @@
     return `${catalogCopy("hoursExample")}: ≈ ${range} ${value.currency || ""} · ${i18n.t("ui.grossShort")}`;
   }
 
-  function jobBenefits(job) {
+  function jobBenefitFlags(job) {
     const result = [];
-    if ((job.housingLocations || []).length) result.push(catalogCopy("housing"));
-    if (String(job.level || "").toLocaleLowerCase("ru").includes("без опыта")) result.push(catalogCopy("noExperience"));
-    if ((job.candidates || []).some((item) => String(item).toLocaleLowerCase("ru").includes("пар"))) result.push(catalogCopy("pairs"));
-    if (/официально|umowa o pracę/i.test(String(job.contract || ""))) result.push(catalogCopy("official"));
-    return result.slice(0, 4);
+    if ((job.housingLocations || []).length) result.push("housing");
+    if (String(job.level || "").toLocaleLowerCase("ru").includes("без опыта")) result.push("noExperience");
+    if ((job.candidates || []).some((item) => String(item).toLocaleLowerCase("ru").includes("пар"))) result.push("pairs");
+    if (/официально|umowa o pracę/i.test(String(job.contract || ""))) result.push("official");
+    return result;
+  }
+
+  function jobBenefits(job) {
+    return jobBenefitFlags(job).map(catalogCopy).slice(0, 4);
   }
 
   function publicJobUrl(job) {
@@ -160,7 +190,7 @@
     const accessibleLabel = `${cardAction}: ${view.title}`;
     const benefits = jobBenefits(job);
     return `
-      <article class="job-card" data-job-id="${escapeHTML(job.id)}" data-status="${escapeHTML(job.status || "verify")}">
+      <article class="job-card" data-job-id="${escapeHTML(job.id)}" data-status="${escapeHTML(effectiveStatus(job))}">
         <a class="job-card-link job-open" href="${escapeHTML(jobUrl)}" data-open-job="${escapeHTML(job.id)}" aria-label="${escapeHTML(accessibleLabel)}">
           <div class="job-card-body">
             <div class="job-card-copy">
@@ -184,7 +214,7 @@
   }
 
   function openJobCount() {
-    return jobs.filter((job) => job.status === "open").length;
+    return jobs.filter(canApply).length;
   }
 
   function catalogDate() {
@@ -201,8 +231,10 @@
   function resetFilters() {
     state.query = "";
     state.country = "";
+    state.feature = "";
     $("job-search").value = "";
     renderCountryFilter();
+    renderFeatureFilter();
     renderJobs();
     $("job-search").focus({ preventScroll: true });
   }
@@ -213,6 +245,7 @@
     const originalOrder = new Map(jobs.map((job, index) => [job.id, index]));
     return jobs.filter((job) => {
       if (state.country && countryCode(job) !== state.country) return false;
+      if (state.feature && !jobBenefitFlags(job).includes(state.feature)) return false;
       if (!query) return true;
       const view = localized(job);
       return [
@@ -226,7 +259,7 @@
         view.summary
       ].join(" ").toLocaleLowerCase(i18n.localeTag()).includes(query);
     }).sort((first, second) => (
-      (statusPriority[first.status] ?? 1) - (statusPriority[second.status] ?? 1)
+      (statusPriority[effectiveStatus(first)] ?? 1) - (statusPriority[effectiveStatus(second)] ?? 1)
       || originalOrder.get(first.id) - originalOrder.get(second.id)
     ));
   }
@@ -248,17 +281,32 @@
     container.setAttribute("aria-label", i18n.t("ui.allCountries"));
   }
 
+  function renderFeatureFilter() {
+    const container = $("feature-filter");
+    if (!container) return;
+    const options = ["", "housing", "noExperience", "pairs", "official"];
+    container.innerHTML = options.map((value) => `
+      <button
+        type="button"
+        data-feature-filter="${escapeHTML(value)}"
+        aria-pressed="${String(state.feature === value)}"
+        class="${state.feature === value ? "is-active" : ""}"
+      >${escapeHTML(value ? catalogCopy(value) : catalogCopy("allConditions"))}</button>
+    `).join("");
+    container.setAttribute("aria-label", i18n.t("ui.conditions"));
+  }
+
   function renderJobs() {
     const result = visibleJobs();
-    const available = result.filter((job) => job.status === "open");
-    const other = result.filter((job) => job.status !== "open");
+    const available = result.filter(canApply);
+    const other = result.filter((job) => !canApply(job));
     const otherJobs = $("other-jobs");
     $("job-grid").innerHTML = available.map(card).join("");
     $("job-grid").setAttribute("aria-busy", "false");
     $("other-job-grid").innerHTML = other.map(card).join("");
     $("other-job-count").textContent = String(other.length);
     otherJobs.hidden = other.length === 0;
-    if (other.length && !available.length && (state.query || state.country)) otherJobs.open = true;
+    if (other.length && !available.length && (state.query || state.country || state.feature)) otherJobs.open = true;
     $("result-count").textContent = `${i18n.t("ui.found")}: ${available.length}`;
     $("empty-state").hidden = result.length > 0;
     $("job-total").textContent = String(openJobCount());
@@ -301,7 +349,7 @@
     const applyUrl = applicationUrl(job);
     const applicationOpen = canApply(job);
     return `
-      <article class="vacancy-detail" data-status="${escapeHTML(job.status || "verify")}">
+      <article class="vacancy-detail" data-status="${escapeHTML(effectiveStatus(job))}">
         <header class="vacancy-hero">
           <div class="vacancy-hero-copy">
             <div class="job-tags">
@@ -376,6 +424,14 @@
       container.innerHTML = "";
       return;
     }
+    const view = localized(job);
+    document.title = `${view.title} · ${job.company} · Kiris Jobs`;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.setAttribute("content", view.summary || view.subtitle || view.title);
+    const socialTitle = document.querySelector('meta[property="og:title"]');
+    if (socialTitle) socialTitle.setAttribute("content", document.title);
+    const socialDescription = document.querySelector('meta[property="og:description"]');
+    if (socialDescription) socialDescription.setAttribute("content", view.summary || view.subtitle || view.title);
     state.openJobId = job.id;
     $("direct-vacancy-back").href = catalogUrl();
     $("application-page-back").href = publicJobUrl(job);
@@ -517,6 +573,7 @@
       renderDirectVacancy();
     } else {
       renderCountryFilter();
+      renderFeatureFilter();
       renderJobs();
     }
     if (state.openJobId && $("job-dialog").open) openJob(state.openJobId);
@@ -535,12 +592,19 @@
     document.addEventListener("click", (event) => {
       const housingPhoto = event.target.closest(".housing-grid a");
       const countryButton = event.target.closest("[data-country-filter]");
+      const featureButton = event.target.closest("[data-feature-filter]");
       const openButton = event.target.closest("[data-open-job]");
       const applyButton = event.target.closest("[data-apply-job]");
       const closeButton = event.target.closest("[data-close-dialog]");
       if (countryButton) {
         state.country = countryButton.dataset.countryFilter || "";
         renderCountryFilter();
+        renderJobs();
+        return;
+      }
+      if (featureButton) {
+        state.feature = featureButton.dataset.featureFilter || "";
+        renderFeatureFilter();
         renderJobs();
         return;
       }
@@ -574,6 +638,12 @@
       toast.hidden = false;
       clearTimeout(toast._timer);
       toast._timer = setTimeout(() => { toast.hidden = true; }, 2600);
+    });
+    window.addEventListener("portal:funnel", (event) => {
+      const name = event.detail?.event;
+      if (["application_start", "application_complete"].includes(name)) {
+        trackFunnel(name, event.detail?.jobId || "");
+      }
     });
     i18n.subscribe(renderStatic);
   }
@@ -633,6 +703,7 @@
     ensureHousingLightbox();
     bind();
     renderStatic();
+    trackFunnel("catalog_view", directJobId);
     openDeepLink();
     ensureAppStyles();
     registerCandidateServiceWorker();

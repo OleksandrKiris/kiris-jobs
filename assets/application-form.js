@@ -203,6 +203,7 @@
     "experienceDetails",
     "workLimitations",
     "extraNotes",
+    "consent",
     "companyWebsite"
   ]);
   const PHYSICAL_JOB_IDS = new Set([
@@ -709,6 +710,32 @@
         </span>
       </aside>
     `;
+  }
+
+  function renderSuccess(applicationId, message) {
+    const container = document.getElementById("application-dialog-content");
+    const job = localizedJob();
+    if (!container) return;
+    const catalogUrl = `./?lang=${encodeURIComponent(i18n.locale)}`;
+    container.innerHTML = `
+      <section class="application-success" aria-labelledby="application-success-title">
+        <div class="application-success-mark" aria-hidden="true">✓</div>
+        <p class="application-vacancy-context">${escapeHTML(job?.title || "")}</p>
+        <h2 id="application-success-title" tabindex="-1">${escapeHTML(t("form.whatsappReady"))}</h2>
+        <p class="application-success-response">${escapeHTML(t("ui.responseTime"))} · ${escapeHTML(profile.workHours || t("ui.workHours"))}</p>
+        <div class="application-success-reference">
+          <span>${escapeHTML(personalMessageCopy().reference)}</span>
+          <strong>${escapeHTML(applicationId)}</strong>
+        </div>
+        ${recruiterHandoff()}
+        <div class="application-success-actions">
+          <a class="button button-secondary" href="${escapeHTML(catalogUrl)}">← ${escapeHTML(t("ui.navJobs"))}</a>
+          <button class="button button-primary" type="button" data-success-whatsapp>WhatsApp ↗</button>
+        </div>
+      </section>
+    `;
+    container.querySelector("[data-success-whatsapp]")?.addEventListener("click", () => openWhatsApp(message));
+    document.getElementById("application-success-title")?.focus();
   }
 
   function field(name, label, input, hint = "") {
@@ -1560,6 +1587,7 @@
         ...initialValues,
         ...draft.values,
         jobId: state.jobId,
+        consent: false,
         shiftReadiness: Array.isArray(draft.values.shiftReadiness) ? draft.values.shiftReadiness : []
       };
       state.pendingDraft = null;
@@ -2544,6 +2572,9 @@
           lastName: record.ln,
           phone: record.p,
           email: record.e || undefined,
+          currentCountry: state.values.currentCountry || undefined,
+          preferredLocation: state.values.preferredLocation || undefined,
+          screeningStatus: record.decision?.status || undefined,
           message,
           consent: Boolean(state.values.consent),
           turnstileToken,
@@ -2626,7 +2657,7 @@
       submitButton.textContent = t("form.sendingApplication");
     }
     try {
-      await deliverApplication(record, message);
+      const delivery = await deliverApplication(record, message);
       const confirmation = t("form.whatsappReady");
       try {
         localStorage.removeItem(draftKey(state.jobId));
@@ -2635,12 +2666,10 @@
       }
       state.hasDraft = false;
       state.submitted = true;
-      const status = document.getElementById("application-submit-status");
-      if (status) {
-        status.textContent = confirmation;
-        status.hidden = false;
-      }
-      if (submitButton?.isConnected) submitButton.textContent = `✓ ${confirmation}`;
+      renderSuccess(delivery.applicationId || record.id, message);
+      window.dispatchEvent(new CustomEvent("portal:funnel", {
+        detail: { event: "application_complete", jobId: state.jobId }
+      }));
       window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: confirmation } }));
     } catch (error) {
       const messageText = submissionErrorMessage(error?.code);
@@ -2676,6 +2705,11 @@
     const hasSelectedJob = Boolean(selectedJob);
     if (hasSelectedJob && !canApply(selectedJob)) return;
     state.mode = hasSelectedJob ? "application" : "match";
+    if (hasSelectedJob) {
+      window.dispatchEvent(new CustomEvent("portal:funnel", {
+        detail: { event: "application_start", jobId }
+      }));
+    }
     state.matchStep = 0;
     state.recommendations = [];
     state.jobId = hasSelectedJob ? jobId : "";
