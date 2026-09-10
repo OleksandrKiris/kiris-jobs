@@ -38,5 +38,8 @@ jobs:
           admin_status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' "$api/api/admin/applications")"
           test "$admin_status" = '401'
 
+          admin_vacancies_status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' "$api/api/admin/vacancies")"
+          test "$admin_vacancies_status" = '401'
+
           vacancies_status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' "$api/api/public/vacancies" -H 'Origin: https://oleksandrkiris.github.io')"
           test "$vacancies_status" = '200'
