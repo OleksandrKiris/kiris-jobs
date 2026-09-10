@@ -14,7 +14,7 @@ const serviceWorker = read("sw.js");
 
 assert(index.includes('href="privacy.html"'), "Homepage does not link to the privacy policy.");
 assert(privacy.includes('id="privacy-policy"'), "Privacy page has no policy container.");
-assert(privacy.includes('assets/privacy.js?v=205'), "Privacy page does not load the current policy script.");
+assert(privacy.includes('assets/privacy-bootstrap.js?v=206'), "Privacy page does not load the current policy bootstrap.");
 for (const locale of ["pl", "en", "ru", "uk", "az"]) {
   assert(privacyScript.includes(`${locale}: {`), `Privacy policy has no ${locale} version.`);
 }
@@ -34,7 +34,7 @@ assert(!form.includes('field("pesel"'), "Public form must not collect a PESEL nu
 assert(!form.includes('field("passportNumber"'), "Public form must not collect a passport number.");
 assert(!form.includes('field("emergencyContactName"'), "Public form must not collect third-party names.");
 assert(!form.includes('field("emergencyContactPhone"'), "Public form must not collect third-party phone numbers.");
-assert(form.includes("const DRAFT_VERSION = 4"), "Old browser drafts were not invalidated.");
+assert(form.includes("const DRAFT_VERSION = 5"), "Old browser drafts were not invalidated.");
 assert(form.includes("TURNSTILE_SITE_KEY"), "Turnstile site key is not configured.");
 assert(form.includes("turnstileToken"), "Turnstile token is not sent to the backend.");
 assert(form.includes('action: "application_submit"'), "Turnstile action binding is missing.");

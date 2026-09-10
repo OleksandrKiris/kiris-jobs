@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => readFile(path.join(root, relativePath), "utf8");
-const [html, legacyCss, css, cleanCss, homepageCss, candidateScript, applicationScript, serviceWorker] = await Promise.all([
+const [html, legacyCss, css, cleanCss, homepageCss, candidateScript, applicationScript, bootstrapScript, serviceWorker] = await Promise.all([
   read("index.html"),
   read("assets/styles.css"),
   read("assets/candidate-base.css"),
@@ -12,6 +12,7 @@ const [html, legacyCss, css, cleanCss, homepageCss, candidateScript, application
   read("assets/homepage.css"),
   read("assets/candidate.js"),
   read("assets/application-form.js"),
+  read("assets/bootstrap.js"),
   read("sw.js")
 ]);
 
@@ -20,6 +21,10 @@ const activeCss = `${css}\n${cleanCss}\n${homepageCss}`;
 const buildMessageSource = applicationScript.slice(
   applicationScript.indexOf("function buildMessage()"),
   applicationScript.indexOf("async function writeMessageToClipboard")
+);
+const applicationStepsSource = applicationScript.slice(
+  applicationScript.indexOf("const STEP_KEYS = ["),
+  applicationScript.indexOf("];", applicationScript.indexOf("const STEP_KEYS = [")) + 2
 );
 const assert = (condition, message) => {
   if (!condition) errors.push(message);
@@ -31,23 +36,32 @@ const versionOf = (source, asset) => (
 const styleVersion = versionOf(html, "assets/candidate-base.css");
 const cleanStyleVersion = versionOf(html, "assets/clean.css");
 const homepageStyleVersion = versionOf(html, "assets/homepage.css");
-const appVersion = versionOf(html, "assets/candidate.js");
-const applicationVersion = versionOf(html, "assets/application-form.js");
+const appVersion = versionOf(html, "assets/bootstrap.js");
+const applicationVersion = appVersion;
 assert(styleVersion, "index.html: candidate-base.css must have a numeric cache-busting version.");
 assert(cleanStyleVersion, "index.html: clean.css must have a numeric cache-busting version.");
 assert(homepageStyleVersion, "index.html: homepage.css must have a numeric cache-busting version.");
-assert(appVersion, "index.html: candidate.js must have a numeric cache-busting version.");
-assert(applicationVersion, "index.html: application-form.js must have a numeric cache-busting version.");
+assert(appVersion, "index.html: bootstrap.js must have a numeric cache-busting version.");
 assert(
   [cleanStyleVersion, homepageStyleVersion, appVersion, applicationVersion].every((version) => version === styleVersion),
   "index.html: all candidate CSS and JS versions must match."
+);
+assert(
+  (applicationStepsSource.match(/"step[A-Z][^"]+"/g) || []).length === 3
+    && applicationStepsSource.includes('"stepContact"')
+    && applicationStepsSource.includes('"stepDetails"')
+    && applicationStepsSource.includes('"stepReview"')
+    && !applicationScript.slice(applicationScript.indexOf("function render(focusStart")).includes("renderPrecheck(focusStart)"),
+  "The direct candidate application must use the focused three-step flow without a duplicate precheck gate."
 );
 assert(
   serviceWorker.includes(`assets/candidate-base.css?v=${styleVersion}`)
     && serviceWorker.includes(`assets/clean.css?v=${cleanStyleVersion}`)
     && serviceWorker.includes(`assets/homepage.css?v=${homepageStyleVersion}`)
     && serviceWorker.includes(`assets/application-form.js?v=${applicationVersion}`)
-    && serviceWorker.includes(`assets/candidate.js?v=${appVersion}`),
+    && serviceWorker.includes(`assets/candidate.js?v=${appVersion}`)
+    && serviceWorker.includes(`assets/bootstrap.js?v=${appVersion}`)
+    && bootstrapScript.includes(`PORTAL_ASSET_VERSION = "${appVersion}"`),
   "sw.js: cached CSS/JS versions must match index.html."
 );
 assert(
@@ -102,8 +116,11 @@ assert(
   "sw.js: activation must only remove this app's caches."
 );
 assert(
-  serviceWorker.includes("cache.addAll([...CORE_SHELL, ...OPTIONAL_LOCALES])"),
-  "sw.js: every locale must be guaranteed in the offline app shell."
+  serviceWorker.includes("cache.addAll(CORE_SHELL)")
+    && bootstrapScript.includes("PORTAL_LOCALE_BASE")
+    && bootstrapScript.includes("await import(new URL")
+    && !serviceWorker.includes("OPTIONAL_LOCALES"),
+  "Locales must load on demand while the active locale remains cacheable."
 );
 assert(
   cleanCss.includes(".direct-vacancy-page:not(.standalone-application-page) .vacancy-layout")
@@ -124,7 +141,7 @@ assert(
   applicationScript.includes('class="application-optional"')
     && applicationScript.includes("isPhysicalJob()")
     && applicationScript.includes("function renderPrecheck(")
-    && applicationScript.includes("precheckComplete"),
+    && applicationScript.includes('"stepDetails"'),
   "assets/application-form.js: optional answers and vacancy-specific physical questions are required."
 );
 assert(
@@ -335,7 +352,7 @@ assert(
   html.includes('href="privacy.html"')
     && applicationScript.includes('class="application-privacy-link"')
     && applicationScript.includes('t("form.privacyDetails")')
-    && applicationScript.includes("const DRAFT_VERSION = 4")
+    && applicationScript.includes("const DRAFT_VERSION = 5")
     && applicationScript.includes("TURNSTILE_SCRIPT_URL")
     && applicationScript.includes("renderTurnstileWidget")
     && applicationScript.includes("turnstileToken")
@@ -345,7 +362,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=205"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=206"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -425,7 +442,9 @@ assert(
     && applicationScript.includes("screeningStatus: record.decision?.status")
     && applicationScript.includes("...legacyPayload")
     && applicationScript.includes('event: "application_complete"')
-    && serviceWorker.includes("kiris-jobs-v205"),
+    && serviceWorker.includes("kiris-jobs-v206")
+    && applicationScript.includes('const STEP_KEYS = [')
+    && applicationScript.includes('"stepDetails"'),
   "The v204 smart filters, freshness, localized metadata and safe success flow are incomplete."
 );
 

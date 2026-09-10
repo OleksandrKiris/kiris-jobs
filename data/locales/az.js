@@ -174,6 +174,7 @@
       selectedVacancy: "Seçilmiş vakansiya",
       changeVacancy: "Vakansiyanı dəyiş",
       stepContact: "Əlaqə",
+      stepDetails: "Məlumatlar və hazırlıq",
       stepLocation: "Ölkə və vətəndaşlıq",
       stepDocuments: "Rəsmiləşdirmə",
       stepLogistics: "Səfər",

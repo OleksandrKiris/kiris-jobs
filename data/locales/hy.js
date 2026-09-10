@@ -174,6 +174,7 @@
       selectedVacancy: "Ընտրված աշխատատեղ",
       changeVacancy: "Փոխել աշխատատեղը",
       stepContact: "Կոնտակտ",
+      stepDetails: "Տվյալներ և պատրաստվածություն",
       stepLocation: "Երկիր և քաղաքացիություն",
       stepDocuments: "Աշխատանքի ձևակերպում",
       stepLogistics: "Մեկնում",

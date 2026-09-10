@@ -839,7 +839,22 @@
     overflow: hidden;
   }
 
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-control {
+    position: relative;
+  }
+
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-control::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 3px;
+    width: 30px;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(244, 246, 244, 0), rgba(244, 246, 244, .98));
+    content: "";
+  }
+
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-control::after {
     position: absolute;
     top: 0;
     right: 0;
@@ -863,6 +878,20 @@
 }
 
 @media (max-width: 560px) {
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-control {
+    overflow: visible;
+  }
+
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-control::after {
+    display: none;
+  }
+
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons {
+    padding-right: 0;
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .language-switcher-button {
     width: 62px;
     min-width: 62px;

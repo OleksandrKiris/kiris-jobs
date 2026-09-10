@@ -174,6 +174,7 @@
       selectedVacancy: "छानिएको रोजगारी",
       changeVacancy: "रोजगारी परिवर्तन गर्नुहोस्",
       stepContact: "सम्पर्क",
+      stepDetails: "विवरण र तयारी",
       stepLocation: "देश र नागरिकता",
       stepDocuments: "कामको प्रक्रिया",
       stepLogistics: "यात्रा",

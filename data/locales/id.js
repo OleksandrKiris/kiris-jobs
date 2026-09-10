@@ -174,6 +174,7 @@
       selectedVacancy: "Lowongan yang dipilih",
       changeVacancy: "Ganti lowongan",
       stepContact: "Kontak",
+      stepDetails: "Data dan kesiapan",
       stepLocation: "Negara dan kewarganegaraan",
       stepDocuments: "Administrasi kerja",
       stepLogistics: "Perjalanan",

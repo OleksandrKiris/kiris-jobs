@@ -174,6 +174,7 @@
       selectedVacancy: "არჩეული ვაკანსია",
       changeVacancy: "ვაკანსიის შეცვლა",
       stepContact: "კონტაქტი",
+      stepDetails: "მონაცემები და მზადყოფნა",
       stepLocation: "ქვეყანა და მოქალაქეობა",
       stepDocuments: "გაფორმება",
       stepLogistics: "გამგზავრება",

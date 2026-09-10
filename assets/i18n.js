@@ -15,6 +15,19 @@
     ne: "🇳🇵",
     hy: "🇦🇲"
   };
+  const LANGUAGE_NAMES = {
+    ru: "Русский",
+    uk: "Українська",
+    pl: "Polski",
+    en: "English",
+    az: "Azərbaycan dili",
+    ka: "ქართული",
+    id: "Bahasa Indonesia",
+    es: "Español",
+    fil: "Filipino",
+    ne: "नेपाली",
+    hy: "Հայերեն"
+  };
   const STORAGE_KEY = "kiris-jobs:language:v1";
   const fallbackLocale = "pl";
   const translations = window.PORTAL_TRANSLATIONS || {};
@@ -94,7 +107,21 @@
   }
 
   function languageName(locale) {
-    return translations[locale]?.meta?.name || locale.toUpperCase();
+    return translations[locale]?.meta?.name || LANGUAGE_NAMES[locale] || locale.toUpperCase();
+  }
+
+  function ensureLocale(locale) {
+    if (translations[locale]) return Promise.resolve(true);
+    const base = window.PORTAL_LOCALE_BASE;
+    if (!base || !SUPPORTED.includes(locale)) return Promise.resolve(false);
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `${base}${locale}.js?v=${encodeURIComponent(window.PORTAL_ASSET_VERSION || "206")}`;
+      script.async = true;
+      script.addEventListener("load", () => resolve(Boolean(translations[locale])), { once: true });
+      script.addEventListener("error", () => resolve(false), { once: true });
+      document.head.append(script);
+    });
   }
 
   function languageFlag(locale) {
@@ -145,7 +172,7 @@
   function populateLanguageSelect() {
     const select = document.getElementById("language-select");
     if (!select) return;
-    select.innerHTML = SUPPORTED.filter((locale) => translations[locale]).map((locale) => (
+    select.innerHTML = SUPPORTED.map((locale) => (
       `<option value="${locale}">${languageName(locale)}</option>`
     )).join("");
     select.value = currentLocale;
@@ -195,7 +222,7 @@
       </button>
       <div class="language-switcher-menu" role="listbox" hidden>
         <div class="language-switcher-grid">
-          ${SUPPORTED.filter((locale) => translations[locale]).map((locale) => `
+          ${SUPPORTED.map((locale) => `
             <button
               class="language-switcher-option"
               type="button"
@@ -237,10 +264,12 @@
       });
     });
 
-    languageSwitcher.menu.addEventListener("click", (event) => {
+    languageSwitcher.menu.addEventListener("click", async (event) => {
       const option = event.target.closest("[data-language-option]");
       if (!option) return;
-      setLocale(option.dataset.languageOption);
+      languageSwitcher.root.setAttribute("aria-busy", "true");
+      await setLocale(option.dataset.languageOption);
+      languageSwitcher.root.removeAttribute("aria-busy");
       closeLanguageSwitcher(true);
     });
 
@@ -273,8 +302,11 @@
     renderLanguageSwitcher();
   }
 
-  function setLocale(locale, options = {}) {
-    const next = normalizeLocale(locale);
+  async function setLocale(locale, options = {}) {
+    const requested = String(locale || "").toLowerCase().split("-")[0];
+    const next = requested === "tl" ? "fil" : requested;
+    if (!SUPPORTED.includes(next)) return false;
+    if (!await ensureLocale(next)) return false;
     if (!next) return false;
     currentLocale = next;
     try {
@@ -303,8 +335,8 @@
     populateLanguageSelect();
     enhanceLanguageSelect();
     applyStaticTranslations();
-    document.getElementById("language-select")?.addEventListener("change", (event) => {
-      setLocale(event.target.value);
+    document.getElementById("language-select")?.addEventListener("change", async (event) => {
+      await setLocale(event.target.value);
     });
   }
 

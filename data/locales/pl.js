@@ -174,6 +174,7 @@
       selectedVacancy: "Wybrana oferta",
       changeVacancy: "Zmień ofertę",
       stepContact: "Kontakt",
+      stepDetails: "Dane i gotowość",
       stepLocation: "Kraj i obywatelstwo",
       stepDocuments: "Formalności",
       stepLogistics: "Wyjazd",

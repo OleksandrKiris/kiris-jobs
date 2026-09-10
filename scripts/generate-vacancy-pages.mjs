@@ -18,6 +18,9 @@ vm.runInNewContext(polishLocaleSource, sandbox, { filename: polishLocalePath });
 
 const content = sandbox.window.PORTAL_CONTENT;
 const polishJobs = sandbox.window.PORTAL_TRANSLATIONS?.pl?.jobs || {};
+const supportedLocales = ["ru", "uk", "pl", "en", "az", "ka", "id", "es", "fil", "ne", "hy"];
+const countryCodes = { "Польша": "PL", "Венгрия": "HU", "Бельгия": "BE" };
+const knownCities = ["Siechnice", "Ryczywół", "Bogatynia", "Pruszcz Gdański", "Zgorzelec", "Wrocław", "Budapest"];
 if (!content?.site?.baseUrl || !Array.isArray(content.jobs)) {
   throw new Error("Не удалось прочитать вакансии из data/content.js");
 }
@@ -45,6 +48,10 @@ const salaryText = (job, localized) => {
 };
 
 await fs.mkdir(outputRoot, { recursive: true });
+const sitemapEntries = [
+  { url: content.site.baseUrl, lastmod: content.site.lastUpdated },
+  { url: new URL("privacy.html", content.site.baseUrl).toString(), lastmod: content.site.lastUpdated }
+];
 
 for (const job of content.jobs) {
   const localized = { ...job, ...(polishJobs[job.id] || {}) };
@@ -70,16 +77,59 @@ for (const job of content.jobs) {
   html = replaceMeta(html, 'name="twitter:description"', description);
   html = replaceMeta(html, 'name="twitter:image"', imageUrl);
   html = html.replace(/<link rel="canonical" href="[^"]+">/, `<link rel="canonical" href="${escapeAttribute(pageUrl)}">`);
+  html = html.replace(/\n\s*<link rel="alternate" hreflang="[^"]+" href="[^"]+">/g, "");
+  const alternateLinks = [
+    `<link rel="alternate" hreflang="x-default" href="${escapeAttribute(pageUrl)}">`,
+    ...supportedLocales.map((locale) => (
+      `<link rel="alternate" hreflang="${locale}" href="${escapeAttribute(`${pageUrl}?lang=${locale}`)}">`
+    ))
+  ].join("\n  ");
+  html = html.replace(
+    `<link rel="canonical" href="${escapeAttribute(pageUrl)}">`,
+    `<link rel="canonical" href="${escapeAttribute(pageUrl)}">\n  ${alternateLinks}`
+  );
   html = html.replace(/<title>[^<]+<\/title>/, `<title>${escapeAttribute(title)}</title>`);
+
+  const countryCode = countryCodes[job.format] || "PL";
+  const cityNames = knownCities.filter((city) => String(job.location || "").includes(city));
+  const locationNames = cityNames.length ? cityNames : [""];
+  const jobLocation = locationNames.map((city) => ({
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      ...(city ? { addressLocality: city } : {}),
+      addressCountry: countryCode
+    }
+  }));
+  const salary = job.salary || {};
+  const salaryValue = Number(salary.min) === Number(salary.max)
+    ? { "@type": "QuantitativeValue", value: Number(salary.min), unitText: salary.period === "месяц" ? "MONTH" : "HOUR" }
+    : { "@type": "QuantitativeValue", minValue: Number(salary.min), maxValue: Number(salary.max), unitText: salary.period === "месяц" ? "MONTH" : "HOUR" };
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: localized.title,
     description: [localized.summary, ...(localized.responsibilities || []), ...(localized.required || [])].join(" "),
+    identifier: {
+      "@type": "PropertyValue",
+      name: job.company,
+      value: job.id
+    },
     datePosted: job.publishedAt,
     employmentType: "FULL_TIME",
+    directApply: true,
     url: pageUrl,
+    jobLocation,
+    ...(salary.confirmed && Number.isFinite(Number(salary.min)) && Number.isFinite(Number(salary.max)) && salary.currency
+      ? {
+          baseSalary: {
+            "@type": "MonetaryAmount",
+            currency: salary.currency,
+            value: salaryValue
+          }
+        }
+      : {}),
     hiringOrganization: {
       "@type": "Organization",
       name: job.company
@@ -93,6 +143,14 @@ for (const job of content.jobs) {
   const outputDirectory = path.join(outputRoot, job.id);
   await fs.mkdir(outputDirectory, { recursive: true });
   await fs.writeFile(path.join(outputDirectory, "index.html"), html, "utf8");
+  sitemapEntries.push({ url: pageUrl, lastmod: job.publishedAt || content.site.lastUpdated });
 }
+
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapEntries.map(({ url, lastmod }) => `  <url>\n    <loc>${escapeAttribute(url)}</loc>\n    <lastmod>${escapeAttribute(lastmod)}</lastmod>\n  </url>`).join("\n")}
+</urlset>
+`;
+await fs.writeFile(path.join(root, "sitemap.xml"), sitemap, "utf8");
 
 console.log(`Созданы отдельные страницы вакансий: ${content.jobs.length}.`);

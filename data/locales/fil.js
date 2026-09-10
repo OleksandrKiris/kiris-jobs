@@ -174,6 +174,7 @@
       selectedVacancy: "Napiling trabaho",
       changeVacancy: "Palitan ang trabaho",
       stepContact: "Pakikipag-ugnayan",
+      stepDetails: "Mga detalye at kahandaan",
       stepLocation: "Bansa at pagkamamamayan",
       stepDocuments: "Mga dokumento sa pagtatrabaho",
       stepLogistics: "Pagbiyahe",

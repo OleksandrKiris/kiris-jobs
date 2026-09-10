@@ -174,6 +174,7 @@
       selectedVacancy: "Vacante elegida",
       changeVacancy: "Cambiar vacante",
       stepContact: "Contacto",
+      stepDetails: "Datos y disponibilidad",
       stepLocation: "País y nacionalidad",
       stepDocuments: "Trámite laboral",
       stepLogistics: "Viaje",

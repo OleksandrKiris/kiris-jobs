@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
 
+Sitemap: https://oleksandrkiris.github.io/kiris-jobs/sitemap.xml
+
 # Вакансии доступны постоянно; конкретные локации и даты кандидаты
 # уточняют у рекрутера через WhatsApp.

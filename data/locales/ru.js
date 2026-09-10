@@ -174,6 +174,7 @@
       selectedVacancy: "Выбранная вакансия",
       changeVacancy: "Изменить вакансию",
       stepContact: "Контакт",
+      stepDetails: "Данные и готовность",
       stepLocation: "Страна и гражданство",
       stepDocuments: "Оформление",
       stepLogistics: "Выезд",

@@ -75,6 +75,13 @@ for (const [index, job] of (content?.jobs || []).entries()) {
       vacancyHtml.includes(`/assets/share/jobs/${job.id}.png?v=200`),
       `${prefix}: отдельная страница содержит неверную Facebook-карточку`
     );
+    add(vacancyHtml.includes('"@type":"JobPosting"'), `${prefix}: отсутствует JobPosting schema`);
+    add(vacancyHtml.includes('"identifier"'), `${prefix}: в JobPosting отсутствует идентификатор`);
+    add(vacancyHtml.includes('"jobLocation"'), `${prefix}: в JobPosting отсутствует место работы`);
+    add(
+      (vacancyHtml.match(/rel="alternate" hreflang=/g) || []).length === 12,
+      `${prefix}: должны быть x-default и 11 языковых alternate-ссылок`
+    );
   }
   add(job.title, `${prefix}.title обязателен`);
   add(job.company, `${prefix}.company обязателен`);
@@ -100,6 +107,15 @@ for (const [index, job] of (content?.jobs || []).entries()) {
   add(Array.isArray(assignedHousing), `${prefix}.housingLocations должен быть массивом`);
   for (const locationId of Array.isArray(assignedHousing) ? assignedHousing : []) {
     add(Boolean(housingLocations[locationId]), `${prefix}.housingLocations: неизвестная локация ${locationId}`);
+  }
+}
+
+const sitemapPath = new URL("../sitemap.xml", import.meta.url);
+add(fs.existsSync(sitemapPath), "sitemap.xml отсутствует");
+if (fs.existsSync(sitemapPath)) {
+  const sitemap = fs.readFileSync(sitemapPath, "utf8");
+  for (const jobId of jobIds) {
+    add(sitemap.includes(`/vacancies/${jobId}/</loc>`), `sitemap.xml: отсутствует ${jobId}`);
   }
 }
 

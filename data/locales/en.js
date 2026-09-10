@@ -174,6 +174,7 @@
       selectedVacancy: "Selected job",
       changeVacancy: "Change job",
       stepContact: "Contact",
+      stepDetails: "Details and readiness",
       stepLocation: "Country and citizenship",
       stepDocuments: "Paperwork",
       stepLogistics: "Travel",

@@ -19,9 +19,7 @@
   const CITIZENSHIP_CODES = COUNTRY_CODES;
   const STEP_KEYS = [
     "stepContact",
-    "stepDocuments",
-    "stepLogistics",
-    "stepWork",
+    "stepDetails",
     "stepReview"
   ];
   const MATCH_STEP_COUNT = 4;
@@ -52,7 +50,7 @@
     exp1to2: 3,
     exp2plus: 4
   };
-  const DRAFT_VERSION = 4;
+  const DRAFT_VERSION = 5;
   const DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
   const DRAFT_PREFIX = "kiris-jobs-application:";
   const APPLICATION_API_URL = "https://candidate-form-flow.lovable.app/api/public/applications";
@@ -696,7 +694,7 @@
     return `
       <aside class="application-recruiter-handoff">
         <span class="application-recruiter-photo">
-          <img src="assets/oleksandr-kiris-greenhouse.jpg" width="960" height="1280" alt="">
+          <img src="assets/oleksandr-kiris-greenhouse-96.webp" srcset="assets/oleksandr-kiris-greenhouse-96.webp 1x, assets/oleksandr-kiris-greenhouse-192.webp 2x" width="96" height="96" alt="">
           <i aria-hidden="true"></i>
         </span>
         <span class="application-recruiter-copy">
@@ -1100,10 +1098,7 @@
   }
 
   function renderContactStep() {
-    const engine = candidateEngineCopy();
     const selectedJob = localizedJob();
-    const age = calculateAge(state.values.birthDate);
-    const ageHint = age == null ? "" : `${engine.age}: ${age}`;
     return `
       ${selectedJob ? `
         <div class="application-selected-vacancy">
@@ -1122,13 +1117,23 @@
         ))}
         ${field("firstName", t("form.firstName"), input("firstName", "text", 'autocomplete="given-name" inputmode="text" autocapitalize="characters" required'), t("form.latinHint"))}
         ${field("lastName", t("form.lastName"), input("lastName", "text", 'autocomplete="family-name" inputmode="text" autocapitalize="characters" required'))}
+        ${field("phone", t("form.whatsapp"), input("phone", "tel", 'autocomplete="tel" inputmode="tel" enterkeyhint="next" data-normalize="phone" maxlength="16" placeholder="+48500100200" required'), t("form.whatsappHint"))}
+        ${field("email", t("form.email"), input("email", "email", 'autocomplete="email" inputmode="email"'))}
+      </div>
+    `;
+  }
+
+  function renderPersonalDetails() {
+    const engine = candidateEngineCopy();
+    const age = calculateAge(state.values.birthDate);
+    const ageHint = age == null ? "" : `${engine.age}: ${age}`;
+    return `
+      <div class="application-grid">
         ${field("birthDate", engine.birthDate, input("birthDate", "date", `autocomplete="bday" min="${yearsAgo(100)}" max="${yearsAgo(18)}" required`), ageHint)}
         ${field("gender", t("form.gender"), choiceButtons("gender", [
           { value: "M", label: t("options.genderMale") },
           { value: "K", label: t("options.genderFemale") }
         ]))}
-        ${field("phone", t("form.whatsapp"), input("phone", "tel", 'autocomplete="tel" inputmode="tel" enterkeyhint="next" data-normalize="phone" maxlength="16" placeholder="+48500100200" required'), t("form.whatsappHint"))}
-        ${field("email", t("form.email"), input("email", "email", 'autocomplete="email" inputmode="email"'))}
       </div>
     `;
   }
@@ -1376,7 +1381,7 @@
             reviewValue(t("form.travellingWith"), optionLabel("travellingWith", state.values.travellingWith)),
             reviewValue(t("form.partnerAlsoApplies"), optionLabel("partnerAlsoApplies", state.values.partnerAlsoApplies)),
             reviewValue(t("form.groupCode"), state.values.groupCode)
-          ], 2)}
+          ], 1)}
           ${reviewGroup(t("form.stepWork"), [
             reviewValue(t("form.plannedDuration"), optionLabel("plannedDuration", state.values.plannedDuration)),
             reviewValue(t("form.currentlyEmployed"), optionLabel("currentlyEmployed", state.values.currentlyEmployed)),
@@ -1385,7 +1390,7 @@
             reviewValue(t("form.standingReady"), optionLabel("standingReady", state.values.standingReady)),
             reviewValue(t("form.liftCapacity"), optionLabel("liftCapacity", state.values.liftCapacity)),
             reviewValue(t("form.shiftReadiness"), shiftValues)
-          ], 3)}
+          ], 1)}
           ${reviewGroup(t("form.stepQualification"), [
             reviewValue(t("form.experience"), state.values.experience ? t(`options.${state.values.experience}`) : ""),
             reviewValue(t("form.experienceDetails"), state.values.experienceDetails),
@@ -1395,7 +1400,7 @@
             reviewValue(t("form.stepQualification"), qualificationValues),
             reviewValue(t("form.workLimitations"), state.values.workLimitations),
             reviewValue(t("form.extraNotes"), state.values.extraNotes)
-          ], 3)}
+          ], 1)}
           </div>
         </details>
       </div>
@@ -1445,6 +1450,10 @@
     if (state.step === 0) return renderContactStep();
     if (state.step === 1) return `
       <section class="application-form-group">
+        <h3>${escapeHTML(t("form.stepContact"))}</h3>
+        ${renderPersonalDetails()}
+      </section>
+      <section class="application-form-group">
         <h3>${escapeHTML(t("form.stepLocation"))}</h3>
         ${renderLocationStep()}
       </section>
@@ -1452,14 +1461,10 @@
         <h3>${escapeHTML(t("form.stepDocuments"))}</h3>
         ${renderDocumentsStep()}
       </section>
-    `;
-    if (state.step === 2) return `
       <section class="application-form-group">
         <h3>${escapeHTML(t("form.sectionTravel"))}</h3>
         ${renderLogisticsStep()}
       </section>
-    `;
-    if (state.step === 3) return `
       <section class="application-form-group">
         <h3>${escapeHTML(t("form.sectionAvailability"))}</h3>
         ${renderWorkStep()}
@@ -1743,10 +1748,6 @@
       renderDraftChoice(focusStart);
       return;
     }
-    if (!state.values.precheckComplete) {
-      renderPrecheck(focusStart);
-      return;
-    }
     const dialog = document.getElementById("application-dialog");
     const container = document.getElementById("application-dialog-content");
     if (!dialog || !container) return;
@@ -1959,13 +1960,13 @@
     for (const [key, value] of data.entries()) {
       if (key !== "shiftReadiness") state.values[key] = String(value).trim();
     }
-    if (state.step === 0) state.values.adult = (calculateAge(state.values.birthDate) ?? -1) >= 18;
-    if (state.step === 2) {
+    if (state.step === 1) {
+      state.values.adult = (calculateAge(state.values.birthDate) ?? -1) >= 18;
       if (state.values.travellingWith === "alone") delete state.values.groupCode;
       else if (state.values.groupCode) state.values.groupCode = normalizeGroupCode(state.values.groupCode);
+      state.values.shiftReadiness = data.getAll("shiftReadiness").map(String);
     }
-    if (state.step === 3) state.values.shiftReadiness = data.getAll("shiftReadiness").map(String);
-    if (state.step === 4) state.values.consent = data.has("consent");
+    if (state.step === 2) state.values.consent = data.has("consent");
     if (state.values.jobId) state.jobId = state.values.jobId;
     saveDraft();
   }
@@ -2022,8 +2023,7 @@
     state.error = "";
     state.invalidFields = [];
     if (state.step === 0) {
-      const age = calculateAge(state.values.birthDate);
-      const required = ["jobId", "preferredLanguage", "firstName", "lastName", "birthDate", "gender", "phone"];
+      const required = ["jobId", "preferredLanguage", "firstName", "lastName", "phone"];
       const missing = required.filter((name) => !(name === "jobId" ? state.jobId : state.values[name]));
       const invalidNames = ["firstName", "lastName"].filter((name) => state.values[name] && !LATIN_NAME.test(state.values[name]));
       if (missing.length) {
@@ -2034,59 +2034,37 @@
         setValidationError(t("form.phoneError"), ["phone"]);
       } else if (state.values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.values.email)) {
         setValidationError(t("form.missingRequired"), ["email"]);
-      } else if (age == null || age < 18) {
-        setValidationError(candidateEngineCopy().underage, ["birthDate"]);
       }
     } else if (state.step === 1) {
       const required = [
+        "birthDate",
+        "gender",
         "citizenship",
         "currentCountry",
         "currentCity",
         "legalStatus",
         "hasPesel",
         "passportExpiry",
-        "workRight"
+        "workRight",
+        "preferredLocation",
+        "readyDate",
+        "housing",
+        "travellingWith",
+        "plannedDuration",
+        "currentlyEmployed",
+        "overtimeReady",
+        "polishLevel",
+        "workedInPoland",
+        "formerCitronexWorker",
+        "experience"
       ];
       if (state.values.citizenship === "OTHER") required.push("otherCitizenship");
       if (state.values.currentCountry === "OTHER") required.push("otherCountry");
       if (state.values.legalStatus && state.values.legalStatus !== "statusNoDocuments") required.push("documentExpiry");
-      const missing = required.filter((name) => !state.values[name]);
-      const latinFields = ["currentCity"];
-      if (state.values.citizenship === "OTHER") latinFields.push("otherCitizenship");
-      if (state.values.currentCountry === "OTHER") latinFields.push("otherCountry");
-      const invalidLatin = latinFields.filter((name) => state.values[name] && !validateLatin(state.values[name], true));
-      if (missing.length) {
-        setValidationError(t("form.missingRequired"), missing);
-      } else if (invalidLatin.length) {
-        setValidationError(t("form.latinError"), invalidLatin);
-      } else if (
-        state.values.passportExpiry < today()
-        || (state.values.documentExpiry && state.values.documentExpiry < today())
-      ) {
-        setValidationError(
-          t("form.dateError"),
-          [state.values.passportExpiry < today() ? "passportExpiry" : "documentExpiry"]
-        );
-      }
-    } else if (state.step === 2) {
-      const required = ["preferredLocation", "readyDate", "housing", "travellingWith"];
       if (state.values.travellingWith && state.values.travellingWith !== "alone") {
         required.push("partnerAlsoApplies");
         state.values.groupCode = normalizeGroupCode(state.values.groupCode) || createGroupCode();
       }
-      const missing = required.filter((name) => !state.values[name]);
-      if (missing.length) {
-        setValidationError(t("form.missingRequired"), missing);
-      } else if (state.values.readyDate < today()) {
-        setValidationError(t("form.dateError"), ["readyDate"]);
-      } else if (
-        state.values.travellingWith !== "alone"
-        && !/^[A-Z0-9-]{4,20}$/.test(state.values.groupCode || "")
-      ) {
-        setValidationError(t("form.groupCodeError"), ["groupCode"]);
-      }
-    } else if (state.step === 3) {
-      const required = ["plannedDuration", "currentlyEmployed", "overtimeReady", "polishLevel", "workedInPoland", "formerCitronexWorker", "experience"];
       if (state.values.currentlyEmployed === "yes") required.push("noticePeriod");
       if (isPhysicalJob()) required.push("standingReady", "liftCapacity");
       if (!(state.values.shiftReadiness || []).length) required.push("shiftReadiness");
@@ -2104,8 +2082,34 @@
                 : [];
       required.push(...qualificationRequired);
       const missing = required.filter((name) => !state.values[name]);
+      const latinFields = ["currentCity"];
+      if (state.values.citizenship === "OTHER") latinFields.push("otherCitizenship");
+      if (state.values.currentCountry === "OTHER") latinFields.push("otherCountry");
+      const invalidLatin = latinFields.filter((name) => state.values[name] && !validateLatin(state.values[name], true));
+      const age = calculateAge(state.values.birthDate);
       if (missing.length) {
         setValidationError(t("form.missingRequired"), missing);
+      } else if (age == null || age < 18) {
+        setValidationError(candidateEngineCopy().underage, ["birthDate"]);
+      } else if (invalidLatin.length) {
+        setValidationError(t("form.latinError"), invalidLatin);
+      } else if (
+        state.values.passportExpiry < today()
+        || (state.values.documentExpiry && state.values.documentExpiry < today())
+        || state.values.readyDate < today()
+      ) {
+        setValidationError(t("form.dateError"), [
+          state.values.passportExpiry < today()
+            ? "passportExpiry"
+            : state.values.documentExpiry && state.values.documentExpiry < today()
+              ? "documentExpiry"
+              : "readyDate"
+        ]);
+      } else if (
+        state.values.travellingWith !== "alone"
+        && !/^[A-Z0-9-]{4,20}$/.test(state.values.groupCode || "")
+      ) {
+        setValidationError(t("form.groupCodeError"), ["groupCode"]);
       } else if (!validateLatin(state.values.udtCategory)) {
         setValidationError(t("form.latinError"), ["udtCategory"]);
       }
