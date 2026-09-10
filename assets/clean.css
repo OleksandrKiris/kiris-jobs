@@ -5850,7 +5850,7 @@ body.candidate-site {
   }
 }
 
-/* v207 · verified vacancy facts, safe salary math and non-destructive updates */
+/* v208 · live vacancy controls, verified facts and safe salary math */
 .vacancy-verification,
 .vacancy-calculator,
 .vacancy-trust-block {

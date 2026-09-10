@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => readFile(path.join(root, relativePath), "utf8");
-const [html, legacyCss, css, cleanCss, homepageCss, candidateScript, applicationScript, bootstrapScript, serviceWorker] = await Promise.all([
+const [html, legacyCss, css, cleanCss, homepageCss, candidateScript, applicationScript, bootstrapScript, vacancyOverrides, serviceWorker] = await Promise.all([
   read("index.html"),
   read("assets/styles.css"),
   read("assets/candidate-base.css"),
@@ -13,6 +13,7 @@ const [html, legacyCss, css, cleanCss, homepageCss, candidateScript, application
   read("assets/candidate.js"),
   read("assets/application-form.js"),
   read("assets/bootstrap.js"),
+  read("assets/vacancy-overrides.js"),
   read("sw.js")
 ]);
 
@@ -362,7 +363,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=207"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=208"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -442,13 +443,13 @@ assert(
     && applicationScript.includes("screeningStatus: record.decision?.status")
     && applicationScript.includes("...legacyPayload")
     && applicationScript.includes('event: "application_complete"')
-    && serviceWorker.includes("kiris-jobs-v207")
+    && serviceWorker.includes("kiris-jobs-v208")
     && applicationScript.includes('const STEP_KEYS = [')
     && applicationScript.includes('"stepDetails"'),
   "The v204 smart filters, freshness, localized metadata and safe success flow are incomplete."
 );
 assert(
-  cleanCss.includes("v207 · verified vacancy facts")
+  cleanCss.includes("v208 · live vacancy controls")
     && candidateScript.includes("function salaryCalculator(job)")
     && candidateScript.includes("function verificationBlock(job)")
     && candidateScript.includes("function showUpdateNotice()")
@@ -456,7 +457,17 @@ assert(
     && applicationScript.includes("function downloadReceipt(applicationId, record)")
     && applicationScript.includes("source: state.values.source || campaignSource()")
     && applicationScript.includes("data-download-receipt"),
-  "The v207 trust, sharing, update and confirmation improvements are incomplete."
+  "The v208 trust, sharing, update and confirmation improvements are incomplete."
+);
+assert(
+  bootstrapScript.includes("PORTAL_VACANCY_OVERRIDES_READY")
+    && vacancyOverrides.includes("/api/public/vacancies")
+    && vacancyOverrides.includes('credentials: "omit"')
+    && vacancyOverrides.includes("allowedStatuses")
+    && candidateScript.includes("runtimeRateUnconfirmed")
+    && applicationScript.includes("vacancy_unavailable")
+    && serviceWorker.includes('"./assets/vacancy-overrides.js?v=208"'),
+  "The live vacancy control integration is incomplete."
 );
 assert(
   html.includes('http-equiv="Content-Security-Policy"')

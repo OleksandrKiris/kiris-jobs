@@ -1,0 +1,42 @@
+name: Контроль опубликованного сайта
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-health
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Проверить сайт и защищённый шлюз
+        shell: bash
+        run: |
+          set -euo pipefail
+          site='https://oleksandrkiris.github.io/kiris-jobs/'
+          api='https://candidate-form-flow.lovable.app'
+
+          curl --fail --silent --show-error --location --max-time 15 "$site" >/dev/null
+          test "$(curl --silent --show-error --max-time 15 "$api/api/health")" = '{"ok":true}'
+
+          allowed_headers="$(mktemp)"
+          allowed_status="$(curl --silent --show-error --max-time 15 -o /dev/null -D "$allowed_headers" -w '%{http_code}' -X OPTIONS "$api/api/applications" -H 'Origin: https://oleksandrkiris.github.io' -H 'Access-Control-Request-Method: POST')"
+          test "$allowed_status" = '204'
+          grep -qi '^Access-Control-Allow-Origin: https://oleksandrkiris.github.io' "$allowed_headers"
+
+          blocked_status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' -X OPTIONS "$api/api/applications" -H 'Origin: https://example.invalid' -H 'Access-Control-Request-Method: POST')"
+          test "$blocked_status" = '403'
+
+          admin_status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' "$api/api/admin/applications")"
+          test "$admin_status" = '401'
+
+          vacancies_status="$(curl --silent --show-error --max-time 15 -o /dev/null -w '%{http_code}' "$api/api/public/vacancies" -H 'Origin: https://oleksandrkiris.github.io')"
+          test "$vacancies_status" = '200'

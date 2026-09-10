@@ -14,7 +14,7 @@ const serviceWorker = read("sw.js");
 
 assert(index.includes('href="privacy.html"'), "Homepage does not link to the privacy policy.");
 assert(privacy.includes('id="privacy-policy"'), "Privacy page has no policy container.");
-assert(privacy.includes('assets/privacy-bootstrap.js?v=207'), "Privacy page does not load the current policy bootstrap.");
+assert(privacy.includes('assets/privacy-bootstrap.js?v=208'), "Privacy page does not load the current policy bootstrap.");
 for (const locale of ["pl", "en", "ru", "uk", "az"]) {
   assert(privacyScript.includes(`${locale}: {`), `Privacy policy has no ${locale} version.`);
 }

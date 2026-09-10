@@ -24,13 +24,15 @@
     || fallback;
   const localeBase = new URL("../data/locales/", import.meta.url);
   window.PORTAL_LOCALE_BASE = localeBase.href;
-  window.PORTAL_ASSET_VERSION = "207";
+  window.PORTAL_ASSET_VERSION = "208";
 
   await import(new URL(`pl.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
   if (active !== fallback) {
     await import(new URL(`${active}.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
   }
   await import(`../data/content.js?v=${window.PORTAL_ASSET_VERSION}`);
+  await import(`./vacancy-overrides.js?v=${window.PORTAL_ASSET_VERSION}`);
+  await window.PORTAL_VACANCY_OVERRIDES_READY;
   await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./application-form.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}`);

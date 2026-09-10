@@ -2646,7 +2646,8 @@
       configuration_error: "form.emailConfigurationError",
       invalid_request: "form.emailInvalidRequest",
       rate_limited: "form.emailRateLimited",
-      delivery_failed: "form.emailDeliveryFailed"
+      delivery_failed: "form.emailDeliveryFailed",
+      vacancy_unavailable: "ui.recruitmentPaused"
     };
     return t(messages[code] || "form.emailDeliveryFailed");
   }

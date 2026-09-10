@@ -231,6 +231,7 @@
   }
 
   function salary(job) {
+    if (job?.runtimeRateUnconfirmed) return i18n.t("ui.rateNeedsConfirmation");
     const value = localized(job).salary || {};
     const min = Number(value.min);
     const max = Number(value.max);
@@ -260,6 +261,7 @@
   }
 
   function salaryExample(job) {
+    if (job?.runtimeRateUnconfirmed) return "";
     const value = localized(job).salary || {};
     if (value.period !== "час") return "";
     const min = Number(value.min);
@@ -287,6 +289,7 @@
   }
 
   function salaryCalculator(job) {
+    if (job?.runtimeRateUnconfirmed) return "";
     const value = localized(job).salary || {};
     const min = Number(value.min);
     const max = Number(value.max);

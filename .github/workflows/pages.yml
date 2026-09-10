@@ -46,7 +46,7 @@ jobs:
           grep -q 'translations.js?v=17.0.0' apply/index.html
           grep -q 'app.js?v=17.2.0' apply/index.html
           grep -q 'href="pdf/"' apply/index.html
-          grep -q 'assets/bootstrap.js?v=207' index.html
+          grep -q 'assets/bootstrap.js?v=208' index.html
           grep -q '<loc>https://oleksandrkiris.github.io/kiris-jobs/vacancies/greenhouse-tomatoes/</loc>' sitemap.xml
           grep -q 'function sendRow' apply/app.js
           grep -q 'CFG.excelColumns.length' apply/app.js
