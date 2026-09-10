@@ -52,16 +52,36 @@
     exp1to2: 3,
     exp2plus: 4
   };
-  const DRAFT_VERSION = 3;
+  const DRAFT_VERSION = 4;
   const DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
   const DRAFT_PREFIX = "kiris-jobs-application:";
   const APPLICATION_API_URL = "https://candidate-form-flow.lovable.app/api/public/applications";
+  const TURNSTILE_SITE_KEY = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? "1x00000000000000000000AA"
+    : "0x4AAAAAAEu272_ItIXV4I25";
+  const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+  let turnstileLoadPromise = null;
+  let turnstileWidgetId = null;
+  let turnstileToken = "";
   const SENSITIVE_DRAFT_FIELDS = new Set([
+    "firstName",
+    "lastName",
+    "birthDate",
+    "phone",
+    "email",
+    "currentCity",
+    "otherCitizenship",
+    "otherCountry",
+    "documentExpiry",
     "pesel",
     "passportNumber",
     "passportExpiry",
+    "groupCode",
     "emergencyContactName",
     "emergencyContactPhone",
+    "experienceDetails",
+    "workLimitations",
+    "extraNotes",
     "companyWebsite"
   ]);
   const PHYSICAL_JOB_IDS = new Set([
@@ -132,6 +152,77 @@
   const canApply = (job) => job?.status === "open" || job?.status === "verify";
   const today = () => new Date().toISOString().slice(0, 10);
   const draftKey = (jobId) => `${DRAFT_PREFIX}${jobId}`;
+
+  function loadTurnstile() {
+    if (window.turnstile) return Promise.resolve(window.turnstile);
+    if (turnstileLoadPromise) return turnstileLoadPromise;
+    turnstileLoadPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${TURNSTILE_SCRIPT_URL}"]`);
+      const script = existing || document.createElement("script");
+      const timeout = window.setTimeout(() => reject(new Error("Turnstile load timeout")), 12000);
+      const finish = () => {
+        window.clearTimeout(timeout);
+        if (window.turnstile) resolve(window.turnstile);
+        else reject(new Error("Turnstile unavailable"));
+      };
+      script.addEventListener("load", finish, { once: true });
+      script.addEventListener("error", () => {
+        window.clearTimeout(timeout);
+        reject(new Error("Turnstile load failed"));
+      }, { once: true });
+      if (!existing) {
+        script.src = TURNSTILE_SCRIPT_URL;
+        script.defer = true;
+        document.head.append(script);
+      }
+    }).catch((error) => {
+      turnstileLoadPromise = null;
+      throw error;
+    });
+    return turnstileLoadPromise;
+  }
+
+  function removeTurnstileWidget() {
+    if (turnstileWidgetId != null && window.turnstile) {
+      try {
+        window.turnstile.remove(turnstileWidgetId);
+      } catch {
+        // A replaced dynamic form may already have removed the widget node.
+      }
+    }
+    turnstileWidgetId = null;
+    turnstileToken = "";
+  }
+
+  async function renderTurnstileWidget() {
+    const container = document.getElementById("application-turnstile");
+    if (!container) return;
+    try {
+      const turnstile = await loadTurnstile();
+      if (!container.isConnected || turnstileWidgetId != null) return;
+      turnstileWidgetId = turnstile.render(container, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: "auto",
+        size: "flexible",
+        action: "application_submit",
+        callback(token) {
+          turnstileToken = token;
+          document.getElementById("application-turnstile-error")?.setAttribute("hidden", "");
+        },
+        "expired-callback"() {
+          turnstileToken = "";
+        },
+        "error-callback"() {
+          turnstileToken = "";
+          const error = document.getElementById("application-turnstile-error");
+          if (error) error.hidden = false;
+        }
+      });
+    } catch {
+      const error = document.getElementById("application-turnstile-error");
+      if (error) error.hidden = false;
+    }
+  }
 
   function initialApplicationValues(jobId) {
     const locations = JOB_LOCATIONS[jobId] || ["DO_CONFIRM"];
@@ -393,48 +484,6 @@
     return ARRIVALS_DEPARTMENT[jobId] || "DO UZUPEŁNIENIA";
   }
 
-  function validPesel(value) {
-    if (!/^\d{11}$/.test(String(value || ""))) return false;
-    const digits = String(value).split("").map(Number);
-    const weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
-    const checksum = (10 - (weights.reduce((sum, weight, index) => sum + weight * digits[index], 0) % 10)) % 10;
-    return checksum === digits[10];
-  }
-
-  function peselIdentity(value) {
-    if (!validPesel(value)) return null;
-    const digits = String(value).split("").map(Number);
-    const shortYear = Number(String(value).slice(0, 2));
-    const encodedMonth = Number(String(value).slice(2, 4));
-    const day = Number(String(value).slice(4, 6));
-    let century = 1900;
-    let month = encodedMonth;
-    if (encodedMonth >= 81 && encodedMonth <= 92) {
-      century = 1800;
-      month -= 80;
-    } else if (encodedMonth >= 21 && encodedMonth <= 32) {
-      century = 2000;
-      month -= 20;
-    } else if (encodedMonth >= 41 && encodedMonth <= 52) {
-      century = 2100;
-      month -= 40;
-    } else if (encodedMonth >= 61 && encodedMonth <= 72) {
-      century = 2200;
-      month -= 60;
-    }
-    const year = century + shortYear;
-    const date = new Date(Date.UTC(year, month - 1, day));
-    if (
-      date.getUTCFullYear() !== year
-      || date.getUTCMonth() !== month - 1
-      || date.getUTCDate() !== day
-    ) return null;
-    return {
-      birthDate: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-      gender: digits[9] % 2 === 1 ? "M" : "K"
-    };
-  }
-
   function passportExpiresSoon(value) {
     const expiry = new Date(`${value}T00:00:00Z`);
     if (Number.isNaN(expiry.getTime())) return false;
@@ -465,13 +514,6 @@
       .toUpperCase()
       .replace(/[^A-Z0-9-]/g, "")
       .slice(0, 20);
-  }
-
-  function maskSensitive(value, visible = 4) {
-    const text = String(value || "");
-    if (!text) return "";
-    if (text.length <= visible) return "••••";
-    return `${"•".repeat(Math.min(8, text.length - visible))}${text.slice(-visible)}`;
   }
 
   function renderStepTrack(labels, currentStep, completeAll = false) {
@@ -939,10 +981,6 @@
           ? field("documentExpiry", t("form.documentExpiry"), input("documentExpiry", "date", `min="${today()}" required`))
           : ""}
         ${field("hasPesel", t("form.hasPesel"), yesNo("hasPesel"))}
-        ${state.values.hasPesel === "yes"
-          ? field("pesel", t("form.pesel"), input("pesel", "text", 'inputmode="numeric" enterkeyhint="next" autocomplete="off" data-normalize="digits" minlength="11" maxlength="11" required'))
-          : ""}
-        ${field("passportNumber", t("form.passportNumber"), input("passportNumber", "text", 'inputmode="text" enterkeyhint="next" autocomplete="off" autocapitalize="characters" spellcheck="false" data-normalize="passport" minlength="5" maxlength="20" required'))}
         ${field("passportExpiry", t("form.passportExpiry"), input("passportExpiry", "date", `min="${today()}" required`))}
         ${field("workRight", workRightLabel, choiceButtons("workRight", [
           { value: "yes", label: t("options.workRightYes") },
@@ -975,8 +1013,6 @@
         ${state.values.travellingWith && state.values.travellingWith !== "alone"
           ? field("groupCode", t("form.groupCode"), input("groupCode", "text", 'autocomplete="off" inputmode="text" maxlength="20" placeholder="GR-ABC123"'), state.values.groupCode ? "" : t("form.groupCodeHint"))
           : ""}
-        ${field("emergencyContactName", t("form.emergencyContactName"), input("emergencyContactName", "text", 'autocomplete="off" inputmode="text" required'))}
-        ${field("emergencyContactPhone", t("form.emergencyContactPhone"), input("emergencyContactPhone", "tel", 'autocomplete="off" inputmode="tel" enterkeyhint="next" data-normalize="phone" maxlength="16" placeholder="+48500100200" required'))}
       </div>
     `;
   }
@@ -1148,8 +1184,7 @@
             reviewValue(t("form.currentCity"), state.values.currentCity),
             reviewValue(t("form.legalStatus"), optionLabel("legalStatus", state.values.legalStatus)),
             reviewValue(t("form.documentExpiry"), polishDate(state.values.documentExpiry)),
-            reviewValue(t("form.pesel"), state.values.hasPesel === "yes" ? maskSensitive(state.values.pesel) : t("options.no")),
-            reviewValue(t("form.passportNumber"), maskSensitive(state.values.passportNumber)),
+            reviewValue(t("form.hasPesel"), state.values.hasPesel ? t(`options.${state.values.hasPesel}`) : ""),
             reviewValue(t("form.passportExpiry"), polishDate(state.values.passportExpiry)),
             reviewValue(t("form.workRight"), state.values.workRight ? t(`options.workRight${state.values.workRight[0].toUpperCase()}${state.values.workRight.slice(1)}`) : "")
           ], 1)}
@@ -1159,9 +1194,7 @@
             reviewValue(t("form.housing"), state.values.housing === "required" ? t("options.housingRequired") : t("options.housingNotRequired")),
             reviewValue(t("form.travellingWith"), optionLabel("travellingWith", state.values.travellingWith)),
             reviewValue(t("form.partnerAlsoApplies"), optionLabel("partnerAlsoApplies", state.values.partnerAlsoApplies)),
-            reviewValue(t("form.groupCode"), state.values.groupCode),
-            reviewValue(t("form.emergencyContactName"), state.values.emergencyContactName),
-            reviewValue(t("form.emergencyContactPhone"), state.values.emergencyContactPhone)
+            reviewValue(t("form.groupCode"), state.values.groupCode)
           ], 2)}
           ${reviewGroup(t("form.stepWork"), [
             reviewValue(t("form.plannedDuration"), optionLabel("plannedDuration", state.values.plannedDuration)),
@@ -1208,9 +1241,18 @@
       </details>
       <label class="application-check application-consent${state.invalidFields.includes("consent") ? " is-invalid" : ""}">
         <input name="consent" type="checkbox" ${state.values.consent ? "checked" : ""}>
-        <span>${escapeHTML(t("form.consent"))}</span>
+        <span>
+          ${escapeHTML(t("form.consent"))}
+          <a class="application-privacy-link" href="privacy.html?lang=${encodeURIComponent(i18n.locale)}" target="_blank" rel="noopener noreferrer">${escapeHTML(t("form.privacyDetails"))}</a>
+        </span>
         ${state.invalidFields[0] === "consent" ? `<small class="application-field-error">${escapeHTML(state.error)}</small>` : ""}
       </label>
+      <section class="application-bot-check" aria-labelledby="application-bot-check-title">
+        <strong id="application-bot-check-title">${escapeHTML(t("form.botCheckTitle"))}</strong>
+        <p>${escapeHTML(t("form.botCheckHint"))}</p>
+        <div id="application-turnstile"></div>
+        <small id="application-turnstile-error" role="alert" hidden>${escapeHTML(t("form.botCheckError"))}</small>
+      </section>
       <div class="application-honeypot" aria-hidden="true">
         <label>Company website <input name="companyWebsite" type="text" value="${escapeHTML(state.values.companyWebsite || "")}" tabindex="-1" autocomplete="off"></label>
       </div>
@@ -1443,6 +1485,7 @@
     const dialog = document.getElementById("application-dialog");
     const container = document.getElementById("application-dialog-content");
     if (!dialog || !container) return;
+    removeTurnstileWidget();
     const percent = ((state.step + 1) / STEP_KEYS.length) * 100;
     const job = localizedJob();
     container.innerHTML = `
@@ -1516,6 +1559,7 @@
       clearInlineError(event.target.name, event.target);
     });
     form?.addEventListener("submit", handleSubmit);
+    if (state.step === STEP_KEYS.length - 1) void renderTurnstileWidget();
     if (focusStart) focusDialogStart();
   }
 
@@ -1640,7 +1684,6 @@
       if (key !== "shiftReadiness") state.values[key] = String(value).trim();
     }
     if (state.step === 0) state.values.adult = (calculateAge(state.values.birthDate) ?? -1) >= 18;
-    if (state.step === 1 && state.values.hasPesel !== "yes") delete state.values.pesel;
     if (state.step === 2) {
       if (state.values.travellingWith === "alone") delete state.values.groupCode;
       else if (state.values.groupCode) state.values.groupCode = normalizeGroupCode(state.values.groupCode);
@@ -1719,21 +1762,18 @@
         setValidationError(candidateEngineCopy().underage, ["birthDate"]);
       }
     } else if (state.step === 1) {
-      const identity = state.values.hasPesel === "yes" ? peselIdentity(state.values.pesel) : null;
       const required = [
         "citizenship",
         "currentCountry",
         "currentCity",
         "legalStatus",
         "hasPesel",
-        "passportNumber",
         "passportExpiry",
         "workRight"
       ];
       if (state.values.citizenship === "OTHER") required.push("otherCitizenship");
       if (state.values.currentCountry === "OTHER") required.push("otherCountry");
       if (state.values.legalStatus && state.values.legalStatus !== "statusNoDocuments") required.push("documentExpiry");
-      if (state.values.hasPesel === "yes") required.push("pesel");
       const missing = required.filter((name) => !state.values[name]);
       const latinFields = ["currentCity"];
       if (state.values.citizenship === "OTHER") latinFields.push("otherCitizenship");
@@ -1751,18 +1791,9 @@
           t("form.dateError"),
           [state.values.passportExpiry < today() ? "passportExpiry" : "documentExpiry"]
         );
-      } else if (state.values.hasPesel === "yes" && !identity) {
-        setValidationError(t("form.peselError"), ["pesel"]);
-      } else if (
-        identity
-        && (identity.birthDate !== state.values.birthDate || identity.gender !== state.values.gender)
-      ) {
-        setValidationError(t("form.peselDataMismatch"), ["pesel"]);
-      } else if (!/^[A-Za-z\d -]{5,20}$/.test(state.values.passportNumber || "")) {
-        setValidationError(t("form.passportError"), ["passportNumber"]);
       }
     } else if (state.step === 2) {
-      const required = ["preferredLocation", "readyDate", "housing", "travellingWith", "emergencyContactName", "emergencyContactPhone"];
+      const required = ["preferredLocation", "readyDate", "housing", "travellingWith"];
       if (state.values.travellingWith && state.values.travellingWith !== "alone") {
         required.push("partnerAlsoApplies");
         state.values.groupCode = normalizeGroupCode(state.values.groupCode) || createGroupCode();
@@ -1772,10 +1803,6 @@
         setValidationError(t("form.missingRequired"), missing);
       } else if (state.values.readyDate < today()) {
         setValidationError(t("form.dateError"), ["readyDate"]);
-      } else if (!LATIN_NAME.test(state.values.emergencyContactName || "")) {
-        setValidationError(t("form.latinError"), ["emergencyContactName"]);
-      } else if (!PHONE.test(String(state.values.emergencyContactPhone || "").replace(/[\s()-]/g, ""))) {
-        setValidationError(t("form.phoneError"), ["emergencyContactPhone"]);
       } else if (
         state.values.travellingWith !== "alone"
         && !/^[A-Z0-9-]{4,20}$/.test(state.values.groupCode || "")
@@ -2009,8 +2036,7 @@
       city: state.values.currentCity || "",
       doc: polishOption(state.values.legalStatus),
       docexp: polishDate(state.values.documentExpiry),
-      pesel: state.values.hasPesel === "yes" ? state.values.pesel || "" : "BRAK",
-      passport: String(state.values.passportNumber || "").toUpperCase(),
+      peselStatus: polishOption(state.values.hasPesel),
       passportExpiry: polishDate(state.values.passportExpiry),
       wr: polishOption(state.values.workRight),
       ready: polishDate(state.values.readyDate),
@@ -2021,8 +2047,6 @@
       travel: polishOption(state.values.travellingWith),
       second: polishOption(state.values.partnerAlsoApplies),
       group: state.values.travellingWith === "alone" ? "—" : normalizeGroupCode(state.values.groupCode),
-      emergencyName: state.values.emergencyContactName || "",
-      emergencyPhone: String(state.values.emergencyContactPhone || "").replace(/[\s()-]/g, ""),
       duration: polishOption(state.values.plannedDuration),
       employed: polishOption(state.values.currentlyEmployed),
       notice: state.values.currentlyEmployed === "yes" ? polishOption(state.values.noticePeriod) : "Nie dotyczy",
@@ -2076,15 +2100,15 @@
       record.fn,
       record.ln,
       record.dob,
-      record.pesel,
+      "",
       record.cit,
-      record.passport,
+      "",
       [record.cc, record.city].filter(Boolean).join(", "),
       "",
       record.p,
       record.e,
-      record.emergencyName,
-      record.emergencyPhone
+      "",
+      ""
     ]);
   }
 
@@ -2160,8 +2184,7 @@
       ...section("DOKUMENTY", [
         line("Status dokumentów", record.doc),
         line("Ważność dokumentu", record.docexp),
-        line("PESEL", record.pesel || "BRAK"),
-        line("Numer paszportu", record.passport),
+        line("PESEL", record.peselStatus),
         line("Paszport ważny do", record.passportExpiry),
         line("Prawo do pracy", record.wr)
       ]),
@@ -2171,9 +2194,7 @@
         line("Obecnie zatrudniony/a", record.employed),
         line("Okres wypowiedzenia", record.notice, record.notice !== "Nie dotyczy"),
         line("Zakwaterowanie", record.house),
-        line("Wyjazd", record.travel),
-        line("Osoba do kontaktu", record.emergencyName),
-        line("Telefon osoby kontaktowej", record.emergencyPhone)
+        line("Wyjazd", record.travel)
       ]),
       ...section("GOTOWOŚĆ I KWALIFIKACJE", [
         line("Nadgodziny", record.overtime),
@@ -2277,6 +2298,7 @@
           email: record.e || undefined,
           message,
           consent: Boolean(state.values.consent),
+          turnstileToken,
           honeypot: state.values.companyWebsite || ""
         })
       });
@@ -2333,6 +2355,19 @@
       render();
       return;
     }
+    if (!turnstileToken) {
+      const messageText = t("form.botCheckError");
+      state.error = messageText;
+      const alert = document.getElementById("application-error");
+      if (alert) {
+        alert.textContent = messageText;
+        alert.hidden = false;
+        alert.focus();
+      }
+      const turnstileError = document.getElementById("application-turnstile-error");
+      if (turnstileError) turnstileError.hidden = false;
+      return;
+    }
     const submitButton = event.submitter;
     state.submitting = true;
     if (submitButton) {
@@ -2366,6 +2401,14 @@
         alert.focus();
       }
       window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: messageText } }));
+      turnstileToken = "";
+      if (turnstileWidgetId != null && window.turnstile) {
+        try {
+          window.turnstile.reset(turnstileWidgetId);
+        } catch {
+          // The form remains usable even if the widget was replaced.
+        }
+      }
     } finally {
       state.submitting = false;
       if (submitButton?.isConnected) {
@@ -2387,6 +2430,7 @@
     state.error = "";
     state.invalidFields = [];
     state.submitting = false;
+    removeTurnstileWidget();
     const initialValues = initialApplicationValues(state.jobId);
     const draft = hasSelectedJob ? readDraft(state.jobId) : null;
     state.hasDraft = Boolean(draft);

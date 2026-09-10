@@ -1,18 +1,21 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v201-email-delivery-2026-09-10-1";
+const CACHE_VERSION = "kiris-jobs-v202-privacy-and-data-minimisation-2026-09-10-1";
 const CORE_SHELL = [
   "./",
   "./index.html",
+  "./privacy.html",
   "./manifest.webmanifest",
-  "./data/content.js?v=201",
-  "./data/locales/ru.js?v=201",
-  "./data/locales/en.js?v=201",
-  "./assets/candidate-base.css?v=201",
-  "./assets/clean.css?v=201",
-  "./assets/homepage.css?v=201",
-  "./assets/i18n.js?v=201",
-  "./assets/application-form.js?v=201",
-  "./assets/candidate.js?v=201",
+  "./data/content.js?v=202",
+  "./data/locales/ru.js?v=202",
+  "./data/locales/en.js?v=202",
+  "./assets/candidate-base.css?v=202",
+  "./assets/clean.css?v=202",
+  "./assets/homepage.css?v=202",
+  "./assets/privacy.css?v=202",
+  "./assets/i18n.js?v=202",
+  "./assets/application-form.js?v=202",
+  "./assets/candidate.js?v=202",
+  "./assets/privacy.js?v=202",
   "./assets/icons.svg",
   "./assets/mobility-map.svg?v=10",
   "./assets/oleksandr-kiris-greenhouse.jpg",
@@ -32,15 +35,15 @@ const CORE_SHELL = [
   "./assets/share-card.png?v=200"
 ];
 const OPTIONAL_LOCALES = [
-  "./data/locales/uk.js?v=201",
-  "./data/locales/pl.js?v=201",
-  "./data/locales/az.js?v=201",
-  "./data/locales/ka.js?v=201",
-  "./data/locales/id.js?v=201",
-  "./data/locales/es.js?v=201",
-  "./data/locales/fil.js?v=201",
-  "./data/locales/ne.js?v=201",
-  "./data/locales/hy.js?v=201"
+  "./data/locales/uk.js?v=202",
+  "./data/locales/pl.js?v=202",
+  "./data/locales/az.js?v=202",
+  "./data/locales/ka.js?v=202",
+  "./data/locales/id.js?v=202",
+  "./data/locales/es.js?v=202",
+  "./data/locales/fil.js?v=202",
+  "./data/locales/ne.js?v=202",
+  "./data/locales/hy.js?v=202"
 ];
 
 self.addEventListener("install", (event) => {

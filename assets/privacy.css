@@ -1,0 +1,148 @@
+.privacy-page {
+  min-height: 100vh;
+  color: #233229;
+  background: #f4f7f5;
+}
+
+.privacy-shell {
+  width: min(100% - 32px, 920px);
+  margin: 0 auto;
+  padding: 34px 0 56px;
+}
+
+.privacy-back {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 18px;
+  color: #176f4a;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.privacy-card {
+  padding: clamp(24px, 5vw, 52px);
+  background: #fff;
+  border: 1px solid #dfe7e2;
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(25, 57, 42, .08);
+}
+
+.privacy-card h1 {
+  max-width: 780px;
+  margin: 8px 0 12px;
+  color: #163c2c;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -.04em;
+}
+
+.privacy-card h2 {
+  margin: 34px 0 10px;
+  color: #173f2e;
+  font-size: 20px;
+}
+
+.privacy-card p,
+.privacy-card li {
+  color: #46564d;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.privacy-card ul {
+  margin: 12px 0 0;
+  padding-left: 22px;
+}
+
+.privacy-card a {
+  color: #126642;
+  font-weight: 750;
+}
+
+.privacy-eyebrow,
+.privacy-updated {
+  margin: 0;
+  color: #176f4a !important;
+  font-size: 11px !important;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.privacy-lead {
+  max-width: 760px;
+  margin: 0;
+  font-size: 17px !important;
+}
+
+.privacy-summary,
+.privacy-warning,
+.privacy-language-note {
+  margin: 24px 0;
+  padding: 18px 20px;
+  background: #edf6f1;
+  border-left: 4px solid #176f4a;
+  border-radius: 10px;
+}
+
+.privacy-warning {
+  background: #fff7e8;
+  border-left-color: #c47b16;
+}
+
+.privacy-language-note {
+  background: #f2f4f3;
+  border-left-color: #77847d;
+}
+
+.privacy-contact {
+  padding: 22px;
+  background: #153c2b;
+  border-radius: 14px;
+}
+
+.privacy-contact h2,
+.privacy-contact p,
+.privacy-contact a {
+  color: #fff;
+}
+
+.candidate-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.application-privacy-link {
+  display: block;
+  width: fit-content;
+  margin-top: 6px;
+  color: #176f4a;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .privacy-shell {
+    width: min(100% - 20px, 920px);
+    padding-top: 22px;
+  }
+
+  .privacy-card {
+    padding: 24px 18px;
+    border-radius: 16px;
+  }
+
+  .privacy-card h2 {
+    margin-top: 28px;
+  }
+
+  .candidate-footer-links {
+    justify-content: flex-start;
+  }
+}

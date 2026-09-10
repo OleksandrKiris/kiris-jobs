@@ -157,20 +157,20 @@ assert(
 );
 assert(
   applicationScript.includes('field("hasPesel"')
-    && applicationScript.includes('field("passportNumber"')
     && applicationScript.includes('field("passportExpiry"')
-    && applicationScript.includes('field("emergencyContactName"')
-    && applicationScript.includes('field("emergencyContactPhone"')
-    && applicationScript.includes("function validPesel(value)")
+    && !applicationScript.includes('field("pesel"')
+    && !applicationScript.includes('field("passportNumber"')
+    && !applicationScript.includes('field("emergencyContactName"')
+    && !applicationScript.includes('field("emergencyContactPhone"')
+    && applicationScript.includes('peselStatus: polishOption(state.values.hasPesel)')
     && applicationScript.includes("SENSITIVE_DRAFT_FIELDS")
     && applicationScript.includes("!SENSITIVE_DRAFT_FIELDS.has(key)")
     && applicationScript.includes("function isoWeekLabel(value)")
     && applicationScript.includes('employeeStatus: state.values.formerCitronexWorker === "yes" ? "stary" : "nowy"'),
-  "assets/application-form.js: onboarding fields, Polish Excel formats and sensitive-draft protection are incomplete."
+  "assets/application-form.js: data-minimised onboarding, Polish Excel formats and draft protection are incomplete."
 );
 assert(
-  applicationScript.includes("function peselIdentity(value)")
-    && applicationScript.includes("function passportExpiresSoon(value)")
+  applicationScript.includes("function passportExpiresSoon(value)")
     && applicationScript.includes("function candidateDecision(job, flags)")
     && applicationScript.includes('status: "GOTOWY"')
     && applicationScript.includes('status: "DO WERYFIKACJI"')
@@ -222,8 +222,8 @@ assert(
     && candidateScript.includes('i18n.t("ui.photoCounter"')
     && applicationScript.includes("function normalizePhoneInput(")
     && applicationScript.includes("function bindApplicationInputNormalization(")
-    && applicationScript.includes('data-normalize="digits"')
-    && applicationScript.includes('data-normalize="passport"')
+    && applicationScript.includes('data-normalize="phone"')
+    && !applicationScript.includes('data-normalize="passport"')
     && applicationScript.includes("const candidateName =")
     && applicationScript.includes("const summaryLocation =")
     && applicationScript.includes("const summaryReady ="),
@@ -330,6 +330,23 @@ assert(
     && cleanCss.includes("v201 · email delivery abuse protection")
     && cleanCss.includes(".application-honeypot"),
   "The production email delivery integration and abuse protection are incomplete."
+);
+assert(
+  html.includes('href="privacy.html"')
+    && applicationScript.includes('class="application-privacy-link"')
+    && applicationScript.includes('t("form.privacyDetails")')
+    && applicationScript.includes("const DRAFT_VERSION = 4")
+    && applicationScript.includes("TURNSTILE_SCRIPT_URL")
+    && applicationScript.includes("renderTurnstileWidget")
+    && applicationScript.includes("turnstileToken")
+    && applicationScript.includes('action: "application_submit"')
+    && applicationScript.includes('"firstName"')
+    && applicationScript.includes('"phone"')
+    && applicationScript.includes('"birthDate"')
+    && cleanCss.includes("v202 · privacy access and data-minimised application")
+    && serviceWorker.includes('"./privacy.html"')
+    && serviceWorker.includes('"./assets/privacy.js?v=202"'),
+  "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
   cleanCss.includes("v198 · faster candidate decision page")

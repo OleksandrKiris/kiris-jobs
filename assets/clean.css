@@ -6204,6 +6204,65 @@ body.candidate-site {
   pointer-events: none !important;
 }
 
+/* v202 · privacy access and data-minimised application */
+.application-privacy-link {
+  display: block;
+  width: fit-content;
+  margin-top: 6px;
+  color: #176f4a;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.application-bot-check {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 14px;
+  background: #f6f9f7;
+  border: 1px solid #d9e4de;
+  border-radius: 10px;
+}
+
+.application-bot-check > strong {
+  color: #203d2f;
+  font-size: 12px;
+}
+
+.application-bot-check > p {
+  margin: 0;
+  color: #627168;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+#application-turnstile {
+  min-height: 65px;
+  margin-top: 4px;
+}
+
+#application-turnstile-error:not([hidden]) {
+  display: block;
+  color: #97342f;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.candidate-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 700px) {
+  .candidate-footer-links {
+    justify-content: flex-start;
+  }
+}
+
 /* v198 · faster candidate decision page */
 .direct-vacancy-page:not(.standalone-application-page) .vacancy-sidebar > .vacancy-status-note {
   margin: 12px 2px 0;
