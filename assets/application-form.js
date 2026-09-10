@@ -179,6 +179,71 @@
       botPassed: "Ստուգումն ավարտված է — կարելի է ուղարկել"
     }
   };
+  const RECEIPT_COPY = {
+    ru: {
+      download: "Скачать подтверждение",
+      title: "Подтверждение отклика Kiris Jobs",
+      vacancy: "Вакансия",
+      sent: "Отправлено",
+      reference: "Номер отклика",
+      contact: "Контакт рекрутера",
+      safety: "Отклик бесплатный. Не отправляйте оплату и документы через этот сайт. Условия поездки и договора подтверждаются рекрутером отдельно."
+    },
+    uk: {
+      download: "Завантажити підтвердження",
+      title: "Підтвердження відгуку Kiris Jobs",
+      vacancy: "Вакансія",
+      sent: "Надіслано",
+      reference: "Номер відгуку",
+      contact: "Контакт рекрутера",
+      safety: "Відгук безкоштовний. Не надсилайте оплату чи документи через цей сайт. Умови поїздки й договору рекрутер підтверджує окремо."
+    },
+    pl: {
+      download: "Pobierz potwierdzenie",
+      title: "Potwierdzenie zgłoszenia Kiris Jobs",
+      vacancy: "Oferta",
+      sent: "Wysłano",
+      reference: "Numer zgłoszenia",
+      contact: "Kontakt do rekrutera",
+      safety: "Zgłoszenie jest bezpłatne. Nie wysyłaj opłat ani dokumentów przez tę stronę. Warunki wyjazdu i umowy rekruter potwierdza osobno."
+    },
+    en: {
+      download: "Download confirmation",
+      title: "Kiris Jobs application confirmation",
+      vacancy: "Vacancy",
+      sent: "Submitted",
+      reference: "Application reference",
+      contact: "Recruiter contact",
+      safety: "Applying is free. Do not send payments or documents through this site. Travel and contract conditions are confirmed separately by the recruiter."
+    },
+    az: {
+      download: "Təsdiqi endir",
+      title: "Kiris Jobs müraciət təsdiqi",
+      vacancy: "Vakansiya",
+      sent: "Göndərilib",
+      reference: "Müraciət nömrəsi",
+      contact: "İşəgötürən nümayəndəsinin əlaqəsi",
+      safety: "Müraciət pulsuzdur. Bu sayt vasitəsilə ödəniş və ya sənəd göndərməyin. Səfər və müqavilə şərtləri nümayəndə tərəfindən ayrıca təsdiqlənir."
+    },
+    ka: {
+      download: "დადასტურების ჩამოტვირთვა", title: "Kiris Jobs განაცხადის დადასტურება", vacancy: "ვაკანსია", sent: "გაგზავნილია", reference: "განაცხადის ნომერი", contact: "რეკრუტერის კონტაქტი", safety: "განაცხადი უფასოა. ამ საიტით ნუ გაგზავნით ფულს ან დოკუმენტებს. მგზავრობისა და ხელშეკრულების პირობებს რეკრუტერი ცალკე ადასტურებს."
+    },
+    id: {
+      download: "Unduh konfirmasi", title: "Konfirmasi lamaran Kiris Jobs", vacancy: "Lowongan", sent: "Dikirim", reference: "Nomor lamaran", contact: "Kontak perekrut", safety: "Melamar gratis. Jangan kirim pembayaran atau dokumen melalui situs ini. Ketentuan perjalanan dan kontrak dikonfirmasi secara terpisah oleh perekrut."
+    },
+    es: {
+      download: "Descargar confirmación", title: "Confirmación de solicitud Kiris Jobs", vacancy: "Vacante", sent: "Enviado", reference: "Número de solicitud", contact: "Contacto del reclutador", safety: "Solicitar es gratis. No envíes pagos ni documentos a través de este sitio. El reclutador confirma por separado las condiciones del viaje y del contrato."
+    },
+    fil: {
+      download: "I-download ang kumpirmasyon", title: "Kumpirmasyon ng aplikasyon sa Kiris Jobs", vacancy: "Bakante", sent: "Naipadala", reference: "Numero ng aplikasyon", contact: "Contact ng recruiter", safety: "Libre ang pag-apply. Huwag magpadala ng bayad o dokumento sa site na ito. Hiwalay na kinukumpirma ng recruiter ang mga kondisyon ng biyahe at kontrata."
+    },
+    ne: {
+      download: "पुष्टि डाउनलोड गर्नुहोस्", title: "Kiris Jobs आवेदन पुष्टि", vacancy: "रिक्त पद", sent: "पठाइएको", reference: "आवेदन नम्बर", contact: "भर्तीकर्ताको सम्पर्क", safety: "आवेदन निःशुल्क छ। यस साइटमार्फत भुक्तानी वा कागजात नपठाउनुहोस्। यात्रा र सम्झौताका सर्तहरू भर्तीकर्ताले छुट्टै पुष्टि गर्छन्।"
+    },
+    hy: {
+      download: "Ներբեռնել հաստատումը", title: "Kiris Jobs դիմումի հաստատում", vacancy: "Թափուր տեղ", sent: "Ուղարկված է", reference: "Դիմումի համարը", contact: "Հավաքագրողի կապը", safety: "Դիմումն անվճար է։ Այս կայքով մի ուղարկեք վճարումներ կամ փաստաթղթեր։ Ճանապարհորդության և պայմանագրի պայմանները հավաքագրողը հաստատում է առանձին։"
+    }
+  };
   let turnstileLoadPromise = null;
   let turnstileWidgetId = null;
   let turnstileToken = "";
@@ -272,6 +337,7 @@
       template
     );
   };
+  const receiptCopy = (key) => RECEIPT_COPY[i18n.locale]?.[key] || RECEIPT_COPY.en[key] || key;
   const baseJob = () => jobs.find((job) => job.id === state.jobId);
   const effectiveJob = () => jobs.find((job) => job.id === state.values.matchedJobId) || baseJob();
   const localizedJob = () => {
@@ -710,7 +776,34 @@
     `;
   }
 
-  function renderSuccess(applicationId, message) {
+  function downloadReceipt(applicationId, record) {
+    const job = localizedJob();
+    const submittedAt = record?.at || new Date().toISOString();
+    const submitted = new Intl.DateTimeFormat(i18n.localeTag(), {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Europe/Warsaw"
+    }).format(new Date(submittedAt));
+    const text = [
+      receiptCopy("title"),
+      "",
+      `${receiptCopy("reference")}: ${applicationId}`,
+      `${receiptCopy("vacancy")}: ${job?.title || record?.j || "—"}`,
+      `${receiptCopy("sent")}: ${submitted} (Europe/Warsaw)`,
+      `${receiptCopy("contact")}: ${profile.name} · ${profile.phone}`,
+      "",
+      receiptCopy("safety")
+    ].join("\r\n");
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Kiris-Jobs-${applicationId}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function renderSuccess(applicationId, message, record) {
     const container = document.getElementById("application-dialog-content");
     const job = localizedJob();
     if (!container) return;
@@ -728,11 +821,13 @@
         ${recruiterHandoff()}
         <div class="application-success-actions">
           <a class="button button-secondary" href="${escapeHTML(catalogUrl)}">← ${escapeHTML(t("ui.navJobs"))}</a>
+          <button class="button button-secondary" type="button" data-download-receipt>${escapeHTML(receiptCopy("download"))}</button>
           <button class="button button-primary" type="button" data-success-whatsapp>WhatsApp ↗</button>
         </div>
       </section>
     `;
     container.querySelector("[data-success-whatsapp]")?.addEventListener("click", () => openWhatsApp(message));
+    container.querySelector("[data-download-receipt]")?.addEventListener("click", () => downloadReceipt(applicationId, record));
     document.getElementById("application-success-title")?.focus();
   }
 
@@ -2574,6 +2669,7 @@
         currentCountry: state.values.currentCountry || undefined,
         preferredLocation: state.values.preferredLocation || undefined,
         screeningStatus: record.decision?.status || undefined,
+        source: state.values.source || campaignSource(),
         message,
         consent: Boolean(state.values.consent),
         turnstileToken,
@@ -2593,8 +2689,8 @@
       // shape. Schema validation happens before Turnstile is consumed, so this
       // preserves uninterrupted submissions without weakening verification.
       if (response.status === 400 && body.error === "invalid_request") {
-        const { currentCountry, preferredLocation, screeningStatus, ...legacyPayload } = payload;
-        if (currentCountry || preferredLocation || screeningStatus) {
+        const { currentCountry, preferredLocation, screeningStatus, source, ...legacyPayload } = payload;
+        if (currentCountry || preferredLocation || screeningStatus || source) {
           response = await send(legacyPayload);
           body = await response.json().catch(() => ({}));
         }
@@ -2683,7 +2779,7 @@
       }
       state.hasDraft = false;
       state.submitted = true;
-      renderSuccess(delivery.applicationId || record.id, message);
+      renderSuccess(delivery.applicationId || record.id, message, record);
       window.dispatchEvent(new CustomEvent("portal:funnel", {
         detail: { event: "application_complete", jobId: state.jobId }
       }));

@@ -14,6 +14,7 @@ vm.runInContext(
 const content = context.window.PORTAL_CONTENT;
 const polishJobs = context.window.PORTAL_TRANSLATIONS?.pl?.jobs || {};
 const errors = [];
+const freshnessLimitMs = 60 * 24 * 60 * 60 * 1000;
 const add = (condition, message) => {
   if (!condition) errors.push(message);
 };
@@ -87,6 +88,13 @@ for (const [index, job] of (content?.jobs || []).entries()) {
   add(job.company, `${prefix}.company обязателен`);
   add(["open", "verify", "paused", "closed"].includes(job.status), `${prefix}.status некорректен`);
   add(job.updatedAt && !Number.isNaN(Date.parse(job.updatedAt)), `${prefix}.updatedAt некорректен`);
+  if (job.status === "open" && job.updatedAt && !Number.isNaN(Date.parse(job.updatedAt))) {
+    const checkedAt = Date.parse(`${job.updatedAt}T23:59:59Z`);
+    add(
+      Date.now() - checkedAt <= freshnessLimitMs,
+      `${prefix}: условия не подтверждались более 60 дней; проверьте вакансию и обновите updatedAt`
+    );
+  }
   add(job.applyEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(job.applyEmail), `${prefix}.applyEmail некорректен`);
   const hasSalaryDisplay = typeof job.salary?.display === "string" && job.salary.display.trim().length > 0;
   const hasSalaryRange = Number.isFinite(job.salary?.min)

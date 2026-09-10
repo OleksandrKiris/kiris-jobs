@@ -28,6 +28,139 @@
     ne: { allConditions: "सबै सर्तहरू", housing: "आवास", noExperience: "अनुभव नचाहिने", pairs: "जोडीका लागि", official: "आधिकारिक", hoursExample: "२०० घण्टाको उदाहरण" },
     hy: { allConditions: "Բոլոր պայմանները", housing: "Բնակարան", noExperience: "Առանց փորձի", pairs: "Զույգերի համար", official: "Պաշտոնական", hoursExample: "Օրինակ՝ 200 ժամի համար" }
   };
+  const ENHANCEMENT_COPY = {
+    ru: {
+      checked: "Условия проверены",
+      recheck: "Требует повторного подтверждения",
+      recheckNote: "Перед поездкой рекрутер повторно подтвердит актуальность места и условий.",
+      grossCalculator: "Калькулятор брутто",
+      hoursMonth: "Часов в месяц",
+      grossEstimate: "Ориентировочно брутто",
+      calculatorNote: "Это арифметический расчёт, а не гарантия часов или выплаты. Нетто зависит от договора и ситуации кандидата — его подтвердит рекрутер.",
+      share: "Поделиться",
+      copied: "Ссылка на вакансию скопирована.",
+      map: "Открыть на карте",
+      trustTitle: "Что подтверждено на этой странице",
+      trustText: "Работодатель: {company}. Контакт: {recruiter}. Отклик бесплатный; сайт не просит оплату или загрузку документов. После отклика рекрутер свяжется и отдельно подтвердит условия.",
+      updateTitle: "Доступна новая версия сайта",
+      updateText: "В анкете могут быть несохранённые личные данные. Завершите её или обновите сейчас — введённые поля будут очищены.",
+      updateNow: "Обновить сейчас",
+      later: "Позже",
+      updateConfirm: "Обновить страницу? Несохранённые поля анкеты будут очищены."
+    },
+    uk: {
+      checked: "Умови перевірено",
+      recheck: "Потребує повторного підтвердження",
+      recheckNote: "Перед поїздкою рекрутер повторно підтвердить актуальність місця й умов.",
+      grossCalculator: "Калькулятор брутто",
+      hoursMonth: "Годин на місяць",
+      grossEstimate: "Орієнтовно брутто",
+      calculatorNote: "Це арифметичний розрахунок, а не гарантія годин чи виплати. Нетто залежить від договору й ситуації кандидата — його підтвердить рекрутер.",
+      share: "Поділитися",
+      copied: "Посилання на вакансію скопійовано.",
+      map: "Відкрити на карті",
+      trustTitle: "Що підтверджено на цій сторінці",
+      trustText: "Роботодавець: {company}. Контакт: {recruiter}. Відгук безкоштовний; сайт не просить оплату чи завантаження документів. Після відгуку рекрутер зв’яжеться й окремо підтвердить умови.",
+      updateTitle: "Доступна нова версія сайту",
+      updateText: "В анкеті можуть бути незбережені особисті дані. Завершіть її або оновіть зараз — введені поля буде очищено.",
+      updateNow: "Оновити зараз",
+      later: "Пізніше",
+      updateConfirm: "Оновити сторінку? Незбережені поля анкети буде очищено."
+    },
+    pl: {
+      checked: "Warunki sprawdzono",
+      recheck: "Wymaga ponownego potwierdzenia",
+      recheckNote: "Przed wyjazdem rekruter ponownie potwierdzi dostępność miejsca i warunki.",
+      grossCalculator: "Kalkulator brutto",
+      hoursMonth: "Godzin w miesiącu",
+      grossEstimate: "Szacunkowo brutto",
+      calculatorNote: "To obliczenie arytmetyczne, nie gwarancja godzin ani wypłaty. Netto zależy od umowy i sytuacji kandydata — potwierdzi je rekruter.",
+      share: "Udostępnij",
+      copied: "Link do oferty skopiowano.",
+      map: "Otwórz na mapie",
+      trustTitle: "Co potwierdzono na tej stronie",
+      trustText: "Pracodawca: {company}. Kontakt: {recruiter}. Zgłoszenie jest bezpłatne; strona nie prosi o opłatę ani przesyłanie dokumentów. Po zgłoszeniu rekruter skontaktuje się i osobno potwierdzi warunki.",
+      updateTitle: "Dostępna jest nowa wersja strony",
+      updateText: "Formularz może zawierać niezapisane dane osobowe. Dokończ go albo odśwież teraz — wpisane pola zostaną wyczyszczone.",
+      updateNow: "Odśwież teraz",
+      later: "Później",
+      updateConfirm: "Odświeżyć stronę? Niezapisane pola formularza zostaną wyczyszczone."
+    },
+    en: {
+      checked: "Conditions checked",
+      recheck: "Needs reconfirmation",
+      recheckNote: "Before travel, the recruiter will reconfirm availability and conditions.",
+      grossCalculator: "Gross pay calculator",
+      hoursMonth: "Hours per month",
+      grossEstimate: "Estimated gross",
+      calculatorNote: "This is arithmetic, not a guarantee of hours or pay. Net pay depends on the contract and candidate circumstances and must be confirmed by the recruiter.",
+      share: "Share",
+      copied: "Vacancy link copied.",
+      map: "Open in maps",
+      trustTitle: "What is confirmed on this page",
+      trustText: "Employer: {company}. Contact: {recruiter}. Applying is free; this site does not request payment or document uploads. After you apply, the recruiter will contact you and confirm the conditions separately.",
+      updateTitle: "A new site version is available",
+      updateText: "The form may contain unsaved personal data. Finish it or update now — entered fields will be cleared.",
+      updateNow: "Update now",
+      later: "Later",
+      updateConfirm: "Update the page? Unsaved form fields will be cleared."
+    },
+    az: {
+      checked: "Şərtlər yoxlanılıb",
+      recheck: "Yenidən təsdiq tələb olunur",
+      recheckNote: "Səfərdən əvvəl işəgötürən nümayəndəsi yerin və şərtlərin aktuallığını yenidən təsdiqləyəcək.",
+      grossCalculator: "Brutto kalkulyatoru",
+      hoursMonth: "Ayda saat",
+      grossEstimate: "Təxmini brutto",
+      calculatorNote: "Bu, sadəcə riyazi hesablamadır, saat və ya ödəniş zəmanəti deyil. Netto müqavilədən və namizədin vəziyyətindən asılıdır və işəgötürən nümayəndəsi tərəfindən təsdiqlənir.",
+      share: "Paylaş",
+      copied: "Vakansiya keçidi kopyalandı.",
+      map: "Xəritədə aç",
+      trustTitle: "Bu səhifədə təsdiqlənənlər",
+      trustText: "İşəgötürən: {company}. Əlaqə: {recruiter}. Müraciət pulsuzdur; sayt ödəniş və ya sənəd yükləmə tələb etmir. Müraciətdən sonra nümayəndə sizinlə əlaqə saxlayıb şərtləri ayrıca təsdiqləyəcək.",
+      updateTitle: "Saytın yeni versiyası mövcuddur",
+      updateText: "Formada saxlanmamış şəxsi məlumatlar ola bilər. Formanı tamamlayın və ya indi yeniləyin — daxil edilmiş sahələr silinəcək.",
+      updateNow: "İndi yenilə",
+      later: "Sonra",
+      updateConfirm: "Səhifə yenilənsin? Saxlanmamış forma sahələri silinəcək."
+    },
+    ka: {
+      checked: "პირობები შემოწმებულია", recheck: "საჭიროა ხელახალი დადასტურება", recheckNote: "გამგზავრებამდე რეკრუტერი ხელახლა დაადასტურებს ადგილისა და პირობების აქტუალურობას.",
+      grossCalculator: "ბრუტო ანაზღაურების კალკულატორი", hoursMonth: "საათი თვეში", grossEstimate: "სავარაუდო ბრუტო", calculatorNote: "ეს მხოლოდ არითმეტიკული გამოთვლაა და არა საათების ან ანაზღაურების გარანტია. ნეტო დამოკიდებულია ხელშეკრულებასა და კანდიდატის მდგომარეობაზე და უნდა დაადასტუროს რეკრუტერმა.",
+      share: "გაზიარება", copied: "ვაკანსიის ბმული დაკოპირდა.", map: "რუკაზე გახსნა", trustTitle: "რა არის დადასტურებული ამ გვერდზე", trustText: "დამსაქმებელი: {company}. კონტაქტი: {recruiter}. განაცხადი უფასოა; საიტი არ ითხოვს გადახდას ან დოკუმენტების ატვირთვას. განაცხადის შემდეგ რეკრუტერი დაგიკავშირდებათ და პირობებს ცალკე დაადასტურებს.",
+      updateTitle: "ხელმისაწვდომია საიტის ახალი ვერსია", updateText: "ფორმაში შეიძლება იყოს შეუნახავი პირადი მონაცემები. დაასრულეთ ან განაახლეთ ახლა — შევსებული ველები გასუფთავდება.", updateNow: "ახლავე განახლება", later: "მოგვიანებით", updateConfirm: "განახლდეს გვერდი? შეუნახავი ველები გასუფთავდება."
+    },
+    id: {
+      checked: "Ketentuan telah diperiksa", recheck: "Perlu dikonfirmasi ulang", recheckNote: "Sebelum berangkat, perekrut akan mengonfirmasi kembali ketersediaan dan ketentuan.",
+      grossCalculator: "Kalkulator upah bruto", hoursMonth: "Jam per bulan", grossEstimate: "Perkiraan bruto", calculatorNote: "Ini hanya perhitungan aritmetika, bukan jaminan jam kerja atau pembayaran. Upah neto bergantung pada kontrak dan kondisi kandidat dan harus dikonfirmasi perekrut.",
+      share: "Bagikan", copied: "Tautan lowongan disalin.", map: "Buka di peta", trustTitle: "Yang dikonfirmasi di halaman ini", trustText: "Pemberi kerja: {company}. Kontak: {recruiter}. Melamar gratis; situs ini tidak meminta pembayaran atau unggahan dokumen. Setelah melamar, perekrut akan menghubungi Anda dan mengonfirmasi ketentuan secara terpisah.",
+      updateTitle: "Versi baru situs tersedia", updateText: "Formulir mungkin berisi data pribadi yang belum tersimpan. Selesaikan atau perbarui sekarang — kolom yang diisi akan dihapus.", updateNow: "Perbarui sekarang", later: "Nanti", updateConfirm: "Perbarui halaman? Kolom formulir yang belum tersimpan akan dihapus."
+    },
+    es: {
+      checked: "Condiciones verificadas", recheck: "Requiere nueva confirmación", recheckNote: "Antes del viaje, el reclutador volverá a confirmar la disponibilidad y las condiciones.",
+      grossCalculator: "Calculadora de salario bruto", hoursMonth: "Horas al mes", grossEstimate: "Bruto estimado", calculatorNote: "Es un cálculo aritmético, no una garantía de horas ni de pago. El neto depende del contrato y de la situación del candidato y debe confirmarlo el reclutador.",
+      share: "Compartir", copied: "Enlace de la vacante copiado.", map: "Abrir en el mapa", trustTitle: "Qué está confirmado en esta página", trustText: "Empleador: {company}. Contacto: {recruiter}. Solicitar es gratis; el sitio no pide pagos ni subir documentos. Tras la solicitud, el reclutador se pondrá en contacto y confirmará las condiciones por separado.",
+      updateTitle: "Hay una nueva versión del sitio", updateText: "El formulario puede contener datos personales sin guardar. Termínalo o actualiza ahora; los campos introducidos se borrarán.", updateNow: "Actualizar ahora", later: "Más tarde", updateConfirm: "¿Actualizar la página? Se borrarán los campos no guardados."
+    },
+    fil: {
+      checked: "Nasuri ang mga kondisyon", recheck: "Kailangang kumpirmahing muli", recheckNote: "Bago bumiyahe, muling kukumpirmahin ng recruiter ang availability at mga kondisyon.",
+      grossCalculator: "Kalkulador ng gross pay", hoursMonth: "Oras bawat buwan", grossEstimate: "Tinatayang gross", calculatorNote: "Aritmetikang pagtatantiya lamang ito, hindi garantiya ng oras o sahod. Ang net pay ay nakadepende sa kontrata at kalagayan ng kandidato at dapat kumpirmahin ng recruiter.",
+      share: "Ibahagi", copied: "Nakopya ang link ng bakante.", map: "Buksan sa mapa", trustTitle: "Ano ang kumpirmado sa pahinang ito", trustText: "Employer: {company}. Contact: {recruiter}. Libre ang pag-apply; hindi humihingi ang site ng bayad o pag-upload ng dokumento. Pagkatapos mag-apply, kokontakin ka ng recruiter at hiwalay na kukumpirmahin ang mga kondisyon.",
+      updateTitle: "May bagong bersyon ng site", updateText: "Maaaring may hindi naka-save na personal na datos ang form. Tapusin ito o mag-update ngayon — mabubura ang mga inilagay na field.", updateNow: "I-update ngayon", later: "Mamaya", updateConfirm: "I-update ang pahina? Mabubura ang mga hindi naka-save na field."
+    },
+    ne: {
+      checked: "सर्तहरू जाँचिएका छन्", recheck: "पुनः पुष्टि आवश्यक", recheckNote: "यात्राअघि भर्तीकर्ताले स्थान र सर्तहरूको उपलब्धता पुनः पुष्टि गर्नेछन्।",
+      grossCalculator: "कुल तलब क्याल्कुलेटर", hoursMonth: "प्रति महिना घण्टा", grossEstimate: "अनुमानित कुल", calculatorNote: "यो अंकगणितीय हिसाब मात्र हो, कामको घण्टा वा भुक्तानीको ग्यारेन्टी होइन। खुद तलब सम्झौता र उम्मेदवारको अवस्थामा निर्भर हुन्छ र भर्तीकर्ताले पुष्टि गर्नुपर्छ।",
+      share: "साझा गर्नुहोस्", copied: "रिक्त पदको लिङ्क प्रतिलिपि भयो।", map: "नक्सामा खोल्नुहोस्", trustTitle: "यस पृष्ठमा पुष्टि भएका कुरा", trustText: "रोजगारदाता: {company}। सम्पर्क: {recruiter}। आवेदन निःशुल्क छ; साइटले भुक्तानी वा कागजात अपलोड माग्दैन। आवेदनपछि भर्तीकर्ताले सम्पर्क गरी सर्तहरू छुट्टै पुष्टि गर्नेछन्।",
+      updateTitle: "साइटको नयाँ संस्करण उपलब्ध छ", updateText: "फारममा सुरक्षित नभएको व्यक्तिगत डेटा हुन सक्छ। पूरा गर्नुहोस् वा अहिले अपडेट गर्नुहोस् — भरिएका फिल्डहरू मेटिनेछन्।", updateNow: "अहिले अपडेट", later: "पछि", updateConfirm: "पृष्ठ अपडेट गर्ने? सुरक्षित नभएका फिल्डहरू मेटिनेछन्।"
+    },
+    hy: {
+      checked: "Պայմանները ստուգված են", recheck: "Պահանջվում է վերահաստատում", recheckNote: "Մեկնելուց առաջ հավաքագրողը կրկին կհաստատի տեղի և պայմանների առկայությունը։",
+      grossCalculator: "Բրուտո աշխատավարձի հաշվիչ", hoursMonth: "Ժամ ամսական", grossEstimate: "Մոտավոր բրուտո", calculatorNote: "Սա միայն թվաբանական հաշվարկ է, ոչ թե ժամերի կամ վճարման երաշխիք։ Նետոն կախված է պայմանագրից և թեկնածուի իրավիճակից ու պետք է հաստատվի հավաքագրողի կողմից։",
+      share: "Կիսվել", copied: "Թափուր տեղի հղումը պատճենվեց։", map: "Բացել քարտեզում", trustTitle: "Ինչն է հաստատված այս էջում", trustText: "Գործատու՝ {company}։ Կապ՝ {recruiter}։ Դիմումն անվճար է, կայքը վճարում կամ փաստաթղթերի վերբեռնում չի պահանջում։ Դիմումից հետո հավաքագրողը կկապվի և առանձին կհաստատի պայմանները։",
+      updateTitle: "Հասանելի է կայքի նոր տարբերակը", updateText: "Ձևում կարող են լինել չպահպանված անձնական տվյալներ։ Ավարտեք կամ թարմացրեք հիմա՝ լրացված դաշտերը կմաքրվեն։", updateNow: "Թարմացնել հիմա", later: "Ավելի ուշ", updateConfirm: "Թարմացնե՞լ էջը։ Չպահպանված դաշտերը կմաքրվեն։"
+    }
+  };
   const VACANCY_FRESHNESS_DAYS = 60;
   const FUNNEL_API_URL = "https://candidate-form-flow.lovable.app/api/public/funnel";
 
@@ -39,6 +172,13 @@
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
   const catalogCopy = (key) => CATALOG_COPY[i18n.locale]?.[key] || CATALOG_COPY.en[key] || key;
+  const enhancementCopy = (key, values = {}) => {
+    let result = ENHANCEMENT_COPY[i18n.locale]?.[key] || ENHANCEMENT_COPY.en[key] || key;
+    Object.entries(values).forEach(([name, value]) => {
+      result = result.replaceAll(`{${name}}`, String(value));
+    });
+    return result;
+  };
 
   function trackFunnel(event, jobId = "") {
     const key = `kiris-funnel:${event}:${jobId || "catalog"}`;
@@ -132,6 +272,58 @@
       ? `${format(min)}–${format(max)}`
       : format(Number.isFinite(min) ? min : max);
     return `${catalogCopy("hoursExample")}: ≈ ${range} ${value.currency || ""} · ${i18n.t("ui.grossShort")}`;
+  }
+
+  function checkedDate(job) {
+    if (!job?.updatedAt) return "";
+    const value = new Date(`${job.updatedAt}T12:00:00Z`);
+    if (Number.isNaN(value.getTime())) return job.updatedAt;
+    return new Intl.DateTimeFormat(i18n.localeTag(), {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "Europe/Warsaw"
+    }).format(value);
+  }
+
+  function salaryCalculator(job) {
+    const value = localized(job).salary || {};
+    const min = Number(value.min);
+    const max = Number(value.max);
+    if (value.confirmed !== true || value.period !== "час" || (!Number.isFinite(min) && !Number.isFinite(max))) return "";
+    const low = Number.isFinite(min) ? min : max;
+    const high = Number.isFinite(max) ? max : min;
+    return `
+      <section class="vacancy-calculator" data-salary-calculator data-rate-min="${escapeHTML(low)}" data-rate-max="${escapeHTML(high)}" data-currency="${escapeHTML(value.currency || "")}">
+        <h3>${escapeHTML(enhancementCopy("grossCalculator"))}</h3>
+        <label>
+          <span>${escapeHTML(enhancementCopy("hoursMonth"))}</span>
+          <input type="number" min="80" max="320" step="1" value="200" inputmode="numeric" data-salary-hours>
+        </label>
+        <p><span>${escapeHTML(enhancementCopy("grossEstimate"))}</span><strong data-salary-output></strong></p>
+        <small>${escapeHTML(enhancementCopy("calculatorNote"))}</small>
+      </section>
+    `;
+  }
+
+  function verificationBlock(job) {
+    const stale = effectiveStatus(job) === "verify";
+    return `
+      <section class="vacancy-verification ${stale ? "is-stale" : ""}">
+        <strong>${escapeHTML(stale ? enhancementCopy("recheck") : enhancementCopy("checked"))}</strong>
+        ${checkedDate(job) ? `<time datetime="${escapeHTML(job.updatedAt)}">${escapeHTML(checkedDate(job))}</time>` : ""}
+        ${stale ? `<p>${escapeHTML(enhancementCopy("recheckNote"))}</p>` : ""}
+      </section>
+    `;
+  }
+
+  function trustBlock(job) {
+    return `
+      <section class="vacancy-trust-block">
+        <h3>${escapeHTML(enhancementCopy("trustTitle"))}</h3>
+        <p>${escapeHTML(enhancementCopy("trustText", { company: job.company, recruiter: `${profile.name} · ${profile.phone}` }))}</p>
+      </section>
+    `;
   }
 
   function jobBenefitFlags(job) {
@@ -396,7 +588,14 @@
               <div><dt>${escapeHTML(i18n.t("ui.contract"))}</dt><dd>${escapeHTML(view.contract)}</dd></div>
               <div><dt>${escapeHTML(i18n.t("ui.suitableFor"))}</dt><dd>${escapeHTML((view.candidates || []).join(" · "))}</dd></div>
             </dl>
+            ${verificationBlock(job)}
+            ${salaryCalculator(job)}
+            <div class="vacancy-utility-actions">
+              <button class="button button-secondary" type="button" data-share-vacancy="${escapeHTML(job.id)}">${escapeHTML(enhancementCopy("share"))}</button>
+              <a class="button button-secondary" href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(`${view.location}, ${view.format}`)}" target="_blank" rel="noopener noreferrer">${escapeHTML(enhancementCopy("map"))}</a>
+            </div>
             <p class="vacancy-status-note">${escapeHTML(view.statusNote || "")}</p>
+            ${trustBlock(job)}
           </aside>
         </div>
       </article>
@@ -408,6 +607,7 @@
     if (!job) return;
     state.openJobId = job.id;
     $("job-dialog-content").innerHTML = detail(job);
+    initializeSalaryCalculators($("job-dialog-content"));
     const dialog = $("job-dialog");
     if (!dialog.open) dialog.showModal();
     dialog.querySelector(".dialog-panel")?.scrollTo({ top: 0 });
@@ -436,6 +636,7 @@
     $("direct-vacancy-back").href = catalogUrl();
     $("application-page-back").href = publicJobUrl(job);
     container.innerHTML = detail(job, { page: true });
+    initializeSalaryCalculators(container);
   }
 
   function closeDialog(dialog) {
@@ -596,6 +797,7 @@
       const openButton = event.target.closest("[data-open-job]");
       const applyButton = event.target.closest("[data-apply-job]");
       const closeButton = event.target.closest("[data-close-dialog]");
+      const shareButton = event.target.closest("[data-share-vacancy]");
       if (countryButton) {
         state.country = countryButton.dataset.countryFilter || "";
         renderCountryFilter();
@@ -611,6 +813,21 @@
       if (housingPhoto) {
         event.preventDefault();
         openHousingLightbox(housingPhoto);
+        return;
+      }
+      if (shareButton) {
+        const job = jobs.find((item) => item.id === shareButton.dataset.shareVacancy);
+        if (!job) return;
+        const url = new URL(publicJobUrl(job));
+        url.searchParams.set("src", "vacancy_share");
+        const view = localized(job);
+        if (navigator.share) {
+          navigator.share({ title: view.title, text: view.subtitle || view.summary || view.title, url: url.toString() }).catch(() => {});
+        } else {
+          navigator.clipboard?.writeText(url.toString()).then(() => {
+            window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: enhancementCopy("copied") } }));
+          }).catch(() => {});
+        }
         return;
       }
       if (openButton && directJobId) event.preventDefault();
@@ -632,6 +849,10 @@
         if (event.target === dialog) closeDialog(dialog);
       });
     });
+    document.addEventListener("input", (event) => {
+      const input = event.target.closest("[data-salary-hours]");
+      if (input) updateSalaryCalculator(input.closest("[data-salary-calculator]"));
+    });
     window.addEventListener("portal:toast", (event) => {
       const toast = $("toast");
       toast.textContent = event.detail?.message || "";
@@ -646,6 +867,44 @@
       }
     });
     i18n.subscribe(renderStatic);
+  }
+
+  function updateSalaryCalculator(calculator) {
+    if (!calculator) return;
+    const hoursInput = calculator.querySelector("[data-salary-hours]");
+    const output = calculator.querySelector("[data-salary-output]");
+    const hours = Math.min(320, Math.max(80, Number(hoursInput?.value) || 200));
+    const min = Number(calculator.dataset.rateMin);
+    const max = Number(calculator.dataset.rateMax);
+    const format = (amount) => new Intl.NumberFormat(i18n.localeTag(), { maximumFractionDigits: 0 }).format(amount * hours);
+    const value = min === max ? format(min) : `${format(min)}–${format(max)}`;
+    if (output) output.textContent = `${value} ${calculator.dataset.currency || ""}`.trim();
+  }
+
+  function initializeSalaryCalculators(root = document) {
+    root.querySelectorAll("[data-salary-calculator]").forEach(updateSalaryCalculator);
+  }
+
+  function showUpdateNotice() {
+    if (document.getElementById("site-update-notice")) return;
+    const notice = document.createElement("aside");
+    notice.id = "site-update-notice";
+    notice.className = "site-update-notice";
+    notice.setAttribute("role", "status");
+    notice.innerHTML = `
+      <div><strong>${escapeHTML(enhancementCopy("updateTitle"))}</strong><p>${escapeHTML(enhancementCopy("updateText"))}</p></div>
+      <div class="site-update-actions">
+        <button type="button" data-update-later>${escapeHTML(enhancementCopy("later"))}</button>
+        <button type="button" data-update-now>${escapeHTML(enhancementCopy("updateNow"))}</button>
+      </div>
+    `;
+    notice.querySelector("[data-update-later]")?.addEventListener("click", () => notice.remove());
+    notice.querySelector("[data-update-now]")?.addEventListener("click", () => {
+      const formOpen = document.body.classList.contains("standalone-application-page")
+        || document.querySelector(".application-modal[open]");
+      if (!formOpen || window.confirm(enhancementCopy("updateConfirm"))) window.location.reload();
+    });
+    document.body.append(notice);
   }
 
   function openDeepLink() {
@@ -685,7 +944,10 @@
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (!hadController || refreshing) return;
       if (document.body.classList.contains("standalone-application-page")
-        || document.querySelector(".application-modal[open]")) return;
+        || document.querySelector(".application-modal[open]")) {
+        showUpdateNotice();
+        return;
+      }
       refreshing = true;
       window.location.reload();
     });
@@ -703,6 +965,7 @@
     ensureHousingLightbox();
     bind();
     renderStatic();
+    initializeSalaryCalculators();
     trackFunnel("catalog_view", directJobId);
     openDeepLink();
     ensureAppStyles();

@@ -20,7 +20,7 @@
         "obywatelstwo, aktualny kraj i miasto, ogólny status dokumentów i prawa do pracy oraz daty ważności — bez numerów dokumentów;",
         "preferencje pracy, termin rozpoczęcia, zakwaterowanie, doświadczenie, kwalifikacje i odpowiedzi związane z wymaganiami stanowiska;",
         "dobrowolne komentarze; nie wpisuj diagnoz medycznych, danych bankowych ani danych innych osób;",
-        "minimalne dane techniczne: identyfikator zgłoszenia, oferta, język, znaczniki czasu, status dostarczenia i jednokierunkowy skrót adresu IP używany przeciw nadużyciom."
+        "minimalne dane techniczne: identyfikator zgłoszenia, oferta, źródło kampanii, język, znaczniki czasu, status dostarczenia i jednokierunkowy skrót adresu IP używany przeciw nadużyciom."
       ],
       purposeTitle: "3. Cele i podstawy prawne",
       purpose: "Dane z ankiety służą do obsługi zgłoszenia, kontaktu, wstępnej oceny dopasowania i podjęcia działań na Twoje żądanie przed ewentualnym zatrudnieniem (art. 6 ust. 1 lit. b RODO). Dobrowolne dane i zgoda na wysłanie są przetwarzane na podstawie zgody (lit. a). Zabezpieczenie formularza, ograniczanie nadużyć i dowód dostarczenia opierają się na uzasadnionym interesie (lit. f).",
@@ -56,7 +56,7 @@
         "citizenship, current country and city, general document and work-right status, and validity dates — without document numbers;",
         "job preferences, availability, housing needs, experience, qualifications and role-related answers;",
         "optional comments; do not enter medical diagnoses, bank data or another person's data;",
-        "minimal technical data: application ID, vacancy, language, timestamps, delivery status and a one-way IP hash used to prevent abuse."
+        "minimal technical data: application ID, vacancy, campaign source, language, timestamps, delivery status and a one-way IP hash used to prevent abuse."
       ],
       purposeTitle: "3. Purposes and legal bases",
       purpose: "Application data is used to handle your request, contact you, make an initial suitability check and take steps at your request before possible employment (GDPR Article 6(1)(b)). Optional data and submission consent rely on consent (Article 6(1)(a)). Form security, abuse prevention and delivery evidence rely on legitimate interests (Article 6(1)(f)).",
@@ -92,7 +92,7 @@
         "гражданство, текущая страна и город, общий статус документов и права на работу, сроки действия — без номеров документов;",
         "предпочтения, дата готовности, жильё, опыт, квалификация и ответы, связанные с требованиями вакансии;",
         "необязательные комментарии; не указывайте диагнозы, банковские данные или данные других людей;",
-        "минимальные технические данные: номер заявки, вакансия, язык, время, статус доставки и односторонний хеш IP для защиты от злоупотреблений."
+        "минимальные технические данные: номер заявки, вакансия, источник кампании, язык, время, статус доставки и односторонний хеш IP для защиты от злоупотреблений."
       ],
       purposeTitle: "3. Цели и правовые основания",
       purpose: "Данные нужны для обработки заявки, контакта, первичной оценки и действий по вашему запросу до возможного трудоустройства (ст. 6(1)(b) GDPR). Необязательные данные и отправка основаны на согласии (ст. 6(1)(a)). Защита формы, ограничение злоупотреблений и подтверждение доставки — на законном интересе (ст. 6(1)(f)).",
@@ -128,7 +128,7 @@
         "громадянство, поточна країна й місто, загальний статус документів і права на роботу, строки дії — без номерів документів;",
         "побажання щодо роботи, дата готовності, житло, досвід, кваліфікація та відповіді за вимогами вакансії;",
         "необов’язкові коментарі; не вказуйте діагнози, банківські дані чи дані інших осіб;",
-        "мінімальні технічні дані: номер заявки, вакансія, мова, час, статус доставки й односторонній хеш IP для захисту від зловживань."
+        "мінімальні технічні дані: номер заявки, вакансія, джерело кампанії, мова, час, статус доставки й односторонній хеш IP для захисту від зловживань."
       ],
       purposeTitle: "3. Цілі та правові підстави",
       purpose: "Дані потрібні для обробки заявки, контакту, первинної оцінки та дій на ваш запит до можливого працевлаштування (ст. 6(1)(b) GDPR). Необов’язкові дані й надсилання ґрунтуються на згоді (ст. 6(1)(a)). Захист форми та підтвердження доставки — на законному інтересі (ст. 6(1)(f)).",
@@ -164,7 +164,7 @@
         "vətəndaşlıq, mövcud ölkə və şəhər, sənədlərin və iş hüququnun ümumi statusu, qüvvədəolma tarixləri — sənəd nömrələri olmadan;",
         "iş seçimi, başlama tarixi, yaşayış ehtiyacı, təcrübə, ixtisas və vakansiya ilə bağlı cavablar;",
         "istəyə bağlı şərhlər; tibbi diaqnoz, bank məlumatı və ya başqa şəxsin məlumatını yazmayın;",
-        "minimal texniki məlumatlar: müraciət ID-si, vakansiya, dil, vaxt, çatdırılma statusu və sui-istifadəyə qarşı birtərəfli IP heşi."
+        "minimal texniki məlumatlar: müraciət ID-si, vakansiya, kampaniya mənbəyi, dil, vaxt, çatdırılma statusu və sui-istifadəyə qarşı birtərəfli IP heşi."
       ],
       purposeTitle: "3. Məqsədlər və hüquqi əsaslar",
       purpose: "Məlumatlar müraciətin işlənməsi, əlaqə, ilkin uyğunluq yoxlaması və mümkün işə qəbuldan əvvəl sizin istəyinizlə addımlar üçün istifadə olunur (GDPR 6(1)(b)). İstəyə bağlı məlumat və göndərmə razılığa əsaslanır (6(1)(a)). Təhlükəsizlik, sui-istifadənin qarşısı və çatdırılma sübutu qanuni marağa əsaslanır (6(1)(f)).",

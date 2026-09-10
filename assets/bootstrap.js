@@ -24,7 +24,7 @@
     || fallback;
   const localeBase = new URL("../data/locales/", import.meta.url);
   window.PORTAL_LOCALE_BASE = localeBase.href;
-  window.PORTAL_ASSET_VERSION = "206";
+  window.PORTAL_ASSET_VERSION = "207";
 
   await import(new URL(`pl.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
   if (active !== fallback) {

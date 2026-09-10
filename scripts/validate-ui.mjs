@@ -362,7 +362,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=206"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=207"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -437,15 +437,33 @@ assert(
     && candidateScript.includes("document.title =")
     && applicationScript.includes('"consent",')
     && applicationScript.includes("consent: false")
-    && applicationScript.includes("function renderSuccess(applicationId, message)")
+    && applicationScript.includes("function renderSuccess(applicationId, message, record)")
     && applicationScript.includes("currentCountry: state.values.currentCountry")
     && applicationScript.includes("screeningStatus: record.decision?.status")
     && applicationScript.includes("...legacyPayload")
     && applicationScript.includes('event: "application_complete"')
-    && serviceWorker.includes("kiris-jobs-v206")
+    && serviceWorker.includes("kiris-jobs-v207")
     && applicationScript.includes('const STEP_KEYS = [')
     && applicationScript.includes('"stepDetails"'),
   "The v204 smart filters, freshness, localized metadata and safe success flow are incomplete."
+);
+assert(
+  cleanCss.includes("v207 · verified vacancy facts")
+    && candidateScript.includes("function salaryCalculator(job)")
+    && candidateScript.includes("function verificationBlock(job)")
+    && candidateScript.includes("function showUpdateNotice()")
+    && candidateScript.includes("data-share-vacancy")
+    && applicationScript.includes("function downloadReceipt(applicationId, record)")
+    && applicationScript.includes("source: state.values.source || campaignSource()")
+    && applicationScript.includes("data-download-receipt"),
+  "The v207 trust, sharing, update and confirmation improvements are incomplete."
+);
+assert(
+  html.includes('http-equiv="Content-Security-Policy"')
+    && html.includes("object-src 'none'")
+    && html.includes("https://challenges.cloudflare.com")
+    && html.includes('name="referrer" content="strict-origin-when-cross-origin"'),
+  "The candidate page needs a restrictive CSP and referrer policy."
 );
 
 const requiredOfflineFonts = [
