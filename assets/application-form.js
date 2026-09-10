@@ -2556,32 +2556,45 @@
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 25000);
     try {
-      const response = await fetch(APPLICATION_API_URL, {
+      const payload = {
+        version: 1,
+        applicationId: record.id,
+        submittedAt: record.at,
+        locale: state.values.preferredLanguage || i18n.locale,
+        jobId: record.jid,
+        jobTitle: record.j,
+        firstName: record.fn,
+        lastName: record.ln,
+        phone: record.p,
+        email: record.e || undefined,
+        currentCountry: state.values.currentCountry || undefined,
+        preferredLocation: state.values.preferredLocation || undefined,
+        screeningStatus: record.decision?.status || undefined,
+        message,
+        consent: Boolean(state.values.consent),
+        turnstileToken,
+        honeypot: state.values.companyWebsite || ""
+      };
+      const send = (body) => fetch(APPLICATION_API_URL, {
         method: "POST",
         credentials: "omit",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({
-          version: 1,
-          applicationId: record.id,
-          submittedAt: record.at,
-          locale: state.values.preferredLanguage || i18n.locale,
-          jobId: record.jid,
-          jobTitle: record.j,
-          firstName: record.fn,
-          lastName: record.ln,
-          phone: record.p,
-          email: record.e || undefined,
-          currentCountry: state.values.currentCountry || undefined,
-          preferredLocation: state.values.preferredLocation || undefined,
-          screeningStatus: record.decision?.status || undefined,
-          message,
-          consent: Boolean(state.values.consent),
-          turnstileToken,
-          honeypot: state.values.companyWebsite || ""
-        })
+        body: JSON.stringify(body)
       });
-      const body = await response.json().catch(() => ({}));
+      let response = await send(payload);
+      let body = await response.json().catch(() => ({}));
+
+      // During a rolling backend release, retry once with the previous payload
+      // shape. Schema validation happens before Turnstile is consumed, so this
+      // preserves uninterrupted submissions without weakening verification.
+      if (response.status === 400 && body.error === "invalid_request") {
+        const { currentCountry, preferredLocation, screeningStatus, ...legacyPayload } = payload;
+        if (currentCountry || preferredLocation || screeningStatus) {
+          response = await send(legacyPayload);
+          body = await response.json().catch(() => ({}));
+        }
+      }
       if (!response.ok || (body.ok !== true && body.success !== true)) {
         const error = new Error("Application delivery failed");
         error.code = body.error || body.code || (response.status === 429 ? "rate_limited" : "delivery_failed");
