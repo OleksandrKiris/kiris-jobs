@@ -15,6 +15,19 @@
   };
   const directPathMatch = location.pathname.match(/\/vacancies\/([^/]+)\/?$/);
   const directJobId = directPathMatch ? decodeURIComponent(directPathMatch[1]) : "";
+  const CATALOG_COPY = {
+    ru: { housing: "Жильё", noExperience: "Без опыта", pairs: "Для пар", official: "Официально", hoursExample: "Пример за 200 ч" },
+    uk: { housing: "Житло", noExperience: "Без досвіду", pairs: "Для пар", official: "Офіційно", hoursExample: "Приклад за 200 год" },
+    pl: { housing: "Zakwaterowanie", noExperience: "Bez doświadczenia", pairs: "Dla par", official: "Legalnie", hoursExample: "Przykład za 200 godz." },
+    en: { housing: "Housing", noExperience: "No experience", pairs: "Couples", official: "Official contract", hoursExample: "Example for 200 h" },
+    az: { housing: "Yaşayış yeri", noExperience: "Təcrübəsiz", pairs: "Cütlüklər üçün", official: "Rəsmi", hoursExample: "200 saat üçün nümunə" },
+    ka: { housing: "საცხოვრებელი", noExperience: "გამოცდილების გარეშე", pairs: "წყვილებისთვის", official: "ოფიციალურად", hoursExample: "მაგალითი 200 საათზე" },
+    id: { housing: "Tempat tinggal", noExperience: "Tanpa pengalaman", pairs: "Untuk pasangan", official: "Resmi", hoursExample: "Contoh untuk 200 jam" },
+    es: { housing: "Alojamiento", noExperience: "Sin experiencia", pairs: "Para parejas", official: "Contrato oficial", hoursExample: "Ejemplo por 200 h" },
+    fil: { housing: "Tirahan", noExperience: "Walang karanasan", pairs: "Para sa magkapareha", official: "Opisyal", hoursExample: "Halimbawa sa 200 oras" },
+    ne: { housing: "आवास", noExperience: "अनुभव नचाहिने", pairs: "जोडीका लागि", official: "आधिकारिक", hoursExample: "२०० घण्टाको उदाहरण" },
+    hy: { housing: "Բնակարան", noExperience: "Առանց փորձի", pairs: "Զույգերի համար", official: "Պաշտոնական", hoursExample: "Օրինակ՝ 200 ժամի համար" }
+  };
 
   const $ = (id) => document.getElementById(id);
   const escapeHTML = (value) => String(value ?? "")
@@ -23,6 +36,7 @@
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+  const catalogCopy = (key) => CATALOG_COPY[i18n.locale]?.[key] || CATALOG_COPY.en[key] || key;
 
   function countryCode(job) {
     const format = String(job.format || "").toLowerCase();
@@ -79,6 +93,30 @@
     return `${rate} · ${i18n.t("ui.grossShort")}`;
   }
 
+  function salaryExample(job) {
+    const value = localized(job).salary || {};
+    if (value.period !== "час") return "";
+    const min = Number(value.min);
+    const max = Number(value.max);
+    if (!Number.isFinite(min) && !Number.isFinite(max)) return "";
+    const format = (amount) => new Intl.NumberFormat(i18n.localeTag(), {
+      maximumFractionDigits: 0
+    }).format(amount * 200);
+    const range = Number.isFinite(min) && Number.isFinite(max) && min !== max
+      ? `${format(min)}–${format(max)}`
+      : format(Number.isFinite(min) ? min : max);
+    return `${catalogCopy("hoursExample")}: ≈ ${range} ${value.currency || ""} · ${i18n.t("ui.grossShort")}`;
+  }
+
+  function jobBenefits(job) {
+    const result = [];
+    if ((job.housingLocations || []).length) result.push(catalogCopy("housing"));
+    if (String(job.level || "").toLocaleLowerCase("ru").includes("без опыта")) result.push(catalogCopy("noExperience"));
+    if ((job.candidates || []).some((item) => String(item).toLocaleLowerCase("ru").includes("пар"))) result.push(catalogCopy("pairs"));
+    if (/официально|umowa o pracę/i.test(String(job.contract || ""))) result.push(catalogCopy("official"));
+    return result.slice(0, 4);
+  }
+
   function publicJobUrl(job) {
     const url = new URL(`vacancies/${encodeURIComponent(job.id)}/`, new URL("./", document.baseURI));
     url.searchParams.set("lang", i18n.locale);
@@ -120,6 +158,7 @@
     const jobUrl = publicJobUrl(job);
     const cardAction = i18n.t("ui.viewOffer");
     const accessibleLabel = `${cardAction}: ${view.title}`;
+    const benefits = jobBenefits(job);
     return `
       <article class="job-card" data-job-id="${escapeHTML(job.id)}" data-status="${escapeHTML(job.status || "verify")}">
         <a class="job-card-link job-open" href="${escapeHTML(jobUrl)}" data-open-job="${escapeHTML(job.id)}" aria-label="${escapeHTML(accessibleLabel)}">
@@ -129,6 +168,7 @@
                 <span class="job-status">${escapeHTML(statusLabel(job))}</span>
               </div>
               <h2>${escapeHTML(view.title)}</h2>
+              ${benefits.length ? `<div class="job-benefit-tags">${benefits.map((item) => `<span>${escapeHTML(item)}</span>`).join("")}</div>` : ""}
             </div>
             <dl class="job-card-facts">
               <div class="job-card-salary"><dt class="sr-only">${escapeHTML(i18n.t("ui.grossSalary"))}</dt><dd>${escapeHTML(salary(job))}</dd></div>
@@ -303,7 +343,7 @@
                 : `<strong class="vacancy-application-unavailable">${escapeHTML(statusLabel(job))}</strong>`}
             </div>
             <dl class="vacancy-facts">
-              <div><dt>${escapeHTML(i18n.t("ui.grossSalary"))}</dt><dd>${escapeHTML(salary(job))}</dd><small>${escapeHTML(view.salary?.note || "")}</small></div>
+              <div><dt>${escapeHTML(i18n.t("ui.grossSalary"))}</dt><dd>${escapeHTML(salary(job))}</dd><small>${escapeHTML(view.salary?.note || "")}</small>${salaryExample(job) ? `<small class="vacancy-salary-example">${escapeHTML(salaryExample(job))}</small>` : ""}</div>
               <div><dt>${escapeHTML(i18n.t("ui.countryLocation"))}</dt><dd>${escapeHTML(view.format)} · ${escapeHTML(view.location)}</dd></div>
               <div><dt>${escapeHTML(i18n.t("ui.contract"))}</dt><dd>${escapeHTML(view.contract)}</dd></div>
               <div><dt>${escapeHTML(i18n.t("ui.suitableFor"))}</dt><dd>${escapeHTML((view.candidates || []).join(" · "))}</dd></div>

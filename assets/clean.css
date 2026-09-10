@@ -7194,3 +7194,217 @@ body.candidate-site {
     transition: none;
   }
 }
+
+/* v203 · safer completion flow and clearer mobile controls */
+.candidate-site .vacancy-salary-example {
+  display: block;
+  margin-top: 6px;
+  color: #176f4a;
+  font-weight: 800;
+}
+
+#application-dialog-content .application-progress-helper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 5px 12px;
+  margin: 9px 0 0;
+  color: rgba(255, 255, 255, .78);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.standalone-application-page #application-dialog-content .application-progress-helper {
+  color: #607168;
+}
+
+#application-dialog-content .application-draft-choice {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  margin-top: 10px;
+  padding: 20px;
+}
+
+#application-dialog-content .application-draft-choice-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  color: #fff;
+  background: #176f4a;
+  border-radius: 14px;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+#application-dialog-content .application-draft-choice strong {
+  color: #203d2f;
+  font-size: 16px;
+}
+
+#application-dialog-content .application-draft-choice p {
+  margin: 4px 0 0;
+  color: #65746c;
+  font-size: 12px;
+}
+
+#application-dialog-content .application-draft-choice-actions {
+  grid-template-columns: minmax(130px, .55fr) minmax(160px, 1fr);
+}
+
+#application-dialog-content .application-safety-shield {
+  color: #fff;
+  background: #176f4a;
+  border-color: #176f4a;
+  border-radius: 12px 12px 16px 16px;
+  box-shadow: 0 8px 18px rgba(23, 111, 74, .18);
+}
+
+#application-dialog-content .application-turnstile-status {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  color: #6d786f;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#application-dialog-content .application-turnstile-status::before {
+  width: 7px;
+  height: 7px;
+  background: #9aa49e;
+  border-radius: 50%;
+  content: "";
+}
+
+#application-dialog-content .application-turnstile-status.is-passed {
+  color: #176f4a;
+}
+
+#application-dialog-content .application-turnstile-status.is-passed::before {
+  background: #22a064;
+  box-shadow: 0 0 0 3px rgba(34, 160, 100, .12);
+}
+
+#application-dialog-content .application-consent {
+  gap: 10px;
+  padding: 11px 13px;
+  font-size: 11px;
+  line-height: 1.42;
+}
+
+#application-dialog-content .application-actions .whatsapp-submit:disabled:not([aria-busy="true"]),
+.standalone-application-page #application-dialog-content .application-actions .whatsapp-submit:disabled:not([aria-busy="true"]) {
+  color: #6c7771;
+  background: #dce3df;
+  border-color: #d2dcd6;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+#application-dialog-content .application-actions .whatsapp-submit.is-ready {
+  color: #fff;
+  background: #176f4a;
+  border-color: #176f4a;
+  cursor: pointer;
+}
+
+@media (max-width: 620px) {
+  .candidate-header .header-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .candidate-header .candidate-nav {
+    display: flex;
+    justify-self: end;
+  }
+
+  .candidate-header .candidate-nav a:not(.whatsapp-link) {
+    display: none;
+  }
+
+  .candidate-header .candidate-nav .whatsapp-link {
+    display: grid;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 12px;
+    font-size: 0;
+  }
+
+  .candidate-header .candidate-nav .whatsapp-link::before {
+    content: "W";
+    font-size: 13px;
+    font-weight: 950;
+  }
+
+  .candidate-site .language-switcher-current {
+    display: grid;
+  }
+
+  .candidate-site .language-switcher-current strong {
+    display: none;
+  }
+
+  .candidate-site .language-switcher-current small {
+    color: #304239;
+    font-size: 9px;
+    font-weight: 900;
+  }
+
+  #application-dialog-content .application-step-track li > small {
+    display: block;
+    position: static;
+    width: 100%;
+    height: auto;
+    margin-top: 4px;
+    overflow: visible;
+    clip: auto;
+    font-size: 7px;
+    line-height: 1.15;
+    text-align: center;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  #application-dialog-content .application-step-track li {
+    align-content: start;
+    min-height: 48px;
+  }
+
+  .standalone-application-page #application-dialog-content .application-step-track li {
+    min-height: 50px;
+  }
+
+  .standalone-application-page #application-dialog-content .application-step-track li > small {
+    display: block;
+    position: static;
+    width: 100%;
+    height: auto;
+    margin-top: 4px;
+    overflow: visible;
+    clip: auto;
+    color: #52665b;
+    font-size: 7px;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .standalone-application-page #application-dialog-content .application-step-track li.is-current > small {
+    color: #176f4a;
+  }
+
+  #application-dialog-content .application-draft-choice-actions {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr);
+  }
+}

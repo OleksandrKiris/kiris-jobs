@@ -345,7 +345,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=202"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=203"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -389,6 +389,23 @@ assert(
     && candidateScript.includes("recruitmentPaused")
     && candidateScript.includes("vacancy-application-unavailable"),
   "assets/candidate.js: vacancy status must control whether the application can be opened."
+);
+assert(
+  cleanCss.includes("v203 · safer completion flow and clearer mobile controls")
+    && homepageCss.includes("v203 · useful vacancy signals and overflow-safe mobile filters")
+    && homepageCss.includes("grid-template-columns: minmax(0, 1fr)")
+    && homepageCss.includes(".job-benefit-tags")
+    && candidateScript.includes("function salaryExample(job)")
+    && candidateScript.includes("function jobBenefits(job)")
+    && applicationScript.includes("function renderDraftChoice(")
+    && applicationScript.includes("state.pendingDraft = draft")
+    && applicationScript.includes("function updateFinalSubmitState(")
+    && applicationScript.includes('language: TURNSTILE_LANGUAGES[i18n.locale] || "en"')
+    && applicationScript.includes('type="submit" disabled aria-disabled="true"')
+    && applicationScript.includes('id="application-turnstile-status"')
+    && applicationScript.includes("renderStepTrack(stepLabels, state.step + 1)")
+    && applicationScript.includes("requiredFieldsRemaining(form)"),
+  "The v203 interface, draft recovery and safe submission controls are incomplete."
 );
 
 const requiredOfflineFonts = [

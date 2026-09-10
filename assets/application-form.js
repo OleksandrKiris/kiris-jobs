@@ -60,6 +60,127 @@
     ? "1x00000000000000000000AA"
     : "0x4AAAAAAEu272_ItIXV4I25";
   const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+  const TURNSTILE_LANGUAGES = {
+    ru: "ru",
+    uk: "uk",
+    pl: "pl",
+    en: "en",
+    id: "id",
+    es: "es",
+    fil: "tl"
+  };
+  const UX_COPY = {
+    ru: {
+      timeEstimate: "Обычно 3–4 минуты",
+      requiredRemaining: "Обязательных полей осталось: {count}",
+      draftFoundTitle: "Продолжить сохранённую анкету?",
+      draftFoundText: "Мы нашли безопасно сохранённый черновик на шаге «{step}». Личные и паспортные данные в черновике не сохраняются.",
+      resumeDraft: "Продолжить",
+      startFresh: "Начать заново",
+      botWaiting: "Ожидает подтверждения",
+      botPassed: "Проверка пройдена — можно отправлять"
+    },
+    uk: {
+      timeEstimate: "Зазвичай 3–4 хвилини",
+      requiredRemaining: "Обов’язкових полів залишилося: {count}",
+      draftFoundTitle: "Продовжити збережену анкету?",
+      draftFoundText: "Ми знайшли безпечно збережену чернетку на кроці «{step}». Особисті та паспортні дані в чернетці не зберігаються.",
+      resumeDraft: "Продовжити",
+      startFresh: "Почати заново",
+      botWaiting: "Очікує підтвердження",
+      botPassed: "Перевірку пройдено — можна надсилати"
+    },
+    pl: {
+      timeEstimate: "Zwykle 3–4 minuty",
+      requiredRemaining: "Pozostałe pola wymagane: {count}",
+      draftFoundTitle: "Kontynuować zapisaną ankietę?",
+      draftFoundText: "Znaleźliśmy bezpiecznie zapisany szkic na etapie „{step}”. Dane osobowe i paszportowe nie są zapisywane w szkicu.",
+      resumeDraft: "Kontynuuj",
+      startFresh: "Zacznij od nowa",
+      botWaiting: "Oczekuje na potwierdzenie",
+      botPassed: "Weryfikacja zakończona — można wysłać"
+    },
+    en: {
+      timeEstimate: "Usually 3–4 minutes",
+      requiredRemaining: "Required fields remaining: {count}",
+      draftFoundTitle: "Continue your saved application?",
+      draftFoundText: "We found a safely stored draft at “{step}”. Personal and passport details are not stored in the draft.",
+      resumeDraft: "Continue",
+      startFresh: "Start over",
+      botWaiting: "Waiting for verification",
+      botPassed: "Verification passed — ready to send"
+    },
+    az: {
+      timeEstimate: "Adətən 3–4 dəqiqə",
+      requiredRemaining: "Qalan məcburi sahələr: {count}",
+      draftFoundTitle: "Yadda saxlanmış anketi davam etdirmək?",
+      draftFoundText: "“{step}” addımında təhlükəsiz saxlanmış qaralama tapdıq. Şəxsi və pasport məlumatları qaralamada saxlanmır.",
+      resumeDraft: "Davam et",
+      startFresh: "Yenidən başla",
+      botWaiting: "Təsdiq gözlənilir",
+      botPassed: "Yoxlama tamamlandı — göndərmək olar"
+    },
+    ka: {
+      timeEstimate: "ჩვეულებრივ 3–4 წუთი",
+      requiredRemaining: "დარჩენილი სავალდებულო ველები: {count}",
+      draftFoundTitle: "გავაგრძელოთ შენახული განაცხადი?",
+      draftFoundText: "ნაპოვნია უსაფრთხოდ შენახული მონახაზი ეტაპზე „{step}“. პირადი და პასპორტის მონაცემები მონახაზში არ ინახება.",
+      resumeDraft: "გაგრძელება",
+      startFresh: "თავიდან დაწყება",
+      botWaiting: "დადასტურების მოლოდინი",
+      botPassed: "შემოწმება დასრულებულია — შეგიძლიათ გაგზავნოთ"
+    },
+    id: {
+      timeEstimate: "Biasanya 3–4 menit",
+      requiredRemaining: "Kolom wajib tersisa: {count}",
+      draftFoundTitle: "Lanjutkan lamaran tersimpan?",
+      draftFoundText: "Kami menemukan draf yang tersimpan aman pada langkah “{step}”. Data pribadi dan paspor tidak disimpan dalam draf.",
+      resumeDraft: "Lanjutkan",
+      startFresh: "Mulai lagi",
+      botWaiting: "Menunggu verifikasi",
+      botPassed: "Verifikasi selesai — siap dikirim"
+    },
+    es: {
+      timeEstimate: "Normalmente 3–4 minutos",
+      requiredRemaining: "Campos obligatorios restantes: {count}",
+      draftFoundTitle: "¿Continuar la solicitud guardada?",
+      draftFoundText: "Encontramos un borrador guardado de forma segura en “{step}”. Los datos personales y del pasaporte no se guardan en el borrador.",
+      resumeDraft: "Continuar",
+      startFresh: "Empezar de nuevo",
+      botWaiting: "Esperando verificación",
+      botPassed: "Verificación completada — listo para enviar"
+    },
+    fil: {
+      timeEstimate: "Karaniwang 3–4 minuto",
+      requiredRemaining: "Natitirang kinakailangang field: {count}",
+      draftFoundTitle: "Ipagpatuloy ang naka-save na aplikasyon?",
+      draftFoundText: "May ligtas na naka-save na draft sa hakbang na “{step}”. Hindi sine-save sa draft ang personal at passport na detalye.",
+      resumeDraft: "Ipagpatuloy",
+      startFresh: "Magsimula muli",
+      botWaiting: "Naghihintay ng beripikasyon",
+      botPassed: "Tapos ang beripikasyon — maaari nang ipadala"
+    },
+    ne: {
+      timeEstimate: "सामान्यतया ३–४ मिनेट",
+      requiredRemaining: "बाँकी अनिवार्य फिल्ड: {count}",
+      draftFoundTitle: "सुरक्षित गरिएको आवेदन जारी राख्ने?",
+      draftFoundText: "“{step}” चरणमा सुरक्षित मस्यौदा भेटियो। व्यक्तिगत र राहदानी विवरण मस्यौदामा राखिँदैन।",
+      resumeDraft: "जारी राख्नुहोस्",
+      startFresh: "फेरि सुरु गर्नुहोस्",
+      botWaiting: "प्रमाणीकरणको प्रतीक्षा",
+      botPassed: "प्रमाणीकरण पूरा भयो — पठाउन तयार"
+    },
+    hy: {
+      timeEstimate: "Սովորաբար 3–4 րոպե",
+      requiredRemaining: "Մնացած պարտադիր դաշտեր՝ {count}",
+      draftFoundTitle: "Շարունակե՞լ պահպանված հայտը",
+      draftFoundText: "Գտնվել է անվտանգ պահպանված սևագիր՝ «{step}» փուլում։ Անձնական և անձնագրային տվյալները սևագրում չեն պահպանվում։",
+      resumeDraft: "Շարունակել",
+      startFresh: "Սկսել նորից",
+      botWaiting: "Սպասում է հաստատման",
+      botPassed: "Ստուգումն ավարտված է — կարելի է ուղարկել"
+    }
+  };
   let turnstileLoadPromise = null;
   let turnstileWidgetId = null;
   let turnstileToken = "";
@@ -132,7 +253,9 @@
     invalidFields: [],
     recommendations: [],
     hasDraft: false,
-    submitting: false
+    submitting: false,
+    submitted: false,
+    pendingDraft: null
   };
 
   const escapeHTML = (value = "") => String(value)
@@ -143,6 +266,13 @@
     .replaceAll("'", "&#039;");
 
   const t = (path, variables) => i18n.t(path, variables);
+  const ux = (key, variables = {}) => {
+    const template = UX_COPY[i18n.locale]?.[key] || UX_COPY.en[key] || key;
+    return Object.entries(variables).reduce(
+      (result, [name, value]) => result.replaceAll(`{${name}}`, String(value)),
+      template
+    );
+  };
   const baseJob = () => jobs.find((job) => job.id === state.jobId);
   const effectiveJob = () => jobs.find((job) => job.id === state.values.matchedJobId) || baseJob();
   const localizedJob = () => {
@@ -194,6 +324,24 @@
     turnstileToken = "";
   }
 
+  function updateTurnstileStatus(passed = Boolean(turnstileToken)) {
+    const status = document.getElementById("application-turnstile-status");
+    if (!status) return;
+    status.textContent = ux(passed ? "botPassed" : "botWaiting");
+    status.classList.toggle("is-passed", passed);
+  }
+
+  function updateFinalSubmitState() {
+    const button = document.querySelector("#application-form .whatsapp-submit");
+    if (!button) return;
+    const ready = Boolean(state.values.consent && turnstileToken && !state.submitting && !state.submitted);
+    button.disabled = !ready;
+    button.setAttribute("aria-disabled", String(!ready));
+    button.classList.toggle("is-ready", ready);
+    updateTurnstileStatus();
+    updateProgressHelper();
+  }
+
   async function renderTurnstileWidget() {
     const container = document.getElementById("application-turnstile");
     if (!container) return;
@@ -204,23 +352,28 @@
         sitekey: TURNSTILE_SITE_KEY,
         theme: "auto",
         size: "flexible",
+        language: TURNSTILE_LANGUAGES[i18n.locale] || "en",
         action: "application_submit",
         callback(token) {
           turnstileToken = token;
           document.getElementById("application-turnstile-error")?.setAttribute("hidden", "");
+          updateFinalSubmitState();
         },
         "expired-callback"() {
           turnstileToken = "";
+          updateFinalSubmitState();
         },
         "error-callback"() {
           turnstileToken = "";
           const error = document.getElementById("application-turnstile-error");
           if (error) error.hidden = false;
+          updateFinalSubmitState();
         }
       });
     } catch {
       const error = document.getElementById("application-turnstile-error");
       if (error) error.hidden = false;
+      updateFinalSubmitState();
     }
   }
 
@@ -256,7 +409,8 @@
       }
       return {
         step: Math.max(0, Math.min(STEP_KEYS.length - 1, Number(draft.step) || 0)),
-        values: draft.values
+        values: draft.values,
+        updatedAt: Number(draft.updatedAt)
       };
     } catch {
       return null;
@@ -1219,7 +1373,7 @@
         </details>
       </div>
       <aside class="application-safety-note">
-        <span aria-hidden="true">✓</span>
+        <span class="application-safety-shield" aria-hidden="true">✓</span>
         <div>
           <strong>${escapeHTML(t("ui.recruiterEyebrow"))}: ${escapeHTML(profile.name)} · ${escapeHTML(profile.phone)}</strong>
           <p>${escapeHTML(t("ui.antiFraudWarning"))}</p>
@@ -1240,7 +1394,7 @@
         </div>
       </details>
       <label class="application-check application-consent${state.invalidFields.includes("consent") ? " is-invalid" : ""}">
-        <input name="consent" type="checkbox" ${state.values.consent ? "checked" : ""}>
+        <input name="consent" type="checkbox" required ${state.values.consent ? "checked" : ""}>
         <span>
           ${escapeHTML(t("form.consent"))}
           <a class="application-privacy-link" href="privacy.html?lang=${encodeURIComponent(i18n.locale)}" target="_blank" rel="noopener noreferrer">${escapeHTML(t("form.privacyDetails"))}</a>
@@ -1251,6 +1405,7 @@
         <strong id="application-bot-check-title">${escapeHTML(t("form.botCheckTitle"))}</strong>
         <p>${escapeHTML(t("form.botCheckHint"))}</p>
         <div id="application-turnstile"></div>
+        <small class="application-turnstile-status" id="application-turnstile-status" role="status">${escapeHTML(ux("botWaiting"))}</small>
         <small id="application-turnstile-error" role="alert" hidden>${escapeHTML(t("form.botCheckError"))}</small>
       </section>
       <div class="application-honeypot" aria-hidden="true">
@@ -1373,6 +1528,84 @@
     `;
   }
 
+  function renderDraftChoice(focusStart = false) {
+    const container = document.getElementById("application-dialog-content");
+    const job = localizedJob();
+    const draft = state.pendingDraft;
+    if (!container || !job || !draft) return;
+    const stepName = t(`form.${STEP_KEYS[draft.step]}`);
+    container.innerHTML = `
+      <header class="application-header application-draft-choice-header">
+        <p class="application-vacancy-context">${escapeHTML(job.title)}</p>
+        <h2 id="application-step-title" tabindex="-1">${escapeHTML(ux("draftFoundTitle"))}</h2>
+        <p>${escapeHTML(ux("draftFoundText", { step: stepName }))}</p>
+        ${recruiterHandoff()}
+      </header>
+      <section class="application-step application-draft-choice">
+        <div class="application-draft-choice-icon" aria-hidden="true">↻</div>
+        <div>
+          <strong>${escapeHTML(stepName)}</strong>
+          <p>${escapeHTML(ux("timeEstimate"))}</p>
+        </div>
+      </section>
+      <footer class="application-actions application-draft-choice-actions">
+        <button class="button button-secondary" type="button" data-start-fresh>${escapeHTML(ux("startFresh"))}</button>
+        <button class="button button-primary" type="button" data-resume-draft>${escapeHTML(ux("resumeDraft"))} →</button>
+      </footer>
+    `;
+    container.querySelector("[data-resume-draft]")?.addEventListener("click", () => {
+      const initialValues = initialApplicationValues(state.jobId);
+      state.step = draft.step;
+      state.values = {
+        ...initialValues,
+        ...draft.values,
+        jobId: state.jobId,
+        shiftReadiness: Array.isArray(draft.values.shiftReadiness) ? draft.values.shiftReadiness : []
+      };
+      state.pendingDraft = null;
+      render(true);
+    });
+    container.querySelector("[data-start-fresh]")?.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(draftKey(state.jobId));
+      } catch {
+        // Starting over still works if storage is unavailable.
+      }
+      state.step = 0;
+      state.error = "";
+      state.invalidFields = [];
+      state.hasDraft = false;
+      state.pendingDraft = null;
+      state.values = initialApplicationValues(state.jobId);
+      render(true);
+    });
+    if (focusStart) focusDialogStart();
+  }
+
+  function requiredFieldsRemaining(form) {
+    if (!form) return 0;
+    const requiredNames = [...new Set(
+      [...form.querySelectorAll("[required][name]")]
+        .filter((input) => !input.disabled)
+        .map((input) => input.name)
+    )];
+    let remaining = requiredNames.filter((name) => {
+      const inputs = [...form.elements].filter((input) => input.name === name && !input.disabled);
+      if (!inputs.length) return false;
+      if (["radio", "checkbox"].includes(inputs[0].type)) return !inputs.some((input) => input.checked);
+      return !inputs.some((input) => String(input.value || "").trim());
+    }).length;
+    if (state.step === STEP_KEYS.length - 1 && !turnstileToken) remaining += 1;
+    return remaining;
+  }
+
+  function updateProgressHelper() {
+    const helper = document.getElementById("application-progress-helper");
+    const form = document.getElementById("application-form");
+    if (!helper || !form) return;
+    helper.innerHTML = `<span>◷ ${escapeHTML(ux("timeEstimate"))}</span><span>• ${escapeHTML(ux("requiredRemaining", { count: requiredFieldsRemaining(form) }))}</span>`;
+  }
+
   function collectPrecheckValues() {
     const form = document.getElementById("application-precheck-form");
     if (!form) return;
@@ -1478,6 +1711,10 @@
       renderMatcher(focusStart);
       return;
     }
+    if (state.pendingDraft) {
+      renderDraftChoice(focusStart);
+      return;
+    }
     if (!state.values.precheckComplete) {
       renderPrecheck(focusStart);
       return;
@@ -1488,11 +1725,13 @@
     removeTurnstileWidget();
     const percent = ((state.step + 1) / STEP_KEYS.length) * 100;
     const job = localizedJob();
+    const stepLabels = STEP_KEYS.map((key) => t(`form.${key}`));
     container.innerHTML = `
       <header class="application-header" data-stage="${state.step + 1}" data-stage-total="${STEP_KEYS.length}">
         <p class="application-vacancy-context">${escapeHTML(job?.title || "")}</p>
         <h2 id="application-step-title" tabindex="-1">${escapeHTML(t(`form.${STEP_KEYS[state.step]}`))}</h2>
         ${draftControl()}
+        ${renderStepTrack(stepLabels, state.step + 1)}
         <div class="application-progress-meta">
           <span>${escapeHTML(t("ui.formStep"))} ${state.step + 1} ${escapeHTML(t("ui.of"))} ${STEP_KEYS.length}</span>
           <span>${Math.round(percent)}%</span>
@@ -1500,6 +1739,7 @@
         <div class="application-progress" role="progressbar" aria-label="${escapeHTML(`${t("ui.formStep")} ${state.step + 1} ${t("ui.of")} ${STEP_KEYS.length}`)}" aria-valuemin="1" aria-valuemax="${STEP_KEYS.length}" aria-valuenow="${state.step + 1}">
           <span style="width:${percent}%"></span>
         </div>
+        <p class="application-progress-helper" id="application-progress-helper"></p>
       </header>
       <form id="application-form" novalidate>
         <div class="application-error" id="application-error" tabindex="-1" role="alert" ${state.error ? "" : "hidden"}>${escapeHTML(state.error)}</div>
@@ -1509,7 +1749,7 @@
           <button class="button button-secondary" type="button" data-application-back ${state.step === 0 ? "disabled" : ""}>${escapeHTML(t("form.back"))}</button>
           ${state.step < STEP_KEYS.length - 1
             ? `<button class="button button-primary" type="submit">${escapeHTML(t("form.next"))} →</button>`
-            : `<button class="button button-primary whatsapp-submit" type="submit">${escapeHTML(t("form.sendWhatsapp"))} ↗</button>`}
+            : `<button class="button button-primary whatsapp-submit" type="submit" disabled aria-disabled="true">${escapeHTML(t("form.sendWhatsapp"))} ↗</button>`}
         </footer>
       </form>
     `;
@@ -1553,13 +1793,21 @@
     form?.addEventListener("input", (event) => {
       collectValues();
       clearInlineError(event.target.name, event.target);
+      updateProgressHelper();
+      updateFinalSubmitState();
     });
     form?.addEventListener("change", (event) => {
       collectValues();
       clearInlineError(event.target.name, event.target);
+      updateProgressHelper();
+      updateFinalSubmitState();
     });
     form?.addEventListener("submit", handleSubmit);
-    if (state.step === STEP_KEYS.length - 1) void renderTurnstileWidget();
+    updateProgressHelper();
+    if (state.step === STEP_KEYS.length - 1) {
+      updateFinalSubmitState();
+      void renderTurnstileWidget();
+    }
     if (focusStart) focusDialogStart();
   }
 
@@ -2328,6 +2576,8 @@
     state.error = "";
     state.invalidFields = [];
     state.hasDraft = false;
+    state.pendingDraft = null;
+    state.submitted = false;
     state.values = initialApplicationValues(state.jobId);
     render(true);
     window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: t("form.draftCleared") } }));
@@ -2384,6 +2634,7 @@
         // Delivery succeeded even if local storage is unavailable.
       }
       state.hasDraft = false;
+      state.submitted = true;
       const status = document.getElementById("application-submit-status");
       if (status) {
         status.textContent = confirmation;
@@ -2402,6 +2653,7 @@
       }
       window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: messageText } }));
       turnstileToken = "";
+      state.submitted = false;
       if (turnstileWidgetId != null && window.turnstile) {
         try {
           window.turnstile.reset(turnstileWidgetId);
@@ -2412,10 +2664,10 @@
     } finally {
       state.submitting = false;
       if (submitButton?.isConnected) {
-        submitButton.disabled = false;
         submitButton.removeAttribute("aria-busy");
         if (state.error) submitButton.textContent = `${t("form.sendWhatsapp")} ↗`;
       }
+      updateFinalSubmitState();
     }
   }
 
@@ -2430,19 +2682,14 @@
     state.error = "";
     state.invalidFields = [];
     state.submitting = false;
+    state.submitted = false;
     removeTurnstileWidget();
     const initialValues = initialApplicationValues(state.jobId);
     const draft = hasSelectedJob ? readDraft(state.jobId) : null;
     state.hasDraft = Boolean(draft);
-    state.step = draft?.step || 0;
-    state.values = draft
-      ? {
-          ...initialValues,
-          ...draft.values,
-          jobId: state.jobId,
-          shiftReadiness: Array.isArray(draft.values.shiftReadiness) ? draft.values.shiftReadiness : []
-        }
-      : initialValues;
+    state.pendingDraft = draft;
+    state.step = 0;
+    state.values = initialValues;
     render();
     const dialog = document.getElementById("application-dialog");
     if (dialog && !dialog.open) {
