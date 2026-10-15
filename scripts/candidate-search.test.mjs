@@ -39,6 +39,18 @@ test("composed and decomposed Latin city names find the same jobs", () => {
 });
 
 for (const locale of locales) {
+  test(`${locale}: job title and city can be combined in either order with pasted whitespace`, () => {
+    const c = catalog(locale);
+    const job = c.window.PORTAL_CONTENT.jobs.find(j => j.id === "greenhouse-tomatoes");
+    const view = c.window.PortalI18n.job(job);
+    const city = view.location.split(/\s*[·,]\s*/)[0];
+    const query = `${city}   ${view.title}`;
+    assert.ok(c.find(query).includes(job.id), query);
+    assert.ok(c.find(`${view.title}\t${city}`).includes(job.id));
+    assert.equal(c.find(`${query} no-such-token-99999`).length, 0, "All search terms are required");
+    c.state.country = "BE";
+    assert.equal(c.find(query).includes(job.id), false, "Country filter still applies");
+  });
   test(`${locale}: exact localized titles still match and country/benefit filters stay active`, () => {
     const c = catalog(locale);
     const jobs = c.window.PORTAL_CONTENT.jobs;
