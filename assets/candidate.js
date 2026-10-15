@@ -30,6 +30,7 @@
   };
   const ENHANCEMENT_COPY = {
     ru: {
+      serviceCompany: "Компания PrimServ", serviceTraining: "Обучение · HYDRA", serviceBot: "Telegram-бот",
       catalogAvailabilityChecked: "Наличие вакансий подтверждено", checked: "Условия проверены", availabilityChecked: "Наличие вакансии подтверждено",
       recheck: "Требует повторного подтверждения",
       recheckNote: "Перед поездкой рекрутер повторно подтвердит актуальность места и условий.",
@@ -49,6 +50,7 @@
       updateConfirm: "Обновить страницу? Несохранённые поля анкеты будут очищены."
     },
     uk: {
+      serviceCompany: "Компанія PrimServ", serviceTraining: "Навчання · HYDRA", serviceBot: "Telegram-бот",
       catalogAvailabilityChecked: "Наявність вакансій підтверджено", checked: "Умови перевірено", availabilityChecked: "Наявність вакансії підтверджено",
       recheck: "Потребує повторного підтвердження",
       recheckNote: "Перед поїздкою рекрутер повторно підтвердить актуальність місця й умов.",
@@ -68,6 +70,7 @@
       updateConfirm: "Оновити сторінку? Незбережені поля анкети буде очищено."
     },
     pl: {
+      serviceCompany: "Firma PrimServ", serviceTraining: "Szkolenia · HYDRA", serviceBot: "Bot Telegram",
       catalogAvailabilityChecked: "Dostępność ofert potwierdzona", checked: "Warunki sprawdzono", availabilityChecked: "Dostępność oferty potwierdzona",
       recheck: "Wymaga ponownego potwierdzenia",
       recheckNote: "Przed wyjazdem rekruter ponownie potwierdzi dostępność miejsca i warunki.",
@@ -87,6 +90,7 @@
       updateConfirm: "Odświeżyć stronę? Niezapisane pola formularza zostaną wyczyszczone."
     },
     en: {
+      serviceCompany: "Company PrimServ", serviceTraining: "Training · HYDRA", serviceBot: "Telegram bot",
       catalogAvailabilityChecked: "Vacancy availability confirmed", checked: "Conditions checked", availabilityChecked: "Job availability confirmed",
       recheck: "Needs reconfirmation",
       recheckNote: "Before travel, the recruiter will reconfirm availability and conditions.",
@@ -106,6 +110,7 @@
       updateConfirm: "Update the page? Unsaved form fields will be cleared."
     },
     az: {
+      serviceCompany: "PrimServ şirkəti", serviceTraining: "Təlim · HYDRA", serviceBot: "Telegram botu",
       catalogAvailabilityChecked: "Vakansiyaların mövcudluğu təsdiqlənib", checked: "Şərtlər yoxlanılıb", availabilityChecked: "Vakansiyanın mövcudluğu təsdiqlənib",
       recheck: "Yenidən təsdiq tələb olunur",
       recheckNote: "Səfərdən əvvəl işəgötürən nümayəndəsi yerin və şərtlərin aktuallığını yenidən təsdiqləyəcək.",
@@ -125,36 +130,42 @@
       updateConfirm: "Səhifə yenilənsin? Saxlanmamış forma sahələri silinəcək."
     },
     ka: {
+      serviceCompany: "კომპანია PrimServ", serviceTraining: "სწავლება · HYDRA", serviceBot: "Telegram ბოტი",
       catalogAvailabilityChecked: "ვაკანსიების ხელმისაწვდომობა დადასტურებულია", checked: "პირობები შემოწმებულია", availabilityChecked: "ვაკანსიის ხელმისაწვდომობა დადასტურებულია", recheck: "საჭიროა ხელახალი დადასტურება", recheckNote: "გამგზავრებამდე რეკრუტერი ხელახლა დაადასტურებს ადგილისა და პირობების აქტუალურობას.",
       grossCalculator: "ბრუტო ანაზღაურების კალკულატორი", hoursMonth: "საათი თვეში", grossEstimate: "სავარაუდო ბრუტო", calculatorNote: "ეს მხოლოდ არითმეტიკული გამოთვლაა და არა საათების ან ანაზღაურების გარანტია. ნეტო დამოკიდებულია ხელშეკრულებასა და კანდიდატის მდგომარეობაზე და უნდა დაადასტუროს რეკრუტერმა.",
       share: "გაზიარება", copied: "ვაკანსიის ბმული დაკოპირდა.", map: "რუკაზე გახსნა", trustTitle: "რა არის დადასტურებული ამ გვერდზე", trustText: "დამსაქმებელი: {company}. კონტაქტი: {recruiter}. განაცხადი უფასოა; საიტი არ ითხოვს გადახდას ან დოკუმენტების ატვირთვას. განაცხადის შემდეგ რეკრუტერი დაგიკავშირდებათ და პირობებს ცალკე დაადასტურებს.",
       updateTitle: "ხელმისაწვდომია საიტის ახალი ვერსია", updateText: "ფორმაში შეიძლება იყოს შეუნახავი პირადი მონაცემები. დაასრულეთ ან განაახლეთ ახლა — შევსებული ველები გასუფთავდება.", updateNow: "ახლავე განახლება", later: "მოგვიანებით", updateConfirm: "განახლდეს გვერდი? შეუნახავი ველები გასუფთავდება."
     },
     id: {
+      serviceCompany: "Perusahaan PrimServ", serviceTraining: "Pelatihan · HYDRA", serviceBot: "Bot Telegram",
       catalogAvailabilityChecked: "Ketersediaan lowongan dikonfirmasi", checked: "Ketentuan telah diperiksa", availabilityChecked: "Ketersediaan lowongan dikonfirmasi", recheck: "Perlu dikonfirmasi ulang", recheckNote: "Sebelum berangkat, perekrut akan mengonfirmasi kembali ketersediaan dan ketentuan.",
       grossCalculator: "Kalkulator upah bruto", hoursMonth: "Jam per bulan", grossEstimate: "Perkiraan bruto", calculatorNote: "Ini hanya perhitungan aritmetika, bukan jaminan jam kerja atau pembayaran. Upah neto bergantung pada kontrak dan kondisi kandidat dan harus dikonfirmasi perekrut.",
       share: "Bagikan", copied: "Tautan lowongan disalin.", map: "Buka di peta", trustTitle: "Yang dikonfirmasi di halaman ini", trustText: "Pemberi kerja: {company}. Kontak: {recruiter}. Melamar gratis; situs ini tidak meminta pembayaran atau unggahan dokumen. Setelah melamar, perekrut akan menghubungi Anda dan mengonfirmasi ketentuan secara terpisah.",
       updateTitle: "Versi baru situs tersedia", updateText: "Formulir mungkin berisi data pribadi yang belum tersimpan. Selesaikan atau perbarui sekarang — kolom yang diisi akan dihapus.", updateNow: "Perbarui sekarang", later: "Nanti", updateConfirm: "Perbarui halaman? Kolom formulir yang belum tersimpan akan dihapus."
     },
     es: {
+      serviceCompany: "Empresa PrimServ", serviceTraining: "Formación · HYDRA", serviceBot: "Bot de Telegram",
       catalogAvailabilityChecked: "Disponibilidad de vacantes confirmada", checked: "Condiciones verificadas", availabilityChecked: "Disponibilidad de la oferta confirmada", recheck: "Requiere nueva confirmación", recheckNote: "Antes del viaje, el reclutador volverá a confirmar la disponibilidad y las condiciones.",
       grossCalculator: "Calculadora de salario bruto", hoursMonth: "Horas al mes", grossEstimate: "Bruto estimado", calculatorNote: "Es un cálculo aritmético, no una garantía de horas ni de pago. El neto depende del contrato y de la situación del candidato y debe confirmarlo el reclutador.",
       share: "Compartir", copied: "Enlace de la vacante copiado.", map: "Abrir en el mapa", trustTitle: "Qué está confirmado en esta página", trustText: "Empleador: {company}. Contacto: {recruiter}. Solicitar es gratis; el sitio no pide pagos ni subir documentos. Tras la solicitud, el reclutador se pondrá en contacto y confirmará las condiciones por separado.",
       updateTitle: "Hay una nueva versión del sitio", updateText: "El formulario puede contener datos personales sin guardar. Termínalo o actualiza ahora; los campos introducidos se borrarán.", updateNow: "Actualizar ahora", later: "Más tarde", updateConfirm: "¿Actualizar la página? Se borrarán los campos no guardados."
     },
     fil: {
+      serviceCompany: "Kumpanyang PrimServ", serviceTraining: "Pagsasanay · HYDRA", serviceBot: "Telegram bot",
       catalogAvailabilityChecked: "Nakumpirma ang mga bakante", checked: "Nasuri ang mga kondisyon", availabilityChecked: "Kumpirmado ang bakante", recheck: "Kailangang kumpirmahing muli", recheckNote: "Bago bumiyahe, muling kukumpirmahin ng recruiter ang availability at mga kondisyon.",
       grossCalculator: "Kalkulador ng gross pay", hoursMonth: "Oras bawat buwan", grossEstimate: "Tinatayang gross", calculatorNote: "Aritmetikang pagtatantiya lamang ito, hindi garantiya ng oras o sahod. Ang net pay ay nakadepende sa kontrata at kalagayan ng kandidato at dapat kumpirmahin ng recruiter.",
       share: "Ibahagi", copied: "Nakopya ang link ng bakante.", map: "Buksan sa mapa", trustTitle: "Ano ang kumpirmado sa pahinang ito", trustText: "Employer: {company}. Contact: {recruiter}. Libre ang pag-apply; hindi humihingi ang site ng bayad o pag-upload ng dokumento. Pagkatapos mag-apply, kokontakin ka ng recruiter at hiwalay na kukumpirmahin ang mga kondisyon.",
       updateTitle: "May bagong bersyon ng site", updateText: "Maaaring may hindi naka-save na personal na datos ang form. Tapusin ito o mag-update ngayon — mabubura ang mga inilagay na field.", updateNow: "I-update ngayon", later: "Mamaya", updateConfirm: "I-update ang pahina? Mabubura ang mga hindi naka-save na field."
     },
     ne: {
+      serviceCompany: "PrimServ कम्पनी", serviceTraining: "प्रशिक्षण · HYDRA", serviceBot: "Telegram बोट",
       catalogAvailabilityChecked: "रिक्त पदहरूको उपलब्धता पुष्टि गरिएको", checked: "सर्तहरू जाँचिएका छन्", availabilityChecked: "रिक्त पदको उपलब्धता पुष्टि भयो", recheck: "पुनः पुष्टि आवश्यक", recheckNote: "यात्राअघि भर्तीकर्ताले स्थान र सर्तहरूको उपलब्धता पुनः पुष्टि गर्नेछन्।",
       grossCalculator: "कुल तलब क्याल्कुलेटर", hoursMonth: "प्रति महिना घण्टा", grossEstimate: "अनुमानित कुल", calculatorNote: "यो अंकगणितीय हिसाब मात्र हो, कामको घण्टा वा भुक्तानीको ग्यारेन्टी होइन। खुद तलब सम्झौता र उम्मेदवारको अवस्थामा निर्भर हुन्छ र भर्तीकर्ताले पुष्टि गर्नुपर्छ।",
       share: "साझा गर्नुहोस्", copied: "रिक्त पदको लिङ्क प्रतिलिपि भयो।", map: "नक्सामा खोल्नुहोस्", trustTitle: "यस पृष्ठमा पुष्टि भएका कुरा", trustText: "रोजगारदाता: {company}। सम्पर्क: {recruiter}। आवेदन निःशुल्क छ; साइटले भुक्तानी वा कागजात अपलोड माग्दैन। आवेदनपछि भर्तीकर्ताले सम्पर्क गरी सर्तहरू छुट्टै पुष्टि गर्नेछन्।",
       updateTitle: "साइटको नयाँ संस्करण उपलब्ध छ", updateText: "फारममा सुरक्षित नभएको व्यक्तिगत डेटा हुन सक्छ। पूरा गर्नुहोस् वा अहिले अपडेट गर्नुहोस् — भरिएका फिल्डहरू मेटिनेछन्।", updateNow: "अहिले अपडेट", later: "पछि", updateConfirm: "पृष्ठ अपडेट गर्ने? सुरक्षित नभएका फिल्डहरू मेटिनेछन्।"
     },
     hy: {
+      serviceCompany: "PrimServ ընկերություն", serviceTraining: "Ուսուցում · HYDRA", serviceBot: "Telegram բոտ",
       catalogAvailabilityChecked: "Թափուր տեղերի առկայությունը հաստատված է", checked: "Պայմանները ստուգված են", availabilityChecked: "Թափուր տեղի առկայությունը հաստատված է", recheck: "Պահանջվում է վերահաստատում", recheckNote: "Մեկնելուց առաջ հավաքագրողը կրկին կհաստատի տեղի և պայմանների առկայությունը։",
       grossCalculator: "Բրուտո աշխատավարձի հաշվիչ", hoursMonth: "Ժամ ամսական", grossEstimate: "Մոտավոր բրուտո", calculatorNote: "Սա միայն թվաբանական հաշվարկ է, ոչ թե ժամերի կամ վճարման երաշխիք։ Նետոն կախված է պայմանագրից և թեկնածուի իրավիճակից ու պետք է հաստատվի հավաքագրողի կողմից։",
       share: "Կիսվել", copied: "Թափուր տեղի հղումը պատճենվեց։", map: "Բացել քարտեզում", trustTitle: "Ինչն է հաստատված այս էջում", trustText: "Գործատու՝ {company}։ Կապ՝ {recruiter}։ Դիմումն անվճար է, կայքը վճարում կամ փաստաթղթերի վերբեռնում չի պահանջում։ Դիմումից հետո հավաքագրողը կկապվի և առանձին կհաստատի պայմանները։",
@@ -770,8 +781,31 @@
     dialog.querySelector("[data-housing-lightbox-close]")?.focus({ preventScroll: true });
   }
 
+  function renderServiceNavigation() {
+    const requested = i18n.locale === "uk" ? "ua" : i18n.locale;
+    const supported = ["pl", "ru", "ua", "en", "az", "es", "fil", "id", "ne"];
+    const trainingLocale = supported.includes(requested) ? requested : "en";
+    const trainingUrl = new URL("https://oleksandrkiris.github.io/citronex-hydra-project/");
+    trainingUrl.searchParams.set("lang", trainingLocale);
+    const services = {
+      company: { href: "https://www.primserv.pl/", label: enhancementCopy("serviceCompany") },
+      training: {
+        href: trainingUrl.toString(),
+        label: enhancementCopy("serviceTraining") + (trainingLocale !== requested ? " (EN)" : "")
+      },
+      bot: { href: "https://t.me/KirisWorkPoland_bot", label: enhancementCopy("serviceBot") }
+    };
+    document.querySelectorAll("[data-primserv-service]").forEach((link) => {
+      const service = services[link.dataset.primservService];
+      if (!service) return;
+      link.href = service.href;
+      link.textContent = service.label;
+    });
+  }
+
   function renderStatic() {
     document.documentElement.lang = i18n.locale;
+    renderServiceNavigation();
     $("profile-name").textContent = profile.name;
     $("profile-hours").textContent = profile.workHours;
     $("recruiter-name").textContent = profile.name;

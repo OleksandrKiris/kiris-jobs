@@ -21,10 +21,10 @@
     || "pl";
   const localeBase = new URL("../data/locales/", import.meta.url);
   window.PORTAL_LOCALE_BASE = localeBase.href;
-  window.PORTAL_ASSET_VERSION = "210";
+  window.PORTAL_ASSET_VERSION = "211";
 
-  await import(new URL("pl.js?v=210", localeBase));
-  if (active !== "pl") await import(new URL(`${active}.js?v=210`, localeBase));
-  await import("./i18n.js?v=210");
-  await import("./privacy.js?v=210");
+  await import(new URL("pl.js?v=211", localeBase));
+  if (active !== "pl") await import(new URL(`${active}.js?v=211`, localeBase));
+  await import("./i18n.js?v=211");
+  await import("./privacy.js?v=211");
 })().catch((error) => console.error("[kiris-jobs] unable to load privacy page", error));
