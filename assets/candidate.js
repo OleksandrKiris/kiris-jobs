@@ -464,15 +464,15 @@
   }
 
   function visibleJobs() {
-    const query = normalizeSearchText(state.query.trim());
+    const terms = normalizeSearchText(state.query.trim()).split(/\s+/).filter(Boolean);
     const statusPriority = { open: 0, verify: 1, paused: 2, closed: 3 };
     const originalOrder = new Map(jobs.map((job, index) => [job.id, index]));
     return jobs.filter((job) => {
       if (state.country && countryCode(job) !== state.country) return false;
       if (state.feature && !jobBenefitFlags(job).includes(state.feature)) return false;
-      if (!query) return true;
+      if (!terms.length) return true;
       const view = localized(job);
-      return normalizeSearchText([
+      const searchable = normalizeSearchText([
         view.title,
         view.subtitle,
         view.company,
@@ -481,7 +481,8 @@
         view.format,
         view.location,
         view.summary
-      ].join(" ")).includes(query);
+      ].join(" "));
+      return terms.every(term => searchable.includes(term));
     }).sort((first, second) => (
       (statusPriority[effectiveStatus(first)] ?? 1) - (statusPriority[effectiveStatus(second)] ?? 1)
       || originalOrder.get(first.id) - originalOrder.get(second.id)
@@ -698,9 +699,6 @@
     `;
     document.body.append(dialog);
 
-    dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) closeDialog(dialog);
-    });
     dialog.querySelector("[data-housing-lightbox-close]")?.addEventListener("click", () => closeDialog(dialog));
     dialog.querySelector("[data-housing-lightbox-previous]")?.addEventListener("click", () => moveHousingPhoto(-1));
     dialog.querySelector("[data-housing-lightbox-next]")?.addEventListener("click", () => moveHousingPhoto(1));

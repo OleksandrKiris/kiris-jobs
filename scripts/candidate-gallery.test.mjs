@@ -6,7 +6,9 @@ import vm from "node:vm";
 const root = new URL("../", import.meta.url);
 const locales = ["ru", "uk", "pl", "en", "az", "ka", "id", "es", "fil", "ne", "hy"];
 const source = await fs.readFile(new URL("assets/candidate.js", root), "utf8");
-const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.galleryTest = { ensureHousingLightbox, openHousingLightbox, closeDialog, lightboxState, photoUrl };\n})();");
+const startup = source.slice(source.lastIndexOf("  function init()"));
+assert.ok(startup.indexOf("ensureHousingLightbox();") >= 0 && startup.indexOf("ensureHousingLightbox();") < startup.indexOf("bind();"), "Production startup must create the lightbox before binding dialogs");
+const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.galleryTest = { ensureHousingLightbox, openHousingLightbox, closeDialog, lightboxState, photoUrl, bind };\n})();");
 assert.notEqual(instrumented, source, "Replace startup only; no real UI, analytics or candidate actions");
 const scripts = await Promise.all(["data/content.js", ...locales.map(l => `data/locales/${l}.js`), "assets/i18n.js"].map(async file => fs.readFile(new URL(file, root), "utf8")));
 
@@ -14,7 +16,7 @@ function gallery(locale = "pl") {
   const elements = new Map();
   const childNodes = new Map();
   const location = new URL(`https://oleksandrkiris.github.io/kiris-jobs/?lang=${locale}`);
-  const window = { location };
+  const window = { location, addEventListener() {} };
   function node() {
     const handlers = new Map();
     return {
@@ -24,6 +26,7 @@ function gallery(locale = "pl") {
         handlers.get(type).push(handler);
       },
       emit(type, event = {}) { for (const handler of handlers.get(type) || []) handler(event); },
+      listenerCount(type) { return (handlers.get(type) || []).length; },
       setAttribute(key, value) { this.attributes[key] = value; },
       querySelector(selector) {
         if (!childNodes.has(selector)) childNodes.set(selector, node());
@@ -34,8 +37,12 @@ function gallery(locale = "pl") {
       focus(options) { this.focusCalls.push(options); }
     };
   }
+  elements.set("job-search", node());
+  elements.set("reset-filters", node());
   const context = vm.createContext({ window, location, URL, Intl, Date,
     document: { getElementById: id => elements.get(id), createElement: node,
+      querySelector: () => null, addEventListener() {},
+      querySelectorAll: selector => selector === "dialog" ? [elements.get("housing-lightbox")].filter(Boolean) : [],
       body: { append: element => elements.set(element.id, element) } },
     navigator: { language: locale, languages: [locale] }, localStorage: { getItem: () => null },
     fetch: () => { throw Error("Network requests forbidden in gallery tests"); }
@@ -43,6 +50,9 @@ function gallery(locale = "pl") {
   scripts.forEach(script => vm.runInContext(script, context));
   vm.runInContext(instrumented, context);
   const api = window.galleryTest;
+  // Match production init(): create the lightbox BEFORE bind() visits all dialogs.
+  api.ensureHousingLightbox();
+  api.bind();
   function open(key, index = 0) {
     const housing = window.PORTAL_CONTENT.housingLocations[key];
     const locationNode = { querySelector: () => ({ textContent: housing.name }) };
@@ -63,6 +73,7 @@ test("backdrop closes a dynamically created photo dialog and returns focus", () 
   const c = gallery();
   const { dialog, trigger } = c.open(Object.keys(c.window.PORTAL_CONTENT.housingLocations)[0]);
   assert.equal(dialog.open, true);
+  assert.equal(dialog.listenerCount("click"), 1, "Exactly one backdrop listener after the real startup order");
   dialog.emit("click", { target: dialog });
   assert.equal(dialog.open, false);
   assert.equal(trigger.focusCalls.length, 1);
@@ -87,6 +98,7 @@ test("close button, repeat opening and detached focus target remain safe", () =>
   assert.equal(first.trigger.focusCalls.length, 1);
   const second = c.open(key, 1);
   assert.equal(first.dialog, second.dialog, "Reuse one dialog and one set of listeners");
+  assert.equal(second.dialog.listenerCount("click"), 1);
   second.trigger.isConnected = false;
   second.dialog.emit("click", { target: second.dialog });
   assert.equal(second.dialog.open, false);
