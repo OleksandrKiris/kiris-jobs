@@ -1,14 +1,14 @@
 /* v197 · unified candidate homepage */
 
 .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) {
-  --homepage-bg: #f4f6f4;
+  --homepage-bg: #f4f6f8;
   --homepage-surface: #fff;
-  --homepage-text: #18231d;
-  --homepage-muted: #647168;
-  --homepage-line: #dfe6e1;
-  --homepage-line-strong: #c9d8cf;
-  --homepage-accent: #176f4a;
-  --homepage-accent-dark: #105b3b;
+  --homepage-text: #1c2e3e;
+  --homepage-muted: #5d6e7d;
+  --homepage-line: #dbe2e9;
+  --homepage-line-strong: #b9c7d4;
+  --homepage-accent: #354c61;
+  --homepage-accent-dark: #1c2e3e;
   background: var(--homepage-bg);
 }
 

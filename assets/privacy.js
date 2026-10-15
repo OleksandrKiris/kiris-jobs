@@ -6,10 +6,10 @@
 
   const policy = {
     pl: {
-      eyebrow: "Kiris Jobs · prywatność",
+      eyebrow: "PrimServ · prywatność",
       title: "Polityka prywatności kandydatów",
       updated: "Ostatnia aktualizacja: 10 września 2026 r.",
-      lead: "Ta informacja wyjaśnia, jakie dane są używane, gdy przeglądasz oferty lub wysyłasz ankietę rekrutacyjną w Kiris Jobs.",
+      lead: "Ta informacja wyjaśnia, jakie dane są używane, gdy przeglądasz oferty lub wysyłasz ankietę rekrutacyjną w PrimServ.",
       summary: "Najważniejsze: nie ma konta kandydata, reklamowych cookies, profilowania ani identyfikatorów przeglądarki. Zapisywane są wyłącznie zbiorcze dzienne liczniki etapów, bez nazwisk i danych kontaktowych. Formularz nie przyjmuje plików, zdjęć dokumentów, numeru PESEL, numeru paszportu ani danych bankowych.",
       controllerTitle: "1. Administrator i kontakt",
       controller: "Administratorem danych zbieranych przez tę stronę na pierwszym etapie rekrutacji jest Oleksandr Kiris. W sprawach prywatności napisz na",
@@ -39,13 +39,13 @@
       securityTitle: "8. Bezpieczeństwo",
       security: "Połączenia są szyfrowane HTTPS. Odbiorca e-maila jest ustalony po stronie serwera, formularz ma limit rozmiaru, walidację danych, ochronę przed powtórkami, honeypot i limit prób. Nie wysyłaj przez formularz zdjęć dokumentów, numerów dokumentów, danych bankowych ani haseł.",
       contactTitle: "Kontakt w sprawie danych",
-      contact: "W tytule wiadomości wpisz „Prywatność Kiris Jobs” i, jeśli go masz, numer zgłoszenia."
+      contact: "W tytule wiadomości wpisz „Prywatność PrimServ” i, jeśli go masz, numer zgłoszenia."
     },
     en: {
-      eyebrow: "Kiris Jobs · privacy",
+      eyebrow: "PrimServ · privacy",
       title: "Candidate privacy policy",
       updated: "Last updated: 10 September 2026",
-      lead: "This notice explains how data is used when you browse vacancies or submit a recruitment application through Kiris Jobs.",
+      lead: "This notice explains how data is used when you browse vacancies or submit a recruitment application through PrimServ.",
       summary: "In short: there are no candidate accounts, advertising cookies, profiling or browser identifiers. Only aggregate daily funnel counters are stored, without names or contact details. The form does not accept files, document photos, PESEL numbers, passport numbers or bank details.",
       controllerTitle: "1. Controller and contact",
       controller: "The controller for data collected by this page at the first recruitment stage is Oleksandr Kiris. For privacy requests, email",
@@ -75,13 +75,13 @@
       securityTitle: "8. Security",
       security: "Connections use HTTPS. The recipient is fixed on the server; the gateway enforces size limits, strict validation, duplicate protection, a honeypot and rate limiting. Never send document photos, document numbers, bank data or passwords through the form.",
       contactTitle: "Privacy contact",
-      contact: "Use “Kiris Jobs privacy” as the subject and include your application ID if available."
+      contact: "Use “PrimServ privacy” as the subject and include your application ID if available."
     },
     ru: {
-      eyebrow: "Kiris Jobs · приватность",
+      eyebrow: "PrimServ · приватность",
       title: "Политика конфиденциальности кандидатов",
       updated: "Последнее обновление: 10 сентября 2026 года",
-      lead: "Здесь объясняется, как используются данные при просмотре вакансий и отправке анкеты через Kiris Jobs.",
+      lead: "Здесь объясняется, как используются данные при просмотре вакансий и отправке анкеты через PrimServ.",
       summary: "Коротко: нет аккаунтов кандидатов, рекламных cookies, профилирования и идентификаторов браузера. Хранятся только общие суточные счётчики этапов без имён и контактов. Форма не принимает файлы, фото документов, номера PESEL и паспорта или банковские данные.",
       controllerTitle: "1. Кто отвечает за данные",
       controller: "На первом этапе рекрутинга администратор данных, собранных через эту страницу, — Oleksandr Kiris. По вопросам приватности пишите на",
@@ -111,13 +111,13 @@
       securityTitle: "8. Безопасность",
       security: "Используется HTTPS. Получатель письма закреплён на сервере; действуют лимит размера, строгая проверка, защита от повторов, скрытое антибот-поле и лимит попыток. Не отправляйте фото и номера документов, банковские данные или пароли.",
       contactTitle: "Контакт по вопросам данных",
-      contact: "Укажите тему «Приватность Kiris Jobs» и номер заявки, если он у вас есть."
+      contact: "Укажите тему «Приватность PrimServ» и номер заявки, если он у вас есть."
     },
     uk: {
-      eyebrow: "Kiris Jobs · приватність",
+      eyebrow: "PrimServ · приватність",
       title: "Політика конфіденційності кандидатів",
       updated: "Останнє оновлення: 10 вересня 2026 року",
-      lead: "Тут пояснено, як використовуються дані під час перегляду вакансій і надсилання анкети через Kiris Jobs.",
+      lead: "Тут пояснено, як використовуються дані під час перегляду вакансій і надсилання анкети через PrimServ.",
       summary: "Коротко: немає акаунтів кандидатів, рекламних cookies, профілювання чи ідентифікаторів браузера. Зберігаються лише загальні добові лічильники етапів без імен і контактів. Форма не приймає файли, фото документів, номери PESEL і паспорта або банківські дані.",
       controllerTitle: "1. Хто відповідає за дані",
       controller: "На першому етапі рекрутингу адміністратор даних, зібраних через цю сторінку, — Oleksandr Kiris. З питань приватності пишіть на",
@@ -147,13 +147,13 @@
       securityTitle: "8. Безпека",
       security: "Використовується HTTPS. Одержувач листа закріплений на сервері; діють ліміт розміру, сувора перевірка, захист від повторів, приховане антибот-поле та ліміт спроб. Не надсилайте фото й номери документів, банківські дані чи паролі.",
       contactTitle: "Контакт із питань даних",
-      contact: "У темі напишіть «Приватність Kiris Jobs» і додайте номер заявки, якщо він у вас є."
+      contact: "У темі напишіть «Приватність PrimServ» і додайте номер заявки, якщо він у вас є."
     },
     az: {
-      eyebrow: "Kiris Jobs · məxfilik",
+      eyebrow: "PrimServ · məxfilik",
       title: "Namizədlər üçün məxfilik siyasəti",
       updated: "Son yenilənmə: 10 sentyabr 2026",
-      lead: "Bu bildiriş vakansiyalara baxarkən və Kiris Jobs vasitəsilə anket göndərərkən məlumatların necə istifadə edildiyini izah edir.",
+      lead: "Bu bildiriş vakansiyalara baxarkən və PrimServ vasitəsilə anket göndərərkən məlumatların necə istifadə edildiyini izah edir.",
       summary: "Qısa şəkildə: namizəd hesabı, reklam kukiləri, profilləşdirmə və brauzer identifikatorları yoxdur. Yalnız ad və əlaqə məlumatları olmadan ümumi gündəlik mərhələ sayğacları saxlanılır. Forma fayl, sənəd şəkli, PESEL və pasport nömrəsi və ya bank məlumatı qəbul etmir.",
       controllerTitle: "1. Məlumatlara cavabdeh şəxs",
       controller: "İşə qəbulun ilk mərhələsində bu səhifə vasitəsilə toplanan məlumatların administratoru Oleksandr Kirisdir. Məxfilik sorğuları üçün yazın:",
@@ -183,7 +183,7 @@
       securityTitle: "8. Təhlükəsizlik",
       security: "HTTPS istifadə olunur. E-poçt alıcısı serverdə sabitdir; ölçü limiti, ciddi yoxlama, təkrar göndərmədən qorunma, gizli anti-bot sahəsi və cəhd limiti tətbiq edilir. Sənəd şəkli və nömrəsi, bank məlumatı və ya parol göndərməyin.",
       contactTitle: "Məlumatlarla bağlı əlaqə",
-      contact: "Mövzu hissəsinə “Kiris Jobs məxfilik” yazın və varsa müraciət ID-sini əlavə edin."
+      contact: "Mövzu hissəsinə “PrimServ məxfilik” yazın və varsa müraciət ID-sini əlavə edin."
     }
   };
 
@@ -233,7 +233,7 @@
         <p>${escapeHTML(copy.contact)} <a href="mailto:oleksandr.kiris@icloud.com">oleksandr.kiris@icloud.com</a></p>
       </section>
     `;
-    document.title = `${copy.title} · Kiris Jobs`;
+    document.title = `${copy.title} · PrimServ`;
     document.getElementById("privacy-back")?.setAttribute("href", `./?lang=${encodeURIComponent(locale)}`);
     document.getElementById("privacy-home-link")?.setAttribute("href", `./?lang=${encodeURIComponent(locale)}`);
   }

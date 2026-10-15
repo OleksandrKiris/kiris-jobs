@@ -14,7 +14,14 @@
     "check:privacy": "node scripts/validate-privacy.mjs",
     "build:css": "node scripts/build-candidate-css.mjs",
     "generate:vacancies": "node scripts/generate-vacancy-pages.mjs",
-    "test": "npm run build:css && npm run generate:vacancies && npm run check:js && npm run check:content && npm run check:locales && npm run check:ui && npm run check:apply && npm run check:delivery && npm run check:privacy"
+    "test": "npm run build:css && npm run generate:vacancies && npm run check:js && npm run check:availability && npm run check:content && npm run check:locales && npm run check:ui && npm run check:apply && npm run check:delivery && npm run check:privacy",
+    "check:availability": "node --test scripts/vacancy-overrides.test.mjs",
+    "generate:brand": "node scripts/generate-share-cards.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "0.1.100"
+  }
 }

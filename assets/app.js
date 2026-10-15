@@ -1163,7 +1163,7 @@
   window.PortalWhatsApp = { open: openWhatsAppSafety };
 
   function renderProfileContent() {
-    document.title = `${profile.name} · Kiris Jobs · ${i18n.languageName(i18n.locale)}`;
+    document.title = `${profile.name} · PrimServ · ${i18n.languageName(i18n.locale)}`;
     document.querySelector('meta[name="description"]')?.setAttribute("content", t("ui.heroIntro"));
     const recruiterRole = `${profile.name} · ${t("ui.recruiterProfile")}`;
     const recruiterLocations = `${t("ui.navJobs")}: ${i18n.countryName("PL")} · ${i18n.countryName("HU")} · ${i18n.countryName("BE")}`;
@@ -1195,7 +1195,7 @@
       el("hero-whatsapp-direct").innerHTML = `${svgIcon("whatsapp")}<span class="sr-only">WhatsApp · ${escapeHTML(profile.phone)}</span>`;
     }
 
-    const mailSubject = encodeURIComponent(`${t("ui.navJobs")} · Kiris Jobs`);
+    const mailSubject = encodeURIComponent(`${t("ui.navJobs")} · PrimServ`);
     const mailBody = encodeURIComponent(`${t("ui.directQuestion")}:\n\n`);
     const mailto = `mailto:${profile.email}?subject=${mailSubject}&body=${mailBody}`;
     el("profile-email-link").href = mailto;
@@ -1420,7 +1420,7 @@
       photoProof.className = "profile-photo-proof";
       avatar.append(photoProof);
     }
-    photoProof.innerHTML = `<i aria-hidden="true"></i><span>Kiris Jobs</span>`;
+    photoProof.innerHTML = `<i aria-hidden="true"></i><span>PrimServ</span>`;
 
     let facts = el("profile-fact-strip");
     if (!facts) {
@@ -1471,7 +1471,7 @@
 
     const journeyCopy = {
       ru: {
-        label: "Мой путь к Kiris Jobs",
+        label: "Мой путь к PrimServ",
         worked: "Работал сам",
         coordinated: "Координировал команды",
         now: "Сейчас",
@@ -1481,7 +1481,7 @@
         missionText: "Моя цель — чтобы человек ещё до поездки видел реальные условия, понимал следующий шаг и мог написать мне напрямую."
       },
       uk: {
-        label: "Мій шлях до Kiris Jobs",
+        label: "Мій шлях до PrimServ",
         worked: "Працював сам",
         coordinated: "Координував команди",
         now: "Зараз",
@@ -1491,7 +1491,7 @@
         missionText: "Моя мета — щоб людина ще до поїздки бачила реальні умови, розуміла наступний крок і могла написати мені напряму."
       },
       pl: {
-        label: "Moja droga do Kiris Jobs",
+        label: "Moja droga do PrimServ",
         worked: "Pracowałem osobiście",
         coordinated: "Koordynowałem zespoły",
         now: "Teraz",
@@ -1501,7 +1501,7 @@
         missionText: "Chcę, aby przed wyjazdem każdy znał realne warunki, rozumiał kolejny krok i mógł napisać bezpośrednio do mnie."
       },
       en: {
-        label: "My path to Kiris Jobs",
+        label: "My path to PrimServ",
         worked: "I did the work myself",
         coordinated: "I coordinated teams",
         now: "Now",
@@ -1511,7 +1511,7 @@
         missionText: "My goal is for people to see the real conditions before travelling, understand the next step and message me directly."
       },
       az: {
-        label: "Kiris Jobs-a gedən yolum",
+        label: "PrimServ-a gedən yolum",
         worked: "İşi özüm görmüşəm",
         coordinated: "Komandaları koordinasiya etmişəm",
         now: "İndi",
@@ -1521,7 +1521,7 @@
         missionText: "Məqsədim odur ki, insan səfərdən əvvəl real şərtləri görsün, növbəti addımı bilsin və mənə birbaşa yaza bilsin."
       },
       ka: {
-        label: "ჩემი გზა Kiris Jobs-მდე",
+        label: "ჩემი გზა PrimServ-მდე",
         worked: "თავად ვმუშაობდი",
         coordinated: "გუნდებს ვმართავდი",
         now: "ახლა",
@@ -1531,7 +1531,7 @@
         missionText: "ჩემი მიზანია, ადამიანმა გამგზავრებამდე ნახოს რეალური პირობები, იცოდეს შემდეგი ნაბიჯი და პირდაპირ მომწეროს."
       },
       id: {
-        label: "Perjalanan saya menuju Kiris Jobs",
+        label: "Perjalanan saya menuju PrimServ",
         worked: "Saya pernah bekerja langsung",
         coordinated: "Saya mengoordinasikan tim",
         now: "Sekarang",
@@ -1541,7 +1541,7 @@
         missionText: "Tujuan saya: setiap orang mengetahui kondisi nyata sebelum berangkat, memahami langkah berikutnya, dan dapat menghubungi saya langsung."
       },
       es: {
-        label: "Mi camino hasta Kiris Jobs",
+        label: "Mi camino hasta PrimServ",
         worked: "Hice el trabajo personalmente",
         coordinated: "Coordiné equipos",
         now: "Ahora",
@@ -1551,7 +1551,7 @@
         missionText: "Mi objetivo es que cada persona conozca las condiciones reales antes de viajar, entienda el siguiente paso y pueda escribirme directamente."
       },
       fil: {
-        label: "Ang landas ko patungo sa Kiris Jobs",
+        label: "Ang landas ko patungo sa PrimServ",
         worked: "Ako mismo ang nagtrabaho",
         coordinated: "Nag-coordinate ako ng mga team",
         now: "Ngayon",
@@ -1561,7 +1561,7 @@
         missionText: "Layunin kong makita ng tao ang tunay na kondisyon bago bumiyahe, malaman ang susunod na hakbang, at makapag-message sa akin nang direkta."
       },
       ne: {
-        label: "Kiris Jobs सम्मको मेरो यात्रा",
+        label: "PrimServ सम्मको मेरो यात्रा",
         worked: "मैले आफैं काम गरेको छु",
         coordinated: "मैले टोली समन्वय गरेको छु",
         now: "अहिले",
@@ -1571,7 +1571,7 @@
         missionText: "मेरो लक्ष्य भनेको यात्राअघि नै वास्तविक सर्तहरू देखाउने, अर्को कदम बुझाउने र मसँग सिधै सम्पर्क गर्न सजिलो बनाउने हो।"
       },
       hy: {
-        label: "Իմ ճանապարհը դեպի Kiris Jobs",
+        label: "Իմ ճանապարհը դեպի PrimServ",
         worked: "Ինքս եմ կատարել աշխատանքը",
         coordinated: "Համակարգել եմ թիմեր",
         now: "Հիմա",
@@ -1696,7 +1696,7 @@
       credential.innerHTML = `
         <img src="assets/icon-192.png" width="192" height="192" alt="">
         <span>
-          <small>Kiris Jobs</small>
+          <small>PrimServ</small>
           <strong>${escapeHTML(profile.name)}</strong>
           <em><i aria-hidden="true"></i>${escapeHTML(t("ui.recruiterEyebrow"))}</em>
         </span>
@@ -2733,11 +2733,11 @@
     if (el("quick-share-heading")) el("quick-share-heading").textContent = copy.title;
     if (el("quick-share-intro")) el("quick-share-intro").textContent = copy.intro;
     const preview = `
-      <figure class="quick-share-preview" aria-label="Kiris Jobs Jobs">
+      <figure class="quick-share-preview" aria-label="PrimServ Jobs">
         <img src="assets/share-card-v11.png?v=139" width="1731" height="909" loading="lazy" decoding="async" alt="">
         <figcaption>
           <span><i aria-hidden="true"></i> WhatsApp · Telegram</span>
-          <strong>Kiris Jobs Jobs</strong>
+          <strong>PrimServ Jobs</strong>
         </figcaption>
       </figure>
     `;
@@ -2993,17 +2993,17 @@
 
   function personalWhatsAppOpening() {
     const copy = {
-      ru: ["Здравствуйте", "Пишу вам через вашу платформу Kiris Jobs."],
-      uk: ["Вітаю", "Пишу вам через вашу платформу Kiris Jobs."],
-      pl: ["Dzień dobry", "Piszę przez Pana platformę Kiris Jobs."],
-      en: ["Hello", "I am contacting you through your Kiris Jobs platform."],
-      az: ["Salam", "Sizin Kiris Jobs platformanız vasitəsilə yazıram."],
-      ka: ["გამარჯობა", "თქვენი Kiris Jobs პლატფორმიდან გწერთ."],
-      id: ["Halo", "Saya menghubungi Anda melalui platform Kiris Jobs milik Anda."],
-      es: ["Hola", "Le escribo desde su plataforma Kiris Jobs."],
-      fil: ["Hello", "Nakikipag-ugnayan ako sa iyo sa pamamagitan ng iyong Kiris Jobs platform."],
-      ne: ["नमस्ते", "म तपाईंको Kiris Jobs प्लेटफर्ममार्फत सम्पर्क गर्दै छु।"],
-      hy: ["Բարև", "Գրում եմ ձեզ ձեր Kiris Jobs հարթակի միջոցով։"]
+      ru: ["Здравствуйте", "Пишу вам через вашу платформу PrimServ."],
+      uk: ["Вітаю", "Пишу вам через вашу платформу PrimServ."],
+      pl: ["Dzień dobry", "Piszę przez Pana platformę PrimServ."],
+      en: ["Hello", "I am contacting you through your PrimServ platform."],
+      az: ["Salam", "Sizin PrimServ platformanız vasitəsilə yazıram."],
+      ka: ["გამარჯობა", "თქვენი PrimServ პლატფორმიდან გწერთ."],
+      id: ["Halo", "Saya menghubungi Anda melalui platform PrimServ milik Anda."],
+      es: ["Hola", "Le escribo desde su plataforma PrimServ."],
+      fil: ["Hello", "Nakikipag-ugnayan ako sa iyo sa pamamagitan ng iyong PrimServ platform."],
+      ne: ["नमस्ते", "म तपाईंको PrimServ प्लेटफर्ममार्फत सम्पर्क गर्दै छु।"],
+      hy: ["Բարև", "Գրում եմ ձեզ ձեր PrimServ հարթակի միջոցով։"]
     };
     const [greeting, source] = copy[i18n.locale] || copy.en;
     return { greeting: `${greeting}, ${profile.name}!`, source };
@@ -3153,7 +3153,7 @@
     const fallbackPhone = String(profile.phone || "").replace(/\D/g, "");
     const whatsappUrl = profile.whatsapp || `https://wa.me/${fallbackPhone}`;
     const separator = whatsappUrl.includes("?") ? "&" : "?";
-    const trackedMessage = `${message}\n\nKiris Jobs · Source: ${campaignSource()}`;
+    const trackedMessage = `${message}\n\nPrimServ · Source: ${campaignSource()}`;
     openWhatsAppSafety(`${whatsappUrl}${separator}text=${encodeURIComponent(trackedMessage)}`);
   }
 

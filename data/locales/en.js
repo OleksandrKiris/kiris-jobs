@@ -21,7 +21,7 @@
       offline: "You are offline · jobs and guides are available",
       bannerTitle: "Before you travel.",
       bannerText: "Confirm the exact location, arrival date, schedule and employment terms with the recruiter. This catalogue does not replace a contract.",
-      heroKicker: "Kiris Jobs · my personal recruitment platform",
+      heroKicker: "PrimServ · Jobs",
       heroTitle: "My name is Oleksandr.",
       heroAccent: "I help people find work in Europe.",
       heroIntro: "I publish current vacancies, explain pay, housing and employment details, then answer you directly on WhatsApp.",

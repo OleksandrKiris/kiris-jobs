@@ -1,5 +1,5 @@
 /*
- * Публичный контент личной платформы Kiris Jobs.
+ * Публичный каталог вакансий PrimServ.
  *
  * Источник: «Полный каталог вакансий Citronex 2026 — БРУТТО»,
  * актуализация 23 июля 2026 года.
@@ -11,9 +11,9 @@
 window.PORTAL_CONTENT = {
   site: {
     isDemo: false,
-    title: "Oleksandr Kiris · Kiris Jobs",
-    shortTitle: "Kiris Jobs",
-    description: "Личная платформа рекрутера Oleksandr Kiris: актуальные вакансии, понятные условия и прямой ответ в WhatsApp.",
+    title: "PrimServ · Praca w Europie",
+    shortTitle: "PrimServ",
+    description: "PrimServ: вакансии в Европе, условия, фото жилья и связь с рекрутером.",
     lastUpdated: "2026-07-23",
     baseUrl: "https://oleksandrkiris.github.io/kiris-jobs/",
     baseRate: "31,40 PLN",
@@ -200,7 +200,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Круглогодичный набор, но наличие места и процесс подтверждаются перед поездкой.",
       featured: true,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "greenhouse-renewal",
@@ -250,7 +251,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Сезонный набор и дата начала процесса подтверждаются по каждой локации.",
       featured: true,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "tomato-sorting",
@@ -300,7 +302,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Регулярность набора и число мест зависят от урожая и производственного плана.",
       featured: true,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "banana-warehouse-poland",
@@ -350,7 +353,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Точная смена, ночная работа и наличие мест подтверждаются перед заездом.",
       featured: true,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "plant-protection",
@@ -400,7 +404,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Ставка специалиста и конкретный объём полномочий требуют индивидуального подтверждения.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "site-cleaning",
@@ -449,7 +454,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Место и дата выхода зависят от текущей потребности объекта.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "forklift-udt",
@@ -498,7 +504,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Нет подтверждённой ставки; место, договор и жильё уточняются индивидуально.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "team-leader",
@@ -548,7 +555,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Ставка, премии, объект и жильё определяются индивидуально.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "greenhouse-agronomist",
@@ -598,7 +606,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Открытие места, ставка, договор и жильё требуют индивидуального согласования.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "truck-mechanic",
@@ -647,7 +656,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Подтверждённой ставки пока нет; условия согласовываются с техническим подразделением.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "driver-ce-poland",
@@ -696,7 +706,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Диапазон указан брутто; конкретная сумма и база фиксируются в договоре.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "driver-ce-relief",
@@ -745,7 +756,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Открывается по необходимости; ставка, договор и даты пока не подтверждены.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "banana-warehouse-hungary",
@@ -795,7 +807,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Польская карта побыту сама по себе не подтверждает право на работу в Венгрии.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     },
     {
       id: "banana-warehouse-belgium",
@@ -845,7 +858,8 @@ window.PORTAL_CONTENT = {
       statusNote: "Не массовая вакансия; направление возможно только после проверки документов и потребности.",
       featured: false,
       publishedAt: "2026-07-23",
-      updatedAt: "2026-07-23"
+      updatedAt: "2026-07-23",
+      availabilityConfirmedOn: "2026-10-15"
     }
   ],
 

@@ -21,7 +21,7 @@
       offline: "Sin conexión · las vacantes y guías siguen disponibles",
       bannerTitle: "Antes de viajar.",
       bannerText: "Confirma con el reclutador la ubicación, la fecha de llegada, el horario y las condiciones de contratación. El catálogo no sustituye al contrato.",
-      heroKicker: "Kiris Jobs · mi plataforma personal de selección",
+      heroKicker: "PrimServ · Ofertas de trabajo",
       heroTitle: "Me llamo Oleksandr.",
       heroAccent: "Ayudo a encontrar trabajo en Europa.",
       heroIntro: "Publico vacantes actuales, explico el salario, el alojamiento y la contratación, y después respondo personalmente por WhatsApp.",
