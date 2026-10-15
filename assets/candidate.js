@@ -698,6 +698,9 @@
     `;
     document.body.append(dialog);
 
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) closeDialog(dialog);
+    });
     dialog.querySelector("[data-housing-lightbox-close]")?.addEventListener("click", () => closeDialog(dialog));
     dialog.querySelector("[data-housing-lightbox-previous]")?.addEventListener("click", () => moveHousingPhoto(-1));
     dialog.querySelector("[data-housing-lightbox-next]")?.addEventListener("click", () => moveHousingPhoto(1));
