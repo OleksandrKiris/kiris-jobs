@@ -1,12 +1,12 @@
 /* Candidate-facing layout. Loaded last so the public flow stays calm and consistent. */
 :root {
-  --paper: #f5f6f4;
+  --paper: #f4f6f8;
   --surface: #fff;
-  --ink: #132019;
-  --ink-soft: #66716a;
-  --forest: #123c2c;
-  --forest-2: #176b48;
-  --line: #dde3df;
+  --ink: #1c2e3e;
+  --ink-soft: #5d6e7d;
+  --forest: #354c61;
+  --forest-2: #354c61;
+  --line: #dbe2e9;
   --shadow: 0 16px 44px rgba(19, 32, 25, .08);
   --shadow-small: 0 6px 20px rgba(19, 32, 25, .06);
 }
@@ -7689,3 +7689,15 @@ body.candidate-site {
     grid-template-columns: minmax(0, .8fr) minmax(0, 1fr);
   }
 }
+
+/* PrimServ: preserve the full official emblem on every candidate handoff. */
+.candidate-brand img {
+  object-fit: contain;
+  object-position: center;
+  background: #fff;
+  border-color: #dbe2e9;
+  box-shadow: none;
+}
+.candidate-brand strong { color: #354c61; }
+.candidate-brand:focus-visible { outline-color: #c51925; }
+.candidate-footer-links { flex-wrap: wrap; }

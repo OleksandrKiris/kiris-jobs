@@ -21,7 +21,7 @@
       offline: "Oflaynsınız · vakansiyalar və məlumatlar əlçatandır",
       bannerTitle: "Yola düşməzdən əvvəl.",
       bannerText: "Dəqiq iş yerini, gəliş tarixini, qrafiki və rəsmiləşdirmə şərtlərini işə qəbul üzrə mütəxəssisdən dəqiqləşdirin. Kataloq müqaviləni əvəz etmir.",
-      heroKicker: "Kiris Jobs · şəxsi işə qəbul platformam",
+      heroKicker: "PrimServ · İş elanları",
       heroTitle: "Mənim adım Oleksandr-dır.",
       heroAccent: "Avropada iş tapmağa kömək edirəm.",
       heroIntro: "Aktual vakansiyaları göstərir, maaş, yaşayış və rəsmiləşdirməni izah edir, sonra WhatsApp-da şəxsən cavab verirəm.",

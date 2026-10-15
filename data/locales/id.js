@@ -21,7 +21,7 @@
       offline: "Anda sedang offline · lowongan dan panduan tetap tersedia",
       bannerTitle: "Sebelum berangkat.",
       bannerText: "Konfirmasikan lokasi, tanggal kedatangan, jadwal, dan ketentuan kerja kepada perekrut. Katalog ini bukan pengganti kontrak.",
-      heroKicker: "Kiris Jobs · platform rekrutmen pribadi saya",
+      heroKicker: "PrimServ · Lowongan kerja",
       heroTitle: "Nama saya Oleksandr.",
       heroAccent: "Saya membantu mencari kerja di Eropa.",
       heroIntro: "Saya menampilkan lowongan aktif, menjelaskan gaji, tempat tinggal dan proses kerja, lalu menjawab langsung melalui WhatsApp.",

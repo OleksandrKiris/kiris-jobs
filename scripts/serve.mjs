@@ -12,6 +12,8 @@ const types = {
   ".webmanifest": "application/manifest+json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
   ".webp": "image/webp",
   ".txt": "text/plain; charset=utf-8"
 };
@@ -35,5 +37,5 @@ const server = http.createServer(async (request, response) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Kiris Jobs: http://127.0.0.1:${port}`);
+  console.log(`PrimServ: http://127.0.0.1:${port}`);
 });

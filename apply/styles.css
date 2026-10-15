@@ -1,16 +1,16 @@
 :root{
   color-scheme:light;
-  --page:#eef5f1;
+  --page:#f4f6f8;
   --surface:#ffffff;
   --surface-soft:#f7faf8;
-  --ink:#14251c;
+  --ink:#1c2e3e;
   --muted:#64756b;
   --line:#d5e2db;
   --line-strong:#b9cec3;
-  --green:#075b39;
-  --green-dark:#043d28;
-  --green-light:#15935a;
-  --green-soft:#e9f7ef;
+  --green:#354c61;
+  --green-dark:#1c2e3e;
+  --green-light:#526d83;
+  --green-soft:#eaf0f5;
   --gold:#e5a62d;
   --gold-soft:#fff7e6;
   --danger:#b42318;
@@ -788,3 +788,8 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){
   *{scroll-behavior:auto!important;transition:none!important}
 }
+
+/* PrimServ official avatar keeps its white safe margin at every size. */
+.logo-frame{width:54px;height:54px;box-shadow:none;border:1px solid #dbe2e9}
+.logo-frame img{padding:0;object-fit:contain}
+@media(max-width:560px){.logo-frame{width:46px;height:46px}}

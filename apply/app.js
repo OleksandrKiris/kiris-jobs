@@ -212,7 +212,7 @@
     app.innerHTML = `
       <section class="panel opening-panel">
         <div class="opening-copy">
-          <span class="eyebrow">CITRONEX · PPO SIECHNICE</span>
+          <span class="eyebrow">PrimServ</span>
           <div class="opening-icon letter-icon" aria-hidden="true">Aa</div>
           <h1>${escapeHtml(t('chooseLanguage'))}</h1>
           <p>${escapeHtml(t('languageLead'))}</p>

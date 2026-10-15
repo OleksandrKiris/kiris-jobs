@@ -3,7 +3,7 @@
 
   window.CITRONEX_SIMPLE_CONFIG = Object.freeze({
     version: '17.0.0',
-    brand: 'Citronex / PPO Siechnice',
+    brand: 'PrimServ',
     privacyUrl: 'https://pposiechnice.pl/?lang=en&page_id=981',
     pdfGeneratorUrl: './pdf/',
     timeZone: 'Europe/Warsaw',

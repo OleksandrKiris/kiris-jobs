@@ -56,8 +56,8 @@ const sitemapEntries = [
 for (const job of content.jobs) {
   const localized = { ...job, ...(polishJobs[job.id] || {}) };
   const pageUrl = new URL(`vacancies/${encodeURIComponent(job.id)}/`, content.site.baseUrl).toString();
-  const imageUrl = new URL(`assets/share/jobs/${encodeURIComponent(job.id)}.png?v=200`, content.site.baseUrl).toString();
-  const title = `${localized.title} · ${job.company} · Kiris Jobs`;
+  const imageUrl = new URL("assets/share-card.png?v=209", content.site.baseUrl).toString();
+  const title = `${localized.title} · ${job.company} · PrimServ`;
   const description = [
     localized.summary,
     localized.location ? `${localized.format}, ${localized.location}.` : "",
@@ -72,7 +72,7 @@ for (const job of content.jobs) {
   html = replaceMeta(html, 'property="og:description"', description);
   html = replaceMeta(html, 'property="og:url"', pageUrl);
   html = replaceMeta(html, 'property="og:image"', imageUrl);
-  html = replaceMeta(html, 'property="og:image:alt"', `${localized.title} — Kiris Jobs`);
+  html = replaceMeta(html, 'property="og:image:alt"', `${localized.title} — PrimServ`);
   html = replaceMeta(html, 'name="twitter:title"', title);
   html = replaceMeta(html, 'name="twitter:description"', description);
   html = replaceMeta(html, 'name="twitter:image"', imageUrl);

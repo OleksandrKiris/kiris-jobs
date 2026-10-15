@@ -182,7 +182,7 @@
   const RECEIPT_COPY = {
     ru: {
       download: "Скачать подтверждение",
-      title: "Подтверждение отклика Kiris Jobs",
+      title: "Подтверждение отклика PrimServ",
       vacancy: "Вакансия",
       sent: "Отправлено",
       reference: "Номер отклика",
@@ -191,7 +191,7 @@
     },
     uk: {
       download: "Завантажити підтвердження",
-      title: "Підтвердження відгуку Kiris Jobs",
+      title: "Підтвердження відгуку PrimServ",
       vacancy: "Вакансія",
       sent: "Надіслано",
       reference: "Номер відгуку",
@@ -200,7 +200,7 @@
     },
     pl: {
       download: "Pobierz potwierdzenie",
-      title: "Potwierdzenie zgłoszenia Kiris Jobs",
+      title: "Potwierdzenie zgłoszenia PrimServ",
       vacancy: "Oferta",
       sent: "Wysłano",
       reference: "Numer zgłoszenia",
@@ -209,7 +209,7 @@
     },
     en: {
       download: "Download confirmation",
-      title: "Kiris Jobs application confirmation",
+      title: "PrimServ application confirmation",
       vacancy: "Vacancy",
       sent: "Submitted",
       reference: "Application reference",
@@ -218,7 +218,7 @@
     },
     az: {
       download: "Təsdiqi endir",
-      title: "Kiris Jobs müraciət təsdiqi",
+      title: "PrimServ müraciət təsdiqi",
       vacancy: "Vakansiya",
       sent: "Göndərilib",
       reference: "Müraciət nömrəsi",
@@ -226,22 +226,22 @@
       safety: "Müraciət pulsuzdur. Bu sayt vasitəsilə ödəniş və ya sənəd göndərməyin. Səfər və müqavilə şərtləri nümayəndə tərəfindən ayrıca təsdiqlənir."
     },
     ka: {
-      download: "დადასტურების ჩამოტვირთვა", title: "Kiris Jobs განაცხადის დადასტურება", vacancy: "ვაკანსია", sent: "გაგზავნილია", reference: "განაცხადის ნომერი", contact: "რეკრუტერის კონტაქტი", safety: "განაცხადი უფასოა. ამ საიტით ნუ გაგზავნით ფულს ან დოკუმენტებს. მგზავრობისა და ხელშეკრულების პირობებს რეკრუტერი ცალკე ადასტურებს."
+      download: "დადასტურების ჩამოტვირთვა", title: "PrimServ განაცხადის დადასტურება", vacancy: "ვაკანსია", sent: "გაგზავნილია", reference: "განაცხადის ნომერი", contact: "რეკრუტერის კონტაქტი", safety: "განაცხადი უფასოა. ამ საიტით ნუ გაგზავნით ფულს ან დოკუმენტებს. მგზავრობისა და ხელშეკრულების პირობებს რეკრუტერი ცალკე ადასტურებს."
     },
     id: {
-      download: "Unduh konfirmasi", title: "Konfirmasi lamaran Kiris Jobs", vacancy: "Lowongan", sent: "Dikirim", reference: "Nomor lamaran", contact: "Kontak perekrut", safety: "Melamar gratis. Jangan kirim pembayaran atau dokumen melalui situs ini. Ketentuan perjalanan dan kontrak dikonfirmasi secara terpisah oleh perekrut."
+      download: "Unduh konfirmasi", title: "Konfirmasi lamaran PrimServ", vacancy: "Lowongan", sent: "Dikirim", reference: "Nomor lamaran", contact: "Kontak perekrut", safety: "Melamar gratis. Jangan kirim pembayaran atau dokumen melalui situs ini. Ketentuan perjalanan dan kontrak dikonfirmasi secara terpisah oleh perekrut."
     },
     es: {
-      download: "Descargar confirmación", title: "Confirmación de solicitud Kiris Jobs", vacancy: "Vacante", sent: "Enviado", reference: "Número de solicitud", contact: "Contacto del reclutador", safety: "Solicitar es gratis. No envíes pagos ni documentos a través de este sitio. El reclutador confirma por separado las condiciones del viaje y del contrato."
+      download: "Descargar confirmación", title: "Confirmación de solicitud PrimServ", vacancy: "Vacante", sent: "Enviado", reference: "Número de solicitud", contact: "Contacto del reclutador", safety: "Solicitar es gratis. No envíes pagos ni documentos a través de este sitio. El reclutador confirma por separado las condiciones del viaje y del contrato."
     },
     fil: {
-      download: "I-download ang kumpirmasyon", title: "Kumpirmasyon ng aplikasyon sa Kiris Jobs", vacancy: "Bakante", sent: "Naipadala", reference: "Numero ng aplikasyon", contact: "Contact ng recruiter", safety: "Libre ang pag-apply. Huwag magpadala ng bayad o dokumento sa site na ito. Hiwalay na kinukumpirma ng recruiter ang mga kondisyon ng biyahe at kontrata."
+      download: "I-download ang kumpirmasyon", title: "Kumpirmasyon ng aplikasyon sa PrimServ", vacancy: "Bakante", sent: "Naipadala", reference: "Numero ng aplikasyon", contact: "Contact ng recruiter", safety: "Libre ang pag-apply. Huwag magpadala ng bayad o dokumento sa site na ito. Hiwalay na kinukumpirma ng recruiter ang mga kondisyon ng biyahe at kontrata."
     },
     ne: {
-      download: "पुष्टि डाउनलोड गर्नुहोस्", title: "Kiris Jobs आवेदन पुष्टि", vacancy: "रिक्त पद", sent: "पठाइएको", reference: "आवेदन नम्बर", contact: "भर्तीकर्ताको सम्पर्क", safety: "आवेदन निःशुल्क छ। यस साइटमार्फत भुक्तानी वा कागजात नपठाउनुहोस्। यात्रा र सम्झौताका सर्तहरू भर्तीकर्ताले छुट्टै पुष्टि गर्छन्।"
+      download: "पुष्टि डाउनलोड गर्नुहोस्", title: "PrimServ आवेदन पुष्टि", vacancy: "रिक्त पद", sent: "पठाइएको", reference: "आवेदन नम्बर", contact: "भर्तीकर्ताको सम्पर्क", safety: "आवेदन निःशुल्क छ। यस साइटमार्फत भुक्तानी वा कागजात नपठाउनुहोस्। यात्रा र सम्झौताका सर्तहरू भर्तीकर्ताले छुट्टै पुष्टि गर्छन्।"
     },
     hy: {
-      download: "Ներբեռնել հաստատումը", title: "Kiris Jobs դիմումի հաստատում", vacancy: "Թափուր տեղ", sent: "Ուղարկված է", reference: "Դիմումի համարը", contact: "Հավաքագրողի կապը", safety: "Դիմումն անվճար է։ Այս կայքով մի ուղարկեք վճարումներ կամ փաստաթղթեր։ Ճանապարհորդության և պայմանագրի պայմանները հավաքագրողը հաստատում է առանձին։"
+      download: "Ներբեռնել հաստատումը", title: "PrimServ դիմումի հաստատում", vacancy: "Թափուր տեղ", sent: "Ուղարկված է", reference: "Դիմումի համարը", contact: "Հավաքագրողի կապը", safety: "Դիմումն անվճար է։ Այս կայքով մի ուղարկեք վճարումներ կամ փաստաթղթեր։ Ճանապարհորդության և պայմանագրի պայմանները հավաքագրողը հաստատում է առանձին։"
     }
   };
   let turnstileLoadPromise = null;
@@ -520,57 +520,57 @@
     const copy = {
       ru: {
         greeting: "Здравствуйте",
-        source: "Отправляю вам анкету через вашу платформу Kiris Jobs.",
+        source: "Отправляю вам анкету через вашу платформу PrimServ.",
         reference: "Номер заявки"
       },
       uk: {
         greeting: "Вітаю",
-        source: "Надсилаю вам анкету через вашу платформу Kiris Jobs.",
+        source: "Надсилаю вам анкету через вашу платформу PrimServ.",
         reference: "Номер заявки"
       },
       pl: {
         greeting: "Dzień dobry",
-        source: "Wysyłam zgłoszenie przez Pana platformę Kiris Jobs.",
+        source: "Wysyłam zgłoszenie przez Pana platformę PrimServ.",
         reference: "Numer zgłoszenia"
       },
       en: {
         greeting: "Hello",
-        source: "I am sending my application through your Kiris Jobs platform.",
+        source: "I am sending my application through your PrimServ platform.",
         reference: "Application reference"
       },
       az: {
         greeting: "Salam",
-        source: "Anketamı sizin Kiris Jobs platformanız vasitəsilə göndərirəm.",
+        source: "Anketamı sizin PrimServ platformanız vasitəsilə göndərirəm.",
         reference: "Müraciət nömrəsi"
       },
       ka: {
         greeting: "გამარჯობა",
-        source: "განაცხადს თქვენი Kiris Jobs პლატფორმიდან გიგზავნით.",
+        source: "განაცხადს თქვენი PrimServ პლატფორმიდან გიგზავნით.",
         reference: "განაცხადის ნომერი"
       },
       id: {
         greeting: "Halo",
-        source: "Saya mengirim lamaran melalui platform Kiris Jobs milik Anda.",
+        source: "Saya mengirim lamaran melalui platform PrimServ milik Anda.",
         reference: "Nomor lamaran"
       },
       es: {
         greeting: "Hola",
-        source: "Le envío mi solicitud desde su plataforma Kiris Jobs.",
+        source: "Le envío mi solicitud desde su plataforma PrimServ.",
         reference: "Referencia de solicitud"
       },
       fil: {
         greeting: "Magandang araw",
-        source: "Ipinapadala ko ang aking aplikasyon sa pamamagitan ng inyong Kiris Jobs platform.",
+        source: "Ipinapadala ko ang aking aplikasyon sa pamamagitan ng inyong PrimServ platform.",
         reference: "Numero ng aplikasyon"
       },
       ne: {
         greeting: "नमस्ते",
-        source: "म तपाईंको Kiris Jobs प्लेटफर्ममार्फत आवेदन पठाउँदै छु।",
+        source: "म तपाईंको PrimServ प्लेटफर्ममार्फत आवेदन पठाउँदै छु।",
         reference: "आवेदन नम्बर"
       },
       hy: {
         greeting: "Բարև",
-        source: "Իմ հայտը ուղարկում եմ ձեր Kiris Jobs հարթակի միջոցով։",
+        source: "Իմ հայտը ուղարկում եմ ձեր PrimServ հարթակի միջոցով։",
         reference: "Հայտի համարը"
       }
     };

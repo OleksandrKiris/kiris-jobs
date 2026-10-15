@@ -6,16 +6,30 @@
   const allowedCurrencies = new Set(["PLN", "EUR"]);
   const periods = { hour: "час", month: "месяц" };
 
-  function validDate(value) {
-    return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+  function confirmation(value) {
+    if (typeof value !== "string") return null;
+    const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+    const isoTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value);
+    if (!dateOnly && !isoTime) return null;
+    const day = value.slice(0, 10);
+    const calendarDate = new Date(`${day}T00:00:00Z`);
+    const timestamp = Date.parse(dateOnly ? `${value}T00:00:00Z` : value);
+    if (!Number.isFinite(timestamp) || !Number.isFinite(calendarDate.getTime()) || calendarDate.toISOString().slice(0, 10) !== day) return null;
+    return { value, timestamp };
   }
 
   function applyOverride(job, override) {
     if (!job || !override || job.id !== override.jobId) return;
-    if (allowedStatuses.has(override.status)) job.status = override.status;
-
-    const confirmedOn = validDate(override.lastConfirmedOn);
-    if (confirmedOn) job.updatedAt = confirmedOn;
+    const confirmed = [confirmation(override.lastConfirmedOn), confirmation(override.updatedAt)]
+      .filter(Boolean).sort((a, b) => a.timestamp - b.timestamp).at(-1);
+    const ownerConfirmed = confirmation(job.availabilityConfirmedOn);
+    // A dated owner confirmation outranks older/default API availability.
+    // Pay overrides keep their existing independent rules below.
+    const statusIsCurrent = !ownerConfirmed || (confirmed && confirmed.timestamp > ownerConfirmed.timestamp);
+    if (allowedStatuses.has(override.status) && statusIsCurrent) {
+      job.status = override.status;
+      if (confirmed) job.runtimeAvailabilityConfirmedOn = confirmed.value;
+    }
 
     if (override.rateConfirmed === false) {
       job.runtimeRateUnconfirmed = true;

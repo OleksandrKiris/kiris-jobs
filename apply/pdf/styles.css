@@ -1,13 +1,13 @@
 :root{
   color-scheme:light;
-  --page:#f1f6f3;
+  --page:#f4f6f8;
   --surface:#fff;
-  --ink:#14231b;
+  --ink:#1c2e3e;
   --muted:#64736b;
   --line:#d6e3dc;
-  --green:#075b39;
-  --green-2:#0a7a4b;
-  --green-soft:#eaf7f0;
+  --green:#354c61;
+  --green-2:#526d83;
+  --green-soft:#eaf0f5;
   --gold:#e8aa32;
   --danger:#b42318;
   --shadow:0 18px 52px rgba(7,72,45,.10);
@@ -118,3 +118,8 @@ img{max-width:100%}
   .pdf-sheet:last-child{break-after:auto;page-break-after:auto}
   .photo-sheet{padding:10mm!important}
 }
+
+/* PrimServ official avatar keeps its white safe margin at every size. */
+.logo-frame{width:54px;height:54px;box-shadow:none;border:1px solid #dbe2e9}
+.logo-frame img{padding:0;object-fit:contain}
+@media(max-width:560px){.logo-frame{width:46px;height:46px}}

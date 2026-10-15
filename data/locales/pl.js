@@ -21,7 +21,7 @@
       offline: "Jesteś offline · oferty i materiały są dostępne",
       bannerTitle: "Przed wyjazdem.",
       bannerText: "Potwierdź z rekruterem dokładną lokalizację, datę przyjazdu, grafik i warunki zatrudnienia. Katalog nie zastępuje umowy.",
-      heroKicker: "Kiris Jobs · osobista platforma rekrutera",
+      heroKicker: "PrimServ · Oferty pracy",
       heroTitle: "Nazywam się Oleksandr.",
       heroAccent: "Pomagam znaleźć pracę w Europie.",
       heroIntro: "Pokazuję aktualne oferty, wyjaśniam wynagrodzenie, zakwaterowanie i formalności, a potem odpowiadam bezpośrednio w WhatsApp.",

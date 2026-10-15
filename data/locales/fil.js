@@ -21,7 +21,7 @@
       offline: "Offline ka · available pa rin ang mga trabaho at gabay",
       bannerTitle: "Bago bumiyahe.",
       bannerText: "Kumpirmahin sa recruiter ang eksaktong lokasyon, petsa ng pagdating, iskedyul, at kondisyon ng pag-empleyo. Hindi kapalit ng kontrata ang katalogo.",
-      heroKicker: "Kiris Jobs · personal kong recruitment platform",
+      heroKicker: "PrimServ · Mga trabaho",
       heroTitle: "Ako si Oleksandr.",
       heroAccent: "Tumutulong akong makahanap ng trabaho sa Europe.",
       heroIntro: "Ipinapakita ko ang mga aktibong trabaho, ipinapaliwanag ang sahod, tirahan at proseso, at personal akong sumasagot sa WhatsApp.",

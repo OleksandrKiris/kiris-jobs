@@ -61,10 +61,10 @@ for (const [index, job] of (content?.jobs || []).entries()) {
   add(!jobIds.has(job.id), `${prefix}.id дублируется: ${job.id}`);
   jobIds.add(job.id);
   const vacancyPage = new URL(`../vacancies/${job.id}/index.html`, import.meta.url);
-  const shareCard = new URL(`../assets/share/jobs/${job.id}.png`, import.meta.url);
+  const shareCard = new URL("../assets/share-card.png", import.meta.url);
   const polishTitle = polishJobs[job.id]?.title || job.title;
   add(fs.existsSync(vacancyPage), `${prefix}: отсутствует отдельная страница vacancies/${job.id}/`);
-  add(fs.existsSync(shareCard), `${prefix}: отсутствует Facebook-карточка assets/share/jobs/${job.id}.png`);
+  add(fs.existsSync(shareCard), `${prefix}: отсутствует общая Facebook-карточка assets/share-card.png`);
   if (fs.existsSync(shareCard)) {
     add(fs.statSync(shareCard).size > 10_000, `${prefix}: Facebook-карточка слишком мала или повреждена`);
   }
@@ -73,7 +73,7 @@ for (const [index, job] of (content?.jobs || []).entries()) {
     add(vacancyHtml.includes(`/vacancies/${job.id}/`), `${prefix}: отдельная страница содержит неверную canonical/OG ссылку`);
     add(vacancyHtml.includes(polishTitle), `${prefix}: на отдельной странице отсутствует польское название вакансии`);
     add(
-      vacancyHtml.includes(`/assets/share/jobs/${job.id}.png?v=200`),
+      vacancyHtml.includes("/assets/share-card.png?v=209"),
       `${prefix}: отдельная страница содержит неверную Facebook-карточку`
     );
     add(vacancyHtml.includes('"@type":"JobPosting"'), `${prefix}: отсутствует JobPosting schema`);
@@ -88,11 +88,18 @@ for (const [index, job] of (content?.jobs || []).entries()) {
   add(job.company, `${prefix}.company обязателен`);
   add(["open", "verify", "paused", "closed"].includes(job.status), `${prefix}.status некорректен`);
   add(job.updatedAt && !Number.isNaN(Date.parse(job.updatedAt)), `${prefix}.updatedAt некорректен`);
-  if (job.status === "open" && job.updatedAt && !Number.isNaN(Date.parse(job.updatedAt))) {
-    const checkedAt = Date.parse(`${job.updatedAt}T23:59:59Z`);
+  const availabilityConfirmedOn = job.availabilityConfirmedOn || job.updatedAt;
+  if (job.availabilityConfirmedOn) {
+    add(/^\d{4}-\d{2}-\d{2}$/.test(job.availabilityConfirmedOn)
+      && !Number.isNaN(Date.parse(`${job.availabilityConfirmedOn}T00:00:00Z`))
+      && new Date(`${job.availabilityConfirmedOn}T00:00:00Z`).toISOString().slice(0, 10) === job.availabilityConfirmedOn,
+    `${prefix}.availabilityConfirmedOn некорректен`);
+  }
+  if (job.status === "open" && availabilityConfirmedOn && !Number.isNaN(Date.parse(availabilityConfirmedOn))) {
+    const checkedAt = Date.parse(`${availabilityConfirmedOn}T23:59:59Z`);
     add(
       Date.now() - checkedAt <= freshnessLimitMs,
-      `${prefix}: условия не подтверждались более 60 дней; проверьте вакансию и обновите updatedAt`
+      `${prefix}: наличие вакансии не подтверждалось более 60 дней; подтвердите availabilityConfirmedOn`
     );
   }
   add(job.applyEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(job.applyEmail), `${prefix}.applyEmail некорректен`);
