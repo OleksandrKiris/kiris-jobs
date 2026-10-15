@@ -457,8 +457,14 @@
     $("job-search").focus({ preventScroll: true });
   }
 
+  function normalizeSearchText(value) {
+    return String(value ?? "").toLowerCase().normalize("NFD")
+      .replace(/([a-z])[\u0300-\u036f]+/g, "$1")
+      .replace(/ł/g, "l").normalize("NFC");
+  }
+
   function visibleJobs() {
-    const query = state.query.trim().toLocaleLowerCase(i18n.localeTag());
+    const query = normalizeSearchText(state.query.trim());
     const statusPriority = { open: 0, verify: 1, paused: 2, closed: 3 };
     const originalOrder = new Map(jobs.map((job, index) => [job.id, index]));
     return jobs.filter((job) => {
@@ -466,7 +472,7 @@
       if (state.feature && !jobBenefitFlags(job).includes(state.feature)) return false;
       if (!query) return true;
       const view = localized(job);
-      return [
+      return normalizeSearchText([
         view.title,
         view.subtitle,
         view.company,
@@ -475,7 +481,7 @@
         view.format,
         view.location,
         view.summary
-      ].join(" ").toLocaleLowerCase(i18n.localeTag()).includes(query);
+      ].join(" ")).includes(query);
     }).sort((first, second) => (
       (statusPriority[effectiveStatus(first)] ?? 1) - (statusPriority[effectiveStatus(second)] ?? 1)
       || originalOrder.get(first.id) - originalOrder.get(second.id)
