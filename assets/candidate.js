@@ -619,6 +619,7 @@
   function detail(job, options = {}) {
     const view = localized(job);
     const headingId = options.page ? "job-page-title" : "job-dialog-title";
+    const headingTag = options.page ? "h1" : "h2";
     const applyUrl = applicationUrl(job);
     const applicationOpen = canApply(job);
     return `
@@ -630,7 +631,7 @@
               <span>${escapeHTML(view.category)}</span>
               <span class="job-status">${escapeHTML(statusLabel(job))}</span>
             </div>
-            <h2 id="${headingId}">${escapeHTML(view.title)}</h2>
+            <${headingTag} id="${headingId}">${escapeHTML(view.title)}</${headingTag}>
             <p>${escapeHTML(job.company)} · ${escapeHTML(view.subtitle || "")}</p>
           </div>
         </header>
@@ -859,8 +860,20 @@
     });
   }
 
+  function updateSkipLink() {
+    // Vacancy pages use <base href="../../">: a bare fragment would leave
+    // the vacancy and open the catalogue. Keep the current URL and language.
+    const skipLink = document.querySelector(".skip-link");
+    if (skipLink) {
+      const target = new URL(location.href);
+      target.hash = "main-content";
+      skipLink.href = target.toString();
+    }
+  }
+
   function renderStatic() {
     document.documentElement.lang = i18n.locale;
+    updateSkipLink();
     renderServiceNavigation();
     $("profile-name").textContent = profile.name;
     $("profile-hours").textContent = profile.workHours;
