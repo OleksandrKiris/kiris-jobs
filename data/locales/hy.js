@@ -15,6 +15,7 @@
       navSaved: "Պահվածները",
       navProfile: "Իմ մասին",
       mainNavigation: "Հիմնական նավարկում",
+      footerNavigation: "PrimServ, կապ և գաղտնիություն",
       contact: "Գրել ինձ",
       install: "Տեղադրել",
       online: "Առցանց · պորտալը պատրաստ է անցանց աշխատանքի",

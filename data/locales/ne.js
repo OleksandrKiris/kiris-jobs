@@ -15,6 +15,7 @@
       navSaved: "सुरक्षित गरिएका",
       navProfile: "मेरो बारेमा",
       mainNavigation: "मुख्य नेभिगेसन",
+      footerNavigation: "PrimServ, सम्पर्क र गोपनीयता",
       contact: "मलाई लेख्नुहोस्",
       install: "इन्स्टल गर्नुहोस्",
       online: "अनलाइन · पोर्टल अफलाइन पनि प्रयोग गर्न सकिन्छ",

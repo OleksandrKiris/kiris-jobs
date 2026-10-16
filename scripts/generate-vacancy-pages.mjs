@@ -56,7 +56,7 @@ const sitemapEntries = [
 for (const job of content.jobs) {
   const localized = { ...job, ...(polishJobs[job.id] || {}) };
   const pageUrl = new URL(`vacancies/${encodeURIComponent(job.id)}/`, content.site.baseUrl).toString();
-  const imageUrl = new URL("assets/share-card.png?v=219", content.site.baseUrl).toString();
+  const imageUrl = new URL("assets/share-card.png?v=220", content.site.baseUrl).toString();
   const title = `${localized.title} · ${job.company} · PrimServ`;
   const description = [
     localized.summary,

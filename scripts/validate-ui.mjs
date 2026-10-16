@@ -368,7 +368,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=219"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=220"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -448,7 +448,7 @@ assert(
     && applicationScript.includes("screeningStatus: record.decision?.status")
     && applicationScript.includes("...legacyPayload")
     && applicationScript.includes('event: "application_complete"')
-    && serviceWorker.includes("kiris-jobs-v219")
+    && serviceWorker.includes("kiris-jobs-v220")
     && applicationScript.includes('const STEP_KEYS = [')
     && applicationScript.includes('"stepDetails"'),
   "The v204 smart filters, freshness, localized metadata and safe success flow are incomplete."
@@ -471,7 +471,7 @@ assert(
     && vacancyOverrides.includes("allowedStatuses")
     && candidateScript.includes("runtimeRateUnconfirmed")
     && applicationScript.includes("vacancy_unavailable")
-    && serviceWorker.includes('"./assets/vacancy-overrides.js?v=219"'),
+    && serviceWorker.includes('"./assets/vacancy-overrides.js?v=220"'),
   "The live vacancy control integration is incomplete."
 );
 assert(

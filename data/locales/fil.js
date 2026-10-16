@@ -15,6 +15,7 @@
       navSaved: "Naka-save",
       navProfile: "Tungkol sa akin",
       mainNavigation: "Pangunahing nabigasyon",
+      footerNavigation: "PrimServ, pakikipag-ugnayan at privacy",
       contact: "I-message ako",
       install: "I-install",
       online: "Online · maaari ring gamitin ang portal offline",
