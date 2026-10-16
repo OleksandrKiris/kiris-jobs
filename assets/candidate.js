@@ -388,6 +388,17 @@
     return url.toString();
   }
 
+  function hrappkaUrl(job) {
+    const form = content.applicationForms?.hrappka;
+    return canApply(job) && form?.jobIds?.includes(job.id) ? form.url : "";
+  }
+
+  function hrappkaLink(job, className = "primary-button hrappka-button") {
+    const url = hrappkaUrl(job);
+    if (!url) return "";
+    return `<a class="${className}" href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer" data-hrappka-link aria-label="${escapeHTML(`${i18n.t("ui.hrappkaOpen")}: ${localized(job).title}. ${i18n.t("ui.hrappkaLanguage")}`)}">${escapeHTML(i18n.t("ui.hrappkaOpen"))} · PL<span aria-hidden="true">↗</span></a>`;
+  }
+
   function housingEntries(job) {
     return (job.housingLocations || [])
       .map((key) => [key, housing[key]])
@@ -413,6 +424,7 @@
         <a class="job-card-link job-open" href="${escapeHTML(jobUrl)}" data-open-job="${escapeHTML(job.id)}" aria-label="${escapeHTML(accessibleLabel)}">
           <div class="job-card-body">
             <div class="job-card-copy">
+              <p class="job-card-company">${escapeHTML(job.company)}</p>
               <div class="job-tags">
                 <span class="job-status">${escapeHTML(statusLabel(job))}</span>
               </div>
@@ -428,6 +440,7 @@
             </span>
           </div>
         </a>
+        ${hrappkaUrl(job) ? `<div class="job-card-apply">${hrappkaLink(job)}<small>${escapeHTML(i18n.t("ui.hrappkaLanguage"))}</small></div>` : ""}
       </article>
     `;
   }
@@ -647,9 +660,10 @@
           <aside class="vacancy-sidebar">
             <div class="vacancy-apply-bar">
               ${applicationOpen
-                ? `<a class="primary-button" href="${escapeHTML(applyUrl)}" data-apply-job="${escapeHTML(job.id)}">${escapeHTML(i18n.t("ui.takeSurvey"))}</a>`
+                ? (hrappkaUrl(job) ? hrappkaLink(job) : `<a class="primary-button" href="${escapeHTML(applyUrl)}" data-apply-job="${escapeHTML(job.id)}">${escapeHTML(i18n.t("ui.takeSurvey"))}</a>`)
                 : `<strong class="vacancy-application-unavailable">${escapeHTML(statusLabel(job))}</strong>`}
             </div>
+            ${hrappkaUrl(job) ? `<div class="hrappka-alternative"><p class="hrappka-language-note">${escapeHTML(i18n.t("ui.hrappkaLanguage"))}</p><a class="secondary-button" href="${escapeHTML(applyUrl)}" data-apply-job="${escapeHTML(job.id)}">${escapeHTML(i18n.t("ui.recruiterForm"))}</a></div>` : ""}
             <dl class="vacancy-facts">
               <div><dt>${escapeHTML(i18n.t("ui.grossSalary"))}</dt><dd>${escapeHTML(salary(job))}</dd><small>${escapeHTML(view.salary?.note || "")}</small>${salaryExample(job) ? `<small class="vacancy-salary-example">${escapeHTML(salaryExample(job))}</small>` : ""}</div>
               <div><dt>${escapeHTML(i18n.t("ui.countryLocation"))}</dt><dd>${escapeHTML(view.format)} · ${escapeHTML(view.location)}</dd></div>
