@@ -7,6 +7,7 @@
   const profile = content.profile || {};
   const housing = content.housingLocations || {};
   const state = { query: "", country: "", feature: "", openJobId: "" };
+  const CATALOG_CONTEXT_KEY = "kiris-jobs:catalog-context:v1";
   const lightboxState = {
     items: [],
     index: 0,
@@ -446,11 +447,37 @@
     return checkedDate({ availabilityConfirmedOn: value });
   }
 
+  function restoreCatalogContext() {
+    if (directJobId) return;
+    try {
+      const saved = JSON.parse(window.sessionStorage.getItem(CATALOG_CONTEXT_KEY) || "null");
+      if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
+      if (typeof saved.query === "string") state.query = saved.query;
+      if (jobs.some((job) => countryCode(job) === saved.country)) state.country = saved.country;
+      if (["housing", "noExperience", "pairs", "official"].includes(saved.feature)) state.feature = saved.feature;
+      $("job-search").value = state.query;
+    } catch {
+      // Tab-local context is optional; never block the catalogue.
+    }
+  }
+
+  function saveCatalogContext() {
+    if (directJobId) return;
+    try {
+      const { query, country, feature } = state;
+      if (query || country || feature) window.sessionStorage.setItem(CATALOG_CONTEXT_KEY, JSON.stringify({ query, country, feature }));
+      else window.sessionStorage.removeItem(CATALOG_CONTEXT_KEY);
+    } catch {
+      // No server fallback or persistent search history.
+    }
+  }
+
   function resetFilters() {
     state.query = "";
     state.country = "";
     state.feature = "";
     $("job-search").value = "";
+    saveCatalogContext();
     renderCountryFilter();
     renderFeatureFilter();
     renderJobs();
@@ -855,6 +882,7 @@
     });
     $("job-search").addEventListener("input", (event) => {
       state.query = event.target.value;
+      saveCatalogContext();
       renderJobs();
     });
     $("reset-filters").addEventListener("click", resetFilters);
@@ -868,12 +896,14 @@
       const shareButton = event.target.closest("[data-share-vacancy]");
       if (countryButton) {
         state.country = countryButton.dataset.countryFilter || "";
+        saveCatalogContext();
         updateFilterSelection("country-filter", "countryFilter", state.country);
         renderJobs();
         return;
       }
       if (featureButton) {
         state.feature = featureButton.dataset.featureFilter || "";
+        saveCatalogContext();
         updateFilterSelection("feature-filter", "featureFilter", state.feature);
         renderJobs();
         return;
@@ -1030,6 +1060,7 @@
 
   function init() {
     i18n.init();
+    restoreCatalogContext();
     ensureHousingLightbox();
     bind();
     renderStatic();
