@@ -16,5 +16,13 @@ jobs:
         with:
           node-version: 22
       - run: npm test
+      - name: Test Pages publication boundary
+        run: node --test scripts/pages-artifact.test.mjs
+      - name: Build and verify Pages artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
       - name: Verify generated files are current
         run: git diff --exit-code
