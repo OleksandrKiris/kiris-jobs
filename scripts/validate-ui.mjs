@@ -40,6 +40,11 @@ const homepageStyleVersion = versionOf(html, "assets/homepage.css");
 const appVersion = versionOf(html, "assets/bootstrap.js");
 const applicationVersion = appVersion;
 assert(styleVersion, "index.html: candidate-base.css must have a numeric cache-busting version.");
+const pagesWorkflow = await read(".github/workflows/pages.yml");
+assert(
+  pagesWorkflow.includes(`grep -q 'assets/bootstrap.js?v=${appVersion}' index.html`),
+  "Pages production check must require the same bootstrap version as index.html."
+);
 assert(cleanStyleVersion, "index.html: clean.css must have a numeric cache-busting version.");
 assert(homepageStyleVersion, "index.html: homepage.css must have a numeric cache-busting version.");
 assert(appVersion, "index.html: bootstrap.js must have a numeric cache-busting version.");
