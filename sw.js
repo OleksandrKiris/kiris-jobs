@@ -1,23 +1,23 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v214-primserv-brand-2026-10-15-1";
+const CACHE_VERSION = "kiris-jobs-v215-primserv-brand-2026-10-15-1";
 const CORE_SHELL = [
   "./",
   "./index.html",
   "./privacy.html",
   "./manifest.webmanifest",
-  "./data/content.js?v=214",
-  "./data/locales/pl.js?v=214",
-  "./assets/bootstrap.js?v=214",
-  "./assets/privacy-bootstrap.js?v=214",
-  "./assets/candidate-base.css?v=214",
-  "./assets/clean.css?v=214",
-  "./assets/homepage.css?v=214",
-  "./assets/privacy.css?v=214",
-  "./assets/i18n.js?v=214",
-  "./assets/application-form.js?v=214",
-  "./assets/vacancy-overrides.js?v=214",
-  "./assets/candidate.js?v=214",
-  "./assets/privacy.js?v=214",
+  "./data/content.js?v=215",
+  "./data/locales/pl.js?v=215",
+  "./assets/bootstrap.js?v=215",
+  "./assets/privacy-bootstrap.js?v=215",
+  "./assets/candidate-base.css?v=215",
+  "./assets/clean.css?v=215",
+  "./assets/homepage.css?v=215",
+  "./assets/privacy.css?v=215",
+  "./assets/i18n.js?v=215",
+  "./assets/application-form.js?v=215",
+  "./assets/vacancy-overrides.js?v=215",
+  "./assets/candidate.js?v=215",
+  "./assets/privacy.js?v=215",
   "./assets/icons.svg",
   "./assets/mobility-map.svg?v=10",
   "./assets/oleksandr-kiris-greenhouse-96.webp",
@@ -33,10 +33,10 @@ const CORE_SHELL = [
   "./assets/fonts/noto-sans-devanagari-variable.woff2",
   "./assets/fonts/OFL-1.1.txt",
   "./assets/fonts/FONT-LICENSES.md",
-  "./assets/icon-192.png?v=214",
-  "./assets/icon-512.png?v=214",
+  "./assets/icon-192.png?v=215",
+  "./assets/icon-512.png?v=215",
   "./assets/share-card.svg",
-  "./assets/share-card.png?v=214"
+  "./assets/share-card.png?v=215"
 ];
 
 self.addEventListener("install", (event) => {
