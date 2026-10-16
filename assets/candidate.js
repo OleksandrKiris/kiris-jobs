@@ -521,6 +521,14 @@
     container.setAttribute("aria-label", i18n.t("ui.conditions"));
   }
 
+  function updateFilterSelection(containerId, datasetKey, value) {
+    $(containerId)?.querySelectorAll("button").forEach((button) => {
+      const selected = button.dataset[datasetKey] === value;
+      button.setAttribute("aria-pressed", String(selected));
+      button.classList.toggle("is-active", selected);
+    });
+  }
+
   function renderJobs() {
     const result = visibleJobs();
     const available = result.filter(canApply);
@@ -860,13 +868,13 @@
       const shareButton = event.target.closest("[data-share-vacancy]");
       if (countryButton) {
         state.country = countryButton.dataset.countryFilter || "";
-        renderCountryFilter();
+        updateFilterSelection("country-filter", "countryFilter", state.country);
         renderJobs();
         return;
       }
       if (featureButton) {
         state.feature = featureButton.dataset.featureFilter || "";
-        renderFeatureFilter();
+        updateFilterSelection("feature-filter", "featureFilter", state.feature);
         renderJobs();
         return;
       }
