@@ -56,7 +56,7 @@ const sitemapEntries = [
 for (const job of content.jobs) {
   const localized = { ...job, ...(polishJobs[job.id] || {}) };
   const pageUrl = new URL(`vacancies/${encodeURIComponent(job.id)}/`, content.site.baseUrl).toString();
-  const imageUrl = new URL("assets/share-card.png?v=218", content.site.baseUrl).toString();
+  const imageUrl = new URL("assets/share-card.png?v=219", content.site.baseUrl).toString();
   const title = `${localized.title} · ${job.company} · PrimServ`;
   const description = [
     localized.summary,
@@ -67,6 +67,7 @@ for (const job of content.jobs) {
 
   let html = template;
   html = html.replace("<meta charset=\"utf-8\">", "<meta charset=\"utf-8\">\n  <base href=\"../../\">");
+  html = html.replace('class="skip-link" href="#main-content"', `class="skip-link" href="${escapeAttribute(pageUrl)}#main-content"`);
   html = replaceMeta(html, 'name="description"', description);
   html = replaceMeta(html, 'property="og:title"', title);
   html = replaceMeta(html, 'property="og:description"', description);

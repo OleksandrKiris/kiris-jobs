@@ -27,7 +27,7 @@ function harness(locale = "en") {
     addEventListener(event, callback) { listeners[event] = callback; }
   };
   const i18n = { locale, t: () => `Questionnaire (${i18n.locale})`, subscribe: fn => subscriptions.push(fn) };
-  const window = { PortalI18n: i18n, PORTAL_ASSET_VERSION: "218" };
+  const window = { PortalI18n: i18n, PORTAL_ASSET_VERSION: "219" };
   const application = { open: (id, options) => opened.push({ id, ...options }) };
   vm.runInNewContext(instrumented, {
     window,
@@ -49,8 +49,8 @@ test("catalogue bootstrap loads only the small loader, with the existing form re
   const candidate = await fs.readFile(new URL("assets/candidate.js", root), "utf8");
   assert.ok(!bootstrap.includes("application-form.js"));
   assert.ok(bootstrap.indexOf("application-loader.js") < bootstrap.indexOf("candidate.js"));
-  assert.ok(worker.includes("assets/application-form.js?v=218"));
-  assert.ok(worker.includes("assets/application-loader.js?v=218"));
+  assert.ok(worker.includes("assets/application-form.js?v=219"));
+  assert.ok(worker.includes("assets/application-loader.js?v=219"));
   assert.equal((candidate.match(/PortalApplicationLoader\?\.open/g) || []).length, 2);
   assert.ok(Buffer.byteLength(source) < 6000);
   const h = harness();
@@ -74,7 +74,7 @@ for (const locale of locales) {
     assert.notEqual(h.container.innerHTML, loading);
     const retry = h.open("greenhouse-tomatoes", { standalone: true });
     assert.equal(h.requests.length, 2);
-    assert.ok(h.requests[1].url.includes("v=218&retry=1"));
+    assert.ok(h.requests[1].url.includes("v=219&retry=1"));
     h.resolve();
     await retry;
     assert.deepEqual(h.opened, [{ id: "greenhouse-tomatoes", standalone: true }]);
