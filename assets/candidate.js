@@ -952,7 +952,7 @@
         if (directJobId) return;
         event.preventDefault();
         closeDialog($("job-dialog"));
-        window.PortalApplication?.open(applyButton.dataset.applyJob);
+        window.PortalApplicationLoader?.open(applyButton.dataset.applyJob);
       }
       if (closeButton) closeDialog(closeButton.closest("dialog"));
     });
@@ -1026,7 +1026,7 @@
         if (!canApply(job)) return;
         document.body.classList.add("standalone-application-page");
         $("application-page-back").hidden = false;
-        window.PortalApplication?.open(directJobId, { standalone: true });
+        window.PortalApplicationLoader?.open(directJobId, { standalone: true });
       }
       return;
     }
