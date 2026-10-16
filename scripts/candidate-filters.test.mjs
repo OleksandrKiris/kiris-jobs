@@ -6,13 +6,19 @@ import vm from "node:vm";
 const root = new URL("../", import.meta.url);
 const locales = ["ru", "uk", "pl", "en", "az", "ka", "id", "es", "fil", "ne", "hy"];
 const source = await fs.readFile(new URL("assets/candidate.js", root), "utf8");
-const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.filterTest = { bind, renderCountryFilter, renderFeatureFilter, resetFilters, visibleJobs, state };\n})();");
+const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.filterTest = { bind, renderCountryFilter, renderFeatureFilter, resetFilters, restoreCatalogContext, visibleJobs, state };\n})();");
 assert.notEqual(instrumented, source, "Replace startup only; never run analytics or candidate submissions");
 const scripts = await Promise.all(["data/content.js", ...locales.map(l => `data/locales/${l}.js`), "assets/i18n.js"].map(async path => fs.readFile(new URL(path, root), "utf8")));
 
-function catalog(locale = "pl") {
-  const location = new URL(`https://oleksandrkiris.github.io/kiris-jobs/?lang=${locale}`);
-  const window = { location, addEventListener() {} };
+function catalog(locale = "pl", options = {}) {
+  const location = new URL(`https://oleksandrkiris.github.io/kiris-jobs/${options.path || ""}?lang=${locale}`);
+  const storage = options.storage || new Map();
+  const storageCalls = [];
+  const window = { location, addEventListener() {}, sessionStorage: {
+    getItem(key) { storageCalls.push(["get", key]); if (options.blockRead) throw Error("Storage blocked"); return storage.get(key) ?? null; },
+    setItem(key, value) { storageCalls.push(["set", key]); if (options.blockWrite) throw Error("Storage full"); storage.set(key, value); },
+    removeItem(key) { storageCalls.push(["remove", key]); if (options.blockWrite) throw Error("Storage blocked"); storage.delete(key); }
+  } };
   const handlers = new Map();
   const elements = new Map();
   const document = {
@@ -26,7 +32,8 @@ function catalog(locale = "pl") {
     let buttons = [];
     const node = {
       id, attributes: {}, value: "", focusCalls: [],
-      addEventListener() {},
+      handlers: new Map(),
+      addEventListener(type, handler) { this.handlers.set(type, handler); },
       setAttribute(key, value) { this.attributes[key] = value; },
       focus(options) { document.activeElement = this; this.focusCalls.push(options); },
       querySelectorAll: selector => selector === "button" ? buttons : [],
@@ -58,10 +65,13 @@ function catalog(locale = "pl") {
   scripts.forEach(script => vm.runInContext(script, context));
   vm.runInContext(instrumented, context);
   const api = window.filterTest;
+  api.restoreCatalogContext();
   api.renderCountryFilter();
   api.renderFeatureFilter();
   api.bind();
-  return { api, window, document, elements, click(button) { button.focus(); handlers.get("click")({ target: button }); } };
+  return { api, window, document, elements, storage, storageCalls,
+    input(query) { const node = elements.get("job-search"); node.value = query; node.handlers.get("input")({ target: node }); },
+    click(button) { button.focus(); handlers.get("click")({ target: button }); } };
 }
 
 for (const locale of locales) {
@@ -110,4 +120,54 @@ test("reset still clears query and both filters and intentionally returns focus 
   for (const [id, key] of [["country-filter", "countryFilter"], ["feature-filter", "featureFilter"]]) {
     assert.ok(c.elements.get(id).querySelectorAll("button").every(button => button.attributes["aria-pressed"] === String(!button.dataset[key])));
   }
+});
+
+const contextKey = "kiris-jobs:catalog-context:v1";
+for (const locale of locales) {
+  test(`${locale}: catalogue → vacancy → catalogue restores query and both filters in the same tab`, () => {
+    const first = catalog(locale);
+    const originalFacts = JSON.stringify(first.window.PORTAL_CONTENT);
+    first.input("Ryczywół");
+    first.click(first.elements.get("country-filter").querySelectorAll("button").find(b => b.dataset.countryFilter === "PL"));
+    first.click(first.elements.get("feature-filter").querySelectorAll("button").find(b => b.dataset.featureFilter === "housing"));
+    const expected = Array.from(first.api.visibleJobs(), job => job.id);
+    assert.ok(expected.length > 0);
+    const saved = first.storage.get(contextKey);
+    assert.deepEqual(JSON.parse(saved), { query: "Ryczywół", country: "PL", feature: "housing" });
+    const direct = catalog(locale, { storage: first.storage, path: "vacancies/greenhouse-tomatoes/" });
+    assert.equal(direct.storageCalls.length, 0, "Vacancy pages must not read or overwrite catalogue context");
+    const returned = catalog(locale, { storage: first.storage });
+    assert.deepEqual(Array.from(returned.api.visibleJobs(), job => job.id), expected);
+    assert.equal(returned.elements.get("job-search").value, "Ryczywół");
+    assert.equal(returned.api.state.country, "PL");
+    assert.equal(returned.api.state.feature, "housing");
+    const changedLanguage = catalog(locale === "en" ? "uk" : "en", { storage: first.storage });
+    assert.equal(changedLanguage.api.state.query, "Ryczywół", "Language changes must not discard the query");
+    assert.equal(JSON.stringify(first.window.PORTAL_CONTENT), originalFacts);
+    returned.api.resetFilters();
+    assert.equal(returned.storage.has(contextKey), false);
+    assert.equal(catalog(locale, { storage: returned.storage }).api.visibleJobs().length, 14);
+    assert.equal(catalog(locale).api.state.query, "", "A fresh tab without saved context starts unfiltered");
+  });
+}
+
+test("invalid or unavailable session context never breaks catalogue filters", () => {
+  for (const value of ["{", "null", "[]", "1", '"text"']) {
+    const c = catalog("pl", { storage: new Map([[contextKey, value]]) });
+    assert.equal(c.api.visibleJobs().length, 14);
+  }
+  const invalid = catalog("pl", { storage: new Map([[contextKey, JSON.stringify({ query: 5, country: "unknown", feature: "unknown", openJobId: "x" })]]) });
+  assert.equal(invalid.api.state.query, "");
+  assert.equal(invalid.api.state.country, "");
+  assert.equal(invalid.api.state.feature, "");
+  assert.equal(invalid.api.state.openJobId, "");
+  const blocked = catalog("pl", { blockRead: true, blockWrite: true });
+  blocked.input("Ryczywół");
+  assert.ok(blocked.api.visibleJobs().length > 0);
+  assert.doesNotThrow(() => blocked.api.resetFilters());
+  assert.equal(blocked.api.visibleJobs().length, 14);
+});
+
+test("startup restores context before rendering the catalogue", () => {
+  assert.match(source, /function init\(\)\s*\{\s*i18n\.init\(\);\s*restoreCatalogContext\(\);/);
 });
