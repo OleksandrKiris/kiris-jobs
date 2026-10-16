@@ -15,6 +15,7 @@
       navSaved: "Tersimpan",
       navProfile: "Tentang saya",
       mainNavigation: "Navigasi utama",
+      footerNavigation: "PrimServ, kontak dan privasi",
       contact: "Kirim pesan",
       install: "Pasang",
       online: "Online · portal siap digunakan secara offline",

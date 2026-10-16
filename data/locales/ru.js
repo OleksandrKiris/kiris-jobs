@@ -15,6 +15,7 @@
       navSaved: "Избранное",
       navProfile: "Обо мне",
       mainNavigation: "Основная навигация",
+      footerNavigation: "PrimServ, контакты и конфиденциальность",
       contact: "Написать мне",
       install: "Установить",
       online: "Онлайн · портал готов к работе офлайн",

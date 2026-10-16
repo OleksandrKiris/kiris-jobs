@@ -15,6 +15,7 @@
       navSaved: "Guardadas",
       navProfile: "Sobre mí",
       mainNavigation: "Navegación principal",
+      footerNavigation: "PrimServ, contacto y privacidad",
       contact: "Escríbeme",
       install: "Instalar",
       online: "En línea · el portal está listo para usarse sin conexión",

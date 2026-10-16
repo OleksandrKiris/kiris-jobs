@@ -15,6 +15,7 @@
       navSaved: "Zapisane",
       navProfile: "O mnie",
       mainNavigation: "Główna nawigacja",
+      footerNavigation: "PrimServ, kontakt i prywatność",
       contact: "Napisz do mnie",
       install: "Zainstaluj",
       online: "Online · portal działa także offline",

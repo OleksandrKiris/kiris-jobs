@@ -15,6 +15,7 @@
       navSaved: "Seçilmişlər",
       navProfile: "Haqqımda",
       mainNavigation: "Əsas naviqasiya",
+      footerNavigation: "PrimServ, əlaqə və məxfilik",
       contact: "Mənə yazın",
       install: "Quraşdır",
       online: "Onlayn · portal oflayn işləməyə hazırdır",

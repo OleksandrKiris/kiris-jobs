@@ -15,6 +15,7 @@
       navSaved: "Saved",
       navProfile: "About me",
       mainNavigation: "Main navigation",
+      footerNavigation: "PrimServ, contact and privacy",
       contact: "Message me",
       install: "Install",
       online: "Online · the portal is ready to work offline",

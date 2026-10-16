@@ -15,6 +15,7 @@
       navSaved: "შენახული",
       navProfile: "ჩემ შესახებ",
       mainNavigation: "მთავარი ნავიგაცია",
+      footerNavigation: "PrimServ, კონტაქტი და კონფიდენციალურობა",
       contact: "მომწერეთ",
       install: "დაყენება",
       online: "ონლაინ · პორტალი მზადაა ოფლაინ მუშაობისთვის",
