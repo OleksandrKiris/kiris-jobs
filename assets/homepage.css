@@ -1,4 +1,4 @@
-/* v197 · unified candidate homepage */
+/* v217 · clearer catalogue and direct HRappka application */
 
 .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) {
   --homepage-bg: #f4f6f8;
@@ -7,8 +7,8 @@
   --homepage-muted: #5d6e7d;
   --homepage-line: #dbe2e9;
   --homepage-line-strong: #b9c7d4;
-  --homepage-accent: #354c61;
-  --homepage-accent-dark: #1c2e3e;
+  --homepage-accent: #b51620;
+  --homepage-accent-dark: #8f1019;
   background: var(--homepage-bg);
 }
 
@@ -898,4 +898,97 @@
     grid-template-columns: 26px 15px;
     gap: 3px;
   }
+}
+
+/* Direct application access, with the original recruiter form preserved. */
+.candidate-site .hrappka-callout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+  align-items: center;
+  gap: 24px;
+  margin-block: 16px 28px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e3cbd0;
+  border-left: 4px solid #b51620;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(16, 24, 32, .04);
+}
+.hrappka-callout-copy { min-width: 0; }
+.hrappka-callout-copy h2 { margin: 4px 0 8px; color: #101820; font-size: clamp(21px, 2.5vw, 26px); line-height: 1.2; }
+.hrappka-callout-copy > p:last-child { margin: 0; color: #4d5a68; font-size: 15px; line-height: 1.5; }
+.hrappka-callout .eyebrow { color: #b51620; font-size: 12px; letter-spacing: .06em; }
+.hrappka-callout-action { min-width: 0; display: grid; gap: 9px; }
+.candidate-site .hrappka-button,
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card .hrappka-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  color: #fff;
+  background: #b51620;
+  border: 1px solid #b51620;
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.candidate-site .hrappka-button:hover { color: #fff; background: #8f1019; border-color: #8f1019; }
+.candidate-site .hrappka-button:focus-visible { outline: 3px solid #101820; outline-offset: 3px; }
+.candidate-site .hrappka-language-note,
+.candidate-site .job-card-apply small { margin: 0; color: #4d5a68; font-size: 12px; line-height: 1.5; }
+.candidate-site .hrappka-alternative { display: grid; gap: 10px; margin-block: 12px 18px; }
+.candidate-site .hrappka-alternative .secondary-button { min-height: 44px; padding: 10px 14px; font-size: 14px; white-space: normal; text-align: center; }
+.candidate-site .primserv-service-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.candidate-site .primserv-service-nav .hrappka-nav-link { color: #a6121c; background: #fff4f5; border-color: #e3cbd0; font-weight: 800; }
+.direct-vacancy-page .hrappka-callout,
+.standalone-application-page .hrappka-callout { display: none; }
+
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .candidate-intro { padding-block: 26px 12px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .candidate-intro .intro-copy { font-size: 16px; line-height: 1.6; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .candidate-intro .intro-note { font-size: 13px; line-height: 1.5; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .candidate-job-grid { gap: 18px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card { flex-direction: column; border-radius: 16px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-link { height: auto; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card .job-open::after { display: none; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-link:focus-visible { outline: 3px solid #101820; outline-offset: -3px; border-radius: 16px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-body { min-height: 240px; padding: 20px; gap: 14px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-company { margin: 0 0 7px; color: #4d5a68; font-size: 12px; font-weight: 700; line-height: 1.5; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card h2 { font-size: 20px; line-height: 1.35; overflow-wrap: anywhere; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-facts .job-card-salary dd { color: #101820; font-size: 21px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-facts .job-card-location dd { font-size: 14px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card .primary-button { min-height: 46px; font-size: 14px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-apply {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  padding: 0 20px 20px;
+}
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card:has(.job-card-apply) .job-card-body > .primary-button {
+  color: #1c2e3e;
+  background: #f4f6f8;
+  border-color: #b9c7d4;
+}
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-benefit-tags span { font-size: 11px; padding: 5px 8px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .country-filter-buttons button,
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .feature-filter-buttons button { min-height: 44px; font-size: 13px; }
+.vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .catalog-date { color: #4d5a68; font-size: 12px; }
+
+@media (max-width: 700px) {
+  .candidate-site .hrappka-callout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px; }
+  .candidate-site .primserv-service-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .candidate-site .primserv-service-nav a:last-child { grid-column: auto; }
+  .candidate-site .primserv-service-nav a { min-width: 0; white-space: normal; overflow-wrap: anywhere; text-align: center; }
+}
+@media (max-width: 420px) {
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-body { padding: 16px; }
+  .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-apply { padding: 0 16px 16px; }
 }

@@ -9,6 +9,12 @@
  * или другие персональные данные кандидатов.
  */
 window.PORTAL_CONTENT = {
+  applicationForms: {
+    hrappka: {
+      url: "https://aplikuj.hrappka.pl/oferta/Konfekcjonowanie-i-pomocnicze-czynnosci-przy-uprawie-warzyw/177999/Facebooklink?lang=pl",
+      jobIds: ["greenhouse-tomatoes", "greenhouse-renewal", "tomato-sorting"]
+    }
+  },
   site: {
     isDemo: false,
     title: "PrimServ · Praca w Europie",

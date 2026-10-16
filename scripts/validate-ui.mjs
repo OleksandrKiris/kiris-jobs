@@ -266,7 +266,7 @@ assert(
   "The recruiter WhatsApp message must remain compact and Unicode-safe."
 );
 assert(
-  homepageCss.includes("v197 · unified candidate homepage")
+  homepageCss.includes("v217 · clearer catalogue and direct HRappka application")
     && homepageCss.includes(".catalog-filters")
     && homepageCss.includes("overflow-x: auto")
     && homepageCss.includes("grid-template-columns: 1fr")
@@ -368,7 +368,7 @@ assert(
     && applicationScript.includes('"birthDate"')
     && cleanCss.includes("v202 · privacy access and data-minimised application")
     && serviceWorker.includes('"./privacy.html"')
-    && serviceWorker.includes('"./assets/privacy.js?v=216"'),
+    && serviceWorker.includes('"./assets/privacy.js?v=217"'),
   "The privacy notice, consent access and data-minimised browser draft are incomplete."
 );
 assert(
@@ -448,7 +448,7 @@ assert(
     && applicationScript.includes("screeningStatus: record.decision?.status")
     && applicationScript.includes("...legacyPayload")
     && applicationScript.includes('event: "application_complete"')
-    && serviceWorker.includes("kiris-jobs-v216")
+    && serviceWorker.includes("kiris-jobs-v217")
     && applicationScript.includes('const STEP_KEYS = [')
     && applicationScript.includes('"stepDetails"'),
   "The v204 smart filters, freshness, localized metadata and safe success flow are incomplete."
@@ -471,7 +471,7 @@ assert(
     && vacancyOverrides.includes("allowedStatuses")
     && candidateScript.includes("runtimeRateUnconfirmed")
     && applicationScript.includes("vacancy_unavailable")
-    && serviceWorker.includes('"./assets/vacancy-overrides.js?v=216"'),
+    && serviceWorker.includes('"./assets/vacancy-overrides.js?v=217"'),
   "The live vacancy control integration is incomplete."
 );
 assert(
