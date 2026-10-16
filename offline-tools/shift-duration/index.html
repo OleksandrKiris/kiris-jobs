@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <title>Shift duration · PrimServ</title>
+  <link rel="icon" href="primserv-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=1">
+  <script src="core.js?v=1" defer></script>
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+  <header><img src="primserv-logo.svg" alt="PrimServ" width="64" height="90"><span data-i18n="badge">Offline prototype · v1</span></header>
+  <main>
+    <div class="heading"><div><p class="eyebrow" data-i18n="eyebrow">A small tool for everyday calculations</p><h1 data-i18n="title">Shift duration</h1></div>
+      <label class="language"><span data-i18n="language">Language</span><select id="language"><option value="en">English</option><option value="pl">Polski</option><option value="uk">Українська</option><option value="ru">Русский</option></select></label></div>
+    <p id="fallback" hidden>Requested language is unavailable. English is shown; you can choose another supported language.</p>
+    <p class="intro" data-i18n="intro">Calculate one interval and subtract a break. Nothing is sent anywhere.</p>
+    <div class="layout">
+      <section class="panel" aria-labelledby="inputTitle"><h2 id="inputTitle" data-i18n="inputTitle">Enter the time</h2>
+        <form id="calculator" novalidate>
+          <div class="times"><label><span data-i18n="start">Start</span><input id="start" type="time" required aria-describedby="error"></label><label><span data-i18n="end">End</span><input id="end" type="time" required aria-describedby="error"></label></div>
+          <label class="check"><input id="nextDay" type="checkbox"><span data-i18n="nextDay">End on the following day</span></label>
+          <label><span data-i18n="breakMinutes">Break, minutes</span><input id="breakMinutes" type="number" min="0" max="1438" step="1" value="0" required aria-describedby="error"></label>
+          <p id="error" role="alert"></p>
+          <button type="submit" data-i18n="calculate">Calculate</button>
+        </form>
+      </section>
+      <section class="panel result" aria-labelledby="resultTitle"><h2 id="resultTitle" data-i18n="resultTitle">Time remaining after the break</h2><div id="result" role="status" aria-live="polite" aria-atomic="true"></div><p class="note" data-i18n="disclaimer">Arithmetic only, not a timesheet or payroll calculation. No assessment of working-time rules. Intervals must be shorter than 24 hours. Clock changes and time zones are not included.</p></section>
+    </div>
+    <section class="panel storage" aria-labelledby="storageTitle"><h2 id="storageTitle" data-i18n="storageTitle">On this device only</h2><p data-i18n="storageNote">Save the current fields and language only when you choose. No names or employee records. Browser storage may be cleared.</p><div class="actions"><button id="save" type="button" class="secondary" data-i18n="save">Save fields</button><button id="forget" type="button" class="secondary" data-i18n="forget">Forget saved fields</button></div><p id="storageStatus" role="status" aria-live="polite"></p></section>
+    <p class="note" data-i18n="offline">Works without internet from a downloaded local copy. Open index.html or use the documented local server. External links below need internet; this is not an installed PWA.</p>
+    <noscript>This tool needs JavaScript enabled locally. It does not send data. / Для расчёта нужен JavaScript.</noscript>
+  </main>
+  <footer><nav aria-label="PrimServ" id="links"><a href="https://www.primserv.pl/" data-i18n="company">PrimServ company</a><a id="jobs" href="https://oleksandrkiris.github.io/kiris-jobs/" data-i18n="jobs">Vacancies</a><a id="hydra" href="https://oleksandrkiris.github.io/citronex-hydra-project/" data-i18n="hydra">Training / HYDRA</a><a href="https://t.me/KirisWorkPoland_bot" data-i18n="telegram">Telegram bot</a></nav></footer>
+</body>
+</html>
