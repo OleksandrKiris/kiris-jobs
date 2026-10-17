@@ -26,3 +26,29 @@ test('backend comparison separates open samples, unchanged counts and unavailabl
   assert.equal(hasCompleteBackendOpen(samples,names),true);assert.equal(hasCompleteBackendOpen(samples.slice(1),names),false);
   assert.equal(hasCompleteBackendOpen([...samples.slice(1),samples[1]],names),false);
 });
+test('malformed backend buckets and incoherent sums are unavailable',async()=>{
+  const {compareBackendOpen}=await import('./backend-open-observation.mjs');const good={status:'observed',histogram};
+  for(const bad of [
+    {...histogram,count:2,buckets:[{low:0,high:1,count:1},{low:0,high:1,count:1}]},
+    {...histogram,sum:5},
+    {...histogram,count:2,sum:1,buckets:[{low:0,high:2,count:1},{low:1,high:2,count:1}]},
+    {...histogram,sum:-1},
+    {...histogram,buckets:[{low:-1,high:1,count:1}]},
+    {...histogram,sum:6,buckets:[{low:6,high:7,count:1}]}
+  ])assert.equal(compareBackendOpen({status:'observed',histogram:bad},good).status,'unavailable',JSON.stringify(bad));
+});
+test('backend delta rejects internally impossible cumulative changes',async()=>{
+  const {compareBackendOpen}=await import('./backend-open-observation.mjs');
+  const before={status:'observed',histogram:{...histogram,sum:1,buckets:[{low:0,high:2,count:1}]}};
+  const after={status:'observed',histogram:{...histogram,sum:0,buckets:[{low:0,high:2,count:1}]}};
+  assert.equal(compareBackendOpen(before,after).status,'incomparable');
+});
+test('duplicate ranges cannot hide zero-count bucket delta; malformed literal response retained',async()=>{
+  const {compareBackendOpen,captureBackendOpen}=await import('./backend-open-observation.mjs');
+  const bad={...histogram,count:2,buckets:[{low:0,high:1,count:1},{low:0,high:1,count:1}]};
+  const after={...histogram,count:2,buckets:[{low:0,high:1,count:2}]};
+  assert.equal(compareBackendOpen({status:'observed',histogram:bad},{status:'observed',histogram:after}).status,'unavailable');
+  let detached=0;
+  const sample=await captureBackendOpen({browser:()=>({newBrowserCDPSession:async()=>({send:async()=>({histogram:bad}),detach:async()=>{detached++;}})})});
+  assert.equal(sample.status,'unavailable');assert.deepEqual(sample.requests[0].result,{histogram:bad});assert.equal(detached,1);
+});

@@ -1,10 +1,19 @@
 // Test-only backend metadata. Never reads or mutates DOM storage data.
 const name='LocalStorage.DatabaseOpen';
+function coherent(buckets,count,sum) {
+  let total=0,min=0,max=0,previousHigh=-1;
+  for(const b of [...buckets].sort((a,b)=>a.low-b.low)) {
+    if(!Number.isSafeInteger(b.low)||!Number.isSafeInteger(b.high)||b.low<0||
+      b.high>6||b.high<=b.low||b.low<previousHigh||
+      !Number.isSafeInteger(b.count)||b.count<=0)return false;
+    previousHigh=b.high;total+=b.count;min+=b.low*b.count;max+=(b.high-1)*b.count;
+    if(![total,min,max].every(Number.isSafeInteger))return false;
+  }
+  return total===count&&sum>=min&&sum<=max;
+}
 const valid=h=>h?.name===name&&Number.isSafeInteger(h.count)&&h.count>0&&
   Number.isSafeInteger(h.sum)&&Array.isArray(h.buckets)&&h.buckets.length>0&&
-  h.buckets.every(b=>Number.isSafeInteger(b.low)&&Number.isSafeInteger(b.high)&&b.high>b.low&&
-    Number.isSafeInteger(b.count)&&b.count>0)&&
-  h.buckets.reduce((n,b)=>n+b.count,0)===h.count;
+  h.buckets.every(b=>b&&typeof b==='object')&&coherent(h.buckets,h.count,h.sum);
 
 export async function captureBackendOpen(context) {
   const sample={status:'unavailable',requests:[],transport:{attached:false,detached:false}};
@@ -35,6 +44,7 @@ export function compareBackendOpen(before,after) {
   const aa=counts(a),bb=counts(b),keys=new Set([...aa.keys(),...bb.keys()]);
   const buckets=[...keys].map(key=>{const [low,high]=key.split(':').map(Number);return {low,high,count:(bb.get(key)||0)-(aa.get(key)||0)};});
   if(b.count<a.count||b.sum<a.sum||buckets.some(x=>x.count<0))return {status:'incomparable',reason:'Cumulative counts decreased'};
+  if(!coherent(buckets.filter(x=>x.count),b.count-a.count,b.sum-a.sum))return {status:'incomparable',reason:'Incoherent cumulative delta'};
   return {status:'observed',count:b.count-a.count,sum:b.sum-a.sum,buckets:buckets.filter(x=>x.count),
     interpretation:b.count===a.count?'no-new-visible-open-sample':'new-process-wide-backend-open-samples',
     limitation:'Not per KEY/origin; OK includes memory/recovery; no commit/load result or durability proof'};
