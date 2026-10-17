@@ -1,12 +1,44 @@
 # Public coordinator generation acceptance
 
-Owner1; existing PR60 only. No coordinator runtime, owner9 fixture, SW
-implementation, transferred CI path or production server is changed by this
-test slice. `package.json` adds the HTTP-fixture regression to the existing
+Owner1; existing PR60 only. No coordinator runtime, owner9 fixture,
+transferred CI path or production server is changed by this slice.
+The root SW body-read fix below is separate from the test helpers.
+`package.json` adds the HTTP-fixture regression to the existing
 `npm test`; the existing catalogue workflow invokes the browser runner.
 All new helpers and this note are inside hidden `.github/browser/`, outside
 the Pages artifact. No runtime dependency, mandatory request or public byte
 is added by these tests.
+
+## Complete network bodies before memory/storage fallback
+
+The first real run on head `40edbe381b72140a84bd7ddba08dd12ec783d56a`,
+run39056441898/artifact12109318008, passed18 existing groups and10 warm
+interruption/recovery cases, then failed on the first cold index.html cut.
+The response had200 headers but its body aborted; the unavailable page did
+not appear. This red run and its DOM/network trace remain preserved.
+
+After response.ok validation, the SW now fully reads clones of all five
+responses BEFORE entering the inner storage-fallback try. Network-body errors
+therefore reach the outer last-good/unavailable branch; only complete
+responses can be used for online-memory fallback if Cache.put fails.
+This adds no network request. It buffers the five explicitly requested public
+tool bodies (37,412 bytes at accepted PR76, plus implementation overhead);
+there is no bulk media download or sensitive data. A future larger runtime
+must account for its own size. It does not claim a hard network/body-size cap.
+
+The original minimal candidate is preserved separately in
+`cold-body-candidate.patch`, SHA256
+8ec65f4f8e5b41d986e9a732e74e1ce48fd6cb3a6d6b2f5dab3d4e2f4868ac04.
+The unpublished PR60 shell cache already differs from published main; this
+fix does not add an unrelated cache rename.
+
+The SW mock now consumes response bodies in Cache.put. Five cold-body tests
+fail200!=503 on the previous source; after the fix all24 SW tests pass,
+including five warm-body failures/recovery, old generation retention,
+complete-memory fallback on storage failure, and offline restart.
+Browser assertions additionally require actual503 for each cold failed
+navigation and subsequent offline reload, no committed pack and no readiness.
+These local results do not substitute for fresh exact-head browser acceptance.
 
 ## Exact source of the old bytes
 

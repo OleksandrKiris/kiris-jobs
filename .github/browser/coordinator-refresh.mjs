@@ -190,6 +190,9 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       assert.deepEqual(errors, []);
       report.results.push({ scenario: 'published old five → new tool bytes with unchanged worker / each HTTP cut / last-good / reconnect / recovered offline',
         width, failedFile, status: 'passed', before, recovered, cutProof, progress: JSON.parse(raw), workerSHA256: workerHash });
+    } catch (error) {
+      await page.screenshot({ path: join(reportDir, id + '-failure.png') }).catch(() => {});
+      throw error;
     } finally {
       origin.clearCut(); await stage(currentFiles); await stageShell(currentShell);
       if (stopped) await startServer();
@@ -210,13 +213,17 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       await page.locator('#job-search').fill('Siechnice');
       const pathname = new URL('tools/coordinator/' + failedFile, base).pathname;
       origin.cut(pathname);
+      const navigation = page.waitForResponse(response => response.request().isNavigationRequest()
+        && response.url().startsWith(base + 'tools/coordinator/'));
       await page.locator('[data-primserv-service="coordinator"]').click();
+      assert.equal((await navigation).status(), 503, 'Cold incomplete network package returns an honest unavailable response');
       await page.locator('#tool-unavailable').waitFor();
       const cutProof = interruption(origin, pathname);
       const unavailable = await packSnapshot(page, base);
       assert.deepEqual(unavailable, { name: null, generations: [], files: [] });
       await stopServer(); stopped = true; await ctx.setOffline(true);
-      await page.reload(); await page.locator('#tool-unavailable').waitFor();
+      assert.equal((await page.reload()).status(), 503);
+      await page.locator('#tool-unavailable').waitFor();
       assert.equal(await page.locator('#offline[data-offline-state="ready"]').count(), 0);
       await fits(page); await shot(page, id + '-unavailable');
       await page.locator('a').click(); await ready(page);
@@ -230,7 +237,10 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
       complete(await packSnapshot(page, base), headExpected);
       report.results.push({ scenario: 'cold partial HTTP body → unavailable offline → reconnect and complete download → offline reload',
-        width: 320, failedFile, status: 'passed', cutProof });
+        width: 320, failedFile, status: 'passed', unavailableStatus: 503, offlineReady: false, cutProof });
+    } catch (error) {
+      await page.screenshot({ path: join(reportDir, id + '-failure.png') }).catch(() => {});
+      throw error;
     } finally {
       origin.clearCut(); if (stopped) await startServer();
       await ctx.tracing.stop({ path: join(reportDir, id + '.zip') });

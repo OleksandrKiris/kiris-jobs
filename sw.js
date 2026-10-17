@@ -136,6 +136,9 @@ async function prepareToolPack(refresh) {
   try {
     const responses = await Promise.all(toolUrls.map(url => fetch(url, { cache: 'no-store', credentials: 'omit' })));
     if (responses.some(response => !response.ok)) throw Error('Incomplete tool package');
+    // Headers can succeed before a truncated network body fails. Validate all
+    // bodies before treating any later failure as unavailable cache storage.
+    await Promise.all(responses.map(response => response.clone().arrayBuffer()));
     try {
       const pack = await storeToolPack(responses);
       onlineToolPack = null;
