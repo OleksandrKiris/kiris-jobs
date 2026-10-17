@@ -9,13 +9,19 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
       - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm test
+      - name: Test isolated-module CI contract
+        run: node --test .github/scripts/local-prototypes.test.mjs
+      - name: Run unit tests owned by present local prototypes
+        run: node .github/scripts/local-prototypes.mjs unit
       - name: Test Pages publication boundary
         run: node --test scripts/pages-artifact.test.mjs
       - name: Build and verify Pages artifact
@@ -41,6 +47,21 @@ jobs:
           TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
           TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/browser/catalogue.mjs
+      - name: Browser acceptance owned by present local prototypes
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PROTOTYPE_REPORT_ROOT: ${{ runner.temp }}/primserv-prototype-reports
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/local-prototypes.mjs browser
+      - name: Keep isolated-module evidence outside Pages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-prototypes-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/primserv-prototype-reports
+          if-no-files-found: warn
+          retention-days: 7
       - name: Keep browser evidence for this commit
         if: always()
         uses: actions/upload-artifact@v4
