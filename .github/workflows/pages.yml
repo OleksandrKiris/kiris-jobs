@@ -32,6 +32,9 @@ jobs:
       - name: Проверить JavaScript, контент и анкету
         run: npm test
 
+      - name: Проверить границу публикации Pages
+        run: node --test scripts/pages-artifact.test.mjs
+
       - name: Проверить чистую production-структуру
         shell: bash
         run: |
@@ -83,10 +86,22 @@ jobs:
       - name: Настроить GitHub Pages
         uses: actions/configure-pages@v6
 
+      - name: Настроить Node.js для упаковки
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Собрать и проверить артефакт Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+
       - name: Подготовить статические файлы
         uses: actions/upload-pages-artifact@v5
         with:
-          path: "."
+          path: "${{ runner.temp }}/primserv-pages"
 
       - name: Опубликовать
         id: deployment

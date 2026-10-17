@@ -3,8 +3,23 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { spawnSync } = require('node:child_process');
 const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
+test('browser entry refuses local execution before loading any browser or git checkout',()=>{
+  const result=spawnSync(process.execPath,[path.join(__dirname,'browser-acceptance.mjs')],{
+    env:{...process.env,GITHUB_ACTIONS:'false',PLAYWRIGHT_PACKAGE:'must-not-be-loaded'},encoding:'utf8',timeout:5000
+  });
+  assert.equal(result.status,1);assert.match(result.stderr,/Run only in the approved GitHub Actions/);
+  assert.doesNotMatch(result.stderr,/Cannot find module|not a git repository/);
+});
+test('browser entry follows shared report contract without runtime dependency changes',()=>{
+  const source=read('browser-acceptance.mjs');
+  assert.match(source,/resolve\(BROWSER_REPORT\)/);assert.doesNotMatch(source,/COORDINATOR_REPORT/);
+  assert.match(source,/TESTED_HEAD/);assert.match(source,/TESTED_BASE/);
+  assert.match(source,/context\.setOffline\(true\)/);assert.match(source,/assert\.deepEqual\(requests, \[\]\)/);
+  assert.match(source,/finally/);assert.match(source,/browser\?\.close\(\)/);
+});
 function storage(entries=[], fail='') {
   const data = new Map(entries), calls=[];
   const access = (op,key) => {calls.push([op,key]);if(fail==='all'||fail===op)throw Error('denied');};
