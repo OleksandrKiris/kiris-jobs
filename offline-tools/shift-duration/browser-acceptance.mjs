@@ -101,6 +101,13 @@ async function remove(page, accept) {
 }
 async function narrow(page) {
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Horizontal overflow');
+  const start = await page.locator('#start').boundingBox();
+  const end = await page.locator('#end').boundingBox();
+  assert(start && end && end.y >= start.y + start.height, 'Native time editors must stack on narrow screens');
+  assert(await page.locator('.times').evaluate(el => [...el.querySelectorAll('input')].every(input => {
+    const box = input.getBoundingClientRect(), parent = el.getBoundingClientRect();
+    return box.left >= parent.left && box.right <= parent.right + 1;
+  })), 'Time editors must remain inside their card');
   for (const selector of ['#language', '#start', '#end', '#breakMinutes', '#save', '#forget']) {
     const box = await page.locator(selector).boundingBox();
     assert(box && box.x >= 0 && box.x + box.width <= 321, `Control outside narrow viewport: ${selector}`);

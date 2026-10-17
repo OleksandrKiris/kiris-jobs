@@ -121,6 +121,14 @@ test('browser entry refuses execution outside CI before loading a browser or acc
   assert.match(run.stderr, /CI-only browser entry/);
   assert.doesNotMatch(run.stderr, /Cannot find module|not a git repository/);
 });
+test('narrow native time controls have stacked layout and a versioned stylesheet', () => {
+  const css = fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  const browser = fs.readFileSync(path.join(__dirname, 'browser-acceptance.mjs'), 'utf8');
+  assert.match(css, /@media\(max-width:400px\)\{\.times\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(html, /style\.css\?v=2/);
+  assert.match(browser, /Time editors must remain inside their card/);
+});
 test('prepared CI entry records exact version, offline scenarios and closes resources', () => {
   const source = fs.readFileSync(path.join(__dirname, 'browser-acceptance.mjs'), 'utf8');
   for (const field of ['PLAYWRIGHT_PACKAGE', 'TESTED_HEAD', 'TESTED_BASE', 'BROWSER_REPORT', 'acceptance.json']) assert(source.includes(field));
