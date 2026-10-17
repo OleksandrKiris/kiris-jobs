@@ -6,7 +6,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createFileProfile } from './browser-profile.mjs';
+import { withFileProfile } from './browser-profile.mjs';
+import { captureStorageIdentity,compareStorageIdentity,hasCompleteIdentity } from './storage-identity.mjs';
 
 if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Run only in the approved GitHub Actions acceptance job. No local browser launch.');
 const { PLAYWRIGHT_PACKAGE, BROWSER_REPORT, TESTED_HEAD, TESTED_BASE } = process.env;
@@ -48,6 +49,17 @@ const readEvidence=()=>({
     filter:document.querySelector('#filter')?.value,tasks:[...document.querySelectorAll('#tasks select')].map(x=>({id:x.id,value:x.value}))}
 });
 report.storageEvidence=[];
+report.storageIdentity=[];
+report.identityObservation={scope:'Only six explicitly observed scenarios, state reload only; original controls and restarts unchanged',
+  effect:'Extra CDP attach/read-only RPC/detach round trips can change timing; not a causal fix',
+  context:'Optional browserContextId is kept null when not reported; no fabricated context ID',
+  protocolSource:'https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/packages/playwright-core/src/server/chromium/protocol.d.ts',
+  protocolSourceSha256:'3f6ef9c13ca4e92bc06426a01f2c3198448e949f64f62eb02e2db23146a8d06c',
+  acceptance:'Issue79 remains open; even green observation does not accept PR68 or establish Chromium cause'};
+const observeIdentity=async(context,page,scenario,phase)=>{
+  const sample=await captureStorageIdentity(context,page);
+  report.storageIdentity.push({scenario:scenario.name,phase,...sample});
+};
 report.observationProtocol={control:'Original storage operations and browser action order; no observer',
   passive:'Wrap existing storage calls and retain real model; no added storage reads, but CPU/payload timing changes',
   preseed:'Passive plus one explicitly labelled raw read after existing marker read',
@@ -80,7 +92,7 @@ try {
     ])
   ]) {
     const viewport = { width: scenario.width, height: 900 };
-    const profile = await createFileProfile(chromium, viewport);
+    await withFileProfile(chromium,viewport,async profile=>{
     const context = profile.context;
     browser = context.browser();
     report.browser = `Chromium ${browser.version()}`;
@@ -100,6 +112,19 @@ try {
       const originalFileSearch = new URL(page.url()).search;
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('.task').count(), 3);
+      assert.equal(await page.locator('#materials article').count(),1);
+      assert.match(await page.locator('#materialsStatus').innerText(),/en.*ru/);
+      assert.equal(await page.locator('#materials h3').getAttribute('lang'),'ru');
+      const snapshotText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),snapshotText);
+      await page.locator('#materialsSource').selectOption('snapshot');
+      await page.locator('#materialQuery').fill('bogatynia');
+      assert.equal(await page.locator('#materials article').count(),0);
+      assert.match(await page.locator('#materialsStatus').innerText(),/No confirmed material/);
+      await page.locator('#materialQuery').fill('zgorzelec');
+      assert.equal(await page.locator('#materials article').count(),1);
+      await page.locator('#materialQuery').fill('');
       await fits(page);
       if (scenario.mode === 'empty') {
         await page.locator('#language').focus(); await page.keyboard.press('Tab'); await focus(page, 'filter');
@@ -113,7 +138,9 @@ try {
         assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focus(page, 'demo-01',scenario);
         await page.locator('#filter').selectOption('done');
         await page.locator('#language').selectOption('uk');
+        if(scenario.observe)await observeIdentity(context,page,scenario,'before-state-reload');
         await page.reload(); await ready(page);
+        if(scenario.observe)await observeIdentity(context,page,scenario,'after-state-reload');
         if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#filter').inputValue(), 'done');
@@ -146,6 +173,14 @@ try {
         await page.goto(`${fileURL}?lang=ua`); await ready(page);
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#fallback').isVisible(), false);
+        await page.goto(`${fileURL}?lang=RU`); await ready(page);
+        assert.equal(await page.locator('html').getAttribute('lang'),'ru');
+        assert.equal(await page.locator('#materialsStatus').innerText(),'ru · Zgorzelec');
+        assert.equal(new URL(page.url()).searchParams.get('lang'),'RU');
+        await page.goto(`${fileURL}?lang=UA`); await ready(page);
+        assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+        assert.match(await page.locator('#materialsStatus').innerText(),/ua.*ru/);
+        assert.equal(new URL(page.url()).searchParams.get('lang'),'UA');
         await context.setOffline(false); await page.reload(); await ready(page);
         if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
       } else {
@@ -175,7 +210,9 @@ try {
           if (scenario.mode === 'denied-write') assert.equal(raw, previous);
           assert.equal(await page.evaluate(key => localStorage.getItem(key), OTHER), 'keep');
         }
+        if(scenario.observe)await observeIdentity(context,page,scenario,'before-state-reload');
         await page.reload(); await ready(page);
+        if(scenario.observe)await observeIdentity(context,page,scenario,'after-state-reload');
         if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
         if (scenario.mode === 'v1' || scenario.mode === 'denied-remove') {
           assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
@@ -208,15 +245,15 @@ try {
       // Continue independent diagnostic scenarios, retaining this failure and exit 1.
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
-      try { await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) }); }
-      finally { await profile.dispose(); }
+      await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) });
     }
+    });
   }
   // Mandatory durability checks: restart the browser with its native profile,
   // without an init script/seed, storageState(), or any test-side state write.
   for (const width of [1280, 320]) {
     const name = `profile-restart-${width}`, viewport = { width, height: 900 };
-    const profile = await createFileProfile(chromium, viewport);
+    await withFileProfile(chromium,viewport,async profile=>{
     const requests = [], errors = [];
     let context = profile.context;
     const prepare = async () => {
@@ -240,6 +277,11 @@ try {
       await page.locator('#filter').selectOption('done');
       await page.locator('#language').selectOption('uk');
       const savedURL = page.url();
+      const savedMaterialText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),savedMaterialText);
+      await page.locator('#materialQuery').fill('zgorzelec');
+      assert.equal(await page.locator('#materials article').count(),1);
       await context.tracing.stop({ path: join(reportDir, `${name}-before-trace.zip`) }); tracing = false;
       context = await profile.reopen();
       page = await prepare(); tracing = true;
@@ -247,6 +289,10 @@ try {
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
       assert.equal(await page.locator('#filter').inputValue(), 'done');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'snapshot');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'');
+      assert.equal(await page.locator('#materials').innerText(),savedMaterialText);
+      assert.match(await page.locator('#materialsStatus').innerText(),/uk.*ru/);
       assert.equal(await page.locator('#demo-02').inputValue(), 'done');
       assert.equal(await page.locator('.task').count(), 1);
       await page.locator('#filter').selectOption('all');
@@ -262,11 +308,19 @@ try {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
-      try { if (tracing) await context.tracing.stop({ path: join(reportDir, `${name}-after-trace.zip`) }); }
-      finally { await profile.dispose(); }
+      if (tracing) await context.tracing.stop({ path: join(reportDir, `${name}-after-trace.zip`) });
     }
+    });
   }
   report.status = acceptanceStatus(report.scenarios);
+  const observedNames=report.scenarios.filter(x=>x.observe).map(x=>x.name);
+  report.identityComparisons=observedNames.map(scenario=>({scenario,result:compareStorageIdentity(
+    report.storageIdentity.find(x=>x.scenario===scenario&&x.phase==='before-state-reload'),
+    report.storageIdentity.find(x=>x.scenario===scenario&&x.phase==='after-state-reload'))}));
+  report.identityGate={expectedObservedScenarios:6,samples:report.storageIdentity.length,
+    status:observedNames.length===6&&hasCompleteIdentity(report.storageIdentity,observedNames)&&
+      report.identityComparisons.every(x=>!['unavailable','incomparable-version'].includes(x.result))?'observed':'unavailable'};
+  if(report.identityGate.status!=='observed')report.status='failed';
   if(report.status==='failed')process.exitCode=1;
 } catch (error) { report.status = 'failed'; report.error = error.stack; process.exitCode = 1; }
 finally {
