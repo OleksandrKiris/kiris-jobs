@@ -24,6 +24,11 @@ jobs:
         run: |
           python -m unittest discover -s quality/security -p 'test_*.py' -v
           python quality/security/pages_concurrency.py .github/workflows/pages.yml
+      - name: Make exact event base available for upgrade acceptance
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: python quality/security/exact_base.py
       - run: npm test
       - name: Test isolated-module CI contract
         run: node --test .github/scripts/local-prototypes.test.mjs
