@@ -23,8 +23,6 @@ jobs:
     env:
       TESTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
       TESTED_BASE: ${{ github.event.pull_request.base.sha || github.sha }}
-      PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/coordinator-browser/node_modules/playwright
-      BROWSER_REPORT: ${{ runner.temp }}/coordinator-storage-report
       COMPARED_PLAYWRIGHT: ${{ matrix.playwright }}
       COMPARISON_SAMPLE: ${{ matrix.sample }}
     steps:
@@ -41,9 +39,14 @@ jobs:
       # A fixed three samples per version. Each failure remains a failed job;
       # neither the product, fixtures, assertions nor browser flags are changed.
       - name: Run unchanged coordinator file acceptance
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/coordinator-browser/node_modules/playwright
+          BROWSER_REPORT: ${{ runner.temp }}/coordinator-storage-report
         run: node coordinator-demo/browser-acceptance.mjs
       - name: Record comparison identity
         if: always()
+        env:
+          BROWSER_REPORT: ${{ runner.temp }}/coordinator-storage-report
         run: |
           node --input-type=module <<'NODE'
           import { mkdir, writeFile } from 'node:fs/promises';
@@ -64,6 +67,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: coordinator-storage-pw${{ matrix.playwright }}-sample${{ matrix.sample }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.BROWSER_REPORT }}
+          path: ${{ runner.temp }}/coordinator-storage-report
           if-no-files-found: error
           retention-days: 7
