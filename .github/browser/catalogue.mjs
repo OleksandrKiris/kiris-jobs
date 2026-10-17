@@ -206,7 +206,9 @@ try {
     const ctx = await context({ width: 320, height: 900 }, mode);
     const page = activePage = await ctx.newPage();
     try {
-      await page.goto(`${base}?lang=en`); await ready(page);
+      // An unsupported URL and corrupt saved locale fall back to browser PL.
+      await page.goto(`${base}?lang=${mode === 'corrupt' ? 'xx' : 'en'}`); await ready(page);
+      assert.equal(await page.locator('html').getAttribute('lang'), mode === 'corrupt' ? 'pl' : 'en');
       await page.locator('#job-search').fill('Siechnice');
       assert.ok(await page.locator('#job-grid .job-card').count() > 0);
       await locale(page, 'uk'); await fits(page);
