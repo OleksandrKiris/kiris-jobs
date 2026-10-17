@@ -26,3 +26,26 @@ jobs:
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
       - name: Verify generated files are current
         run: git diff --exit-code
+
+      # Test the same staged bytes that Pages uploads, before any publication.
+      # Browser tooling and evidence stay outside the public artifact.
+      - name: Install pinned Chromium test tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Browser acceptance of staged catalogue
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-browser-report
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/catalogue.mjs
+      - name: Keep browser evidence for this commit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogue-browser-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/primserv-browser-report
+          if-no-files-found: error
+          retention-days: 7
