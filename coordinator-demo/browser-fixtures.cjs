@@ -1,6 +1,7 @@
 // Self-contained: Playwright serializes this function into each document.
 function seedFixture({key, other, mode, previous}) {
   const marker='primserv:acceptance:coordinator-seeded';
+  window.__coordinatorInitialStorage={raw:localStorage.getItem(key),marker:localStorage.getItem(marker)};
   if (!localStorage.getItem(marker)) {
     localStorage.setItem(other,'keep');
     const raw=mode==='corrupt'?'{broken':mode==='future'

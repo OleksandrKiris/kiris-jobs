@@ -99,7 +99,11 @@ try {
         assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focus(page, 'demo-01');
         await page.locator('#filter').selectOption('done');
         await page.locator('#language').selectOption('uk');
+        report.storageDiagnostics??=[];
+        report.storageDiagnostics.push({scenario:scenario.name,phase:'before-reload',state:await page.evaluate(key=>({url:location.href,raw:localStorage.getItem(key),initial:window.__coordinatorInitialStorage}),KEY)});
+        assert.equal(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),KEY)).statuses['demo-01'],'done');
         await page.reload(); await ready(page);
+        report.storageDiagnostics.push({scenario:scenario.name,phase:'after-reload',state:await page.evaluate(key=>({url:location.href,raw:localStorage.getItem(key),initial:window.__coordinatorInitialStorage}),KEY)});
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#filter').inputValue(), 'done');
         assert.equal(await page.locator('#demo-01').inputValue(), 'done');
