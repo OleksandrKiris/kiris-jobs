@@ -3,7 +3,7 @@
 Локальный поиск одного материала с источником, Russian fallback и read-only
 snapshot/mock описан в [журнале](../docs/platform/materials-slice-20261017.md).
 PR68 возобновлён обычным merge принятого main `54b597f` (PR76). Локально проходят
-47 тестов, включая fragment/native-profile совместимость и cleanup при отказе
+51 тест, включая fragment/native-profile совместимость и cleanup при отказе
 route/tracing/newPage setup, и 16 сравнений с
 принятым контрактом `bf0fd233`. Harness сохраняет 14 controls и два настоящих
 закрытия/открытия native profile без storage import/replay. Новый exact head/CI
@@ -27,6 +27,21 @@ Online выключен, Django не нужен. Поиск и выбор ист
 статусы задач сохраняются как прежде. **PR68 остаётся Draft:** до его merge
 владелец1 готовит SW/cache-интеграцию и проверяет совместное обновление от
 предыдущей опубликованной версии. Сам материал ещё не опубликован.
+
+Следующее измерение issue79 — только в шести помеченных observed-сценариях:
+до/после state-reload записываются literal CDP requests/results для frame/target/
+storage key и фактической версии Chromium. В сохранённых 18 trace `13dbd5c`
+были Playwright context/frame metadata, но не Chromium storage key. Методы сверены
+с [protocol source Playwright1.56.1](https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/packages/playwright-core/src/server/chromium/protocol.d.ts),
+закреплённым в CI. Недоступный метод/пустой key/неполная пара измерений оставляет
+общий gate failed. Отсутствующий optional browserContextId записывается как null,
+а не выдумывается. Frame/loader сам по себе не считается storage identity.
+
+Extra CDP attach/read/detach добавляет round trips и может менять timing. Controls,
+оба native-profile restart и все 16 state assertions сохранены; localStorage/DOM
+не подменяются и новые storage-записи/чтения не добавляются. Даже зелёный результат
+этого измерения не устанавливает причину Chromium, не закрывает79 и не принимает68.
+Красный `13dbd5c` (15/16) и остальные старые capture сохраняют свой статус.
 
 ## Принятая база — 17.10.2026
 

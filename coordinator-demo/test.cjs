@@ -8,6 +8,57 @@ const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
 const {seedFixture,acceptanceStatus}=require('./browser-fixtures.cjs');
 
+function fakeIdentityContext(failMethod='',key='file-key') {
+  const sends=[];let detached=0;
+  const results={'Browser.getVersion':{product:'Chrome/141.0.7390.37',protocolVersion:'1.3'},
+    'Page.getFrameTree':{frameTree:{frame:{id:'frame-a',loaderId:'loader-a',url:'file:///test/index.html#board',securityOrigin:'file://'}}},
+    'Target.getTargetInfo':{targetInfo:{targetId:'target-a'}},
+    'Storage.getStorageKeyForFrame':{storageKey:key}};
+  const context={async newCDPSession(){return {async send(method,params){
+    sends.push({method,params});if(method===failMethod)throw Error('unsupported method');return results[method];
+  },async detach(){detached++;}};}};
+  return {context,sends,get detached(){return detached;}};
+}
+
+test('identity probe records four literal read-only requests/results and actual version, no DOM/storage evaluation',async()=>{
+  const {captureStorageIdentity}=await import('./storage-identity.mjs');const h=fakeIdentityContext();
+  const r=await captureStorageIdentity(h.context,{});
+  assert.equal(r.status,'observed');assert.equal(h.detached,1);
+  assert.deepEqual(h.sends,[{method:'Browser.getVersion',params:{}},{method:'Page.getFrameTree',params:{}},
+    {method:'Target.getTargetInfo',params:{}},{method:'Storage.getStorageKeyForFrame',params:{frameId:'frame-a'}}]);
+  assert.equal(r.identity.product,'Chrome/141.0.7390.37');assert.equal(r.identity.browserContextId,null);
+  assert.equal(r.requests[3].result.storageKey,'file-key');
+});
+
+test('unsupported or empty identity stays unavailable and debugger is detached without retries',async()=>{
+  const {captureStorageIdentity}=await import('./storage-identity.mjs');
+  for(const h of [fakeIdentityContext('Storage.getStorageKeyForFrame'),fakeIdentityContext('','')]) {
+    const r=await captureStorageIdentity(h.context,{});assert.equal(r.status,'unavailable');
+    assert.equal(h.sends.length,4);assert.equal(h.detached,1);
+  }
+  const r=await captureStorageIdentity({async newCDPSession(){throw Error('attach unavailable');}},{});
+  assert.equal(r.status,'unavailable');assert.equal(r.requests.length,0);assert.match(r.error.message,/attach unavailable/);
+});
+
+test('identity comparison distinguishes reported keys without treating frame/loader changes as a cause',async()=>{
+  const {captureStorageIdentity,compareStorageIdentity}=await import('./storage-identity.mjs');
+  const a=await captureStorageIdentity(fakeIdentityContext().context,{});
+  const b=structuredClone(a);b.identity.frameId='new-frame';b.identity.loaderId='new-loader';
+  assert.equal(compareStorageIdentity(a,b),'same-reported-target-and-storage-key');
+  b.identity.storageKey='other';assert.equal(compareStorageIdentity(a,b),'different-reported-storage-key');
+  b.identity.product='different';assert.equal(compareStorageIdentity(a,b),'incomparable-version');
+  assert.equal(compareStorageIdentity(a,{status:'unavailable'}),'unavailable');
+});
+
+test('identity availability gate rejects missing, duplicate or unavailable measurements',async()=>{
+  const {captureStorageIdentity,hasCompleteIdentity}=await import('./storage-identity.mjs');
+  const a=await captureStorageIdentity(fakeIdentityContext().context,{});
+  const before={...a,scenario:'observed',phase:'before-state-reload'},after={...a,scenario:'observed',phase:'after-state-reload'};
+  assert.equal(hasCompleteIdentity([before,after],['observed']),true);
+  for(const samples of [[],[before],[before,before],[before,{...after,status:'unavailable'}]])assert.equal(hasCompleteIdentity(samples,['observed']),false);
+  const runner=read('browser-acceptance.mjs');assert.match(runner,/if\(report\.identityGate\.status!=='observed'\)report\.status='failed'/);
+});
+
 test('file profiles are isolated and restart the same native directory without replaying state',async()=>{
   const {createFileProfile}=await import('./browser-profile.mjs');
   const launches=[],closes=[];
