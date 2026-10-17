@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v220-coordinator-2026-10-17-2";
+const CACHE_VERSION = "kiris-jobs-v220-locale-recovery-2026-10-17-1";
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -7,13 +7,13 @@ const CORE_SHELL = [
   "./manifest.webmanifest",
   "./data/content.js?v=220",
   "./data/locales/pl.js?v=220",
-  "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1",
-  "./assets/privacy-bootstrap.js?v=220",
+  "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1&localeRecovery=1",
+  "./assets/privacy-bootstrap.js?v=220&localeRecovery=1",
   "./assets/candidate-base.css?v=220",
   "./assets/clean.css?v=220",
-  "./assets/homepage.css?v=220",
+  "./assets/homepage.css?v=220&localeRecovery=1",
   "./assets/privacy.css?v=220",
-  "./assets/i18n.js?v=220",
+  "./assets/i18n.js?v=220&localeRecovery=1",
   "./assets/application-form.js?v=220",
   "./assets/application-loader.js?v=220",
   "./assets/vacancy-overrides.js?v=220",
@@ -136,6 +136,9 @@ async function prepareToolPack(refresh) {
   try {
     const responses = await Promise.all(toolUrls.map(url => fetch(url, { cache: 'no-store', credentials: 'omit' })));
     if (responses.some(response => !response.ok)) throw Error('Incomplete tool package');
+    // Headers can succeed before a truncated network body fails. Validate all
+    // bodies before treating any later failure as unavailable cache storage.
+    await Promise.all(responses.map(response => response.clone().arrayBuffer()));
     try {
       const pack = await storeToolPack(responses);
       onlineToolPack = null;
