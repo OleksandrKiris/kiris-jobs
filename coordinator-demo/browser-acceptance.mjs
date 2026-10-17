@@ -6,6 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createFileProfile } from './browser-profile.mjs';
 
 if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Run only in the approved GitHub Actions acceptance job. No local browser launch.');
 const { PLAYWRIGHT_PACKAGE, BROWSER_REPORT, TESTED_HEAD, TESTED_BASE } = process.env;
@@ -19,11 +20,12 @@ git('merge-base', '--is-ancestor', TESTED_BASE, 'HEAD');
 const report = { status: 'running', head: TESTED_HEAD, base: TESTED_BASE,
   checkout: git('rev-parse', 'HEAD').toString().trim(), started: new Date().toISOString(),
   launch: 'downloaded folder via file://; no HTTP server, SW, PWA or public deployment',
+  profile: 'fresh isolated on-disk Chromium profile per scenario; no storage import or replay',
   resources: [], scenarios: [], networkRequests: [], pageErrors: [],
   limitations: ['Chromium emulated viewport, not a physical phone',
     'External links inspected, not opened; no forms or messages sent',
     'v1 fixture compatibility, not an upgrade from a previously released coordinator',
-    'Other browsers and optional localhost HTTP launch remain untested'] };
+    'Incognito file storage, other browsers and optional localhost HTTP launch remain untested'] };
 const files = ['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg'];
 for (const name of files) {
   const bytes = await readFile(join(dir, name));
@@ -67,8 +69,6 @@ const ready = async page => {
 const keyClick = async (page, id) => { await page.locator(`#${id}`).focus(); await page.keyboard.press('Enter'); };
 let browser;
 try {
-  browser = await chromium.launch({ headless: true });
-  report.browser = `Chromium ${browser.version()}`;
   for (const scenario of [
     { name: 'board-wide', width: 1280, mode: 'empty' },
     { name: 'board-narrow', width: 320, mode: 'empty' },
@@ -80,7 +80,10 @@ try {
     ])
   ]) {
     const viewport = { width: scenario.width, height: 900 };
-    const context = await browser.newContext({ viewport });
+    const profile = await createFileProfile(chromium, viewport);
+    const context = profile.context;
+    browser = context.browser();
+    report.browser = `Chromium ${browser.version()}`;
     context.setDefaultTimeout(10000);
     const requests = [], errors = [];
     context.on('request', request => { if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() }); });
@@ -203,8 +206,62 @@ try {
       // Continue independent diagnostic scenarios, retaining this failure and exit 1.
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
-      await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) });
-      await context.close();
+      try { await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) }); }
+      finally { await profile.dispose(); }
+    }
+  }
+  // Mandatory durability checks: restart the browser with its native profile,
+  // without an init script/seed, storageState(), or any test-side state write.
+  for (const width of [1280, 320]) {
+    const name = `profile-restart-${width}`, viewport = { width, height: 900 };
+    const profile = await createFileProfile(chromium, viewport);
+    const requests = [], errors = [];
+    let context = profile.context;
+    const prepare = async () => {
+      context.setDefaultTimeout(10000);
+      context.on('request', request => {
+        if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() });
+      });
+      context.on('page', page => page.on('pageerror', error => errors.push(error.message)));
+      await context.route(/^https?:/, route => route.abort());
+      await context.setOffline(true);
+      await context.tracing.start({ screenshots: true, snapshots: true });
+      return context.newPage();
+    };
+    let tracing = false;
+    try {
+      let page = await prepare(); tracing = true;
+      await page.goto(`${fileURL}?lang=en&from=restart#board`); await ready(page);
+      assert.equal(await page.locator('#demo-01').inputValue(), 'todo');
+      await page.locator('#demo-01').selectOption('doing');
+      await page.locator('#demo-02').selectOption('done');
+      await page.locator('#filter').selectOption('done');
+      await page.locator('#language').selectOption('uk');
+      const savedURL = page.url();
+      await context.tracing.stop({ path: join(reportDir, `${name}-before-trace.zip`) }); tracing = false;
+      context = await profile.reopen();
+      page = await prepare(); tracing = true;
+      await page.goto(savedURL); await ready(page);
+      assert.equal(await page.evaluate(() => navigator.onLine), false);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
+      assert.equal(await page.locator('#filter').inputValue(), 'done');
+      assert.equal(await page.locator('#demo-02').inputValue(), 'done');
+      assert.equal(await page.locator('.task').count(), 1);
+      await page.locator('#filter').selectOption('all');
+      assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
+      assert.equal(await page.locator('#demo-02').inputValue(), 'done');
+      assert.equal(await page.locator('#demo-03').inputValue(), 'todo');
+      await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
+      await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
+      report.scenarios.push({ name, viewport, status: 'passed', offline: true,
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board'],
+        results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
+    } catch (error) {
+      report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
+    } finally {
+      report.networkRequests.push(...requests); report.pageErrors.push(...errors);
+      try { if (tracing) await context.tracing.stop({ path: join(reportDir, `${name}-after-trace.zip`) }); }
+      finally { await profile.dispose(); }
     }
   }
   report.status = acceptanceStatus(report.scenarios);

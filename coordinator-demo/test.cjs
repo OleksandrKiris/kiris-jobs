@@ -8,6 +8,46 @@ const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
 const {seedFixture,acceptanceStatus}=require('./browser-fixtures.cjs');
 
+test('file profiles are isolated and restart the same native directory without replaying state',async()=>{
+  const {createFileProfile}=await import('./browser-profile.mjs');
+  const launches=[],closes=[];
+  const chromium={async launchPersistentContext(directory,options){
+    launches.push({directory,options});
+    return {async close(){closes.push(directory);}};
+  }};
+  const first=await createFileProfile(chromium,{width:320,height:900});
+  const second=await createFileProfile(chromium,{width:1280,height:900});
+  try {
+    assert.notEqual(first.directory,second.directory);
+    assert.ok(fs.existsSync(first.directory));
+    await first.reopen();
+    assert.equal(launches[2].directory,launches[0].directory);
+    assert.deepEqual(launches[2].options,{headless:true,viewport:{width:320,height:900}});
+    assert.deepEqual(closes,[first.directory]);
+  } finally {await first.dispose();await second.dispose();}
+  assert.equal(fs.existsSync(first.directory),false);
+  assert.equal(fs.existsSync(second.directory),false);
+});
+
+test('file profile launch failures remove the newly allocated directory',async()=>{
+  const {createFileProfile}=await import('./browser-profile.mjs');
+  let directory;
+  await assert.rejects(createFileProfile({async launchPersistentContext(dir){directory=dir;throw Error('launch failed');}},{}),/launch failed/);
+  assert.equal(fs.existsSync(directory),false);
+});
+
+test('file profile restart failures still allow cleanup',async()=>{
+  const {createFileProfile}=await import('./browser-profile.mjs');
+  let launches=0;
+  const profile=await createFileProfile({async launchPersistentContext(){
+    if(launches++)throw Error('restart failed');
+    return {async close(){}};
+  }},{});
+  await assert.rejects(profile.reopen(),/restart failed/);
+  await profile.dispose();
+  assert.equal(fs.existsSync(profile.directory),false);
+});
+
 function observedDocument(data,observe=false,mode='v1') {
   const calls=[];
   class Storage {

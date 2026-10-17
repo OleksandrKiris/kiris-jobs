@@ -1,5 +1,9 @@
 # Main reload diagnostics, not a claimed fix
 
+Follow-up: [native browser profile acceptance](coordinator-file-profile.md) changes
+the supported file browser mode and adds mandatory close/reopen checks. The
+historical protocol and failure below remain evidence, not a Chromium cause claim.
+
 Owner9; repo OleksandrKiris/kiris-jobs. Allowed: coordinator-demo/browser-fixtures.cjs,
 browser-acceptance.mjs, test.cjs, docs/platform/**. Basea8093c9e251f117dd113649fa82c3441ed5846e8 (fresh main; fixture/runtime unchanged from bf0fd233).
 Branch codex/role9-reload-causal-diagnostics is the only active role9 WIP.
