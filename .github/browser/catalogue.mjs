@@ -103,6 +103,59 @@ try {
     await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: false });
   }
 
+  // Regression #57: an uncached locale must not take down the cached catalogue.
+  for (const width of [1280, 320]) {
+    const ctx = await context({ width, height: 900 });
+    const page = activePage = await ctx.newPage();
+    let originStopped = false;
+    await ctx.tracing.start({ screenshots: true, snapshots: true, sources: false });
+    try {
+      await page.goto(`${base}?lang=pl`); await ready(page);
+      assert.equal(await page.locator('.job-card').count(), 14);
+      await page.evaluate(() => navigator.serviceWorker.ready);
+      await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+      await page.locator('#job-search').fill('Siechnice');
+      await page.reload(); await ready(page);
+      assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+      assert.equal(await page.evaluate(async () => Boolean(await caches.match(new URL('data/locales/en.js?v=220', location.href)))), false);
+      await stopServer(); originStopped = true; await ctx.setOffline(true);
+      await page.goto(`${base}?lang=en`); await ready(page);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'pl');
+      assert.match(await page.locator('#locale-load-message').innerText(), /English.*Polski/);
+      assert.equal(await page.locator('#locale-load-notice').getAttribute('lang'), 'en');
+      assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+      assert.ok(await page.locator('.job-card').count() > 0);
+      await fits(page); await shot(page, `locale-fallback-offline-${width}`);
+      await page.locator('#locale-load-retry').focus(); await page.keyboard.press('Enter');
+      await page.waitForFunction(() => !document.getElementById('locale-load-retry').disabled);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'pl');
+      await page.reload(); await ready(page);
+      assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+      await startServer(); originStopped = false; await ctx.setOffline(false);
+      await page.locator('#locale-load-retry').focus(); await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.documentElement.lang === 'en');
+      assert.equal(await page.locator('#locale-load-notice').count(), 0);
+      assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+      assert.equal(await page.locator('.language-switcher-button').evaluate(node => node === document.activeElement), true);
+      await fits(page); await shot(page, `locale-retry-restored-${width}`);
+      await page.reload(); await ready(page);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+      assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+      // The same recovery also covers a switch attempted after the app has started.
+      await stopServer(); originStopped = true; await ctx.setOffline(true);
+      await page.locator('.language-switcher-button').click();
+      await page.locator('[data-language-option="ka"]').click();
+      await page.locator('#locale-load-notice[lang="ka"]').waitFor();
+      assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+      await fits(page); await shot(page, `locale-switch-failed-ka-${width}`);
+      report.results.push({ scenario: 'uncached locale with origin stopped: Polish fallback, failed keyboard retry, reload, reconnect/retry without lost search, failed Georgian switch', width, status: 'passed' });
+    } finally {
+      if (originStopped) await startServer();
+      await ctx.tracing.stop({ path: join(reportDir, `locale-recovery-${width}.zip`) });
+      await ctx.close(); activePage = null;
+    }
+  }
+
   for (const viewport of [{ width: 1280, height: 900 }, { width: 320, height: 900 }]) {
     const ctx = await context(viewport);
     const errors = [];
@@ -368,7 +421,7 @@ try {
 
   // Download the actual base runtime, then update only from the catalogue.
   // There must be no online tool visit/refresh after activation of the head SW.
-  const upgradeFiles = ['index.html', 'assets/bootstrap.js', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js'];
+  const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js'];
   const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
   const headCache = headFiles.get('sw.js').toString().match(/const CACHE_VERSION = "([^"]+)"/)[1];
   const baseWorker = execFileSync('git', ['show', `${report.base}:sw.js`]).toString();

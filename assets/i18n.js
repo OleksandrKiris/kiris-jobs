@@ -33,6 +33,72 @@
   const translations = window.PORTAL_TRANSLATIONS || {};
   const listeners = new Set();
   let languageSwitcher = null;
+  let localeRequest = 0;
+  const localeLoads = new Map();
+  // This small recovery UI must be readable even when its language pack is missing.
+  const LOAD_FAILURE = {
+    ru: ["Не удалось загрузить язык: {requested}. Сейчас показан {current}. Проверьте интернет и повторите загрузку.", "Повторить загрузку языка"],
+    uk: ["Не вдалося завантажити мову: {requested}. Зараз показано {current}. Перевірте інтернет і повторіть завантаження.", "Повторити завантаження мови"],
+    pl: ["Nie udało się wczytać języka: {requested}. Wyświetlany język: {current}. Sprawdź internet i spróbuj ponownie.", "Wczytaj język ponownie"],
+    en: ["Could not load {requested}. Currently showing {current}. Check your internet connection and try again.", "Retry language download"],
+    az: ["{requested} yüklənmədi. Hazırda {current} göstərilir. İnternet bağlantısını yoxlayın və yenidən cəhd edin.", "Dili yenidən yüklə"],
+    ka: ["ვერ ჩაიტვირთა ენა: {requested}. ახლა ნაჩვენებია {current}. შეამოწმეთ ინტერნეტი და სცადეთ ხელახლა.", "ენის ხელახლა ჩატვირთვა"],
+    id: ["Gagal memuat {requested}. Saat ini menampilkan {current}. Periksa koneksi internet dan coba lagi.", "Coba muat bahasa lagi"],
+    es: ["No se pudo cargar {requested}. Se muestra {current}. Comprueba tu conexión a internet e inténtalo de nuevo.", "Volver a cargar el idioma"],
+    fil: ["Hindi ma-load ang {requested}. Kasalukuyang ipinapakita ang {current}. Suriin ang internet at subukang muli.", "I-load muli ang wika"],
+    ne: ["{requested} लोड हुन सकेन। अहिले {current} देखाइएको छ। इन्टरनेट जडान जाँचेर फेरि प्रयास गर्नुहोस्।", "भाषा फेरि लोड गर्नुहोस्"],
+    hy: ["Չհաջողվեց բեռնել {requested} լեզուն։ Այժմ ցուցադրվում է {current}։ Ստուգեք ինտերնետ կապը և կրկին փորձեք։", "Կրկին բեռնել լեզուն"]
+  };
+
+  function showLocaleFailure(requested) {
+    let notice = document.getElementById("locale-load-notice");
+    if (!notice) {
+      const main = document.querySelector("main");
+      if (!main) return;
+      notice = document.createElement("div");
+      notice.id = "locale-load-notice";
+      notice.className = "candidate-shell locale-load-notice";
+      const message = document.createElement("p");
+      message.id = "locale-load-message";
+      message.setAttribute("role", "status");
+      const retry = document.createElement("button");
+      retry.id = "locale-load-retry";
+      retry.type = "button";
+      retry.setAttribute("aria-describedby", message.id);
+      retry.addEventListener("click", async () => {
+        retry.disabled = true;
+        notice.setAttribute("aria-busy", "true");
+        try {
+          const applied = await setLocale(notice.dataset.requestedLanguage);
+          if (applied && document.activeElement === document.body) {
+            (languageSwitcher?.button || document.getElementById("language-select"))?.focus({ preventScroll: true });
+          }
+        }
+        finally {
+          retry.disabled = false;
+          notice.removeAttribute("aria-busy");
+        }
+      });
+      notice.append(message, retry);
+      main.before(notice);
+    }
+    const [message, retry] = LOAD_FAILURE[requested] || LOAD_FAILURE.en;
+    notice.lang = requested;
+    notice.dataset.requestedLanguage = requested;
+    notice.querySelector("p").textContent = interpolate(message, {
+      requested: languageName(requested), current: languageName(currentLocale)
+    });
+    notice.querySelector("button").textContent = retry;
+  }
+
+  function clearLocaleFailure() {
+    const notice = document.getElementById("locale-load-notice");
+    if (notice?.contains(document.activeElement)) {
+      (languageSwitcher?.button || document.getElementById("language-select"))?.focus({ preventScroll: true });
+    }
+    notice?.remove();
+    delete window.PORTAL_LOCALE_LOAD_ERROR;
+  }
 
   function normalizeLocale(value) {
     const language = String(value || "").toLowerCase().split("-")[0];
@@ -114,14 +180,24 @@
     if (translations[locale]) return Promise.resolve(true);
     const base = window.PORTAL_LOCALE_BASE;
     if (!base || !SUPPORTED.includes(locale)) return Promise.resolve(false);
-    return new Promise((resolve) => {
+    if (localeLoads.has(locale)) return localeLoads.get(locale);
+    const loading = new Promise((resolve) => {
       const script = document.createElement("script");
       script.src = `${base}${locale}.js?v=${encodeURIComponent(window.PORTAL_ASSET_VERSION || "206")}`;
       script.async = true;
-      script.addEventListener("load", () => resolve(Boolean(translations[locale])), { once: true });
-      script.addEventListener("error", () => resolve(false), { once: true });
+      const finish = (loaded) => {
+        clearTimeout(timeout);
+        script.remove();
+        resolve(loaded);
+      };
+      const timeout = setTimeout(() => finish(false), 15000);
+      script.addEventListener("load", () => finish(Boolean(translations[locale])), { once: true });
+      script.addEventListener("error", () => finish(false), { once: true });
       document.head.append(script);
     });
+    localeLoads.set(locale, loading);
+    loading.finally(() => localeLoads.delete(locale));
+    return loading;
   }
 
   function languageFlag(locale) {
@@ -306,7 +382,14 @@
     const requested = String(locale || "").toLowerCase().split("-")[0];
     const next = requested === "tl" ? "fil" : requested;
     if (!SUPPORTED.includes(next)) return false;
-    if (!await ensureLocale(next)) return false;
+    const request = ++localeRequest;
+    const loaded = await ensureLocale(next);
+    if (request !== localeRequest) return false;
+    if (!loaded) {
+      showLocaleFailure(next);
+      populateLanguageSelect();
+      return false;
+    }
     if (!next) return false;
     currentLocale = next;
     try {
@@ -321,6 +404,7 @@
     }
     populateLanguageSelect();
     applyStaticTranslations();
+    clearLocaleFailure();
     listeners.forEach((listener) => listener(next));
     window.dispatchEvent(new CustomEvent("portal:languagechange", { detail: { locale: next } }));
     return true;
@@ -335,6 +419,7 @@
     populateLanguageSelect();
     enhanceLanguageSelect();
     applyStaticTranslations();
+    if (SUPPORTED.includes(window.PORTAL_LOCALE_LOAD_ERROR)) showLocaleFailure(window.PORTAL_LOCALE_LOAD_ERROR);
     document.getElementById("language-select")?.addEventListener("change", async (event) => {
       await setLocale(event.target.value);
     });

@@ -28,7 +28,13 @@
 
   await import(new URL(`pl.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
   if (active !== fallback) {
-    await import(new URL(`${active}.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
+    try {
+      await import(new URL(`${active}.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
+    } catch {
+      // The cached Polish catalogue remains useful when a selected pack is absent.
+      // Preserve the requested language for an explicit retry; do not overwrite storage.
+      window.PORTAL_LOCALE_LOAD_ERROR = active;
+    }
   }
   await import(`../data/content.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./vacancy-overrides.js?v=${window.PORTAL_ASSET_VERSION}`);
