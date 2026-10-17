@@ -1032,6 +1032,23 @@
     document.body.append(notice);
   }
 
+  // Keep installed pre-existing #home/#jobs/#profile shortcuts usable.
+  // An exact allowlist avoids changing vacancy routes or unrelated anchors.
+  function focusCatalogShortcut() {
+    if (directJobId) return;
+    const targets = {
+      "#home": "main-content", "#main-content": "main-content",
+      "#jobs": "job-search", "#job-search": "job-search",
+      "#profile": "footer-whatsapp", "#footer-whatsapp": "footer-whatsapp"
+    };
+    const id = targets[location.hash];
+    if (!id) return;
+    const target = $(id);
+    if (!target) return;
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: "center" });
+  }
+
   function openDeepLink() {
     if (directJobId) {
       if (new URL(location.href).searchParams.get("apply") === "1") {
@@ -1094,6 +1111,8 @@
     initializeSalaryCalculators();
     trackFunnel("catalog_view", directJobId);
     openDeepLink();
+    focusCatalogShortcut();
+    window.addEventListener("hashchange", focusCatalogShortcut);
     ensureAppStyles();
     registerCandidateServiceWorker();
   }

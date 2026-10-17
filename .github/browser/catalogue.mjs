@@ -24,7 +24,7 @@ const report = {
   limits: ['Desktop Chromium; narrow viewport is not a physical phone.',
     'External services are blocked; HRappka delivery and Telegram are not tested.',
     'Offline means browser network disabled after successful local installation.',
-    'Cache version unchanged; no new service-worker migration is introduced.']
+    'Existing v220 shell → shortcut cache is tested without submitting data.']
 };
 for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candidate.js',
   'assets/i18n.js', 'assets/candidate-base.css', 'assets/clean.css', 'assets/homepage.css',
@@ -215,6 +215,77 @@ try {
       await shot(page, `storage-${mode}`);
       report.results.push({ scenario: `storage-${mode}`, status: 'passed', viewport: { width: 320, height: 900 } });
     } finally { await ctx.close(); activePage = null; }
+  }
+
+  const shortcutTargets = { home: 'main-content', jobs: 'job-search', profile: 'footer-whatsapp',
+    'main-content': 'main-content', 'job-search': 'job-search', 'footer-whatsapp': 'footer-whatsapp' };
+  for (const width of [1280, 320]) {
+    for (const storage of ['', 'corrupt', 'denied']) {
+      const ctx = await context({ width, height: 900 }, storage);
+      const page = activePage = await ctx.newPage();
+      const errors = [];
+      page.on('pageerror', e => errors.push(e.message));
+      for (const [hash, id] of Object.entries(shortcutTargets)) {
+        await page.goto(`${base}?lang=ka#${hash}`); await ready(page);
+        await page.waitForFunction(id => document.activeElement?.id === id, id);
+        assert.equal(await page.locator('html').getAttribute('lang'), 'ka');
+        assert.equal(new URL(page.url()).hash, '#' + hash);
+        const visible = await page.locator('#' + id).evaluate(el => {
+          const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight;
+        });
+        assert.ok(visible, hash + ' must be in view');
+        await fits(page);
+      }
+      await shot(page, `shortcuts-${width}-${storage || 'normal'}`);
+      if (!storage) {
+        await page.goto(`${base}?lang=en#jobs`); await ready(page);
+        await page.locator('#job-search').fill('Siechnice');
+        await page.goto(`${base}?lang=en#profile`); await ready(page);
+        await page.waitForFunction(() => document.activeElement?.id === 'footer-whatsapp');
+        await page.goBack(); await ready(page);
+        await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+        assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+        await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+        await ctx.setOffline(true); await page.reload(); await ready(page);
+        await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+        assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+        assert.equal(await page.evaluate(() => navigator.onLine), false);
+        await shot(page, `shortcuts-offline-${width}`);
+        await ctx.setOffline(false);
+      }
+      assert.deepEqual(errors, []);
+      report.results.push({ scenario: 'six shortcut anchors / focus / language' + (storage ? ' / ' + storage : ' / Back / offline reload / saved search'), width, status: 'passed' });
+      await ctx.close(); activePage = null;
+    }
+  }
+
+  // Exercise the actual previous SW and cached shell on the same HTTP origin.
+  const upgradeFiles = ['index.html', 'assets/bootstrap.js', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js'];
+  const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
+  const ctx = await context({ width: 320, height: 900 });
+  const page = activePage = await ctx.newPage();
+  try {
+    for (const file of upgradeFiles) await writeFile(join(artifact, file), execFileSync('git', ['show', `${report.base}:${file}`]));
+    await page.goto(`${base}?lang=en#jobs`); await ready(page);
+    await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+    await page.locator('#job-search').fill('Siechnice');
+    await page.evaluate(async () => { localStorage.setItem('shortcut-unrelated', 'keep'); await caches.open('unrelated-shortcut-cache'); });
+    for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
+    await page.evaluate(async () => { const registration = await navigator.serviceWorker.ready; await registration.update(); });
+    await page.waitForFunction(async () => (await caches.keys()).includes('kiris-jobs-v220-shortcuts-2026-10-17-1'));
+    // Existing app reloads once on controllerchange; wait for the new target.
+    await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+    assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+    assert.equal(await page.evaluate(() => localStorage.getItem('shortcut-unrelated')), 'keep');
+    assert.ok((await page.evaluate(() => caches.keys())).includes('unrelated-shortcut-cache'));
+    await ctx.setOffline(true); await page.reload(); await ready(page);
+    await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+    assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+    await shot(page, 'shortcuts-upgrade-offline');
+    report.results.push({ scenario: 'actual base SW → head SW / preserved search and unrelated storage / offline shortcut', status: 'passed' });
+  } finally {
+    for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
+    await ctx.close(); activePage = null;
   }
 
   for (const path of ['coordinator-demo/', 'offline-tools/']) {

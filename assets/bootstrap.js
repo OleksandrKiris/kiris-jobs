@@ -35,7 +35,7 @@
   await window.PORTAL_VACANCY_OVERRIDES_READY;
   await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./application-loader.js?v=${window.PORTAL_ASSET_VERSION}`);
-  await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}`);
+  await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}&shortcuts=1`);
 })().catch((error) => {
   console.error("[kiris-jobs] unable to start", error);
   document.documentElement.classList.add("app-load-failed");

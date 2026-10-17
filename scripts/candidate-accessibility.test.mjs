@@ -10,6 +10,41 @@ const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.
 assert.notEqual(instrumented, source);
 const scripts = await Promise.all(["data/content.js", ...locales.map(l => `data/locales/${l}.js`), "assets/i18n.js"].map(p => fs.readFile(new URL(p, root), "utf8")));
 
+test("installed shortcuts focus existing targets, preserve URLs/context, and leave vacancy routes alone", async () => {
+  const routed = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.shortcutTest = { focusCatalogShortcut };\n})();");
+  for (const direct of [false, true]) {
+    const location = new URL(`https://example.test/${direct ? 'vacancies/greenhouse-tomatoes/' : ''}?lang=ka`);
+    const calls = [];
+    const nodes = Object.fromEntries(['job-search', 'footer-whatsapp', 'main-content'].map(id => [id, {
+      focus(options) { calls.push(['focus', id, options.preventScroll]); },
+      scrollIntoView(options) { calls.push(['scroll', id, options.block]); }
+    }]));
+    const window = { location };
+    const context = vm.createContext({ window, location, URL, Intl, Date,
+      document: { body: { dataset: direct ? { jobId: 'greenhouse-tomatoes' } : {} },
+        getElementById: id => nodes[id], querySelector: () => null },
+      navigator: { language: 'ka', languages: ['ka'] }, localStorage: { getItem: () => null },
+      fetch() { throw Error('No network or submissions'); }
+    });
+    scripts.forEach(script => vm.runInContext(script, context));
+    vm.runInContext(routed, context);
+    for (const [hash, id] of Object.entries({ '#jobs': 'job-search', '#job-search': 'job-search', '#profile': 'footer-whatsapp', '#footer-whatsapp': 'footer-whatsapp', '#home': 'main-content', '#main-content': 'main-content' })) {
+      location.hash = hash; calls.length = 0; const before = location.href;
+      window.shortcutTest.focusCatalogShortcut();
+      assert.equal(location.href, before, 'Language/query/hash remain intact');
+      assert.deepEqual(calls, direct ? [] : [['focus', id, true], ['scroll', id, 'center']]);
+    }
+    for (const hash of ['', '#job=greenhouse-tomatoes', '#unknown', '#%E0%A4%A']) {
+      location.hash = hash; calls.length = 0; window.shortcutTest.focusCatalogShortcut();
+      assert.deepEqual(calls, [], 'Only the exact allowlist may move focus');
+    }
+  }
+  const manifest = JSON.parse(await fs.readFile(new URL('manifest.webmanifest', root), 'utf8'));
+  assert.equal(manifest.start_url, './#main-content');
+  assert.deepEqual(manifest.shortcuts.map(s => s.url), ['./#job-search', './#footer-whatsapp']);
+  assert.match(source, /addEventListener\("hashchange", focusCatalogShortcut\)/);
+});
+
 for (const locale of locales) {
   test(`${locale}: footer landmark follows the chosen language without a Polish fallback`, async () => {
     const index = await fs.readFile(new URL("index.html", root), "utf8");
