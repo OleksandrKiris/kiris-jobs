@@ -53,8 +53,9 @@ report.storageEvidence=[];
 report.storageIdentity=[];
 report.backendOpen=[];
 report.backendOpenObservation={effect:"Extra browser CDP attach/read/detach changes timing; not a fix",
-  scope:"Existing six observed state reloads only; cumulative process-wide LocalStorage.DatabaseOpen",
-  sourceRevision:"9f043f63b0e5b728c8d09f3e3ddfc1681a4bd58e",
+  scope:"Existing six observed state reloads only; cumulative process-wide open telemetry selected from each measured profile",
+  sourceRevision:null, // No universal revision: see each sample.provenance.
+  provenanceContract:"Per-sample measured profile/version, selected schema, source revision and attempted names; unknown fields remain null",
   limits:"Missing/empty is unavailable, unchanged is no new open sample; OK includes memory/recovery, not KEY commit/load/durability"};
 report.identityObservation={scope:'Only six explicitly observed scenarios, state reload only; original controls and restarts unchanged',
   effect:'Extra CDP attach/read-only RPC/detach round trips can change timing; not a causal fix',
@@ -62,10 +63,18 @@ report.identityObservation={scope:'Only six explicitly observed scenarios, state
   protocolSource:'https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/packages/playwright-core/src/server/chromium/protocol.d.ts',
   protocolSourceSha256:'3f6ef9c13ca4e92bc06426a01f2c3198448e949f64f62eb02e2db23146a8d06c',
   acceptance:'Issue79 remains open; even green observation does not accept PR68 or establish Chromium cause'};
+const backendOpenProvenance=sample=>{
+  const maxCode=sample.profile==='chromium141'?5:sample.profile==='chromium156'?6:null;
+  return {measuredProfile:sample.profile??null,measuredVersion:sample.version??null,
+    schema:maxCode===null?null:{id:sample.profile==='chromium141'?'legacy-leveldb-status':'dom-storage-db-status',minCode:0,maxCode},
+    sourceRevision:maxCode===null?null:sample.version?.revision?.replace(/^@/,'')??null,
+    attemptedHistogramNames:sample.requests.filter(x=>x.method==='Browser.getHistogram').map(x=>x.params.name)};
+};
 const observeIdentity=async(context,page,scenario,phase)=>{
   const sample=await captureStorageIdentity(context,page);
   report.storageIdentity.push({scenario:scenario.name,phase,...sample});
-  report.backendOpen.push({scenario:scenario.name,phase,...await captureBackendOpen(context)});
+  const backend=await captureBackendOpen(context);
+  report.backendOpen.push({scenario:scenario.name,phase,...backend,provenance:backendOpenProvenance(backend)});
 };
 report.observationProtocol={control:'No observer; one native fixture preparation before the tested journey',
   passive:'Wrap existing storage calls and retain real model; no added storage reads, but CPU/payload timing changes',
