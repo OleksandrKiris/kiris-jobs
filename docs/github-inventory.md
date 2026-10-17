@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, 00:20 Europe/Budapest; kiris-jobs main3ad9f93 после77. Владелец: роль10.
+Сверка: 18.10.2026, 00:38 Europe/Budapest; kiris-jobs main3ad9f93 после77. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,10 +12,10 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `3ad9f93f66776613443f767403cd239c4678d605` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft | [39073288866](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39073288866) |
-| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | нет; PR13 принят | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `3ad9f93f66776613443f767403cd239c4678d605` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) ready, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft, [#86](https://github.com/OleksandrKiris/kiris-jobs/pull/86) ready | [39073288866](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39073288866) |
+| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) ready,efbb5a8 | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
-| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `70b0f74e95d1556c85aa649d6204b106bd564c4f` | [#11](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/11) draft,5ac5dd0 | [39072598765](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39072598765) |
+| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `95ba121c42e82582a9efdff0d4b4b38e577e7840` | нет; PR11 принят | [39075670274](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39075670274) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
@@ -270,3 +270,12 @@ QA приезда3:14HTTP exact bytes, IAB bootstrap timeout; UI/offline NOTRUN.
 Это текущая дельта; старые READY/FROZEN ниже/выше относятся к своим head.
 
 Следующий head60 cba1c2fc4acd753c5df6114e030b4a4a4d85c2f1/base3ad усиливает ожидание actual controller/reload без runtime-правки; независимое delta-review и новый CI ещё pending. Red697 сохранён, нового выпуска нет.
+
+18 октября,00:38: Dragon11 exact5ac/base70b принят guard95ba121c,
+tested/merged tree6fc651d0 совпал. Pages39075670274 SUCCESS,8public assets
+HTTP200/размер/SHA256 exact. Это опубликованный ka/tr/hy текстовый путь;
+языковая экспертиза носителем и физическое устройство остаются отдельно.
+PR60 cba/base3ad: независимые source-delta и current19runtime CLEAR,
+Verify39074332390/Backend39074332378 SUCCESS; не merged, historical33/48 отдельно.
+
+HYDRA14@efbb5a8/base533 подготовлен:136unit/66browser CI39075737482 PASS; independent source/runtime/peer4 CLEAR, ещё не published. PR86@b564/base3ad содержит localGET materials на canonical snapshot/serializer77;68CI tests/14newHTTP; Backend39076208129 иCatalogue39076208133 SUCCESS, independent14source/15runtime CLEAR. Только14новых тестов повторены независимо;68CI и20contract tests подтвержденыraw. PR86ready, неmerged/deployed.

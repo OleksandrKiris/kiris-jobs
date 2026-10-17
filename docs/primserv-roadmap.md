@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (17 октября, 22:20 UTC). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (17 октября, 22:48 UTC). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -8,6 +8,10 @@
 Ниже остаются **10 продуктовых направлений**: это не количество исполнителей.
 Другие документы `docs/` — доказательства отдельных
 исправлений, а не альтернативные планы.
+
+Текущая очередь — в [таблице 15 ролей](#очередь-и-исполнение-после-аудита-всех-15-направлений).
+Датированные записи приёмки сохраняют прежние head и ограничения; поручения
+для нового прохода брать из текущей очереди, а не из старых слов «следующий».
 
 ## Продуктовая цель: превзойти HRappka
 
@@ -66,7 +70,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 Последняя сверка main: `3ad9f93f66776613443f767403cd239c4678d605`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77.
 Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
-Ранее принят Dragon9; текущий Dragon main после PR10 — `70b0f74e95d1556c85aa649d6204b106bd564c4f`.
+Ранее приняты Dragon9/10; текущий Dragon main после PR11 — `95ba121c42e82582a9efdff0d4b4b38e577e7840`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
 `da054fd69b2f831de93d16842991cc38e280233a` прошёл CI; merge `fc672d8`,
@@ -647,21 +651,21 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | PR60@4179: независимые48/48 PASS;697/base3ad red8/19, новыйcba1c2f уточняет wait-controller | Независимое delta-review и CI новогоcba; старые697red/10NOTRUN сохранены, готовность4179 не переносится |
-| 2 | HYDRA13 опубликован533360d7;15VM критериев для нового Dragon11 подготовлены | Dragon11@5ac:15VM/9location/36old-language PASS; проверка носителем отдельно |
+| 1 | PR60@cba/base3ad: source-delta и current19 runtime CLEAR, оба CI SUCCESS | Следующий отдельный guard10; исторические33/48 на4179 и red697 не смешаны с current19 |
+| 2 | HYDRA14@efbb5a8:136unit/66current-browser, независимые source/runtime/peer4 CLEAR | Готов к отдельному guard;36 URL-сочетаний проверены VM, внешний Dragon браузером не открывался; ещё не опубликован |
 | 3 | Local58005b9f,182unit; независимые14/14 HTTP200 exact bytes | IAB HTTP bootstrap timeout; разрешённая инвентаризация не нашла другого HTTP-браузера; UI/offline NOTRUN |
-| 4 | Dragon10 опубликован; новый Dragon11@5ac5dd0/base70b0: ka/tr/hy текст,167unit/35browser PASS | Независимые source/runtime/15VM CLEAR,6PNG просмотрены; следующий guard10; ещё не опубликован |
+| 4 | Dragon11@5ac принят95ba121c; Pages39075670274 SUCCESS,8public assets exact | ka/tr/hy текст, выбор площадки и public-copy опубликованы; WIP закрыт, проверка носителем отдельно |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | PR68@c896:8green checks,6×24PASS/72samples; совместный gate4179 —48PASS | Сначала исправить/принять текущий prerequisite60, затем одна интеграция main и свежая приёмка68; ещё не опубликован |
-| 10 | В этом проходе принят77→3ad9f93; post Backend/Pages SUCCESS,7public bytes exact | Приёмка Dragon11 и текущего60; тот же docs PR84, один merge за проход |
+| 9 | PR68@c896:8green checks,6×24PASS/72samples; prerequisite60@cba независимо CLEAR | Сначала выпуск60, затем одна интеграция main и свежая приёмка68; материалы пока не опубликованы |
+| 10 | Новый проход22:32: Dragon11 опубликован95ba; Pages/8bytes PASS | Тот же docs PR84; один merge использован, следующая очередь60→68 |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | PR77@0fe5/base62cb принят3ad9f93; bounded JSON→UTF-8 serializer32KiB,54CI tests | WIP завершён; backend локальный, route/deploy не добавлены; следующий контрактный срез отдельно |
+| 12 | PR86@b564/base3ad: localGET materials,68CI tests; independent14 source/15 runtime CLEAR | Готов к отдельному guard;14новых тестов выполнены независимо, backend не merged/deployed |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | PR74@e731: docs-only scoped proof; company boundary schema=primserv.company/version1 изучена source-only | Read-only context-guard лишь предложение; не дублировать ORM importer/validator и не заявлять tenant production readiness |
-| 15 | PR85@af008c86 принят62cb5788, post-CI/7public assets PASS | Один affected consumer74; завершить review telemetry9, второго автора/PR нет |
+| 14 | Company-boundary исследован source-only,10 acceptance-векторов NOTRUN; docs84 review завершено | Чистого canonical company-provider нет: context-guard отложен, новый framework/validator не создаётся |
+| 15 | PR85 принят; QA68@c896 завершён:6×24PASS/72samples, bounded telemetry141/156 | Только новая подтверждённая неисправность/новый head потребуют адресной проверки; неизменённые CI не повторять |
 
 PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
 Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
@@ -786,6 +790,62 @@ localprototypes SKIPPED. Причина продукта/обвязки ещё �
 QA11 проверил14/14 HTTP runtime bytes приезда3; разрешённый IAB HTTP bootstrap
 завершился timeout до страницы. Инвентаризация доступных поверхностей успешна,
 другого поддержанного HTTP-браузера нет. UI/offline NOTRUN, повторного цикла нет.
+
+### Выпуск Dragon и следующий функциональный срез — 18 октября, 00:38
+
+По новому прямому поручению пользователя готовый Dragon11 выпущен отдельным
+guarded merge: head `5ac5dd049f7e8407b94cd1bdb9618106d7c1a283`,
+base70b0f74e → `95ba121c42e82582a9efdff0d4b4b38e577e7840`.
+Свежая база, service-worker CI39073440703, отсутствие review-блокеров и
+неизменность source/tree сверены перед merge. Дерево принятой версии совпало
+с проверенным6fc651d0. [Pages39075670274](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39075670274)
+успешен; все восемь публичных файлов вернули HTTP200 с точными размерами/SHA256.
+Новые текстовые пути грузинского, турецкого и армянского доступны на сайте;
+выбор локации и публичная ссылка сохраняют язык, английское аудио запускается
+явно по кнопке. Независимые167unit/35browser/15VM/6PNG доказательства сохранены.
+Черновые переводы не проверены носителем, полные переводы целевых обучений
+и системное аудио/clipboard на физическом телефоне не сертифицированы.
+
+В этом проходе выполнен один merge. PR60@cba1c2fc теперь имеет независимое
+source-ревью двух browser-файлов и current19 runtime CLEAR:4 functional,
+10 warm,5 cold,25 partial-body cuts,10 actual reload/controller receipts,
+три просмотренных PNG. Verify39074332390/Backend39074332378 SUCCESS.
+Исторические33/48 на4179 имеют отдельное происхождение; red697 сохранён.
+Выпуск60 и последующий68 остаются очередными отдельными слотами.
+
+Владелец2 подготовил [HYDRA PR14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14),
+head `efbb5a8a6f989586b3f335335f550bed6cbe1d7f` / base533360d7: явная ссылка
+на гида выбранной площадки с requested language и пояснением следующего шага.
+CI39075737482:136unit/66current-browser PASS; независимые source/runtime/peer4 проверки CLEAR.
+Внешний Dragon в этих тестах не открывался; публикации14 пока нет.
+Текущий runtime-отчёт содержит66 записей, включая сохранённые проверки.
+Новые CTA assertions выполнялись в10 last-site группах:3 площадки сua и
+12 языков наZgorzelec. Отдельные36 сочетаний площадки/языка,3 alias и
+negative/storage/fallback случаи проверены peer4 через VM. Из четырёх
+просмотренных PNG новый CTA показан вka на320/1280; tr/hy снимки относятся
+к прежнему welcome modal. Это не полная декартова browser-матрица и не
+реальная межсайтовая навигация.
+Владелец12 подготовил [PR86](https://github.com/OleksandrKiris/kiris-jobs/pull/86),
+head `b564c93663e8645a5c33ebeb775f73ea4501f0b4` / base3ad9f93f:
+локальный `GET /api/v1/materials/` на существующем canonical mock/snapshot и
+serializer77. Авторский runner:68backend PASS, включая14 новых HTTP-тестов
+и16 комбинаций реального provider; check0, миграций нет. Backend39076208129
+и Catalogue39076208133 SUCCESS. Роль14 независимо приняла source/contract,
+роль15 проверила raw CI и выполнила только14 новых HTTP-тестов в отдельной
+копии exactb564:14PASS наDjango6.1.2, Python3.12.14 (CI3.12.15). Старые54
+локально не повторялись. Raw CI и независимый лог сверены root поSHA256,
+пять source-manifest совпали. Граница compact32768/32769 доказана отдельно
+инъекционными transport-тестами; actual fixedsnapshot проверен через реальный
+provider, его прежний более ранний spacedJSON cap сохранён. Разрешены только
+material_http, commonURLs, targetedtests, один core-doc и минимальный trusted
+request-ID/route mapping в middleware. Contract GET-only/HEAD405 сохраняется,
+ошибки view имеют accepted code/request_id, header/body/log ID генерируется
+сервером. Core guards до view сохраняют прежний envelope. Новый endpoint
+подготовлен и независимо принят в этом объёме, PR86 ready; merge и backend
+publication не выполнялись, frontend online-adapter выключен. Предложение company-context guard отложено:
+в принятом core нет чистого canonical company-provider, callback-spy или
+существующий ORM importer не подтверждают такую интеграцию. Десять векторов14
+сохранены как NOTRUN, новый параллельный backend framework не создаётся.
 
 ### История очереди — ранняя сверка 17.10.2026, не задания к повтору
 
@@ -1058,6 +1118,8 @@ GitHub продолжался. Прежний общий запрет на лю�
   ведёт на EN с понятным предупреждением, не выдуманным переводом.
 
 ## Журнал существенных изменений
+
+- **2026-10-18, выпуск Dragon11:** опубликован текстовый путь ka/tr/hy, guarded95ba121c, Pages39075670274 и8точных публичных файлов. Current19 prerequisite60 независимо CLEAR, выпуск60→68 впереди. Следующие задачи поручены владельцам2/12; незавершённый код не объявлен готовым.
 
 - **2026-10-18, функциональный проход:** новый Dragon11 ka/tr/hy подготовлен с167unit/35browser PASS; независимые source/runtime/VM проверки CLEAR, выпуск отдельно. Локальный serializer77 принят3ad9f93 с post-CI/7public bytes. В Ryczywół исправлен найденный P2 с182tests. Совместный public gate4179 прошёл48сценариев, новый697 имеет отдельный timeout; материалы68 пока не опубликованы.
 
