@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 17.10.2026, 17:36 Europe/Budapest; kiris-jobs дополнен в 17:43. Владелец: роль10.
+Сверка: 17.10.2026, 17:36 Europe/Budapest; kiris-jobs дополнен в 17:48. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `427a8e13421f94e3e22b5fe03c9934f065d50df1` | [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#61](https://github.com/OleksandrKiris/kiris-jobs/pull/61) draft, [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft | не найдена в последних пяти runs |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `e93dc59c6339a94020e955969a074c8c1d3a5956` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#61](https://github.com/OleksandrKiris/kiris-jobs/pull/61) draft, [#64](https://github.com/OleksandrKiris/kiris-jobs/pull/64), [#67](https://github.com/OleksandrKiris/kiris-jobs/pull/67) draft | [39046564380](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39046564380) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `02a1bfdb08b1ccf72e49113f57ca144ab14cd328` | [#11](https://github.com/OleksandrKiris/citronex-hydra-project/pull/11) draft | [39035254461](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39035254461) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
@@ -53,8 +53,20 @@ recruitmentbot. Остальной аккаунт не объявляется о
   completed. Код v4 и canonical archive26 находятся в прежнем cloud/Library-контексте;
   байты candidate ZIP локально не получены. Соответствие исходников deployment,
   новый deploy и реальная отправка не выполнялись. Это отдельная зависимость передачи.
-- Роль14 подготовила read-only материалы и карту владения локально; роль10 независимо
-  прочла и приняла передачу десяти CI-путей. Автоматический ownership-gate ещё не в main.
+- Роль14 опубликовала новый read-only срез и карту в draft PR67, head7225ba73,
+  base427a8e1; оба CI и 19 собственных тестов прошли. Старый task-write пакет
+  не перенесён. Независимое ревью карты/контракта и согласование с новым main
+  ещё нужны; передача десяти CI-путей принята вручную, ownership-gate не установлен.
+- Причина fixture failure из PR61 установлена до app: повторный seed при утрате
+  session marker. PR66 принят на head604e627b2025328f2831ef8f2db738de90d20c99,
+  merge e93dc59c6339a94020e955969a074c8c1d3a5956. Независимые 29 тестов, две регрессии
+  падают на старой fixture; 8/8 browser-сценариев, просмотрены screenshot/trace.
+  Post-merge Backend39046564372/Pages39046564380 success; семь runtime-ресурсов
+  побайтно совпали с публикацией. Runtime не менялся; дефект app не подтверждён.
+- PR64 Windows containment: head da3ceabf, оба CI success; независимые 9 адресных
+  и все 15 Ubuntu fixture-тестов, включая symlink rejection, прошли. Не принят;
+  до merge требуется совместная проверка с новым main. Windows symlink EPERM
+  остаётся отдельным ограничением среды, тест не отключён.
 
 ## Регулярное продолжение
 
