@@ -35,3 +35,11 @@ jobs:
         run: python .github/scripts/backend-ci.test.py
       - name: Run all present backend tests and isolated Django checks
         run: python .github/scripts/backend-ci.py
+      - name: Run accepted material and ownership regressions (not a live ownership gate)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/contract-tests"
+          "$RUNNER_TEMP/contract-tests/bin/python" -m pip install -r quality/security/contract-ci-requirements.txt
+          "$RUNNER_TEMP/contract-tests/bin/python" -m pip check
+          "$RUNNER_TEMP/contract-tests/bin/python" quality/security/contract_ci.py

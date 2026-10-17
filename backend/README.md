@@ -46,3 +46,24 @@ migration regression executes `migrate` twice against the runner's in-memory
 SQLite and verifies the current empty migration graph and unchanged table set.
 There are no persistent models yet; this is not evidence of future data migration
 or PostgreSQL compatibility.
+
+## Canonical materials schema (local only)
+
+The accepted schema lives in `contracts/materials-v1/response.schema.json`.
+`core.material_schema.material_response_validator()` returns a callback suitable
+for the role13 adapter: `None` on success, a real `jsonschema.ValidationError` on
+invalid data. It checks Draft2020-12 and date formats, and uses an empty registry
+with no remote retrieval. Missing/broken schema fails explicitly. Business rules
+remain in domain; this does not authenticate, serve or confirm the source content.
+
+`jsonschema==4.23.0` matches accepted contract tooling. Directly imported
+`referencing==0.37.0` pins the offline registry API (Python >=3.10; core >=3.12).
+No format extras are needed for the current date-only schema. Django stays6.1.2.
+Existing fixed dev/test settings and in-memory SQLite are used; no production
+configuration or new settings profile is introduced.
+
+The ordinary backend runner includes real canonical-schema negative tests.
+The separate `docs/backend/core/verify-material-domain.py` is an explicit combined
+proof command for a tree containing the role13 adapter. Missing adapter fails;
+it is not silently skipped or claimed to run in main CI before PR62 acceptance.
+Online remains off and no materials URL is installed by this slice.
