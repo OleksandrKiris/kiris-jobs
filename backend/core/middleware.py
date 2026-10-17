@@ -16,7 +16,8 @@ from .protocol import API_VERSION
 from .views import api_error
 
 logger = logging.getLogger('core.requests')
-ROUTES = {'/api/v1/health/': 'health', '/api/v1/version/': 'version'}
+ROUTES = {'/api/v1/health/': 'health', '/api/v1/version/': 'version',
+          '/api/v1/materials/': 'materials'}
 METHODS = {'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'}
 
 
@@ -64,6 +65,7 @@ class APIGuardMiddleware:
             return self.get_response(request)
         start = time.monotonic()
         request_id = uuid.uuid4().hex
+        request.core_request_id = request_id
         retry = self.retry_after(start)
         if retry is not None:
             response = api_error('rate_limited', 'Too many requests. Try again later.', status=429)
