@@ -66,7 +66,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 Последняя сверка main: `62cb57883e617d67e54d8ba5b280f616ca651848`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85.
 Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
-Следующим проходом принят Dragon9, main `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
+Ранее принят Dragon9; текущий Dragon main после PR10 — `70b0f74e95d1556c85aa649d6204b106bd564c4f`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
 `da054fd69b2f831de93d16842991cc38e280233a` прошёл CI; merge `fc672d8`,
@@ -650,15 +650,15 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 1 | PR60@21d0f22f: cold-body fix и прежний33-case public gate подготовлены | Shared preflight15; затем current public old5/new5 gate с материалом68 |
 | 2 | HYDRA13 принят533360d7; Pages/3актива проверены | WIP завершён; следующий полезный срез из этой очереди |
 | 3 | Local58005b9f,182unit; browser timeout до navigation | Одна доступная approved-browser приёмка; remote отказ отдельно |
-| 4 | Dragon10@6cb: independent153unit/17browser/6PNG | Отдельный слот10, frozen head |
+| 4 | Dragon10@6cb принят70b0f74e; Pages/8public assets PASS | Копирование публичной guide-ссылки опубликовано; WIP закрыт |
 | 5 | Local0c099a6,181unit+author UI; manifest исправлен на22paths | CI-browser matrix/independent acceptance и разрешённая remote передача |
 | 6 | Local742435d9,176Node20+author UI/upgrade; bundle сверён | Independent local acceptance; прежний remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; replay tree9f92 | Independent local acceptance; exact IDG6 не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | PR68@cc2/base558: mandatory green, functional16 в обеих версиях | Chromium156 histogram unavailable: capability/gate review; public gate1 |
+| 9 | PR68@c896/base62cb:8green checks; actual141legacy/156OnDisk;6×24PASS/72samples | Совместный public old5/new5 gate1, затем свежая приёмка10; ещё не опубликован |
 | 10 | PR78/внешнее83 проверены; audit обновляет тот же PR84 | Готовая очередь перед новым WIP; один guarded merge и post-check |
 | 11 | Local1f087fe/base558:26unit,6/6ZIP runtime exact | Combined browser gate; новый file-protocol policy отказ отдельно |
-| 12 | PR77@d2cbb0fb/base558 READY; оба exact CI success,3 пути прежние | Свежий guard10; не повторять54+8 на unchanged serializer |
+| 12 | PR77@0fe5f63a/base62cb READY; оба exact CI success,3 пути прежние | Отдельный свежий guard10; локальный backend не опубликован |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
 | 14 | PR74@e7311a10/base62cb: mandatory green, exact preflight/16+8 PASS | Runtime/fixtures byte-identical85; native matrix NOTSCHEDULED для sole docs diff; отдельная docs-приёмка |
 | 15 | PR85@af008c86 принят62cb5788, post-CI/7public assets PASS | Один affected consumer74; завершить review telemetry9, второго автора/PR нет |
@@ -678,22 +678,26 @@ Native matrix на e731 NOTSCHEDULED по accepted paths, а не PASS/FAIL: ш�
 jobs относятся к тем же байтам, нового выполнения шести jobs здесь нет. Scoped review
 не требует искусственного запуска для sole docs diff. Массовый rerun60/74 не выполнялся.
 Переход missing-base в live consumer ещё не доказан; PR74 ещё не merged.
-Queue77/Dragon10;60/68 получают слот после своих конкретных gates. Готовый77
+По прямому запросу пользователя о видимых функциях21:48 готовый Dragon10 выпущен: guarded merge70b0f74e, tested/merged tree18b4d00e, Pages39072598765SUCCESS; восемь public assets HTTP200/exact bytes. Кнопка копирования guide-ссылки сохраняет язык/локацию и даёт ручной вариант при недоступном clipboard. Это единственный merge этого отдельного пользовательского прохода. Следующий видимый кандидат — материалы координатора PR68@c896: свежие8checksSUCCESS; independent integration4blobs/runtime5/workflows CLEAR; QA15 подтверждает actual141legacy/156OnDisk,6×24PASS/72telemetry samples. Это process-wide open measurement, не доказательство commit/durability. До выпуска68 остаётся совместный public old5/new5 gate1. Локальный backend77@0fe5f63a/62cb с новым зелёным CI сохраняет отдельный следующий слот. Готовый77
 не ждёт универсального объяснения file-storage. Исторический red не является
 текущим результатом нового head.
 
-Matrix68 на Chromium156: functional16 PASS, но histogram unavailable даёт
+Историческая matrix68@cc2 на Chromium156: functional16 PASS, но histogram unavailable давал
 diagnostic gate FAIL; calculator там NOTRUN. Это не preflight85 и не потеря задачи.
 Новый source-контракт proposalSHA2560f600a79/fixturesfe9bc7c9 получил CLEAR14/15
 и независимую delta-проверку. Никаких сопоставимых same-name пар, mixed incomparable,
 all-missing/unknown/malformed дают FAIL; absent-both не превращается в ноль.
-Owner9 подготовил один local helper/test/docs patch SHA256f169c5b8: авторский новый
+Исторический локальный срез: owner9 подготовил helper/test/docs patch SHA256f169c5b8: авторский новый
 fake-CDP suite9/9 PASS, combined64/64; old-helper9tests даёт1PASS/8FAIL.
-Независимое review реализации ещё требуется: новые RPC-имена и runtime не наблюдались,
-авторский результат не заменяет приёмку. Root review нужен до одного changed-head CI; functional16
+Тогда независимое review реализации ещё требовалось: новые RPC-имена и runtime не наблюдались,
+авторский результат не заменял приёмку. Root review требовался до одного changed-head CI; functional16
 и shift8 остаются обязательными, общий nonzero не снимается.
-Первый independent review local patch нашёл P2: consumer report ещё подписывает156
-legacy141 scope/revision. Передана малая metadata-only коррекция; CI до приёмки не запускается.
+Первый independent review local patch нашёл P2: consumer report подписывал156
+legacy141 scope/revision. Metadata-only коррекция d3d01 затем получила independent CLEAR:
+72assertions/runner body неизменны, один pure metadata check PASS. Обычный pushc896
+после accepted62cb integration дал8green checks; actual156OnDisk подтверждён QA15.
+Этот новый результат закрывает прежний telemetry gate, не выдаёт process-wide open за
+KEY commit/durability и не закрывает историческую проблему79. Public gate1 остаётся.
 
 На WIP назначаются один автор, один source-reviewer и один runtime-verifier.
 Один current manifest содержит repo/head/base/runtime hashes, proof/команды/результат,
