@@ -77,11 +77,13 @@ HRappka описана по публичным официальным матер
 - [PR62][pr62] open/draft, head `177872e3a4a1ada304ab2f0e0d0b9e5ffa5f8119`.
   Интеграция13 с actual schema validator ещё не выполнена: в его durable-среде
   git fetch к GitHub443 policy-blocked, штатное разрешение отсутствует (передача10).
-  Локальная proof12 этого не заменяет; другой сетевой инструмент не является обходом.
+  Локальная proof12 этого не заменяет. Отказ не обходится другим инструментом
+  или средой; требуется штатное разрешение сети того окружения.
 - [PR77][pr77] ready/open, **не merged**: head
   `7406378500892cf41a0400ce4da32b9958c42b71`, implementation `d834881f`.
-  Pure UTF-8 helper с cap32768: 54 backend tests +8 независимых регрессий и
-  CI отмечены в PR. GitHub draft flag выключен, но это
+  Pure UTF-8 helper с cap32768: 54 backend tests +8 независимых регрессий
+  отмечены в PR; на этом head Backend CI PASS, общий coordinator CI FAIL.
+  GitHub draft flag выключен, но это
   не означает наличие helper в accepted main. HTTP route по-прежнему не установлен.
 - [PR72][pr72] принят в `a8093c9`: [CI][p-contract-ci] исполняет 20 accepted
   contract/ownership regressions. **Hard lock не установлен**; выполнение
