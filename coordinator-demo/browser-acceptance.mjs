@@ -97,6 +97,7 @@ try {
       // Start already offline: all five runtime files must already be on disk.
       await context.setOffline(true);
       await page.goto(`${fileURL}?lang=en&from=acceptance#board`); await ready(page);
+      const originalFileSearch = new URL(page.url()).search;
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('.task').count(), 3);
       await fits(page);
@@ -118,7 +119,8 @@ try {
         assert.equal(await page.locator('#filter').inputValue(), 'done');
         assert.equal(await page.locator('#demo-01').inputValue(), 'done');
         assert.equal(new URL(page.url()).searchParams.get('from'), 'acceptance');
-        assert.equal(new URL(page.url()).hash, '#board');
+        assert.equal(new URL(page.url()).search, originalFileSearch, 'File storage address stays stable');
+        assert.equal(new URL(page.url()).hash, '#board?lang=uk&status=done');
         const savedURL = page.url();
         // Local navigation / Back, no external page or operational action.
         await page.goto(`${fileURL}?lang=ka`); await ready(page);

@@ -213,7 +213,7 @@ test('denied read never overwrites unseen previous data, even if writes would wo
 test('unsupported language and alias have deterministic fallback',()=>{
   assert.equal(M.language('ua'),'uk');assert.equal(M.language('UK'),'uk');assert.equal(M.language('ka'),'en');assert.equal(M.language('<script>'),'en');
 });
-function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true}={}) {
+function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true,href}={}) {
   let document;
   class Node {
     constructor(tag){this.tagName=tag;this.children=[];this.handlers={};this.hidden=false;this.value='';this.textContent='';this.id='';this.attrs={};this.dataset={};}
@@ -226,11 +226,11 @@ function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl=
   const roots=[...read('index.html').matchAll(/id="([^"]+)"/g)].map(([,id])=>{const n=new Node('fixture');n.id=id;return n;});
   const find=(id,nodes)=>{for(const node of nodes){if(node.id===id)return node;const child=find(id,node.children);if(child)return child;}return null;};
   document={documentElement:{},activeElement:null,title:'',createElement:t=>new Node(t),getElementById:id=>find(id,roots),querySelector:()=>({prepend(node){roots.unshift(node);}})};
-  const location=new URL(baseUrl+'?lang='+lang+'&status='+filter+'&from=fixture#board');
+  const location=new URL(href||baseUrl+'?lang='+lang+'&status='+filter+'&from=fixture#board');
   const forbidden=()=>{throw Error('External network/operational action forbidden');};
   const window={CoordinatorDemo:M,localStorage:store};const historyCalls=[];
   const history={state:{keep:true},replaceState(s,title,url){if(historyDenied)throw Error('denied');assert.equal(s.keep,true);historyCalls.push(String(url));location.href=String(url);}};
-  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})}});
+  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,URLSearchParams,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})}});
   return {document,location,store,historyCalls,$:id=>document.getElementById(id),change(id,value){const n=this.$(id);n.focus();n.value=value;n.handlers.change();},click(id){this.$(id).handlers.click();}};
 }
 for(const lang of M.LANGS)test(lang+': real UI handlers, filter, focus, language, reload, cancel/reset',()=>{
@@ -274,6 +274,28 @@ test('downloaded file and source demo never register the online worker',()=>{
     const h=ui({baseUrl});h.change('demo-01','doing');assert.equal(h.$('demo-01').value,'doing');
     assert.equal(h.$('catalogue-return'),null);
   }
+});
+
+test('file view changes keep the original file query and restore through fragment on reload',()=>{
+  const h=ui({baseUrl:'file:///tmp/coordinator-demo/index.html'});
+  const query=h.location.search,pathname=h.location.pathname;
+  h.change('demo-01','done');h.change('filter','done');h.change('language','uk');
+  assert.equal(h.location.search,query);assert.equal(h.location.pathname,pathname);
+  assert.equal(h.location.hash,'#board?lang=uk&status=done');
+  const reload=ui({href:h.location.href,store:h.store});
+  assert.equal(reload.document.documentElement.lang,'uk');
+  assert.equal(reload.$('filter').value,'done');assert.equal(reload.$('demo-01').value,'done');
+  reload.change('filter','all');
+  const again=ui({href:reload.location.href,store:h.store});
+  assert.equal(again.$('filter').value,'all');assert.equal(again.$('tasks').children.length,3);
+});
+
+test('file all-filter fragment overrides a legacy done query without changing the storage address',()=>{
+  const h=ui({href:'file:///tmp/coordinator-demo/index.html?lang=ru&status=done&from=fixture#board?lang=pl&status=all'});
+  assert.equal(h.document.documentElement.lang,'pl');assert.equal(h.$('filter').value,'all');
+  h.change('language','en');
+  assert.equal(h.location.search,'?lang=ru&status=done&from=fixture');
+  assert.equal(h.location.hash,'#board?lang=en&status=all');
 });
 test('published demo returns to same-origin catalogue and reports unavailable offline storage honestly',()=>{
   const h=ui({baseUrl:'https://example.test/kiris-jobs/tools/coordinator/',lang:'ka',worker:false});
