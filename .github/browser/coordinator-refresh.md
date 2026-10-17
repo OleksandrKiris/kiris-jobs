@@ -1,3 +1,46 @@
+# Shared publication guard — issue87
+
+The current guard uses the real Pages publisher's verifyArtifact and destination
+inventory. It also verifies staged bytes against the exact checkout Git tree.
+Pinned4179 publication paths are reconstructed through the SAME publisher
+policy using path-only placeholders and Git blob identities; placeholder hashes
+are not proof, and no historical image bodies are fetched. Generated tool paths
+use the publisher's five-file mapping and exact public-tools manifest.
+
+All source-diff exceptions were removed. Excluded integration74/backend86 paths
+do not enter publication. Public roadmap84/docs/platform68 and real runtime
+changes DO enter it. Any published path/blob delta invalidates the prior-publication
+reuse and executes catalogue-full.mjs --current-only on actual staged HEAD:
+all16 direct catalogue/coordinator groups plus applicable exact-base worker
+upgrade cases. An unchanged worker is explicitly N/A. The two old pinned
+resource-cut overlays are excluded from this core invocation because mandatory19
+executes separately, not disabled. Historical33 and48 stay attributed to4179;
+none are relabelled shell-only or a current run.
+
+The actual five staged coordinator hashes are classified BEFORE any overlay.
+Accepted NEW tuple: mandatory19 uses the captured actual HEAD buffers; the
+external candidate loader is never called. Verified OLD tuple: a separate
+explicitly labelled composite19 may still use pinned candidatec896, while the
+actual OLD receipt is retained. Unknown/mixed tuples fail closed. The refreshed
+legacy phase uses exact event base as published input, so worker equality is
+recorded honestly; no fresh worker-upgrade claim follows from unchanged bytes.
+Full manifests/digests, actual head/checkout, historical receipt, optional full
+current report and19 current case results remain separate. Original staging
+is restored and verified against Git/publication after the test phases.
+
+Scope: only owner1 .github/browser files. No package, workflow, publisherpolicy
+or owner9/12/14 runtime/docs edit. Regression fixtures are fictional isolated
+Git trees exercising the actual publisher; they are not browser/consumer
+acceptance. Existing npm check:browser-fixtures executes the addressed tests.
+The root-provided outputs files were absent here; diagnosis provenance is the
+exact root messages, cross-checked against fresh source, not redownloaded logs.
+
+---
+
+The following is historical PR60 acceptance documentation; its old default
+receipt and baseline guards are superseded by issue87 above. Source pins and
+red/green observations are retained.
+
 # Public coordinator generation acceptance
 
 ## Current default scope:19 composite groups

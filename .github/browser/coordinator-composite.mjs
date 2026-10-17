@@ -8,6 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
+import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput } from './catalogue-scope.mjs';
 import { acceptCoordinatorHTTP } from './coordinator-http.mjs';
 import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, publishedToolBytes, TOOL_FILES } from './coordinator-refresh.mjs';
 
@@ -52,9 +53,6 @@ let browser;
 let activePage;
 const mutations = [];
 try {
-  await startServer();
-  browser = await chromium.launch({ headless: true });
-  report.browser = `Chromium ${browser.version()} / Playwright 1.56.1`;
 
   async function context(viewport, storageMode = '') {
     const ctx = await browser.newContext({ viewport, locale: 'pl-PL', serviceWorkers: 'allow' });
@@ -97,48 +95,89 @@ try {
     await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: false });
   }
 
+  report.currentScenario = 'publication-guard';
   const reused = JSON.parse(await readFile(new URL('./catalogue-reuse.json', import.meta.url), 'utf8'));
-  for (const [name, value] of Object.entries(report.files)) {
-    assert.equal(value.sha256, reused.files[name].sha256, 'Reused public shell hash: ' + name);
-  }
+  const oldHashes = Object.fromEntries(TOOL_FILES.map(name =>
+    [name, reused.files['tools/coordinator/' + name].sha256]));
+  // Make only the pinned reference object/five small sources available. Past
+  // media are represented by Git object identities, never downloaded here.
+  publishedToolBytes({ ref: reused.head, hashes: oldHashes }, false);
+  const staged = captureStagedPublication(checkout, artifact, report.checkout);
+  const historical = gitPublication(checkout, reused.head);
+  const reuse = publicationReuse(historical, staged.files);
   originalTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
-  for (const [name, bytes] of originalTools) {
-    assert.equal(sha256(bytes), reused.files['tools/coordinator/' + name].sha256, 'Unchanged branch baseline: ' + name);
-  }
-  publishedToolBytes({ ref: reused.head, hashes: Object.fromEntries(TOOL_FILES.map(name =>
-    [name, reused.files['tools/coordinator/' + name].sha256])) }, false);
-  const sinceProof = execFileSync('git', ['diff', '--name-only', reused.head, 'HEAD'], { encoding: 'utf8' })
-    .trim().split('\n').filter(Boolean);
-  const inheritedBackend77 = ['backend/core/material_response.py',
-    'backend/tests/core/test_material_response.py', 'docs/backend/core/material-response-bytes.md'];
-  assert.deepEqual(sinceProof.filter(path => !path.startsWith('.github/browser/')
-    && !inheritedBackend77.includes(path)), [], 'Reusing old catalogue groups requires ALL public source paths unchanged');
-  const candidate = publishedToolBytes(JOINT_TOOL_TRANSITION.target, false);
+  const actualHashes = Object.fromEntries([...originalTools].map(([name, bytes]) => [name, sha256(bytes)]));
+  report.currentStagedHead = { sourceHead: report.head, checkout: report.checkout,
+    inventorySHA256: staged.sha256, files: staged.files.length, actualToolHashes: actualHashes };
+  const mode = selectToolTarget(actualHashes, oldHashes, JOINT_TOOL_TRANSITION.target.hashes);
+  report.currentStagedHead.toolMode = mode;
+  report.historicalEvidence = { head: reused.head, base: reused.base, run: reused.run,
+    artifact: reused.artifact, zipSHA256: reused.zipSHA256, historicalGroups: 33,
+    historicalTotalGroups: 48, historical33IsCurrentRun: false, publicationComparison: reuse };
+  await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
+  await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
     '50ef25e6f86f4d95897e94bb391896d8d22141c6', 'This composite requires the real SW80 fix');
+
+  if (reuse.requireFullCurrentCatalogue) {
+    const fullDir = join(reportDir, 'full-current');
+    let failure;
+    try {
+      execFileSync(process.execPath, [new URL('./catalogue-full.mjs', import.meta.url).pathname, '--current-only'],
+        { env: { ...process.env, BROWSER_REPORT: fullDir }, timeout: 300000, maxBuffer: 8 * 1024 * 1024 });
+    } catch (error) { failure = error; }
+    const full = JSON.parse(await readFile(join(fullDir, 'acceptance.json'), 'utf8'));
+    report.fullCurrentCatalogue = { status: full.status, head: full.head, base: full.base,
+      checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
+      passed: full.results.filter(x => x.status === 'passed').length,
+      notApplicable: full.results.filter(x => x.status === 'not-applicable'), error: full.error || null };
+    assert.equal(full.scope, 'full-current-catalogue-core; historical tool overlays excluded');
+    assert.equal(full.head, report.head); assert.equal(full.checkout, report.checkout);
+    assert.equal(full.status, 'passed', full.error || failure?.message);
+    assert.ok(report.fullCurrentCatalogue.passed >= 16, 'All actual catalogue and coordinator core cases must execute');
+    for (const name of TOOL_FILES) assert.equal(full.files['tools/coordinator/' + name].sha256, actualHashes[name]);
+    assert.equal(captureStagedPublication(checkout, artifact, report.checkout).sha256, staged.sha256,
+      'Full-current core must leave the actual staged HEAD intact');
+  }
+
+  const candidate = toolInput(mode, originalTools, () => publishedToolBytes(JOINT_TOOL_TRANSITION.target, false));
+  const targetHashes = Object.fromEntries([...candidate.files].map(([name, bytes]) => [name, sha256(bytes)]));
+  const transition = { ...JOINT_TOOL_TRANSITION,
+    published: { ...JOINT_TOOL_TRANSITION.published, ref: report.base },
+    target: { ref: mode === 'actual-staged-head' ? report.head : JOINT_TOOL_TRANSITION.target.ref, hashes: targetHashes } };
   report.compositeReceipt = {
-    kind: 'composite-test-inputs', version: 1,
+    kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
+    currentStagedHead: report.currentStagedHead,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
       workerBlob: '50ef25e6f86f4d95897e94bb391896d8d22141c6', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
-    candidate5: { sourceHead: JOINT_TOOL_TRANSITION.target.ref, sourcePath: 'coordinator-demo/',
-      stagedPath: 'tools/coordinator/', hashes: JOINT_TOOL_TRANSITION.target.hashes },
-    publishedOld5: { sourceHead: JOINT_TOOL_TRANSITION.published.ref, hashes: JOINT_TOOL_TRANSITION.published.hashes },
+    candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',
+      stagedPath: 'tools/coordinator/', hashes: targetHashes, actualStagedHead: mode === 'actual-staged-head' },
+    publishedOld5: { sourceHead: transition.published.ref, hashes: transition.published.hashes },
+    acceptedCandidateReference: JOINT_TOOL_TRANSITION.target.ref,
     scope: '19 current groups:4HTTPfunctional +10warmcuts +5coldcuts',
-    limitation: 'Overlay receipt, not a claim that candidate5 belongs to the shell Git commit. SW80 is a release prerequisite.'
+    limitation: mode === 'actual-staged-head' ? 'Target is captured actual HEAD5; no external target overlay.'
+      : 'Actual OLD tuple independently verified. Candidate overlay is a separate test input, not current HEAD runtime.'
   };
-  report.reusedEvidence = { head: reused.head, base: reused.base, run: reused.run,
-    artifact: reused.artifact, zipSHA256: reused.zipSHA256, scope: reused.scope,
-    reportedPublicHashesEqual: true, changedPathsSinceProof: sinceProof, old33BrowserGroupsReexecuted: false };
-  for (const [name, bytes] of candidate.files) await writeFile(join(artifact, 'tools/coordinator', name), bytes);
+  await startServer();
+  browser = await chromium.launch({ headless: true });
+  report.browser = `Chromium ${browser.version()} / Playwright 1.56.1`;
+  if (mode !== 'actual-staged-head') {
+    for (const [name, bytes] of candidate.files) await writeFile(join(artifact, 'tools/coordinator', name), bytes);
+  }
   await acceptCoordinatorHTTP({ report, reportDir, base, context, ready, fits, shot,
     active: page => { activePage = page; }, startServer, stopServer });
   await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
     ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer,
-    transition: JOINT_TOOL_TRANSITION });
+    transition, targetFiles: candidate.files });
   assert.equal(report.results.length, 19, 'Exactly19 current composite groups are required');
   assert.equal(report.results.filter(result => result.transition === 'pr68-http').length, 4);
   assert.equal(report.results.filter(result => result.transition === 'pr68').length, 15);
+
+  for (const [name, bytes] of originalTools) await writeFile(join(artifact, 'tools/coordinator', name), bytes);
+  assert.equal(captureStagedPublication(checkout, artifact, report.checkout).sha256, staged.sha256,
+    'Actual staged HEAD must be restored after all test phases');
+  report.currentStagedHead.restoredAndVerified = true;
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
     // Use a separate request context so the existing navigation SW fallback

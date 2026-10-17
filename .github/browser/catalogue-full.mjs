@@ -22,6 +22,7 @@ const report = {
   head: process.env.TESTED_HEAD, base: process.env.TESTED_BASE,
   checkout: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   started: new Date().toISOString(), browser: '', results: [], files: {},
+  scope: process.argv.includes('--current-only') ? 'full-current-catalogue-core; historical tool overlays excluded' : 'historical full runner',
   limits: ['Desktop Chromium; narrow viewport is not a physical phone.',
     'External services are blocked; HRappka delivery and Telegram are not tested.',
     'Coordinator offline tests disable the browser network and stop the origin server; a cold entry has no cached tool.',
@@ -530,6 +531,8 @@ try {
     }
   }
 
+  // The shared guard runs mandatory19 separately on actual captured HEAD5.
+  if (!process.argv.includes('--current-only')) {
   // A changed tool must refresh atomically even if the worker bytes do not change.
   await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
     ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer });
@@ -539,6 +542,8 @@ try {
   await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
     ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer,
     transition: JOINT_TOOL_TRANSITION });
+
+  }
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
     // Use a separate request context so the existing navigation SW fallback
