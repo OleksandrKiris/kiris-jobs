@@ -45,10 +45,12 @@ def check(mapping, change, accepted_dependencies=()):
         errors.extend(f'overlap:{p}' for p in sorted(overlap))
     return sorted(set(errors))
 
-def git_paths(base, head):
-    # -z preserves whitespace; rename/copy checks both old and new ownership.
-    raw = subprocess.check_output(['git', 'diff', '--name-status', '-z',
-                                   '--find-renames', base, head, '--'])
+def git_paths(base, head, cwd=None):
+    # Ownership covers changed paths, not read access to unchanged copy sources.
+    # -z preserves whitespace; renames affect both old and new names.
+    raw = subprocess.check_output(['git', '-c', 'diff.renames=true', 'diff', '--name-status', '-z',
+                                   '--no-ext-diff', '--no-textconv', '--find-renames',
+                                   base, head, '--'], cwd=cwd)
     fields = raw.decode('utf-8').rstrip('\0').split('\0') if raw else []
     paths, i = [], 0
     while i < len(fields):

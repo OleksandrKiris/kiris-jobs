@@ -48,7 +48,6 @@ class OwnershipTests(unittest.TestCase):
         self.assertEqual(checker.owner_of('coordinator-demo/browser-acceptance.mjs',M),9)
         self.assertEqual(checker.owner_of('offline-tools/a/browser-acceptance.mjs',M),11)
 
-if __name__ == '__main__': unittest.main()
 
 # checker parsing regression is independent of this checkout's Git history.
 class DiffParsingTests(unittest.TestCase):
@@ -63,3 +62,45 @@ class DiffParsingTests(unittest.TestCase):
     def test_wrong_repo_and_empty_diff(self):
         c=claim(14);c['repo']='other/repo'
         self.assertEqual(checker.check(M,c),['empty_diff','wrong_repo'])
+
+
+class RealGitDiffTests(unittest.TestCase):
+    def test_copy_and_rename_ownership_with_real_git(self):
+        import subprocess
+        import tempfile
+        with tempfile.TemporaryDirectory(prefix='primserv-diff-') as tmp:
+            root = Path(tmp)
+            def git(*args):
+                return subprocess.check_output(['git', *args], cwd=root, text=True).strip()
+            git('init', '-q')
+            git('config', 'user.name', 'Synthetic Fixture')
+            git('config', 'user.email', 'fixture@example.invalid')
+            git('config', 'commit.gpgsign', 'false')
+            # Even a user-level copy preference must not change the policy.
+            git('config', 'diff.renames', 'copies')
+            (root/'assets').mkdir()
+            source = root/'assets/source.js'
+            source.write_text('public fixture line\n'*30, encoding='utf-8')
+            git('add', '.'); git('commit', '-qm', 'fixture base')
+            base = git('rev-parse', 'HEAD')
+            destination = root/'contracts/materials-v1/copy.js'
+            destination.parent.mkdir(parents=True)
+            destination.write_bytes(source.read_bytes())
+            git('add', '.'); git('commit', '-qm', 'copy public fixture')
+            copied = git('rev-parse', 'HEAD')
+            paths = checker.git_paths(base, copied, cwd=root)
+            self.assertEqual(paths, ['contracts/materials-v1/copy.js'])
+            self.assertEqual(checker.check(M, claim(14, *paths)), [])
+            source.write_text('edited fixture\n', encoding='utf-8')
+            git('add', '.'); git('commit', '-qm', 'source edit')
+            paths = checker.git_paths(base, 'HEAD', cwd=root)
+            self.assertIn('assets/source.js', paths)
+            self.assertIn('foreign_path:assets/source.js:owner1', checker.check(M, claim(14, *paths)))
+            # Rename deletes the old name, unlike copying unchanged content.
+            git('mv', 'assets/source.js', 'contracts/materials-v1/moved.js')
+            git('commit', '-qm', 'rename across owners')
+            paths = checker.git_paths('HEAD~1', 'HEAD', cwd=root)
+            self.assertEqual(paths, ['assets/source.js', 'contracts/materials-v1/moved.js'])
+            self.assertIn('foreign_path:assets/source.js:owner1', checker.check(M, claim(14, *paths)))
+
+if __name__ == '__main__': unittest.main()

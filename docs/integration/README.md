@@ -55,8 +55,12 @@ materials route is not currently installed. Online and AI stay disabled.
 Example actual-diff preflight: `python docs/integration/check-diff.py --claim
 claim.json --base <accepted-base> --head <exact-head>`. Claim contains owner,
 repo, head (full SHA), allowed_paths, depends_on and optional other_wip path
-lists; actual changed paths replace any claim paths. Rename/copy old and new
-names are both checked. The CLI cannot approve dependency/map changes itself.
+lists; actual changed paths replace any claim paths. Rename old and new
+names are both checked. Copies check the added destination only; an unchanged
+public source is read access, not a write requiring source ownership. Copy
+detection is deliberately not enabled. If the source is also modified, that
+modified source path is checked independently. Real Git CLI fixtures cover
+copy-only, copy plus source edit, and cross-owner rename cases. The CLI cannot approve dependency/map changes itself.
 Revert this isolated commit to recover; no storage/cache format is changed.
 
 ## Previous work and access limitation
