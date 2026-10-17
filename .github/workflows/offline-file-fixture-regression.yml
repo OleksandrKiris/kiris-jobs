@@ -1,0 +1,65 @@
+name: Offline native fixture regression
+
+on:
+  pull_request:
+    paths:
+      - coordinator-demo/browser-profile.mjs
+      - coordinator-demo/browser-fixtures.cjs
+      - coordinator-demo/browser-acceptance.mjs
+      - offline-tools/shift-duration/browser-fixtures.cjs
+      - offline-tools/shift-duration/browser-acceptance.mjs
+      - .github/workflows/offline-file-fixture-regression.yml
+
+permissions:
+  contents: read
+
+jobs:
+  native-fixtures:
+    name: Native fixtures / Playwright ${{ matrix.playwright }} / sample ${{ matrix.sample }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        playwright: ['1.56.1', '1.64.1']
+        sample: [1, 2, 3]
+    env:
+      TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+      TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+      TESTED_PLAYWRIGHT: ${{ matrix.playwright }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install exact browser tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/coordinator-browser" --no-save --no-package-lock "playwright@$TESTED_PLAYWRIGHT"
+          "$RUNNER_TEMP/coordinator-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Test fixture initialization guards
+        run: node --test coordinator-demo/test.cjs offline-tools/shift-duration/test.cjs
+      # Fixed samples, no retries. Every sample must pass 16 coordinator and 8
+      # calculator scenarios, including denial/corrupt/future preservation.
+      - name: Run complete file acceptance against native fixture state
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/coordinator-browser/node_modules/playwright
+          BROWSER_REPORT: ${{ runner.temp }}/coordinator-native-fixture-report
+        run: node coordinator-demo/browser-acceptance.mjs
+      - name: Run complete calculator file acceptance against native fixture state
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/coordinator-browser/node_modules/playwright
+          BROWSER_REPORT: ${{ runner.temp }}/shift-native-fixture-report
+        run: node offline-tools/shift-duration/browser-acceptance.mjs
+      - name: Preserve every result, screenshot and native trace
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: offline-native-pw${{ matrix.playwright }}-sample${{ matrix.sample }}-${{ github.event.pull_request.head.sha }}
+          path: |
+            ${{ runner.temp }}/coordinator-native-fixture-report
+            ${{ runner.temp }}/shift-native-fixture-report
+          if-no-files-found: error
+          retention-days: 7
