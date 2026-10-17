@@ -29,22 +29,69 @@ function archiveFiles(src, tar) {
     .filter(path => path && !path.endsWith('/')).map(path => path.replace(/^\.\//, '')).sort();
 }
 
-test('old root tar includes prototypes; staged tar excludes only new root applications', t => {
+// Independent publication contract: keep pre-existing public documentation and
+// similarly named files, but never publish these exact development subtrees.
+const excludedPublicPath = /^(?:(?:offline-tools|coordinator-demo|backend|contracts|quality)(?:\/|$)|docs\/(?:backend|integration|quality)(?:\/|$))/;
+
+test('old root tar includes internal modules; staged tar excludes only registered paths', t => {
   const f = fixture(t);
   for (const path of ['offline-tools/tool/index.html', 'offline-tools/tool/nested/data.json',
     'coordinator-demo/index.html', 'coordinator-demo/nested/app.js', 'apply/pdf/index.html',
     'assets/picture with spaces.webp', 'docs/platform/readme.md', 'docs/offline-services/readme.md',
     'assets/offline-tools/keep.txt', 'offline-tools-old/index.html', 'coordinator-demo.txt', 'sw.js',
     'manifest.webmanifest', 'vacancies/old/index.html', '.nojekyll', '.git/config', '.github/test',
-    'assets/.hidden']) f.write(path);
+    'assets/.hidden', 'backend/domain/workflow.py', 'contracts/v1/tasks.json',
+    'quality/security/report.json', 'docs/backend/domain/README.md',
+    'docs/integration/v1/README.md', 'docs/quality/review.md',
+    'backend-old/index.html', 'contracts.json', 'quality.html',
+    'assets/backend/example.txt', 'assets/contracts/example.txt', 'assets/quality/example.txt',
+    'docs/backend.md', 'docs/integration-guide.md', 'docs/quality-guide.md',
+    'docs/backend-old/keep.txt', 'docs/integration-old/keep.txt', 'docs/quality-old/keep.txt',
+    'public/docs/backend/keep.txt']) f.write(path);
   const old = archiveFiles(f.src, join(f.root, 'old.tar'));
   assert.ok(old.includes('offline-tools/tool/index.html'));
   assert.ok(old.includes('coordinator-demo/index.html'));
   buildArtifact(f.src, f.dst);
-  assert.deepEqual(archiveFiles(f.dst, join(f.root, 'new.tar')), old.filter(path => !/^(offline-tools|coordinator-demo)\//.test(path)));
+  assert.deepEqual(archiveFiles(f.dst, join(f.root, 'new.tar')), old.filter(path => !excludedPublicPath.test(path)));
   assert.ok(existsSync(join(f.src, 'coordinator-demo/index.html')));
   assert.ok(existsSync(join(f.src, 'offline-tools/tool/nested/data.json')));
 });
+
+for (const path of ['backend', 'contracts', 'quality', 'docs/backend', 'docs/integration', 'docs/quality']) {
+  test(`internal path ${path} is excluded without changing source or public bytes`, t => {
+    const f = fixture(t);
+    f.write(`${path}/nested/development.txt`, 'fictional internal fixture');
+    f.write(`${path}-public/keep.txt`, Buffer.from([0, 255, 13, 10]));
+    const before = readFileSync(join(f.src, `${path}/nested/development.txt`));
+    buildArtifact(f.src, f.dst);
+    assert.equal(existsSync(join(f.dst, path)), false);
+    assert.deepEqual(readFileSync(join(f.dst, `${path}-public/keep.txt`)), Buffer.from([0, 255, 13, 10]));
+    assert.deepEqual(readFileSync(join(f.src, `${path}/nested/development.txt`)), before);
+    assert.doesNotThrow(() => verifyArtifact(f.src, f.dst));
+  });
+
+  test(`empty internal directory ${path} is omitted`, t => {
+    const f = fixture(t); mkdirSync(join(f.src, path), { recursive: true });
+    buildArtifact(f.src, f.dst);
+    assert.equal(existsSync(join(f.dst, path)), false);
+  });
+
+  for (const type of ['file', 'directory']) {
+    test(`verification rejects injected internal ${type} at ${path}`, t => {
+      const f = fixture(t); buildArtifact(f.src, f.dst);
+      mkdirSync(dirname(join(f.dst, path)), { recursive: true });
+      if (type === 'directory') mkdirSync(join(f.dst, path));
+      else writeFileSync(join(f.dst, path), 'fictional internal fixture');
+      assert.throws(() => verifyArtifact(f.src, f.dst), /Forbidden artifact path/);
+    });
+  }
+
+  test(`symlink alias cannot publish internal path ${path}`, t => {
+    const f = fixture(t); f.write(`${path}/nested/development.txt`);
+    symlinkSync(join(f.src, path), join(f.src, 'public-alias'));
+    assert.throws(() => buildArtifact(f.src, f.dst), /Symlinks/);
+  });
+}
 
 test('binary bytes and all public filenames survive copying', t => {
   const f = fixture(t); f.write('assets/фото.webp', Buffer.from([0, 255, 13, 10, 127]));
@@ -103,7 +150,7 @@ test('full checkout staging preserves the complete non-hidden public inventory',
   assert.deepEqual(inventory(f.dst), inventory(repo, { source: true }));
   const previousFiles = archiveFiles(repo, join(f.root, 'previous.tar'));
   const stagedFiles = archiveFiles(f.dst, join(f.root, 'staged.tar'));
-  assert.deepEqual(stagedFiles, previousFiles.filter(path => !/^(offline-tools|coordinator-demo)\//.test(path)));
+  assert.deepEqual(stagedFiles, previousFiles.filter(path => !excludedPublicPath.test(path)));
   for (const path of ['index.html', 'sw.js', 'manifest.webmanifest', 'apply/index.html',
     'apply/pdf/index.html', 'assets/primserv-logo.svg', 'data/content.js']) {
     assert.ok(existsSync(join(f.dst, path)), path);
