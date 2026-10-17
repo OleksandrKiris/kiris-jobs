@@ -102,6 +102,9 @@ recruitmentbot. Остальной аккаунт не объявляется о
   независимые8 регрессий/pip check и оба CI39055318327/39055318340 success.
   Фактический strict JSON/UTF-8 cap32768, без URL/domain/deps. Не merged;
   memory/CPU cap и production authorization не заявлены.
+  Новый head7406378500892cf41a0400ce4da32b9958c42b71/base54b597 сохраняет эти bytes;
+  Backend39056290992 SUCCESS, Catalogue39056291062 FAILURE в общем coordinator
+  reload. Не готов к guarded merge; повторов ради зелёного нет.
 - Продолжение62 в durable-чате13 не завершено: модель at capacity, а
   `/bin/bash -lc 'git status --short; git fetch origin main'` получила
   `Network access to "https://github.com:443" was blocked by policy.`
@@ -117,6 +120,11 @@ recruitmentbot. Остальной аккаунт не объявляется о
  После76 тот же68 уже REOPENED draft, первый headc7a06df6/base54b597.
  Сообщены46 local+16 parity PASS; новый P3 profile setup-cleanup в работе.
  Независимая приёмка нового head и cache-gate1 до publicmerge обязательны.
+ Head13dbd5c8 после адресного P3 cleanup:47 local+16 parity по автору,
+ Backend39056223256 SUCCESS, Catalogue39056223259 FAILURE15/16 board-wide reload;
+ оба actual restart PASS. Post-failure rawKEY=null/marker=yes при прежнем path/query
+ не доказывает состояние до fixture или причину. Артефакт12109233074 сохранён;
+ роли9/15 продолжают один разбор без mass rerun, новый head не принят.
 - PR61@02485d33 run39049003896 и прежнийPR72@594 run39048985559 выявили разные
  reload failures mainfixture: v1todo!=doing иboard-narrowmissingdemo01. Старые
  входные raw подтверждены trace, initraw/marker нет. PureVM continuousstorage

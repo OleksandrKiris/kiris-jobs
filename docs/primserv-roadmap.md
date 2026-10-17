@@ -436,6 +436,12 @@ multibyte, NaN/Infinity, surrogate, nonstring keys, циклы, ошибки sch
 фиксированный отказ без payload/partial output и неизменность входа.
 PR77 не merged; новые main/head требуют свежей сверки перед приёмкой.
 Это не второй validator и не ограничение пиковых memory/CPU.
+На следующем head77 `7406378500892cf41a0400ce4da32b9958c42b71` после обычного
+merge54b597 все три serializer-файла/backend/schema/deps побайтно прежние;
+независимая дельта без замечаний. Backend39056290992 SUCCESS, но
+Catalogue39056291062 FAILURE в общем coordinator reload (`#demo-01`/todo!=doing).
+Это не доказанный дефект serializer; PR77 не готов к guarded merge.
+Роли9/15 разбирают exact-head доказательства, без rerun до зелёного.
 Domain/core/contract владельцы раздельны, новых зависимостей или настроек не нужно.
 Только12 после соответствующей приёмки регистрирует локальный URL;
 production API, deployment и доказанная многокомпанейная авторизация отсутствуют.
@@ -446,6 +452,13 @@ production API, deployment и доказанная многокомпанейн�
 Сообщены46 local/16 accepted-parity PASS и прежние14 controls+2 restart с material
 assertions; независимая приёмка нового head ещё впереди. Дополнительный адресный
 P3 setup-cleanup профиля исправляется в том же WIP, без второго PR.
+После конкретного P3-fix head68 `13dbd5c8b2767ce91213af2c4352a9c84341f18a`
+имеет47 local+16 parity PASS по автору, Backend39056223256 SUCCESS,
+но Catalogue39056223259 FAILURE15/16: board-wide теряет demo-01 после reload.
+Оба native restart прошли. В post-failure capture rawKEY=null, marker=yes,
+path/query неизменны; preseed/initialraw не измерены, причина не установлена.
+Прежний c7 run39056120814 был green с теми же runtime bytes. Этот новый failure
+сохранён, не маскируется прежним успехом76 или повторами. Public gate1 также открыт.
 На a418 независимо устранён P3 ?lang=RU → requested=en:
 новый case-тест падает со старым app и проходит с новым;36 локальных тестов,
 16 snapshot/mock parity, оба CI и10 browser-сценариев прошли. Два controls не
