@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "PrimServ proposed LOCAL materials read contract",
+    "version": "1.0.0",
+    "description": "Not an installed route. Online adapter disabled; no production server. API v1 differs from schema/content/app build versions."
+  },
+  "security": [],
+  "paths": {
+    "/api/v1/materials/": {
+      "get": {
+        "operationId": "listMaterials",
+        "description": "Public repository material only; no authentication, private data or sends. Reject duplicate/unknown query parameters. No implicit online activation.",
+        "parameters": [
+          {
+            "name": "location_id",
+            "in": "query",
+            "required": false,
+            "description": "Exact location; no cross-location fallback.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "zgorzelec"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "description": "Requested language; ua aliases uk. Missing defaults to en.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ua",
+                "uk",
+                "ru",
+                "pl",
+                "en",
+                "ka",
+                "tr",
+                "hy"
+              ],
+              "default": "en"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum items. This bounded slice has one item.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 20
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Reserved pagination. Nonempty cursor rejected in this single-page slice.",
+            "schema": {
+              "type": "string",
+              "maxLength": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Repository-verified summary; max serialized body 32768 UTF-8 bytes. Additive response fields permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./response.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; no request echo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only method.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Bounded generic error; no traceback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
