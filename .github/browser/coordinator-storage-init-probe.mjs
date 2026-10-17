@@ -16,7 +16,7 @@ const root = resolve(import.meta.dirname, '../..');
 const git = (...args) => execFileSync('git', ['-C', root, ...args]);
 for (const sha of [TESTED_HEAD, TESTED_BASE]) git('merge-base', '--is-ancestor', sha, 'HEAD');
 const report = { head: TESTED_HEAD, base: TESTED_BASE, checkout: git('rev-parse', 'HEAD').toString().trim(),
-  protocol: 'Three fixed samples per mode, fresh profile each. Same UI edit/reload; only init-script registration differs.',
+  protocol: 'Three fixed samples per mode and action sequence, fresh profile each. Within each action sequence only init-script registration differs.',
   limitations: ['Small diagnostic sample; observer and scheduler effects remain possible.',
     'A pass is not a durability guarantee; the existing full acceptance suite is unchanged.'], resources: [], scenarios: [] };
 for (const name of ['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg']) {
@@ -29,11 +29,11 @@ const require = createRequire(import.meta.url);
 const { chromium } = require(PLAYWRIGHT_PACKAGE);
 const { seedFixture } = require('../../coordinator-demo/browser-fixtures.cjs');
 const KEY = 'primserv:coordinator-demo:v1';
-const url = pathToFileURL(join(root, 'coordinator-demo/index.html')).href + '?lang=en&from=init-probe#board';
+const url = pathToFileURL(join(root, 'coordinator-demo/index.html')).href + '?lang=en&from=acceptance#board';
 try {
-  for (let sample = 1; sample <= 3; sample++) for (const mode of ['no-init-script', 'empty-fixture']) {
-    const name = `${mode}-${sample}`, profile = await createFileProfile(chromium, { width: 320, height: 900 });
-    const context = profile.context, result = { name, mode, sample, status: 'running' };
+  for (let sample = 1; sample <= 3; sample++) for (const actions of ['status-only', 'full-board']) for (const mode of ['no-init-script', 'empty-fixture']) {
+    const name = `${actions}-${mode}-${sample}`, profile = await createFileProfile(chromium, { width: 320, height: 900 });
+    const context = profile.context, result = { name, mode, sample, actions, status: 'running' };
     const requests = [], errors = [];
     let page, tracing = false;
     try {
@@ -52,12 +52,35 @@ try {
         await page.waitForFunction(() => document.querySelector('#filter').options.length === 4); };
       await page.goto(url); await ready();
       assert.equal(await page.locator('#demo-01').inputValue(), 'todo');
-      await page.locator('#demo-01').selectOption('doing');
-      assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
-      // No extra storage reads, export/import, replay, retries, waits or URL mutation.
+      if (actions === 'full-board') {
+        // Match the full acceptance's existing keyboard/language/filter calls.
+        const focused = async id => assert.equal(await page.evaluate(() => document.activeElement.id), id);
+        const fits = async () => assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        assert.equal(await page.locator('.task').count(), 3); await fits();
+        await page.locator('#language').focus(); await page.keyboard.press('Tab'); await focused('filter');
+        await page.keyboard.press('Shift+Tab'); await focused('language');
+        for (const lang of ['ru', 'uk', 'pl', 'en']) {
+          await page.locator('#language').selectOption(lang);
+          assert.equal(await page.locator('html').getAttribute('lang'), lang); await fits();
+        }
+        await page.locator('#demo-01').focus();
+        await page.keyboard.press('End'); await page.keyboard.press('Enter');
+        assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focused('demo-01');
+        await page.locator('#filter').selectOption('done');
+        await page.locator('#language').selectOption('uk');
+      } else {
+        await page.locator('#demo-01').selectOption('doing');
+        assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
+      }
+      // No extra storage reads, export/import, replay, retries or waits.
+      const savedURL = page.url();
       await page.reload(); await ready();
-      assert.equal(page.url(), url);
-      assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
+      assert.equal(page.url(), savedURL);
+      if (actions === 'full-board') {
+        assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
+        assert.equal(await page.locator('#filter').inputValue(), 'done');
+      }
+      assert.equal(await page.locator('#demo-01').inputValue(), actions === 'full-board' ? 'done' : 'doing');
       assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       result.status = 'passed';
     } catch (error) {
@@ -78,7 +101,7 @@ try {
   }
 } catch (error) { report.error = error.stack; }
 finally {
-  report.status = !report.error && report.scenarios.length === 6 && report.scenarios.every(s => s.status === 'passed') ? 'passed' : 'failed';
+  report.status = !report.error && report.scenarios.length === 12 && report.scenarios.every(s => s.status === 'passed') ? 'passed' : 'failed';
   if (report.status === 'failed') process.exitCode = 1;
   await writeFile(join(BROWSER_REPORT, 'init-probe.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
