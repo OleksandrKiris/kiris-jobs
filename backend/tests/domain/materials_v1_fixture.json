@@ -1,0 +1,30 @@
+{
+  "api_version": "v1",
+  "schema_version": "1.0.0",
+  "content_version": "fc672d805fb884eb1d09bdc8ca342ba530ad83f4",
+  "requested_language": "ru",
+  "effective_language": "ru",
+  "fallback": false,
+  "items": [
+    {
+      "id": "site-cleaning-summary-ru",
+      "type": "job-summary",
+      "job_id": "site-cleaning",
+      "location_id": "zgorzelec",
+      "language": "ru",
+      "title": "Уборка территории",
+      "text": "Уборка территории предприятия, сбор отходов и простые хозяйственные работы внутри технических зон и на улице.",
+      "source": {
+        "repo": "OleksandrKiris/kiris-jobs",
+        "path": "data/content.js",
+        "ref": "fc672d805fb884eb1d09bdc8ca342ba530ad83f4",
+        "selector": "jobs[id=site-cleaning]",
+        "source_updated_on": "2026-07-23",
+        "verified_on": "2026-10-17",
+        "verification_status": "verified-against-repository"
+      },
+      "synthetic": false
+    }
+  ],
+  "next_cursor": null
+}
