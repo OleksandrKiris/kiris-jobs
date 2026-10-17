@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
   const KEY = 'primserv.offline.shift-duration.v1';
-  const LANGS = ['ru', 'uk', 'pl', 'en'];
+  const LANGS = ['ru', 'uk', 'pl', 'en', 'ka', 'tr', 'hy'];
   const empty = () => ({ start: '', end: '', nextDay: false, breakMinutes: '0', lang: 'en' });
   function language(value) { return value === 'ua' ? 'uk' : LANGS.includes(value) ? value : 'en'; }
   function minutes(value) {
