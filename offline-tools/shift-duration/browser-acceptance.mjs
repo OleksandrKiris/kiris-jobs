@@ -29,7 +29,7 @@ for (const name of runtime) {
 }
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
-const { installFixture } = createRequire(import.meta.url)('./browser-fixtures.cjs');
+const { prepareNativeFixture, installNativeHooks } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const url = pathToFileURL(path.join(folder, 'index.html')).href;
 const KEY = 'primserv.offline.shift-duration.v1';
 const OTHER = 'primserv.acceptance.unrelated';
@@ -48,11 +48,19 @@ async function scenario(name, viewport, run, fixture) {
       report.requests.push(entry);
     });
     await context.route(/^https?:/, route => route.abort('blockedbyclient'));
-    if (fixture) await context.addInitScript(installFixture, { key: KEY, other: OTHER, ...fixture });
     page = await context.newPage();
     page.setDefaultTimeout(8000);
     page.on('pageerror', error => report.pageErrors.push({ scenario: name, message: error.message }));
     await page.goto(`${url}?lang=en`);
+    if(fixture) {
+      await page.locator('#storageStatus').waitFor();
+      // Prepare native storage once through a ready file document. Reload hooks
+      // only apply denial policy, never the old corrupt/future/previous value.
+      const args={key:KEY,other:OTHER,...fixture};
+      await page.evaluate(prepareNativeFixture,args);
+      await context.addInitScript(installNativeHooks,args);
+      await page.reload();
+    }
     assert.equal(await page.evaluate(() => navigator.onLine), false, 'Context must really be offline');
     await run(page, context, item);
     assert.deepEqual(report.pageErrors.filter(e => e.scenario === name), []);

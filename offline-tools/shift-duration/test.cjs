@@ -194,3 +194,48 @@ test('real browser fixture never reseeds recovered data after a new document', (
     assert.equal(afterReset.localStorage.getItem(C.KEY),null);
   }
 });
+
+test('native calculator fixture rejects preparation before the file document is ready',()=>{
+  const {prepareNativeFixture}=require('./browser-fixtures.cjs');let accesses=0;
+  const sandbox={document:{readyState:'loading'},args:{key:C.KEY,other:'other',raw:'{broken'}};
+  Object.defineProperty(sandbox,'localStorage',{get(){accesses++;throw Error('early access');}});
+  assert.throws(()=>vm.runInNewContext('('+prepareNativeFixture.toString()+')(args)',sandbox),/requires a ready file document/);
+  assert.equal(accesses,0);
+});
+
+test('calculator reload hooks never access early storage or reseed recovered values',()=>{
+  const {installNativeHooks}=require('./browser-fixtures.cjs');
+  for(const denied of [undefined,'getItem','setItem','removeItem']) {
+    const map=new Map([[C.KEY,JSON.stringify({version:1,value:good()})],['other','keep']]);
+    const document=(name='')=>{
+      let ready=false,accesses=0;
+      class Storage {getItem(k){return map.get(k)??null;}setItem(k,v){map.set(k,String(v));}removeItem(k){map.delete(k);}}
+      const area=new Storage(),window={name},sandbox={Storage,window,DOMException,args:{key:C.KEY,denied}};
+      Object.defineProperty(sandbox,'localStorage',{get(){accesses++;if(!ready)throw Error('early access');return area;}});
+      vm.runInNewContext('('+installNativeHooks.toString()+')(args)',sandbox);
+      assert.equal(accesses,0);ready=true;
+      return {area,window};
+    };
+    const first=document();
+    if(denied)assert.throws(()=>first.area[denied](C.KEY,'replacement'),/Test storage denial/);
+    assert.equal(first.area.getItem('other'),'keep');
+    first.window.__shiftFixture.restore();
+    const next=document(first.window.name);
+    assert.equal(next.area.getItem(C.KEY),map.get(C.KEY));
+    next.area.setItem(C.KEY,'explicit recovery');
+    assert.equal(next.area.getItem(C.KEY),'explicit recovery');
+    next.area.removeItem(C.KEY);
+    const afterReset=document(next.window.name);
+    assert.equal(afterReset.area.getItem(C.KEY),null);
+    assert.equal(map.get('other'),'keep');
+  }
+});
+
+test('native calculator preparation refuses to replace unexpected existing data',()=>{
+  const {prepareNativeFixture}=require('./browser-fixtures.cjs');
+  const map=new Map([[C.KEY,'preserve']]),localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
+  assert.throws(()=>vm.runInNewContext('('+prepareNativeFixture.toString()+')(args)',{
+    document:{readyState:'complete'},localStorage,args:{key:C.KEY,other:'other',raw:'replacement'}
+  }),/fresh owned fixture profile/);
+  assert.equal(map.get(C.KEY),'preserve');assert.equal(map.has('other'),false);
+});

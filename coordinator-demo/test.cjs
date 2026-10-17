@@ -6,7 +6,75 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
-const {seedFixture,acceptanceStatus}=require('./browser-fixtures.cjs');
+const {seedFixture,seedNativeFixture,installFixtureHooks,acceptanceStatus}=require('./browser-fixtures.cjs');
+
+function nativeFixtureRealm(data=new Map()) {
+  const calls=[];let allowed=false;
+  class Storage {
+    getItem(k){calls.push(['getItem',k]);return data.get(k)??null;}
+    setItem(k,v){calls.push(['setItem',k,v]);data.set(k,v);}
+    removeItem(k){calls.push(['removeItem',k]);data.delete(k);}
+  }
+  const area=new Storage(),browserWindow={};
+  const access=()=>{if(!allowed)throw Error('Storage accessed before document readiness');return area;};
+  Object.defineProperty(browserWindow,'localStorage',{configurable:true,get:access});
+  const sandbox={window:browserWindow,Storage,DOMException,
+    location:{href:'file:///fixture/index.html?lang=en'},document:{readyState:'loading'},
+    performance:{timeOrigin:1,now:()=>2,getEntriesByType:()=>[{type:'reload'}]}};
+  Object.defineProperty(sandbox,'localStorage',{get:access});
+  const context=vm.createContext(sandbox);
+  return {calls,data,area,window:browserWindow,
+    run(fn,args){context.args=args;return vm.runInContext('('+fn.toString()+')(args)',context);},
+    ready(){allowed=true;sandbox.document.readyState='complete';},
+    model(){browserWindow.CoordinatorDemo=M;return browserWindow.CoordinatorDemo.create({
+      getItem:k=>browserWindow.localStorage.getItem(k),
+      setItem:(k,v)=>browserWindow.localStorage.setItem(k,v),
+      removeItem:k=>browserWindow.localStorage.removeItem(k)
+    });}
+  };
+}
+const nativeArgs=(mode='v1',observe=false)=>({key:M.KEY,other:'fixture:other',mode,observe,
+  previous:JSON.stringify({version:1,statuses:{...M.initial(),'demo-02':'done'}})});
+
+test('native fixture provisioning rejects an unready document before any storage access',()=>{
+  const h=nativeFixtureRealm();
+  assert.throws(()=>h.run(seedNativeFixture,nativeArgs()),/requires a ready file document/);
+  assert.deepEqual(h.calls,[]);
+});
+
+test('all reload observation and denial hooks install without touching early storage',()=>{
+  for(const observe of [false,'passive','preseed'])for(const mode of ['empty','v1','corrupt','future','denied-read','denied-write','denied-remove']) {
+    const h=nativeFixtureRealm();
+    assert.doesNotThrow(()=>h.run(installFixtureHooks,nativeArgs(mode,observe)));
+    assert.deepEqual(h.calls,[]);
+  }
+});
+
+test('ready preparation seeds once; reload hooks cannot replace edited or missing native state',()=>{
+  for(const lost of [false,true]) {
+    const h=nativeFixtureRealm(),args=nativeArgs();h.ready();h.run(seedNativeFixture,args);
+    h.model().set('demo-01','doing');
+    const marker='primserv:acceptance:coordinator-seeded';h.data.delete(marker);
+    if(lost)h.data.delete(M.KEY);
+    const next=nativeFixtureRealm(h.data);next.run(installFixtureHooks,args);
+    assert.deepEqual(next.calls,[]);next.ready();
+    const model=next.model();
+    assert.equal(model.snapshot().statuses['demo-01'],lost?'todo':'doing');
+    assert.equal(model.snapshot().statuses['demo-02'],lost?'todo':'done');
+    assert.deepEqual(next.calls,[['getItem',M.KEY]]);
+    assert.equal(next.data.has(marker),false);
+  }
+});
+
+test('native preparation preserves existing unknown records and labels its optional read',()=>{
+  for(const raw of ['{broken',JSON.stringify({version:2,statuses:{}})]) {
+    const h=nativeFixtureRealm(new Map([[M.KEY,raw]]));h.ready();
+    const prep=h.run(seedNativeFixture,nativeArgs('v1','preseed'));
+    assert.equal(h.data.get(M.KEY),raw);assert.equal(prep.preSeedProbe.raw,raw);
+    assert.equal(prep.preSeedProbe.addedReads,1);
+    assert.equal(h.data.get('fixture:other'),'keep');
+  }
+});
 
 function fakeIdentityContext(failMethod='',key='file-key') {
   const sends=[];let detached=0;
