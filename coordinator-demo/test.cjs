@@ -6,7 +6,117 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
-const {seedFixture}=require('./browser-fixtures.cjs');
+const {seedFixture,acceptanceStatus}=require('./browser-fixtures.cjs');
+
+test('file profiles are isolated and restart the same native directory without replaying state',async()=>{
+  const {createFileProfile}=await import('./browser-profile.mjs');
+  const launches=[],closes=[];
+  const chromium={async launchPersistentContext(directory,options){
+    launches.push({directory,options});
+    return {async close(){closes.push(directory);}};
+  }};
+  const first=await createFileProfile(chromium,{width:320,height:900});
+  const second=await createFileProfile(chromium,{width:1280,height:900});
+  try {
+    assert.notEqual(first.directory,second.directory);
+    assert.ok(fs.existsSync(first.directory));
+    await first.reopen();
+    assert.equal(launches[2].directory,launches[0].directory);
+    assert.deepEqual(launches[2].options,{headless:true,viewport:{width:320,height:900}});
+    assert.deepEqual(closes,[first.directory]);
+  } finally {await first.dispose();await second.dispose();}
+  assert.equal(fs.existsSync(first.directory),false);
+  assert.equal(fs.existsSync(second.directory),false);
+});
+
+test('file profile launch failures remove the newly allocated directory',async()=>{
+  const {createFileProfile}=await import('./browser-profile.mjs');
+  let directory;
+  await assert.rejects(createFileProfile({async launchPersistentContext(dir){directory=dir;throw Error('launch failed');}},{}),/launch failed/);
+  assert.equal(fs.existsSync(directory),false);
+});
+
+test('file profile restart failures still allow cleanup',async()=>{
+  const {createFileProfile}=await import('./browser-profile.mjs');
+  let launches=0;
+  const profile=await createFileProfile({async launchPersistentContext(){
+    if(launches++)throw Error('restart failed');
+    return {async close(){}};
+  }},{});
+  await assert.rejects(profile.reopen(),/restart failed/);
+  await profile.dispose();
+  assert.equal(fs.existsSync(profile.directory),false);
+});
+
+function observedDocument(data,observe=false,mode='v1') {
+  const calls=[];
+  class Storage {
+    getItem(k){calls.push(['getItem',k]);return data.get(k)??null;}
+    setItem(k,v){calls.push(['setItem',k,v]);data.set(k,v);}
+    removeItem(k){calls.push(['removeItem',k]);data.delete(k);}
+  }
+  const area=new Storage(), browserWindow={localStorage:area};
+  const args={key:M.KEY,other:'fixture:other',mode,observe,
+    previous:JSON.stringify({version:1,statuses:{...M.initial(),'demo-02':'done'}})};
+  vm.runInNewContext('('+seedFixture.toString()+')(args)',{
+    args,window:browserWindow,localStorage:area,Storage,DOMException,
+    location:{href:'file:///fixture/index.html?lang=en'},document:{readyState:'loading'},
+    performance:{timeOrigin:1,now:()=>2,getEntriesByType:()=>[{type:'reload'}]}
+  });
+  browserWindow.CoordinatorDemo=M;
+  const model=browserWindow.CoordinatorDemo.create(area);
+  return {calls,area,model,window:browserWindow};
+}
+
+test('passive observer preserves exact storage operation sequence and real model state',()=>{
+  const control=observedDocument(new Map()), passive=observedDocument(new Map(),'passive');
+  control.model.set('demo-01','doing');passive.model.set('demo-01','doing');
+  assert.deepEqual(passive.calls,control.calls);
+  assert.deepEqual(passive.model.snapshot(),control.model.snapshot());
+  assert.equal(passive.window.__coordinatorObservedModel,passive.model);
+  assert.equal(control.window.__coordinatorObservedModel,undefined);
+  const evidence=passive.window.__coordinatorEvidence;
+  assert.equal(evidence.preSeedProbe,undefined);
+  assert.equal(evidence.navigation,'reload');
+  assert.equal(evidence.events[0].key,'primserv:acceptance:coordinator-seeded');
+  assert.equal(evidence.events[0].result,null);
+  assert.equal(evidence.events.at(-1).phase,'app');
+  assert.equal(evidence.events.at(-1).operation,'setItem');
+});
+
+test('explicit pre-seed observer adds exactly one labelled read, not an implicit flush fix',()=>{
+  const passive=observedDocument(new Map(),'passive'), active=observedDocument(new Map(),'preseed');
+  assert.equal(active.calls.length,passive.calls.length+1);
+  assert.deepEqual(active.calls.filter((_,i)=>i!==1),passive.calls);
+  assert.equal(active.window.__coordinatorEvidence.preSeedProbe.raw,null);
+  assert.equal(active.window.__coordinatorEvidence.preSeedProbe.marker,null);
+  assert.equal(active.window.__coordinatorEvidence.preSeedProbe.addedReads,1);
+  assert.deepEqual(active.model.snapshot(),passive.model.snapshot());
+});
+
+test('observations distinguish continuous, fresh and stale storage with identical v1 DOM possibilities',()=>{
+  const marker='primserv:acceptance:coordinator-seeded';
+  const raw=status=>JSON.stringify({version:1,statuses:{...M.initial(),'demo-01':status,'demo-02':'done'}});
+  for(const [kind,data,expected,writes] of [
+    ['continuous',new Map([[marker,'yes'],[M.KEY,raw('doing')]]),'doing',0],
+    ['fresh',new Map(),'todo',1],
+    ['stale',new Map([[marker,'yes'],[M.KEY,raw('todo')]]),'todo',0]
+  ]) {
+    const h=observedDocument(data,'preseed'),e=h.window.__coordinatorEvidence;
+    assert.equal(h.model.snapshot().statuses['demo-01'],expected,kind);
+    assert.equal(h.model.snapshot().statuses['demo-02'],'done',kind);
+    assert.equal(e.events.filter(x=>x.phase==='fixture'&&x.operation==='setItem'&&x.key===M.KEY).length,writes,kind);
+    assert.equal(e.initialModel.statuses['demo-01'],expected,kind);
+    assert.equal(e.preSeedProbe.raw,kind==='fresh'?null:raw(expected),kind);
+  }
+});
+
+test('continuing independent scenarios retains any failure and zero-test failure',()=>{
+  assert.equal(acceptanceStatus([]),'failed');
+  assert.equal(acceptanceStatus([{status:'passed'},{status:'failed'},{status:'passed'}]),'failed');
+  assert.equal(acceptanceStatus([{status:'passed'},{status:'unknown'}]),'failed');
+  assert.equal(acceptanceStatus([{status:'passed'}]),'passed');
+});
 
 function fixtureDocument(data,mode,previous) {
   // A new document has new prototypes/session storage, while local state survives.
@@ -164,7 +274,7 @@ test('denied read never overwrites unseen previous data, even if writes would wo
 test('unsupported language and alias have deterministic fallback',()=>{
   assert.equal(M.language('ua'),'uk');assert.equal(M.language('UK'),'uk');assert.equal(M.language('ka'),'en');assert.equal(M.language('<script>'),'en');
 });
-function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true}={}) {
+function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true,href}={}) {
   let document;
   class Node {
     constructor(tag){this.tagName=tag;this.children=[];this.handlers={};this.hidden=false;this.value='';this.textContent='';this.id='';this.attrs={};this.dataset={};}
@@ -177,11 +287,11 @@ function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl=
   const roots=[...read('index.html').matchAll(/id="([^"]+)"/g)].map(([,id])=>{const n=new Node('fixture');n.id=id;return n;});
   const find=(id,nodes)=>{for(const node of nodes){if(node.id===id)return node;const child=find(id,node.children);if(child)return child;}return null;};
   document={documentElement:{},activeElement:null,title:'',createElement:t=>new Node(t),getElementById:id=>find(id,roots),querySelector:()=>({prepend(node){roots.unshift(node);}})};
-  const location=new URL(baseUrl+'?lang='+lang+'&status='+filter+'&from=fixture#board');
+  const location=new URL(href||baseUrl+'?lang='+lang+'&status='+filter+'&from=fixture#board');
   const forbidden=()=>{throw Error('External network/operational action forbidden');};
   const window={CoordinatorDemo:M,localStorage:store};const historyCalls=[];
   const history={state:{keep:true},replaceState(s,title,url){if(historyDenied)throw Error('denied');assert.equal(s.keep,true);historyCalls.push(String(url));location.href=String(url);}};
-  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})}});
+  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,URLSearchParams,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})}});
   return {document,location,store,historyCalls,$:id=>document.getElementById(id),change(id,value){const n=this.$(id);n.focus();n.value=value;n.handlers.change();},click(id){this.$(id).handlers.click();}};
 }
 for(const lang of M.LANGS)test(lang+': real UI handlers, filter, focus, language, reload, cancel/reset',()=>{
@@ -267,6 +377,44 @@ test('downloaded file and source demo never register the online worker',()=>{
     assert.equal(h.$('catalogue-return'),null);
   }
 });
+
+test('file view changes keep the original file query and restore through fragment on reload',()=>{
+  const h=ui({baseUrl:'file:///tmp/coordinator-demo/index.html'});
+  const query=h.location.search,pathname=h.location.pathname;
+  h.change('demo-01','done');h.change('filter','done');h.change('language','uk');
+  assert.equal(h.location.search,query);assert.equal(h.location.pathname,pathname);
+  assert.equal(h.location.hash,'#board?lang=uk&status=done');
+  const reload=ui({href:h.location.href,store:h.store});
+  assert.equal(reload.document.documentElement.lang,'uk');
+  assert.equal(reload.$('filter').value,'done');assert.equal(reload.$('demo-01').value,'done');
+  reload.change('filter','all');
+  const again=ui({href:reload.location.href,store:h.store});
+  assert.equal(again.$('filter').value,'all');assert.equal(again.$('tasks').children.length,3);
+});
+
+test('file all-filter fragment overrides a legacy done query without changing the storage address',()=>{
+  const h=ui({href:'file:///tmp/coordinator-demo/index.html?lang=ru&status=done&from=fixture#board?lang=pl&status=all'});
+  assert.equal(h.document.documentElement.lang,'pl');assert.equal(h.$('filter').value,'all');
+  h.change('language','en');
+  assert.equal(h.location.search,'?lang=ru&status=done&from=fixture');
+  assert.equal(h.location.hash,'#board?lang=en&status=all');
+});
+test('materials honor file fragment alias while preserving query and restoring task context',()=>{
+  const h=ui({href:'file:///tmp/coordinator-demo/index.html?lang=RU&from=legacy#board?lang=UA&status=all'});
+  const query=h.location.search,path=h.location.pathname;
+  assert.equal(h.document.documentElement.lang,'uk');
+  assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
+  h.change('materialsSource','mock');assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
+  h.change('demo-01','done');h.change('filter','done');h.change('language','pl');
+  assert.equal(h.location.search,query);assert.equal(h.location.pathname,path);
+  assert.equal(h.location.hash,'#board?lang=pl&status=done');
+  const reload=ui({href:h.location.href,store:h.store});
+  assert.equal(reload.$('demo-01').value,'done');assert.equal(reload.$('filter').value,'done');
+  assert.match(reload.$('materialsStatus').textContent,/pl.*ru/);
+  assert.equal(reload.$('materialsSource').value,'snapshot');
+  assert.equal(reload.$('materials').children.length,1);
+});
+
 test('published demo returns to same-origin catalogue and reports unavailable offline storage honestly',()=>{
   const h=ui({baseUrl:'https://example.test/kiris-jobs/tools/coordinator/',lang:'ka',worker:false});
   assert.equal(h.document.documentElement.lang,'en');

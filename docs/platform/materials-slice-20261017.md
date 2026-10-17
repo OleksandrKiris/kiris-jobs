@@ -1,15 +1,15 @@
 # Role 9: one source-backed material
 
 Owner9; repo OleksandrKiris/kiris-jobs. Allowed coordinator-demo/**, docs/platform/**.
-Base e93dc59c6339a94020e955969a074c8c1d3a5956 includes accepted fixture fix PR66.
-This resumes saved material patch9b6fa61 in codex/role9-material-snapshot; original
+Base54b597fcc5d50180adcf50d4d40dc9d81d83cc4d includes accepted PR76 file-fragment
+and native-profile logic. This resumes saved PR68a418/patch9b6fa61 in codex/role9-material-snapshot; original
 patch and branch remain preserved. It excludes the old Turkish locale draft and
 its historically rejected write. Role10 expressly authorized this new scoped
 material implementation. No second functional PR exists for the role.
 
-Dependency: draft PR67 head7225ba73c273c06c233053e157180eb434cb3723,
+Dependency: accepted PR67 merge bf0fd233d12cb80939addbabc9526156e871b67c,
 contracts/materials-v1/{response.schema.json,snapshot.json,local_mock.py}.
-The dependency is proposed, not accepted centrally. This client stays independent
+Contract schema1.0.0 is accepted and frozen. This client stays independent
 of Django and has no online mode. Root SW/cache integration belongs to role1;
 acceptance, merge and release belong to role10.
 
@@ -48,16 +48,17 @@ malformed and over32768-byte responses are refused. HTML uses textContent; CSP
 connect-src 'none' remains. Search is bounded to120 characters, never sent or put
 in a URL. Future GET /api/v1/materials/ is not claimed available.
 
-35/35 own Node tests pass including PR66 fixture regressions, source text/date,
+46/46 own Node tests pass including accepted native-profile/fragment regressions, source text/date,
 alias/fallback, search/mode UI handlers, no-match, negative responses and storage.
-`node coordinator-demo/contract-parity.cjs ../contract67/contracts/materials-v1`
+`node coordinator-demo/contract-parity.cjs`
 passes exact fixture and16 combinations8languages x limits1/20 against actual
-Python mock and both frontend readers. contract67 was exported with git archive
-from fetched remote PR67 head7225ba73; another role checkout was not modified.
+Python mock and both frontend readers in the merged accepted contract tree.
+Another role checkout was not modified.
 Syntax and git diff --check pass. Exact-head CI/browser results belong in PR body.
 
-Browser runner retains CI-only guard and tests mode equality, search/no-match,
-material language, existing keyboard/languages/reload/Back/storage faults/offline.
+Browser runner retains14 accepted controls and2 real native-profile restarts,
+CI-only guard/no storage replay, and adds mode equality/search/no-match/aliases
+and material/task context after the same native profile is reopened.
 Local DOM tests are not browser acceptance. No fresh screenshots/CI are claimed
 until that run completes; native-speaker and physical-device review not performed.
 
