@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 17.10.2026, после приёмки73; kiris-jobs mainace6655. Владелец: роль10.
+Сверка: 17.10.2026, после приёмки73 и наблюдения76; kiris-jobs main54b597. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `ace6655eff143e674dc93e07a3a8709e45d5d14c` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#75](https://github.com/OleksandrKiris/kiris-jobs/pull/75) draft | [39054979967](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39054979967) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77), [#78](https://github.com/OleksandrKiris/kiris-jobs/pull/78) draft | [39055542734](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39055542734) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `02a1bfdb08b1ccf72e49113f57ca144ab14cd328` | [#11](https://github.com/OleksandrKiris/citronex-hydra-project/pull/11) draft | [39035254461](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39035254461) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
@@ -98,18 +98,31 @@ recruitmentbot. Остальной аккаунт не объявляется о
  Guarded mergeace6655; post Backend39054980031/Pages39054979967 success,
  семь public ресурсов HTTP200 побайтно совпали с main. Принят локальный validator,
  PR62 и HTTP/URL12 ещё впереди. Backend не опубликован, production tenancy не доказана.
-- PR68 CLOSED/PARKED, NOTmerged: exacta41851cf8477584e5aeeff47b518e3577f7968df,
+- Следующий helper12 подготовлен в PR77@d834881f/baseace6655:54 backend-теста,
+  независимые8 регрессий/pip check и оба CI39055318327/39055318340 success.
+  Фактический strict JSON/UTF-8 cap32768, без URL/domain/deps. Не merged;
+  memory/CPU cap и production authorization не заявлены.
+- Продолжение62 в durable-чате13 не завершено: модель at capacity, а
+  `/bin/bash -lc 'git status --short; git fetch origin main'` получила
+  `Network access to "https://github.com:443" was blocked by policy.`
+  Исходная команда/ответ сохранены; владелец подтвердил отсутствие доступного
+  механизма разрешения сети, sandbox_approval отключён.
+  Отказ не заменяется GitHub-записью через другой инструмент.
+- Исторический PR68 CLOSED/PARKED, NOTmerged: exacta41851cf8477584e5aeeff47b518e3577f7968df,
  ветка сохранена; bundleverify/patch/manifest/metadata сохранены9. Независимо
  P3case исправлен red/green,36tests/16parity иCI39048930084/39048930092green,
  artifact12106589116:10browserPASS,0externalHTTP/errors. Runtime45 789B;
  appSHA2564c081403d2434593a4b5f7ec635277eff30d1e475d9b1976f1d45b92e0c111f0.
  Ранние initreads вno-prereadcontrols остаются; историческая причина не доказана.
- После fixturefix переоткрывать68; cache/SW интеграция1 до publicmerge обязательна.
+ После76 тот же68 уже REOPENED draft, первый headc7a06df6/base54b597.
+ Сообщены46 local+16 parity PASS; новый P3 profile setup-cleanup в работе.
+ Независимая приёмка нового head и cache-gate1 до publicmerge обязательны.
 - PR61@02485d33 run39049003896 и прежнийPR72@594 run39048985559 выявили разные
  reload failures mainfixture: v1todo!=doing иboard-narrowmissingdemo01. Старые
  входные raw подтверждены trace, initraw/marker нет. PureVM continuousstorage
  сохраняет состояние; fresh/stale input дают одинаковые сочетания статусов, причинного
- browserдоказательства нет. PR75@b808045/basea809 — единственный diagnosticWIP9,
+ browserдоказательства нет. PR75@b808045/basea809 — исторический diagnostic9,
+ теперь CLOSED, не merged;
  независимо подтверждены прежние8controls/assertions и33 unit-теста; измерения отдельно,observereffect указан.
  Catalogue39050068735 FAILURE(13/14), Backend39050068823 success; original8 иpassive3
  прошли. Независимо artifact12107372113 подтвердил initialKEY/marker=null доfixture,
@@ -122,9 +135,21 @@ recruitmentbot. Остальной аккаунт не объявляется о
  docs/platform/main-reload-diagnostics.md через exec_command/PowerShell Set-Content
  с последующими checks отклонена до исполнения: blocked by policy, подробностей нет.
  Исходный caller request, видимый усечённый ответ и unapplied patches сохранены;
- README/doc пока расходятся. Тот же документ не записывался другим способом.
+ Для этой неприменённой HTTP-передачи README/doc расходились.
+ Тот же HTTP rewrite не записывался другим способом.
  Для75 upgrade=N/A; будущий68 требует реальных old5tool→new5tool, per5interrupt,
  last-good и tool status после reconnect: нынешняя root-shell overlay этого не доказывает.
+- PR76 из отдельного пользовательского чата MERGED54b597 на head2ffee86e;
+  file view-state теперь fragment при стабильном query. Profile-only15/16 red
+  сменился exact-head16/16:14 controls+2 настоящих Chromium restart без replay.
+  Независимо прочитаны artifacts12108814444/12108648711 и traces, два PNG просмотрены.
+  38 unit и оба PR CI success; post Backend39055542656/Pages39055542734 success,
+  семь публичных HTTP200 bytes совпали с54b597. Это не второй merge координатора.
+  Normal-profile сценарий подтверждён; все исторические причины/другие браузеры
+  и старый опубликованный5tool→новый5tool/per5failure/reconnect ещё не доказаны.
+  SW прежний; owner1 добавляет gate в60, необходимость bump определяет по результатам.
+  Документ76 — исторический diagnostic/native-profile follow-up, не отклонённый
+  HTTP rewrite75. Материалы68 продолжаются в существующем PR после сохраненияa418.
 - PR74@3f5ddeb — подготовленная9-row HRappka evidence/gap matrix; исправлены
  live APIguide/S5→S6 и parked68. Это не второйroadmap или доказанное превосходство.
 
