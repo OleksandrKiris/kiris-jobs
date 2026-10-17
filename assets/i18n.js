@@ -77,6 +77,9 @@
         finally {
           retry.disabled = false;
           notice.removeAttribute("aria-busy");
+          if (document.activeElement === document.body && document.getElementById("locale-load-notice") === notice) {
+            retry.focus({ preventScroll: true });
+          }
         }
       });
       notice.append(message, retry);

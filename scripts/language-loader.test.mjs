@@ -75,7 +75,7 @@ function languageApp({ denied = false, failure = '', stored = 'en' } = {}) {
     elements.push(node); return node;
   }
   const main = element('main');
-  const document = { documentElement: {}, activeElement: null,
+  const document = { documentElement: {}, body: {}, activeElement: null,
     createElement: element,
     getElementById: id => elements.find(node => node.id === id && !node.removed),
     querySelector: tag => tag === 'main' ? main : null,
@@ -128,8 +128,10 @@ test('failed switch and failed retry keep the active catalogue, URL and saved pr
   const button = app.document.getElementById('locale-load-retry');
   const retrying = button.handlers.click();
   assert.equal(button.disabled, true);
+  app.document.activeElement = app.document.body; // disabling a focused native button
   app.complete('en', false); await retrying;
   assert.equal(button.disabled, false);
+  assert.equal(app.document.activeElement, button);
   assert.equal(app.api.locale, 'pl');
   assert.equal(app.saved.get('kiris-jobs:language:v1'), 'en');
   assert.equal(app.window.location.href, 'https://example.test/?lang=en&src=test');

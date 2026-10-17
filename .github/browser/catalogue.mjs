@@ -128,6 +128,7 @@ try {
       await fits(page); await shot(page, `locale-fallback-offline-${width}`);
       await page.locator('#locale-load-retry').focus(); await page.keyboard.press('Enter');
       await page.waitForFunction(() => !document.getElementById('locale-load-retry').disabled);
+      assert.equal(await page.locator('#locale-load-retry').evaluate(node => node === document.activeElement), true);
       assert.equal(await page.locator('html').getAttribute('lang'), 'pl');
       await page.reload(); await ready(page);
       assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
