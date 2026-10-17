@@ -23,8 +23,8 @@ const report = {
   started: new Date().toISOString(), browser: '', results: [], files: {},
   limits: ['Desktop Chromium; narrow viewport is not a physical phone.',
     'External services are blocked; HRappka delivery and Telegram are not tested.',
-    'Offline means browser network disabled after successful local installation.',
-    'Cache version unchanged; no new service-worker migration is introduced.']
+    'Coordinator offline tests disable the browser network and stop the origin server; a cold entry has no cached tool.',
+    'The actual base worker downloads the tool before upgrading to the head worker; subsequent tool entry is offline with the origin stopped.']
 };
 for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candidate.js',
   'assets/i18n.js', 'assets/candidate-base.css', 'assets/clean.css', 'assets/homepage.css',
@@ -36,19 +36,29 @@ for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candid
 
 const serveRoot = await mkdtemp(join(tmpdir(), 'primserv-browser-site-'));
 await symlink(artifact, join(serveRoot, 'kiris-jobs'), 'dir');
-const server = spawn(process.execPath, [join(checkout, 'scripts/serve.mjs'), '4173'], {
-  cwd: serveRoot, stdio: ['ignore', 'pipe', 'pipe']
-});
 const base = 'http://127.0.0.1:4173/kiris-jobs/';
-let browser;
-let activePage;
-const mutations = [];
-try {
+let server;
+async function startServer() {
+  server = spawn(process.execPath, [join(checkout, 'scripts/serve.mjs'), '4173'], {
+    cwd: serveRoot, stdio: ['ignore', 'pipe', 'pipe']
+  });
   await Promise.race([
     once(server.stdout, 'data'),
     once(server, 'exit').then(([code]) => { throw Error(`Server exited: ${code}`); }),
     new Promise((_, reject) => setTimeout(() => reject(Error('Server startup timeout')), 10000).unref())
   ]);
+}
+async function stopServer() {
+  const exited = once(server, 'exit');
+  server.kill('SIGTERM');
+  await exited;
+  await assert.rejects(fetch(base), 'The origin must really be unreachable during offline acceptance');
+}
+let browser;
+let activePage;
+const mutations = [];
+try {
+  await startServer();
   browser = await chromium.launch({ headless: true });
   report.browser = `Chromium ${browser.version()} / Playwright 1.56.1`;
 
@@ -217,7 +227,253 @@ try {
     } finally { await ctx.close(); activePage = null; }
   }
 
-  for (const path of ['coordinator-demo/', 'offline-tools/']) {
+  const shortcutTargets = { home: 'main-content', jobs: 'job-search', profile: 'footer-whatsapp',
+    'main-content': 'main-content', 'job-search': 'job-search', 'footer-whatsapp': 'footer-whatsapp' };
+  for (const width of [1280, 320]) {
+    for (const storage of ['', 'corrupt', 'denied']) {
+      const ctx = await context({ width, height: 900 }, storage);
+      const page = activePage = await ctx.newPage();
+      const errors = [];
+      page.on('pageerror', e => errors.push(e.message));
+      for (const [hash, id] of Object.entries(shortcutTargets)) {
+        await page.goto(`${base}?lang=ka#${hash}`); await ready(page);
+        await page.waitForFunction(id => document.activeElement?.id === id, id);
+        assert.equal(await page.locator('html').getAttribute('lang'), 'ka');
+        assert.equal(new URL(page.url()).hash, '#' + hash);
+        const visible = await page.locator('#' + id).evaluate(el => {
+          const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight;
+        });
+        assert.ok(visible, hash + ' must be in view');
+        await fits(page);
+      }
+      await shot(page, `shortcuts-${width}-${storage || 'normal'}`);
+      if (!storage) {
+        await page.goto(`${base}?lang=en#jobs`); await ready(page);
+        await page.locator('#job-search').fill('Siechnice');
+        await page.goto(`${base}?lang=en#profile`); await ready(page);
+        await page.waitForFunction(() => document.activeElement?.id === 'footer-whatsapp');
+        await page.goBack(); await ready(page);
+        await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+        assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+        await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+        await ctx.setOffline(true); await page.reload(); await ready(page);
+        await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+        assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
+        assert.equal(await page.evaluate(() => navigator.onLine), false);
+        await shot(page, `shortcuts-offline-${width}`);
+        await ctx.setOffline(false);
+      }
+      assert.deepEqual(errors, []);
+      report.results.push({ scenario: 'six shortcut anchors / focus / language' + (storage ? ' / ' + storage : ' / Back / offline reload / saved search'), width, status: 'passed' });
+      await ctx.close(); activePage = null;
+    }
+  }
+
+  for (const name of ['index.html','model.js','app.js','style.css','primserv-logo.svg']) {
+    const bytes=await readFile(join(artifact,'tools/coordinator',name));
+    assert.deepEqual(bytes,await readFile(join(checkout,'coordinator-demo',name)));
+    report.files['tools/coordinator/'+name]={bytes:bytes.length,sha256:sha256(bytes)};
+  }
+  for(const width of [1280,320]) {
+    const ctx=await context({width,height:900});const page=activePage=await ctx.newPage();
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    await ctx.tracing.start({screenshots:true,snapshots:true});
+    try {
+      await page.goto(base+'?lang=uk');await ready(page);
+      await page.locator('#job-search').fill('Siechnice');
+      await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
+      await page.waitForFunction(async()=>Boolean(await caches.match(new URL('data/locales/uk.js?v=220',location.href).href)));
+      // No visit to the tool yet: offline navigation must explain the missing copy.
+      assert.equal(await page.evaluate(async()=>{
+        const names=await caches.keys();
+        const all=await Promise.all(names.map(async name=>(await (await caches.open(name)).keys()).map(r=>r.url)));
+        return all.flat().filter(url=>url.includes('/tools/coordinator/')).length;
+      }),0);
+      // Stop the actual origin as well: this browser version can still send
+      // worker requests after setOffline. A cached page must never mask that.
+      await stopServer();
+      await ctx.setOffline(true);
+      await page.locator('[data-primserv-service="coordinator"]').click();
+      await page.locator('#tool-unavailable').waitFor();await fits(page);
+      await shot(page,`demo-cold-offline-${width}`);
+      await page.locator('a').click();await ready(page);
+      assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');
+      await startServer();
+      await ctx.setOffline(false);
+      const entry=page.locator('[data-primserv-service="coordinator"]');
+      await entry.focus();await page.keyboard.press('Enter');
+      await page.locator('#demo-01').waitFor();
+      await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      await page.locator('#demo-01').selectOption('doing');
+      await page.locator('#filter').selectOption('doing');
+      await page.reload();assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      for(const lang of ['ru','uk','pl','en']) {
+        await page.locator('#language').selectOption(lang);
+        assert.equal(await page.locator('html').getAttribute('lang'),lang);
+        assert.equal(await page.locator('#demo-01').inputValue(),'doing');await fits(page);
+      }
+      for(const lang of ['ka','tr','hy']) {
+        await page.goto(base+'tools/coordinator/?lang='+lang+'&fromLang=uk');
+        assert.equal(await page.locator('html').getAttribute('lang'),'en');
+        assert.equal(await page.locator('#fallback').isVisible(),true);
+        assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      }
+      await page.goto(base+'tools/coordinator/?lang=ua&fromLang=uk');
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      await stopServer();
+      await ctx.setOffline(true);await page.reload();
+      assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      await page.locator('#demo-02').selectOption('done');await fits(page);
+      await shot(page,`demo-online-entry-offline-${width}`);
+      await page.locator('#catalogue-return').click();await ready(page);
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');
+      await page.locator('[data-primserv-service="coordinator"]').click();
+      assert.equal(await page.locator('#demo-02').inputValue(),'done');
+      await page.goBack();await ready(page);
+      await startServer();
+      await ctx.setOffline(false);await page.reload();await ready(page);
+      assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');
+      assert.deepEqual(errors,[]);
+      const toolCache=await page.evaluate(async()=>{
+        const names=await caches.keys();
+        const entries=await Promise.all(names.map(async name=>(await (await caches.open(name)).keys()).map(r=>r.url)));
+        return entries.flat().filter(u=>u.includes('/tools/coordinator/'));
+      });
+      assert.equal(toolCache.length,5);assert(toolCache.every(u=>!new URL(u).search));
+      report.results.push({scenario:'catalogue → coordinator → return / cold and warm offline / four languages + fallback',width,status:'passed',toolCache});
+    } finally {await ctx.tracing.stop({path:join(reportDir,`demo-${width}.zip`)});await ctx.close();activePage=null;}
+  }
+  for(const mode of ['corrupt','denied']) {
+    const ctx=await context({width:320,height:900},mode==='denied'?'denied':'');
+    if(mode==='corrupt') await ctx.addInitScript(()=>{
+      if(localStorage.getItem('demo-fixture-marker'))return;
+      localStorage.setItem('demo-fixture-marker','keep');localStorage.setItem('primserv:coordinator-demo:v1','{broken');
+    });
+    const page=activePage=await ctx.newPage();
+    try {
+      await page.goto(base+'tools/coordinator/?lang=en&fromLang=ka');
+      await page.locator('#demo-01').selectOption('done');
+      assert.equal(await page.locator('#demo-01').inputValue(),'done');
+      assert.match(await page.locator('#storage').innerText(),mode==='corrupt'?/preserved/:/unavailable/);
+      assert((await page.locator('#catalogue-return').getAttribute('href')).endsWith('?lang=ka'));
+      if(mode==='corrupt') assert.equal(await page.evaluate(()=>localStorage.getItem('primserv:coordinator-demo:v1')),'{broken');
+      await fits(page);await shot(page,'demo-storage-'+mode);
+      report.results.push({scenario:'published demo '+mode+' storage / preserved record and return language',status:'passed'});
+    } finally {await ctx.close();activePage=null;}
+  }
+
+  // Download the actual base runtime, then update only from the catalogue.
+  // There must be no online tool visit/refresh after activation of the head SW.
+  const upgradeFiles = ['index.html', 'assets/bootstrap.js', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js'];
+  const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
+  const headCache = headFiles.get('sw.js').toString().match(/const CACHE_VERSION = "([^"]+)"/)[1];
+  const baseWorker = execFileSync('git', ['show', `${report.base}:sw.js`]).toString();
+  const baseCache = baseWorker.match(/const CACHE_VERSION = "([^"]+)"/)[1];
+  const upgradeWidths = baseWorker === headFiles.get('sw.js').toString() ? [] : [1280,320];
+  if(upgradeWidths.length) assert.notEqual(baseCache, headCache, 'A changed worker must change its cache version');
+  else report.results.push({scenario:'base → head worker upgrade',status:'not-applicable',reason:'Worker bytes are unchanged'});
+  async function toolSnapshot(page) {
+    return page.evaluate(async () => {
+      const result=[];
+      for(const name of await caches.keys()) {
+        const cache=await caches.open(name);
+        for(const request of await cache.keys()) {
+          if(!new URL(request.url).pathname.includes('/tools/coordinator/'))continue;
+          const bytes=await (await cache.match(request)).arrayBuffer();
+          const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+          result.push({url:request.url,sha256:hash});
+        }
+      }
+      return result.sort((a,b)=>a.url.localeCompare(b.url));
+    });
+  }
+  for(const width of upgradeWidths) {
+    const ctx = await context({ width, height: 900 });
+    const page = activePage = await ctx.newPage();
+    const errors=[];page.on('pageerror',error=>errors.push(error.message));
+    let originStopped=false;
+    await ctx.tracing.start({screenshots:true,snapshots:true,sources:false});
+    try {
+      for (const file of upgradeFiles) await writeFile(join(artifact, file), execFileSync('git', ['show', `${report.base}:${file}`]));
+      await page.goto(`${base}?lang=uk#jobs`); await ready(page);
+      await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+      await page.locator('#job-search').fill('Siechnice');
+      await page.locator('[data-primserv-service="coordinator"]').click();
+      await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      await page.locator('#demo-01').selectOption('doing');
+      await page.locator('#demo-03').selectOption('done');
+      await page.locator('#catalogue-return').click();await ready(page);
+      await page.goto(base+'?lang=uk#jobs');await ready(page);
+      const before=await toolSnapshot(page);
+      assert.equal(before.length,5);assert(before.every(item=>!new URL(item.url).search));
+      assert.ok((await page.evaluate(()=>caches.keys())).includes(baseCache));
+      await page.evaluate(async () => {
+        localStorage.setItem('shortcut-unrelated', 'keep');
+        await caches.open('unrelated-shortcut-cache');
+      });
+      const onlineToolRequests=[];
+      const observe=request=>{
+        if(new URL(request.url()).pathname.includes('/tools/coordinator/')) onlineToolRequests.push(request.url());
+      };
+      ctx.on('request',observe);
+      for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
+      await page.evaluate(async () => { const registration = await navigator.serviceWorker.ready; await registration.update(); });
+      await page.waitForFunction(async ({headCache,baseCache}) => {
+        const keys = await caches.keys();
+        return keys.includes(headCache) && !keys.includes(baseCache);
+      }, {headCache,baseCache});
+      // Controllerchange warms only the current catalogue locale. Reopening the
+      // shell is allowed, but the tool is deliberately not opened online.
+      await page.reload();await ready(page);
+      await page.waitForFunction(() => document.activeElement?.id === 'job-search');
+      await page.waitForFunction(async headCache=>Boolean(await (await caches.open(headCache))
+        .match(new URL('data/locales/uk.js?v=220',location.href).href)),headCache);
+      assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');
+      assert.equal(await page.evaluate(()=>localStorage.getItem('shortcut-unrelated')),'keep');
+      assert.ok((await page.evaluate(()=>caches.keys())).includes('unrelated-shortcut-cache'));
+      const after=await toolSnapshot(page);
+      assert.deepEqual(after,before,'Migration must preserve the exact complete old runtime');
+      assert.deepEqual(onlineToolRequests,[],'No online tool visit or refresh may hide a broken migration');
+      ctx.off('request',observe);
+      await stopServer();originStopped=true;await ctx.setOffline(true);
+      await page.locator('[data-primserv-service="coordinator"]').click();
+      await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      assert.equal(await page.locator('#demo-03').inputValue(),'done');
+      await page.reload();
+      assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      for(const lang of ['ru','uk','pl','en']) {
+        await page.locator('#language').selectOption(lang);
+        assert.equal(await page.locator('html').getAttribute('lang'),lang);
+        assert.equal(await page.locator('#demo-03').inputValue(),'done');await fits(page);
+      }
+      await page.locator('#demo-02').selectOption('done');
+      await shot(page,`demo-upgrade-offline-${width}`);
+      await page.locator('#catalogue-return').click();await ready(page);
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');await fits(page);
+      await shot(page,`catalogue-upgrade-offline-${width}`);
+      await page.locator('[data-primserv-service="coordinator"]').click();await page.reload();
+      assert.equal(await page.locator('#demo-02').inputValue(),'done');
+      await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      assert.deepEqual(await toolSnapshot(page),before);
+      assert.deepEqual(errors,[]);
+      report.results.push({scenario:'actual base complete tool → head shell → origin stopped/offline first tool entry, reload, languages, return and saved fictional statuses',
+        width,status:'passed',baseCache,headCache,before,after,onlineToolRequests});
+    } finally {
+      for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
+      if(originStopped)await startServer();
+      await ctx.tracing.stop({path:join(reportDir,`demo-upgrade-${width}.zip`)});
+      await ctx.close(); activePage = null;
+    }
+  }
+
+  for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
     // Use a separate request context so the existing navigation SW fallback
     // cannot disguise the actual publication boundary as the catalogue shell.
     const response = await fetch(base + path);
@@ -237,8 +493,9 @@ try {
   process.exitCode = 1;
 } finally {
   await browser?.close();
-  server.kill('SIGTERM');
+  server?.kill('SIGTERM');
   report.finished = new Date().toISOString(); report.blockedMutations = mutations;
   await writeFile(join(reportDir, 'acceptance.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }
+

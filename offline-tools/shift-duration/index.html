@@ -8,14 +8,15 @@
   <title>Shift duration · PrimServ</title>
   <link rel="icon" href="primserv-logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=2">
-  <script src="core.js?v=1" defer></script>
-  <script src="app.js?v=1" defer></script>
+  <script src="core.js?v=2" defer></script>
+  <script src="locales.js?v=1" defer></script>
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
   <header><img src="primserv-logo.svg" alt="PrimServ" width="64" height="90"><span data-i18n="badge">Offline prototype · v1</span></header>
   <main>
     <div class="heading"><div><p class="eyebrow" data-i18n="eyebrow">A small tool for everyday calculations</p><h1 data-i18n="title">Shift duration</h1></div>
-      <label class="language"><span data-i18n="language">Language</span><select id="language"><option value="en">English</option><option value="pl">Polski</option><option value="uk">Українська</option><option value="ru">Русский</option></select></label></div>
+      <label class="language"><span data-i18n="language">Language</span><select id="language"><option value="en">English</option><option value="pl">Polski</option><option value="uk">Українська</option><option value="ru">Русский</option><option value="ka">ქართული</option><option value="tr">Türkçe</option><option value="hy">Հայերեն</option></select></label></div>
     <p id="fallback" hidden>Requested language is unavailable. English is shown; you can choose another supported language.</p>
     <p class="intro" data-i18n="intro">Calculate one interval and subtract a break. Nothing is sent anywhere.</p>
     <div class="layout">
@@ -32,8 +33,10 @@
     </div>
     <section class="panel storage" aria-labelledby="storageTitle"><h2 id="storageTitle" data-i18n="storageTitle">On this device only</h2><p data-i18n="storageNote">Save the current fields and language only when you choose. No names or employee records. Browser storage may be cleared.</p><div class="actions"><button id="save" type="button" class="secondary" data-i18n="save">Save fields</button><button id="forget" type="button" class="secondary" data-i18n="forget">Forget saved fields</button></div><p id="storageStatus" role="status" aria-live="polite"></p></section>
     <p class="note" data-i18n="offline">Works without internet from a downloaded local copy. Open index.html or use the documented local server. External links below need internet; this is not an installed PWA.</p>
+    <p class="note" id="externalNotice" hidden></p>
     <noscript>This tool needs JavaScript enabled locally. It does not send data. / Для расчёта нужен JavaScript.</noscript>
   </main>
   <footer><nav aria-label="PrimServ" id="links"><a href="https://www.primserv.pl/" data-i18n="company">PrimServ company</a><a id="jobs" href="https://oleksandrkiris.github.io/kiris-jobs/" data-i18n="jobs">Vacancies</a><a id="hydra" href="https://oleksandrkiris.github.io/citronex-hydra-project/" data-i18n="hydra">Training / HYDRA</a><a href="https://t.me/KirisWorkPoland_bot" data-i18n="telegram">Telegram bot</a></nav></footer>
 </body>
 </html>
+

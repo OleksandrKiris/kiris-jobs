@@ -19,7 +19,7 @@ assert(relativeReport.startsWith(`..${path.sep}`) || path.isAbsolute(relativeRep
 const git = args => execFileSync('git', args, { cwd: root, timeout: 15000 });
 git(['merge-base', '--is-ancestor', base, 'HEAD']);
 git(['merge-base', '--is-ancestor', head, 'HEAD']);
-const runtime = ['index.html', 'core.js', 'app.js', 'style.css', 'primserv-logo.svg'];
+const runtime = ['index.html', 'core.js', 'locales.js', 'app.js', 'style.css', 'primserv-logo.svg'];
 const resources = [];
 for (const name of runtime) {
   const resource = `offline-tools/shift-duration/${name}`;
@@ -29,6 +29,7 @@ for (const name of runtime) {
 }
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
+const { installFixture } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const url = pathToFileURL(path.join(folder, 'index.html')).href;
 const KEY = 'primserv.offline.shift-duration.v1';
 const OTHER = 'primserv.acceptance.unrelated';
@@ -47,22 +48,7 @@ async function scenario(name, viewport, run, fixture) {
       report.requests.push(entry);
     });
     await context.route(/^https?:/, route => route.abort('blockedbyclient'));
-    if (fixture) await context.addInitScript(({ key, other, raw, denied }) => {
-      // Seed only fictitious values and only once in this fresh context.
-      if (sessionStorage.getItem('fixture-seeded')) return;
-      sessionStorage.setItem('fixture-seeded', 'yes');
-      localStorage.setItem(key, raw);
-      localStorage.setItem(other, 'keep');
-      const original = Object.fromEntries(['getItem', 'setItem', 'removeItem'].map(method => [method, Storage.prototype[method]]));
-      if (denied) Storage.prototype[denied] = function (k, ...args) {
-        if (this === localStorage && k === key) throw new DOMException('Test storage denial', 'SecurityError');
-        return original[denied].call(this, k, ...args);
-      };
-      window.__shiftFixture = {
-        read: k => original.getItem.call(localStorage, k),
-        restore: () => { for (const method of Object.keys(original)) Storage.prototype[method] = original[method]; }
-      };
-    }, { key: KEY, other: OTHER, ...fixture });
+    if (fixture) await context.addInitScript(installFixture, { key: KEY, other: OTHER, ...fixture });
     page = await context.newPage();
     page.setDefaultTimeout(8000);
     page.on('pageerror', error => report.pageErrors.push({ scenario: name, message: error.message }));
@@ -117,7 +103,7 @@ try {
   browser = await chromium.launch({ headless: true });
   report.browser = `Chromium ${browser.version()}`;
   for (const width of [1280, 320]) await scenario(`route-${width}`, { width, height: 900 }, async (page, context, item) => {
-    item.actions.push('Offline first load, empty state, invalid form, overnight calculation, keyboard Save, reload/Back, four locales and fallback, reset, online recovery');
+    item.actions.push('Offline first load, empty state, invalid form, overnight calculation, keyboard Save, reload/Back, seven locales and fallback, reset, online recovery');
     assert.match(await page.locator('#storageStatus').innerText(), /Nothing saved/);
     await calculate(page);
     assert.equal(await page.locator('#start').getAttribute('aria-invalid'), 'true');
@@ -144,7 +130,7 @@ try {
     await page.goto('about:blank');
     await page.goBack();
     await result(page);
-    for (const [lang, expected] of [['ru', '7 ч 30 мин'], ['uk', '7 год 30 хв'], ['pl', '7 godz. 30 min'], ['en', '7 h 30 min']]) {
+    for (const [lang, expected] of [['ru', '7 ч 30 мин'], ['uk', '7 год 30 хв'], ['pl', '7 godz. 30 min'], ['en', '7 h 30 min'], ['ka', '7 სთ 30 წთ'], ['tr', '7 sa 30 dk'], ['hy', '7 ժ 30 ր']]) {
       await page.locator('#language').selectOption(lang);
       assert.equal(await page.locator('html').getAttribute('lang'), lang);
       assert.equal(await page.locator('#start').inputValue(), '22:00');
@@ -159,9 +145,23 @@ try {
     await page.goto(url); // No query: restore saved language, not a URL override.
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
     await result(page, '7 год 30 хв');
-    await page.goto(`${url}?lang=ka`);
+    for (const language of ['ka', 'tr', 'hy']) {
+      await page.goto(`${url}?lang=${language}`);
+      assert.equal(await page.locator('html').getAttribute('lang'), language);
+      assert.equal(await page.locator('#fallback').isVisible(), false);
+      assert.equal(await page.locator('#externalNotice').isVisible(), true);
+      await result(page, {ka:'7 სთ 30 წთ',tr:'7 sa 30 dk',hy:'7 ժ 30 ր'}[language]);
+      await page.locator('#save').click();
+      await page.goto(url);
+      assert.equal(await page.locator('html').getAttribute('lang'), language);
+      await page.screenshot({path:path.join(reportDir, `language-${language}-${width}.png`), fullPage:true});
+      if(width === 320) await narrow(page);
+      assert.equal(await page.locator('#start').inputValue(), '22:00');
+    }
+    await page.goto(`${url}?lang=xx`);
     assert.equal(await page.locator('html').getAttribute('lang'), 'en');
-    assert.match(await page.locator('#fallback').innerText(), /English is shown/);
+    assert.equal(await page.locator('#fallback').isVisible(), true);
+    await result(page);
     await page.goto(`${url}?lang=ua`);
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
     assert.equal(await page.locator('#fallback').isVisible(), false);
@@ -239,6 +239,7 @@ try {
   report.status = 'passed';
 } catch (error) {
   report.error = error.stack;
+  console.error(error.stack || String(error));
   process.exitCode = 1;
 } finally {
   if (browser) await browser.close();
@@ -247,3 +248,5 @@ try {
   await writeFile(path.join(reportDir, 'acceptance.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify({ status: report.status, head, base, scenarios: report.scenarios.map(s => ({ name: s.name, status: s.status })), externalRequestCount: report.externalRequestCount }));
 }
+
+

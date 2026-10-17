@@ -17,6 +17,13 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Prove Pages cancellation regression and check deployment policy
+        run: |
+          python -m unittest discover -s quality/security -p 'test_*.py' -v
+          python quality/security/pages_concurrency.py .github/workflows/pages.yml
       - run: npm test
       - name: Test isolated-module CI contract
         run: node --test .github/scripts/local-prototypes.test.mjs
