@@ -169,3 +169,28 @@ test('prepared CI entry records exact version, offline scenarios and closes reso
 });
 
 
+
+test('real browser fixture never reseeds recovered data after a new document', () => {
+  const {installFixture}=require('./browser-fixtures.cjs');
+  for(const denied of [undefined,'getItem','setItem','removeItem']) {
+    const map=new Map();
+    const install=()=>{
+      class Storage {getItem(k){return map.get(k)??null;}setItem(k,v){map.set(k,String(v));}removeItem(k){map.delete(k);}}
+      const localStorage=new Storage(),window={};
+      vm.runInNewContext('('+installFixture.toString()+')(args)',{Storage,localStorage,window,DOMException,args:{key:C.KEY,other:'test-other',raw:'{broken',denied}});
+      return {localStorage,window};
+    };
+    const first=install();
+    assert.equal(first.window.__shiftFixture.read(C.KEY),'{broken');
+    first.window.__shiftFixture.restore();
+    const recovered=JSON.stringify({version:1,value:good()});
+    first.localStorage.setItem(C.KEY,recovered);
+    const reloaded=install(); // Fresh JS document, same persisted storage; no sessionStorage dependency.
+    assert.equal(reloaded.localStorage.getItem(C.KEY),recovered);
+    reloaded.localStorage.setItem(C.KEY,recovered);
+    assert.equal(reloaded.localStorage.getItem('test-other'),'keep');
+    reloaded.localStorage.removeItem(C.KEY);
+    const afterReset=install();
+    assert.equal(afterReset.localStorage.getItem(C.KEY),null);
+  }
+});

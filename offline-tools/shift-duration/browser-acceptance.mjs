@@ -29,6 +29,7 @@ for (const name of runtime) {
 }
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
+const { installFixture } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const url = pathToFileURL(path.join(folder, 'index.html')).href;
 const KEY = 'primserv.offline.shift-duration.v1';
 const OTHER = 'primserv.acceptance.unrelated';
@@ -47,22 +48,7 @@ async function scenario(name, viewport, run, fixture) {
       report.requests.push(entry);
     });
     await context.route(/^https?:/, route => route.abort('blockedbyclient'));
-    if (fixture) await context.addInitScript(({ key, other, raw, denied }) => {
-      // Seed only fictitious values and only once in this fresh context.
-      if (sessionStorage.getItem('fixture-seeded')) return;
-      sessionStorage.setItem('fixture-seeded', 'yes');
-      localStorage.setItem(key, raw);
-      localStorage.setItem(other, 'keep');
-      const original = Object.fromEntries(['getItem', 'setItem', 'removeItem'].map(method => [method, Storage.prototype[method]]));
-      if (denied) Storage.prototype[denied] = function (k, ...args) {
-        if (this === localStorage && k === key) throw new DOMException('Test storage denial', 'SecurityError');
-        return original[denied].call(this, k, ...args);
-      };
-      window.__shiftFixture = {
-        read: k => original.getItem.call(localStorage, k),
-        restore: () => { for (const method of Object.keys(original)) Storage.prototype[method] = original[method]; }
-      };
-    }, { key: KEY, other: OTHER, ...fixture });
+    if (fixture) await context.addInitScript(installFixture, { key: KEY, other: OTHER, ...fixture });
     page = await context.newPage();
     page.setDefaultTimeout(8000);
     page.on('pageerror', error => report.pageErrors.push({ scenario: name, message: error.message }));
@@ -253,6 +239,7 @@ try {
   report.status = 'passed';
 } catch (error) {
   report.error = error.stack;
+  console.error(error.stack || String(error));
   process.exitCode = 1;
 } finally {
   if (browser) await browser.close();
