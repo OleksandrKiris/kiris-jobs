@@ -13,7 +13,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
 | [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77), [#78](https://github.com/OleksandrKiris/kiris-jobs/pull/78) draft | [39055542734](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39055542734) |
-| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `02a1bfdb08b1ccf72e49113f57ca144ab14cd328` | [#11](https://github.com/OleksandrKiris/citronex-hydra-project/pull/11) draft | [39035254461](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39035254461) |
+| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `0aaa156939e35d52506629d509abb3e5271d27e9` | [#12](https://github.com/OleksandrKiris/citronex-hydra-project/pull/12) draft | [39057041456](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39057041456) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
@@ -43,14 +43,21 @@ recruitmentbot. Остальной аккаунт не объявляется о
   Позднее PR61 принят на head3f11c589, guarded merge3c2c73fb;
   post Backend39050890139/Pages39050890058 success, семь public bytes совпали.
   Старый failure не является состоянием принятого head.
-- HYDRA PR11: head `beb192c684dea9a770b8d8c9c29c69cad767af02`, draft,
+- HYDRA PR11 принят: head `beb192c684dea9a770b8d8c9c29c69cad767af02`,
   base02a1bfd, CI39049963079 success. Дельта от ранее проверенного39d18a2 —
   только tests/browser.mjs; runtime/SW/переводы прежние. Независимо прочитан
   artifact12106809441:30 уникальных ka/tr/hy ×1280/320 ×5fault-case,
   guide целиком во viewport/clipping bounds с center hit-test,
   14 Tab stops с прямым/обратным циклом и wrap. Три guide-320 screenshot просмотрены;
   десять прежних сценариев и upgrade/offline сохранены, всего41 запись.
-  PR ещё не принят. Носитель языка, физический телефон и внешнее обучение не проверены.
+  Guarded merge0aaa156939e35d52506629d509abb3e5271d27e9, Pages39057041456 success;
+  три публичных runtime bytes/index/sw/manifest HTTP200 совпали с tested head,
+  оба treeSHA=b5a7e68525f30f37c37c670e575fef52ddc3b04b. Носитель языка,
+  физический телефон, полные процедуры и внешнее обучение не проверены.
+  Следующий PR12@9e2c2612 — последняя публичная площадка/сброс, не принят.
+  95 unit/54 browser PASS, но independent1280 PNG выявил P2: heading/Clear
+  сжаты наследуемой44px колонкой. Исправление и адресная layout-проверка у2,
+  старый green не означает приёмку.
 - Роли3/5/6/7/9/11 подготовили отдельные локальные commits/patches и адресные тесты.
   В передаче имеются исторические отказы отдельных GitHub write/PR операций без
   полного исходного ответа. Эти операции не повторялись другим инструментом.
@@ -125,6 +132,11 @@ recruitmentbot. Остальной аккаунт не объявляется о
  оба actual restart PASS. Post-failure rawKEY=null/marker=yes при прежнем path/query
  не доказывает состояние до fixture или причину. Артефакт12109233074 сохранён;
  роли9/15 продолжают один разбор без mass rerun, новый head не принят.
+ Следующий1895b595:51 local+16 parity PASS по автору, Backend39057614115SUCCESS,
+ Catalogue39057614010FAILURE14/16, оба native restart PASS. Все12samples/шесть пар
+ сообщают одинаковые target/context/storageKey, но observed-v1 initial raw/marker
+ после reload=null до fixture. Внутренняя identity/причина этим не доказаны;
+ bounded primary-source research не нашёл подтверждённого upstream fix. Issue79 открыт.
 - PR61@02485d33 run39049003896 и прежнийPR72@594 run39048985559 выявили разные
  reload failures mainfixture: v1todo!=doing иboard-narrowmissingdemo01. Старые
  входные raw подтверждены trace, initraw/marker нет. PureVM continuousstorage
@@ -158,8 +170,16 @@ recruitmentbot. Остальной аккаунт не объявляется о
   SW прежний; owner1 добавляет gate в60, необходимость bump определяет по результатам.
   Документ76 — исторический diagnostic/native-profile follow-up, не отклонённый
   HTTP rewrite75. Материалы68 продолжаются в существующем PR после сохраненияa418.
-- PR74@3f5ddeb — подготовленная9-row HRappka evidence/gap matrix; исправлены
+- PR74@d3345af8 — подготовленная9-row/30refs HRappka evidence/gap matrix; исправлены
  live APIguide/S5→S6 и parked68. Это не второйroadmap или доказанное превосходство.
+  Последняя адресная фраза запрещает обход сетевого отказа13 другим инструментом;
+  Backend39057556666SUCCESS, Catalogue39057556741FAILUREcoordinator, draft.
+- PR60@3876a64a/base54b597 содержит fix80 неполного первого скачивания tool-body.
+  Независимый VM red/green: новый24PASS, старый40ed с тем же testfile19PASS/5coldFAIL,
+  реальное потребление streams в Cache.put mock. ExactCatalogue39057420518:
+  каталоговый этап33PASS (18old+10warm+5cold503/recovery), последующий coordinator
+  file-gate79FAILURE; Backend39057420520SUCCESS. Не merged/не опубликован.
+  Это proof ace6655→76/60, будущие5runtime68 отдельно. Подробности в issue80.
 
 ## Регулярное продолжение
 
