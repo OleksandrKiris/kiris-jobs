@@ -15,7 +15,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77), [#78](https://github.com/OleksandrKiris/kiris-jobs/pull/78) draft | [39055542734](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39055542734) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b` | [#13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13) draft | [39059220706](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39059220706) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
-| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | [#9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9) draft | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
+| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `3a7ea5e0b70abece336f41c00c31cf510928aaeb` | [#10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10) draft | [39061616083](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39061616083) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
@@ -62,12 +62,25 @@ recruitmentbot. Остальной аккаунт не объявляется о
   восстановил26 exactblobSHA, net без удалений. Pages39059220706 success,
   HTML117274B/SW3193B/manifest593B HTTP200 exacttestedbytes, treeSHA совпал.
   Следующий WIP2 — PR13@cbb35d46/baseb820, копирование публичной ссылки;
-  автоматических отправок нет. CI39060090874 success, final artifact review pending.
-- Dragon PR9@810125c0/base79fdd78 сохраняет прежний WIP4 Turkish → EN fallback.
+  автоматических отправок нет. CI39060090874 success, independent review clear:
+  99 unit/66 entries/6 current PNG. Clipboard outcomes смоделированы;
+  frozen/draft/unpublished, следующий guard отдельно.
+- Dragon PR9@810125c0/base79fdd78 принят, guarded merge3a7ea5e0.
   Accepted binary blobs сохранены. Старый green31270 имел BASE-cache gate,
   не доказывающий HEAD-upgrade (issue81); de798 red выявил requestedtr loss
   после reload. Automatic fallback/manual language choice разделены;
-  CI39060007333 success, final browser/offline independent review pending, draft.
+  CI39060007333 success:144 unit/9 browser groups,5 current PNG и trace просмотрены;
+  actual changed/activated HEAD/noBASE/offline HEAD notice+JS2770c8c0 exact подтверждены.
+  Issue81 CLOSED, Pages39061616083 success и пять public runtime assets HTTP200
+  exact-tested bytes. Старые недостаточные/красные proofs сохранены, не исправление79.
+  Следующий WIP4 — PR10@6cb0c3dd/base3a7, публичная guide-ссылка/requested context
+  и clipboard fallback. CI39062064278 success; независимая приёмка ещё выполняется.
+  Draft, не merged/не опубликован; второй merge в этом проходе не выполняется.
+- Pinned company-import source проверен отдельно на synthetic :memory: fixture:
+  preview-valid/apply-UnicodeEncodeError на4 surrogate inputs, baseline unchanged.
+  Private PROPOSED guard+test candidate:8 generic CommandError/SQL0/validemojiPASS;
+  independent review clear. Source repo/production не изменены, полного project suite
+  или tenant isolation proof нет; это условие перед reuse, не внедрённый backend fix.
 - Роли3/5/6/7/9/11 подготовили отдельные локальные commits/patches и адресные тесты.
   В передаче имеются исторические отказы отдельных GitHub write/PR операций без
   полного исходного ответа. Эти операции не повторялись другим инструментом.

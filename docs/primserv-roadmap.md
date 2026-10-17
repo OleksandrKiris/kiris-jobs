@@ -66,6 +66,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 Последняя сверка main: `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d`, после PR53/55/56/59/66/64/70/67/72/61/73/76.
 Отдельными проходами приняты HYDRA11/12, main `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b`.
+Следующим проходом принят Dragon9, main `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
 `da054fd69b2f831de93d16842991cc38e280233a` прошёл CI; merge `fc672d8`,
@@ -272,6 +273,26 @@ SW3193B и manifest593B HTTP200 совпали с tested bytes. Это три ru
 не повторная проверка audio/внешнего обучения. Следующий срез2 — копирование
 публичной ссылки на площадку/язык с доступным fallback при отказе clipboard.
 
+Принят [Dragon PR9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9):
+head `810125c0a5aeca8f945d041fa281b5e45c18e5d4`, base `79fdd78c`,
+guarded merge `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
+Явный Turkish-запрос получает EN и понятное пояснение; automatic fallback
+сохраняет requested tr/ka/hy в URL после reload/Back. Ручной EN/UA обновляет
+запрос и скрывает fallback notice. При автоматическом fallback контент и handoff
+используют effective EN; ручной выбор задаёт выбранный язык.
+CI39060007333 success:144 unit и9 browser groups, включая четыре TR-case
+(1280/320 × saved PL/corrupt storage), keyboard, reload/Back и прежние controls.
+Независимо просмотрены пять current PNG и trace; пять URL-regressions дали
+de7980/5 →8984/5 →8105/5, без ослабления требований.
+Исправлена проверка обновления: подтверждены changed/activated HEAD controller,
+HEAD cache без BASE cache, остановленный origin/offline HEAD notice и точный
+JS SHA256 `2770c8c0071e8648faf71204da8976ec6ff39c3c954e63942e4c1a528c0466e2`.
+Старый false-green31270 и red de798 сохранены; issue81 закрыта после приёмки.
+Pages39061616083 success; merge/tested tree совпали. Публичные HTML10243B,
+JS79991B, CSS19323B, SW1659B и manifest323B HTTP200 exact-tested bytes.
+Это пять runtime-файлов;11 прежних binary blobs сохранены, нового полного
+аудита audio, OS voices или физического телефона не было.
+
 Новый gate1 в PR60@40edbe38 доказал18 прежних+10 warm browser случаев:
 каждый из пяти ресурсов ×1280/320, реальные socket cuts, старые5 hashes/одна
 generation/progress, восстановление нового пакета и offline после stop origin.
@@ -446,17 +467,24 @@ HYDRA PR11/12 приняты и опубликованы, guard/post-check вы�
 WIP2 — [HYDRA PR13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13),
 headcbb35d46/baseb820: передача публичной ссылки на выбранную площадку/язык, без персональных
 данных и автоматических отправок, с ручным выделяемым URL при отказе clipboard.
-CI39060090874 success; независимая проверка exact-head артефактов ещё не завершена,
-предыдущие7afb/169 screenshots автоматически на новый CSS не переносятся.
+CI39060090874 success; независимая проверка exact-head завершена:
+99 unit,66 entries (54 прежних+12 clipboard), шесть current PNG просмотрены,
+scope/tree/hashes сохранены. Clipboard outcomes смоделированы; реальный OS clipboard
+не проверен. PR13 frozen/draft, не merged/не опубликован; следующий свежий guard отдельно.
 Предыдущий дефект layout и случайные удаления исправлены до приёмки12;
 исторические9e2c/1ef5 proof сохранены отдельно, не названы принятыми head.
-Существующий WIP4 доведён до [Dragon PR9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9),
-head810125c0/base79fdd78: явный tr → EN fallback, прежние бинарные активы сохранены.
+Существующий WIP4 завершён [Dragon PR9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9),
+guard/post-check выше. Следующий единственный WIP4 — [Dragon PR10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10),
+head6cb0c3dd/base3a7: копирование публичной guide-ссылки с requested языком,
+allowlisted context/существующим anchor и ручным fallback, без произвольных
+query/hash/прогресса/отправок. CI39062064278 success; независимая приёмка
+ещё выполняется. Draft, не merged/не опубликован; второй merge в этом проходе не нужен.
+Прежний head810125c0/base79fdd78 принят; бинарные активы сохранены.
 Старый green31270 не доказал HEAD-upgrade: helper ждал BASE-cache; это
 [issue81](https://github.com/OleksandrKiris/kiris-jobs/issues/81), owner4.
 Новый browser gate на de798 выявил потерю requestedtr после reload; automatic
-fallback и ручной выбор языка теперь разделены. CI39060007333 success,
-draft: независимая приёмка final browser/offline артефактов ещё нужна.
+fallback и ручной выбор языка разделены; независимые final browser/offline
+доказательства прочитаны, CI39060007333 success. Issue81 CLOSED, не исправление79.
 Передача владельца1 / issue51 завершена PR53, offline-пакет принят PR55.
 Следующая интеграция — один источник подтверждённого материала, общий read-only
 контракт14, совместимые snapshot/mock9 и локальный домен13/маршрут12.
@@ -513,8 +541,20 @@ production API, deployment и доказанная многокомпанейн�
 Это отдельная компания на установку. Замена singleton не является A/B tenant
 изоляцией; один nonstaff GET→302 не доказывает POST/staff/object права.
 Frontend этим серверным интерфейсом не обладает; production isolation не проверена.
-До нового собственного company-config протокола изучить этот источник,
-не запускать импорт или реальные данные и не объявлять принятыми все10 приложений.
+На source pin с Django5.2.18 проведена отдельная локальная fixture: один valid
+Unicode+emoji roundtrip и четыре ASCII-escaped surrogate input (name/phone × high/low).
+Старый preview принимает их, apply выдаёт UnicodeEncodeError; baseline во всех
+случаях сохранён. Это воспроизведённый local correctness gap, не production corruption.
+Подготовлен PROPOSED/NOT APPLIED patch: пять строк UTF-8 scalar check перед ORM
+и предложенный26-line test. На отдельной candidate copy все8 preview/apply вызовов
+дали generic CommandError, SQL=0, baseline unchanged; обычный Unicode/emoji прошёл.
+Python3.12.14/Django5.2.18/SQLite3.53.1, только :memory: и одна CompanyProfile table.
+Независимое source/raw-proof review clear;8 исходников и старый repro сохранены.
+Полный project suite и предложенный TestCase не исполнялись; socket=0 относится
+к guarded fixture phase после django.setup. Исходный репозиторий не изменён,
+патч не принят в семь репозиториев и не означает внедрение всех10 приложений.
+Перед reuse нужна передача владельцу, проверка в исходном проекте и отдельная
+совместимость с core6.1.2; реальные компании/импорт/tenant права не подключать.
 
 Исторический снимок PR68 **CLOSED/PARKED, не merged** — head `a41851cf8477584e5aeeff47b518e3577f7968df`.
 Ветка, проверенный bundle, patch, manifest и PR metadata сохранены9; после закрытия75
@@ -843,6 +883,12 @@ GitHub продолжался. Прежний общий запрет на лю�
   ведёт на EN с понятным предупреждением, не выдуманным переводом.
 
 ## Журнал существенных изменений
+
+- **2026-10-17, Dragon9:** исправлены явный TR fallback и requested context после
+  reload/Back; guard810 →3a7, Pages39061616083 и пять runtime bytes проверены.
+  Issue81 закрыта с actual HEAD-upgrade/offline proof. HYDRA13 currentcbb отдельно
+  прошёл независимое ревью, остаётся draft. Company Unicode gap воспроизведён
+  и закрыт в private candidate proposal с SQL0; source repo не изменён.
 
 - **2026-10-17, HYDRA12:** последняя публичная площадка/очистка выбора приняты
   с guard b8e5 → b820; Pages39059220706 и три точных runtime-файла проверены.
