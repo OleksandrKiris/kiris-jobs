@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 17.10.2026, 17:36 Europe/Budapest. Владелец: роль10.
+Сверка: 17.10.2026, 17:36 Europe/Budapest; kiris-jobs дополнен в 17:43. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `fbf5683a1c253a2eb740e998d17c58addd64673c` | [#59](https://github.com/OleksandrKiris/kiris-jobs/pull/59) | [39045592744](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39045592744) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `427a8e13421f94e3e22b5fe03c9934f065d50df1` | [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#61](https://github.com/OleksandrKiris/kiris-jobs/pull/61) draft, [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft | не найдена в последних пяти runs |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `02a1bfdb08b1ccf72e49113f57ca144ab14cd328` | [#11](https://github.com/OleksandrKiris/citronex-hydra-project/pull/11) draft | [39035254461](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39035254461) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
@@ -30,10 +30,18 @@ recruitmentbot. Остальной аккаунт не объявляется о
   `tools/coordinator/` побайтно совпали с публичным HTTP-ответом. Прямой
   `/coordinator-demo/` намеренно не публикуется: упаковка переносит allowlist
   в `tools/coordinator/`. Полная новая browser/offline-приёмка здесь не выполнялась.
-- PR59: head `77977573f3bff01abf08e9dcc45629e39b71ca09`, base `fbf5683`, оба CI
-  success (39045678838/39045678871). Исправление отмены активного Pages deploy
-  подготовлено, не принято. Фактические прошлые отмены или количество предотвращённых
-  сбоев не установлены. Требуется независимое ревью и наблюдение следующего выпуска.
+- PR59 принят guarded merge `427a8e13421f94e3e22b5fe03c9934f065d50df1` с exact
+  head `77977573f3bff01abf08e9dcc45629e39b71ca09`. Четыре локальные регрессии и
+  CLI policy guard повторно прошли; post-merge Backend39046140582 и Pages39046140524
+  success. Корневые index/SW и пять runtime-файлов demo побайтно совпали с публичной
+  версией. Фактических прошлых отмен deploy не установлено; исправлена конфигурация.
+  Наблюдение следующего функционального PR на новой базе остаётся отдельным шагом.
+- PR61 docs-only head `9a3b653` упал в Catalogue39046009208/job117434756744:
+  coordinator-demo/browser-acceptance.mjs:157 denied-remove/reload: todo != doing.
+  Предыдущие шесть сценариев прошли; причина передана владельцу9 для различения
+  нестабильной fixture и дефекта продукта. Проверка не выключена и повтор вслепую
+  не выполнялся. Документационный WIP согласован с новым main обычным merge;
+  новый exact head должен пройти проверки и сохраняет draft до необходимой приёмки.
 - HYDRA PR11: head `39d18a27881e07de5577fb216b84f038c6254700`, draft, CI39045329094
   success. Более ранний failure39045212681 относится к `b2ed637`, не текущему head.
   Непроведённая лингвистическая проверка не считается выполненной.
