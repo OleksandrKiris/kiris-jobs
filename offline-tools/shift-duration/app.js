@@ -15,6 +15,7 @@
       title:'Czas trwania zmiany', badge:'Prototyp offline · v1', eyebrow:'Małe narzędzie do codziennych obliczeń', language:'Język', intro:'Oblicz jeden przedział czasu i odejmij przerwę. Nic nie jest nigdzie wysyłane.', inputTitle:'Wpisz godziny', start:'Początek', end:'Koniec', nextDay:'Zakończenie następnego dnia', breakMinutes:'Przerwa, minuty', calculate:'Oblicz', resultTitle:'Czas po odjęciu przerwy', placeholder:'Wpisz godziny, aby obliczyć czas', disclaimer:'Tylko obliczenie arytmetyczne — nie ewidencja czasu pracy ani obliczenie wynagrodzenia. Bez oceny norm czasu pracy. Przedział musi być krótszy niż 24 godziny. Zmiany czasu i strefy czasowe nie są uwzględniane.', storageTitle:'Tylko na tym urządzeniu', storageNote:'Zapisujesz tylko bieżące pola i język, po naciśnięciu przycisku. Bez nazwisk i danych pracowników. Przeglądarka może wyczyścić pamięć.', save:'Zapisz pola', forget:'Usuń zapisane pola', offline:'Działa bez internetu z pobranej kopii lokalnej. Otwórz index.html lub użyj lokalnego serwera zgodnie z instrukcją. Poniższe linki wymagają internetu; to nie jest zainstalowana PWA.', company:'Firma PrimServ', jobs:'Oferty pracy', hydra:'Szkolenia / HYDRA', telegram:'Bot Telegram', timeError:'Wpisz prawidłową godzinę rozpoczęcia i zakończenia (GG:mm).', rangeError:'Wybierz przedział większy od zera i krótszy niż 24 godziny. Jeśli obejmuje północ, zaznacz następny dzień.', breakError:'Wpisz całkowitą liczbę minut przerwy: od zera do wartości mniejszej niż długość przedziału.', empty:'Brak zapisu. Zmiany pozostają w pamięci do naciśnięcia „Zapisz”.', loaded:'Przywrócono zapisane pola. Zmiany nie zapisują się automatycznie.', saved:'Pola zapisano na tym urządzeniu.', unsupported:'Zapisane dane są uszkodzone lub mają inny format. Nie zmieniono ich. Obliczenia są dostępne; przed nowym zapisem jawnie usuń stary.', unavailable:'Pamięć przeglądarki jest niedostępna. Obliczenia działają w pamięci tymczasowej.', saveFailed:'Nie udało się zapisać lub usunąć danych. Obliczenia nadal działają w pamięci tymczasowej.', forgotten:'Usunięto zapisane pola. Bieżące obliczenie nie zostało zmienione.', cancelled:'Anulowano usuwanie. Zapisane pola pozostały bez zmian.', confirm:'Usunąć tylko zapisane pola tego kalkulatora? Bieżące wartości i inne aplikacje nie zostaną zmienione.', hours:'godz.', minutes:'min', total:'Cały przedział', breakLabel:'Przerwa'
     }
   };
+  Object.assign(copy, window.ShiftDurationLocales);
   const $ = id => document.getElementById(id);
   const getStorage = () => window.localStorage;
   const loaded = C.read(getStorage);
@@ -45,6 +46,8 @@
     const t = copy[state.lang]; document.documentElement.lang = state.lang; document.title = `${t.title} · PrimServ`;
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t[el.dataset.i18n]; });
     $('language').value = state.lang;
+    $('externalNotice').hidden = !t.externalNotice;
+    $('externalNotice').textContent = t.externalNotice || '';
     $('storageStatus').textContent = t[status];
     $('jobs').href = `https://oleksandrkiris.github.io/kiris-jobs/?lang=${state.lang}`;
     $('hydra').href = `https://oleksandrkiris.github.io/citronex-hydra-project/?lang=${state.lang === 'uk' ? 'ua' : state.lang}`;
@@ -64,3 +67,4 @@
   attempted = loaded.status === 'loaded' && !C.calculate(state).error;
   render();
 })();
+

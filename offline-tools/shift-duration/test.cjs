@@ -29,7 +29,7 @@ test('empty and malformed times and breaks', () => {
 test('all supported languages and honest fallback', () => {
   for(const lang of C.LANGS) assert.equal(C.language(lang),lang);
   assert.equal(C.language('ua'),'uk');
-  for(const lang of ['ka','xx','',null]) assert.equal(C.language(lang),'en');
+  for(const lang of ['xx','',null]) assert.equal(C.language(lang),'en');
 });
 test('empty storage, save and reload preserve only allowed fields', () => {
   const s=storage(); assert.equal(C.read(()=>s).status,'empty');
@@ -71,6 +71,7 @@ function ui(lang='en', persisted=null, denied=false) {
   const window={ShiftDuration:C,location:{search:`?lang=${lang}`,href:`http://localhost/?lang=${lang}`},confirm:()=>false,history:{replaceState(_state,_title,url){window.location.href=String(url);window.location.search=url.search;}}};
   Object.defineProperty(window,'localStorage',{get(){if(denied)throw Error('denied');return s;}});
   const document={documentElement:{},getElementById:id=>els.get(id),querySelectorAll:()=>labels,createElement:()=>element('')};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'locales.js'),'utf8'),{window});
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'app.js'),'utf8'),{window,document,URLSearchParams,URL});
   return {els,labels,window,document,s,set(v){for(const [k,x] of Object.entries(v))if(els.has(k))els.get(k)[k==='nextDay'?'checked':'value']=x;},event(id,type){els.get(id).events[type]({preventDefault(){}});}};
 }
@@ -103,14 +104,38 @@ test('Save button reports read denial without overwriting or losing the current 
 });
 test('all UI labels exist, fallback, denied storage still calculates', () => {
   for(const lang of C.LANGS) {const u=ui(lang);assert.equal(u.document.documentElement.lang,lang);assert(u.labels.every(e=>typeof e.textContent==='string'&&e.textContent.length));}
-  const u=ui('ka',null,true);assert.equal(u.els.get('fallback').hidden,false);assert.equal(u.document.documentElement.lang,'en');u.set(good());u.event('calculator','submit');assert.match(u.els.get('result').textContent,/7 h 30 min/);
+  const u=ui('xx',null,true);assert.equal(u.els.get('fallback').hidden,false);assert.equal(u.document.documentElement.lang,'en');u.set(good());u.event('calculator','submit');assert.match(u.els.get('result').textContent,/7 h 30 min/);
 });
 test('packaged dependencies are local, no network API or service worker, original logo', () => {
   const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
   for(const [,ref] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {if(/^https:/.test(ref))continue;assert(fs.existsSync(path.join(__dirname,ref.split('?')[0])));}
-  for(const file of ['core.js','app.js']) assert.doesNotMatch(fs.readFileSync(path.join(__dirname,file),'utf8'),/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|serviceWorker|setInterval|innerHTML/);
+  for(const file of ['core.js','locales.js','app.js']) assert.doesNotMatch(fs.readFileSync(path.join(__dirname,file),'utf8'),/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|serviceWorker|setInterval|innerHTML/);
   assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);assert.match(html,/aria-live="polite"/);
   assert.deepEqual(fs.readFileSync(path.join(__dirname,'primserv-logo.svg')),fs.readFileSync(path.join(__dirname,'../../assets/primserv-logo.svg')));
+});
+test('advertised languages match the connected language picker', () => {
+  const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+  const picker=html.match(/<select id="language">([\s\S]*?)<\/select>/)[1];
+  const choices=Array.from(picker.matchAll(/value="([^"]+)"/g), m=>m[1]);
+  assert.deepEqual([...C.LANGS].sort(),choices.sort());
+});
+test('ka/tr/hy render their dictionaries without overwriting saved fields', () => {
+  for(const lang of ['ka','tr','hy']) {
+    assert.equal(C.language(lang),lang);
+    const raw=JSON.stringify({version:1,value:good()});
+    for(const denied of [false,true]) {
+      const u=ui(lang,raw,denied);
+      assert.equal(u.document.documentElement.lang,lang);
+      assert.equal(u.els.get('fallback').hidden,true);
+      assert.ok(u.labels.every(e=>typeof e.textContent==='string'&&e.textContent.length));
+      u.set(good());u.event('calculator','submit');
+      assert.equal(u.els.get('result').textContent, {ka:'7 სთ 30 წთ',tr:'7 sa 30 dk',hy:'7 ժ 30 ր'}[lang]);
+      assert.equal(u.els.get('externalNotice').hidden,false);
+      assert.equal(u.document.title,u.window.ShiftDurationLocales[lang].title+' · PrimServ');
+      assert.equal(u.s.getItem(C.KEY),raw);
+      assert.equal(u.s.getItem('other'),'keep');
+    }
+  }
 });
 test('browser entry refuses execution outside CI before loading a browser or accessing git', () => {
   const run = spawnSync(process.execPath, [path.join(__dirname, 'browser-acceptance.mjs')], {
@@ -141,4 +166,31 @@ test('prepared CI entry records exact version, offline scenarios and closes reso
   assert.match(source, /await browser\.close\(\)/);
   for (const scenario of ['previous-v1', 'corrupt', 'future', 'read-denied', 'write-denied', 'remove-denied']) assert(source.includes(scenario));
   assert.doesNotMatch(source, /--no-sandbox|createServer|\.install\(/);
+});
+
+
+
+test('real browser fixture never reseeds recovered data after a new document', () => {
+  const {installFixture}=require('./browser-fixtures.cjs');
+  for(const denied of [undefined,'getItem','setItem','removeItem']) {
+    const map=new Map();
+    const install=()=>{
+      class Storage {getItem(k){return map.get(k)??null;}setItem(k,v){map.set(k,String(v));}removeItem(k){map.delete(k);}}
+      const localStorage=new Storage(),window={};
+      vm.runInNewContext('('+installFixture.toString()+')(args)',{Storage,localStorage,window,DOMException,args:{key:C.KEY,other:'test-other',raw:'{broken',denied}});
+      return {localStorage,window};
+    };
+    const first=install();
+    assert.equal(first.window.__shiftFixture.read(C.KEY),'{broken');
+    first.window.__shiftFixture.restore();
+    const recovered=JSON.stringify({version:1,value:good()});
+    first.localStorage.setItem(C.KEY,recovered);
+    const reloaded=install(); // Fresh JS document, same persisted storage; no sessionStorage dependency.
+    assert.equal(reloaded.localStorage.getItem(C.KEY),recovered);
+    reloaded.localStorage.setItem(C.KEY,recovered);
+    assert.equal(reloaded.localStorage.getItem('test-other'),'keep');
+    reloaded.localStorage.removeItem(C.KEY);
+    const afterReset=install();
+    assert.equal(afterReset.localStorage.getItem(C.KEY),null);
+  }
 });
