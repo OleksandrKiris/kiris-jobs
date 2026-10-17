@@ -25,6 +25,6 @@
 
   await import(new URL("pl.js?v=220", localeBase));
   if (active !== "pl") await import(new URL(`${active}.js?v=220`, localeBase));
-  await import("./i18n.js?v=220");
+  await import("./i18n.js?v=220&localeRecovery=1");
   await import("./privacy.js?v=220");
 })().catch((error) => console.error("[kiris-jobs] unable to load privacy page", error));
