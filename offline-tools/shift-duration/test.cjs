@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const C = require('./core.js');
+const { spawnSync } = require('node:child_process');
 const good = () => ({start:'06:00',end:'14:00',nextDay:false,breakMinutes:'30',lang:'en'});
 function storage(initial) {
   const map = new Map(initial ? [[C.KEY, initial],['other','keep']] : [['other','keep']]);
@@ -110,4 +111,26 @@ test('packaged dependencies are local, no network API or service worker, origina
   for(const file of ['core.js','app.js']) assert.doesNotMatch(fs.readFileSync(path.join(__dirname,file),'utf8'),/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|serviceWorker|setInterval|innerHTML/);
   assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);assert.match(html,/aria-live="polite"/);
   assert.deepEqual(fs.readFileSync(path.join(__dirname,'primserv-logo.svg')),fs.readFileSync(path.join(__dirname,'../../assets/primserv-logo.svg')));
+});
+test('browser entry refuses execution outside CI before loading a browser or accessing git', () => {
+  const run = spawnSync(process.execPath, [path.join(__dirname, 'browser-acceptance.mjs')], {
+    env: { ...process.env, GITHUB_ACTIONS: 'false', PLAYWRIGHT_PACKAGE: '/nonexistent/playwright', TESTED_HEAD: '', TESTED_BASE: '' },
+    encoding: 'utf8', timeout: 10000
+  });
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /CI-only browser entry/);
+  assert.doesNotMatch(run.stderr, /Cannot find module|not a git repository/);
+});
+test('prepared CI entry records exact version, offline scenarios and closes resources', () => {
+  const source = fs.readFileSync(path.join(__dirname, 'browser-acceptance.mjs'), 'utf8');
+  for (const field of ['PLAYWRIGHT_PACKAGE', 'TESTED_HEAD', 'TESTED_BASE', 'BROWSER_REPORT', 'acceptance.json']) assert(source.includes(field));
+  assert.match(source, /offline: true/);
+  assert.match(source, /navigator\.onLine/);
+  assert.match(source, /createHash\('sha256'\)/);
+  assert.match(source, /Exact-head mismatch/);
+  assert.match(source, /No external requests, even failed attempts/);
+  assert.match(source, /await context\.close\(\)/);
+  assert.match(source, /await browser\.close\(\)/);
+  for (const scenario of ['previous-v1', 'corrupt', 'future', 'read-denied', 'write-denied', 'remove-denied']) assert(source.includes(scenario));
+  assert.doesNotMatch(source, /--no-sandbox|createServer|\.install\(/);
 });
