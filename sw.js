@@ -99,7 +99,7 @@ function unavailableTool(url) {
   const returnUrl = new URL('./', self.location.href);
   const from = url.searchParams.get('fromLang') || requested;
   if (/^[a-z]{2,3}$/.test(from)) returnUrl.searchParams.set('lang', from);
-  return new Response(`<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><main style="max-width:40rem;margin:3rem auto;padding:1.5rem;font:18px/1.6 system-ui"><h1>${title}</h1><p id="tool-unavailable">${description}</p><a href="${returnUrl.href}">${back}</a></main></html>`, {
+  return new Response(`<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><main style="max-width:40rem;margin:3rem auto;padding:1.5rem;font:18px/1.6 system-ui;overflow-wrap:anywhere"><h1 style="font-size:clamp(1.5rem,6vw,2rem);line-height:1.2">${title}</h1><p id="tool-unavailable">${description}</p><a href="${returnUrl.href}">${back}</a></main></html>`, {
     status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store',
       'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" }
   });
