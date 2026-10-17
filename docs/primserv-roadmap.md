@@ -65,7 +65,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 ## Актуальное состояние после исправлений — 17.10.2026
 
 Последняя сверка main: `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d`, после PR53/55/56/59/66/64/70/67/72/61/73/76.
-Отдельным следующим проходом принят HYDRA11, main `0aaa156939e35d52506629d509abb3e5271d27e9`.
+Отдельными проходами приняты HYDRA11/12, main `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
 `da054fd69b2f831de93d16842991cc38e280233a` прошёл CI; merge `fc672d8`,
@@ -255,6 +255,23 @@ Pages39057041456 success; merge/tested tree побайтно одинаковы.
 не объявлены проверенными. Следующий срез2 — возврат к последней выбранной
 площадке по публичному ID с очисткой выбора и текущим языком, без данных человека.
 
+Этот срез принят в [HYDRA PR12](https://github.com/OleksandrKiris/citronex-hydra-project/pull/12):
+head `b8e5c00a0c0fa76d3dfabd6c8f0fb20f2d45b724`, base `0aaa1569`,
+guarded merge `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b`.
+Сохраняется только публичный ID, ссылка строится из действующего allowlist
+с текущим языком/fallback; неизвестные/повреждённые значения не создают маршрутов.
+Очистка возвращает фокус; отказ storage означает только память до reload.
+95 unit-тестов и CI39058694900 success; report passed содержит54 записи,
+прежние offline/upgrade assertions сохранены. Независимо проверены120 измерений
+читаемости (10 cases ×12 языков) и просмотрены1280/320 PNG.
+P2 узкой44px колонки устранён. Промежуточный1ef5 с пропущенным base_tree_sha
+удалил26 файлов и был отклонён; исправляющийb8e5 восстановил все26 прежних blob SHA,
+net diff без удалений, workflow/manifest/assets/tests сохранены.
+Pages39059220706 success; merge/tested tree одинаковы. Публичные HTML117274B,
+SW3193B и manifest593B HTTP200 совпали с tested bytes. Это три runtime-файла,
+не повторная проверка audio/внешнего обучения. Следующий срез2 — копирование
+публичной ссылки на площадку/язык с доступным fallback при отказе clipboard.
+
 Новый gate1 в PR60@40edbe38 доказал18 прежних+10 warm browser случаев:
 каждый из пяти ресурсов ×1280/320, реальные socket cuts, старые5 hashes/одна
 generation/progress, восстановление нового пакета и offline после stop origin.
@@ -425,12 +442,21 @@ PR68 просмотра материалов9 возобновлён в том �
 Контракт14 PR67 закрыт после отдельной приёмки.
 Перед действием перечитать их head/CI и проверить совместный результат с новым main.
 Функциональные изменения не принимать по старой зелёной версии после нового push.
-HYDRA PR11 принят и опубликован, guard/post-check выше. Новый единственный
-WIP2 — PR12@9e2c2612: последняя выбранная площадка/очистка выбора.
-95 unit и54 browser записей прошли, однако независимый просмотр exact-head1280 PNG
-нашёл P2: heading/Clear наследуют44px icon-column и становятся почти вертикальными.
-Автор исправляет layout и проверку читаемости в том же PR; green CI не заменяет
-пользовательскую приёмку и не относится к уже опубликованному11.
+HYDRA PR11/12 приняты и опубликованы, guard/post-check выше. Следующий единственный
+WIP2 — [HYDRA PR13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13),
+headcbb35d46/baseb820: передача публичной ссылки на выбранную площадку/язык, без персональных
+данных и автоматических отправок, с ручным выделяемым URL при отказе clipboard.
+CI39060090874 success; независимая проверка exact-head артефактов ещё не завершена,
+предыдущие7afb/169 screenshots автоматически на новый CSS не переносятся.
+Предыдущий дефект layout и случайные удаления исправлены до приёмки12;
+исторические9e2c/1ef5 proof сохранены отдельно, не названы принятыми head.
+Существующий WIP4 доведён до [Dragon PR9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9),
+head810125c0/base79fdd78: явный tr → EN fallback, прежние бинарные активы сохранены.
+Старый green31270 не доказал HEAD-upgrade: helper ждал BASE-cache; это
+[issue81](https://github.com/OleksandrKiris/kiris-jobs/issues/81), owner4.
+Новый browser gate на de798 выявил потерю requestedtr после reload; automatic
+fallback и ручной выбор языка теперь разделены. CI39060007333 success,
+draft: независимая приёмка final browser/offline артефактов ещё нужна.
 Передача владельца1 / issue51 завершена PR53, offline-пакет принят PR55.
 Следующая интеграция — один источник подтверждённого материала, общий read-only
 контракт14, совместимые snapshot/mock9 и локальный домен13/маршрут12.
@@ -478,11 +504,15 @@ Catalogue39056291062 FAILURE в общем coordinator reload (`#demo-01`/todo!=
 Domain/core/contract владельцы раздельны, новых зависимостей или настроек не нужно.
 Только12 после соответствующей приёмки регистрирует локальный URL;
 production API, deployment и доказанная многокомпанейная авторизация отсутствуют.
-Для последующей переносимости найден существующий документированный интерфейс:
-primserv-helpdesk@3e17f1ce `export_company` → `import_company` preview → apply,
-общий company_id и валидация перед атомарной заменой. Прочитаны только README
-и docs/integration.md; установка явно одной компании. Код команд, tenant fixtures
-и production isolation не проверены, frontend этим серверным интерфейсом не обладает.
+Для последующей переносимости проверена существующая граница
+[primserv-helpdesk@3e17f1ce](https://github.com/OleksandrKiris/primserv-helpdesk/blob/3e17f1cebda946cf77385c60a2931d97d2fb8677/ui/management/commands/import_company.py):
+`export_company` → `import_company` preview → apply, девять публичных полей,
+строгий envelope/32KiB, full_clean перед atomic apply и singleton pk=1.
+После двух документов прочитаны пять pinned исходников и три вспомогательных
+файла, включая requirements/validators. Written roundtrip/rollback тесты не запускались.
+Это отдельная компания на установку. Замена singleton не является A/B tenant
+изоляцией; один nonstaff GET→302 не доказывает POST/staff/object права.
+Frontend этим серверным интерфейсом не обладает; production isolation не проверена.
 До нового собственного company-config протокола изучить этот источник,
 не запускать импорт или реальные данные и не объявлять принятыми все10 приложений.
 
@@ -509,6 +539,10 @@ CDP identity не доказывает одинаковое внутреннее
 Observer effect указан. Ограниченный разбор WHATWG/Chromium141/Playwright1.56.1
 не нашёл подтверждённого upstream fix; успешный setItem не объявлен disk acknowledgement.
 Причина issue79 остаётся открытой, повторных CI без полезного изменения нет.
+Последующий ограниченный разбор нашёл backend UMA LocalStorage.DatabaseOpen,
+но не подтвердил надёжную доставку его samples в обычном CI storage-service topology.
+Отсутствие histogram не означает успешную запись; open-result не доказывает per-key
+commit/load. Новая запись CI на основании одного существования API не запускалась.
 На a418 независимо устранён P3 ?lang=RU → requested=en:
 новый case-тест падает со старым app и проходит с новым;36 локальных тестов,
 16 snapshot/mock parity, оба CI и10 browser-сценариев прошли. Два controls не
@@ -809,6 +843,12 @@ GitHub продолжался. Прежний общий запрет на лю�
   ведёт на EN с понятным предупреждением, не выдуманным переводом.
 
 ## Журнал существенных изменений
+
+- **2026-10-17, HYDRA12:** последняя публичная площадка/очистка выбора приняты
+  с guard b8e5 → b820; Pages39059220706 и три точных runtime-файла проверены.
+  Независимо закрыты layout P2 и случайное удаление26 файлов до merge.
+  Dragon9 сохраняет прежний WIP4 в PR, следующий срез2 — публичная ссылка;
+  общего исправления file-reload79 и публикации Django пока нет.
 
 - **2026-10-17, HYDRA11:** ka/tr/hy hub/intro и keyboard guide приняты с guard,
   Pages39057041456 и три публичных runtime-файла проверены. Новый полезный срез2

@@ -13,9 +13,9 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
 | [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77), [#78](https://github.com/OleksandrKiris/kiris-jobs/pull/78) draft | [39055542734](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39055542734) |
-| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `0aaa156939e35d52506629d509abb3e5271d27e9` | [#12](https://github.com/OleksandrKiris/citronex-hydra-project/pull/12) draft | [39057041456](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39057041456) |
+| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b` | [#13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13) draft | [39059220706](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39059220706) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
-| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
+| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | [#9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9) draft | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
@@ -54,10 +54,20 @@ recruitmentbot. Остальной аккаунт не объявляется о
   три публичных runtime bytes/index/sw/manifest HTTP200 совпали с tested head,
   оба treeSHA=b5a7e68525f30f37c37c670e575fef52ddc3b04b. Носитель языка,
   физический телефон, полные процедуры и внешнее обучение не проверены.
-  Следующий PR12@9e2c2612 — последняя публичная площадка/сброс, не принят.
-  95 unit/54 browser PASS, но independent1280 PNG выявил P2: heading/Clear
-  сжаты наследуемой44px колонкой. Исправление и адресная layout-проверка у2,
-  старый green не означает приёмку.
+  PR12 принят отдельно на b8e5c00a/base0aaa, guarded mergeb820e85f:
+  последняя публичная площадка/сброс, текущий язык/fallback, storage-denied limits.
+  95 unit и CI39058694900 success;54 result entries/reportpassed,
+  120 readability measurements и просмотренные1280/320 PNG. P2 layout44px исправлен.
+  Промежуточный1ef5 безbase_tree_sha потерял26 файлов и отклонён; b8e5
+  восстановил26 exactblobSHA, net без удалений. Pages39059220706 success,
+  HTML117274B/SW3193B/manifest593B HTTP200 exacttestedbytes, treeSHA совпал.
+  Следующий WIP2 — PR13@cbb35d46/baseb820, копирование публичной ссылки;
+  автоматических отправок нет. CI39060090874 success, final artifact review pending.
+- Dragon PR9@810125c0/base79fdd78 сохраняет прежний WIP4 Turkish → EN fallback.
+  Accepted binary blobs сохранены. Старый green31270 имел BASE-cache gate,
+  не доказывающий HEAD-upgrade (issue81); de798 red выявил requestedtr loss
+  после reload. Automatic fallback/manual language choice разделены;
+  CI39060007333 success, final browser/offline independent review pending, draft.
 - Роли3/5/6/7/9/11 подготовили отдельные локальные commits/patches и адресные тесты.
   В передаче имеются исторические отказы отдельных GitHub write/PR операций без
   полного исходного ответа. Эти операции не повторялись другим инструментом.
