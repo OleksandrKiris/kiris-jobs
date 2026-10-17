@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import path, { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Explicit ownership boundary: never discover arbitrary folders or user data.
@@ -9,10 +9,10 @@ export const MODULES = Object.freeze([
   { id: 'coordinator', path: 'coordinator-demo', owner: 9 },
   { id: 'shift-duration', path: 'offline-tools/shift-duration', owner: 11 }
 ]);
-const inside = (root, target) => {
-  const rel = relative(root, target);
-  return rel !== '..' && !rel.startsWith('../') && !isAbsolute(rel);
-};
+export function inside(root, target, pathApi = path) {
+  const rel = pathApi.relative(root, target);
+  return rel !== '..' && !rel.startsWith(`..${pathApi.sep}`) && !pathApi.isAbsolute(rel);
+}
 function checkedPath(root, path) {
   const absolute = join(root, path);
   assert.ok(inside(root, realpathSync(absolute)), `Path escapes checkout: ${path}`);
