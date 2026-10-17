@@ -992,3 +992,31 @@
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-body { padding: 16px; }
   .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card-apply { padding: 0 16px 16px; }
 }
+/* Language-pack recovery stays in normal flow; it never hides vacancy controls. */
+.locale-load-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block: 16px;
+  padding: 16px;
+  color: #fff;
+  background: #173a2a;
+  border-radius: 14px;
+}
+.locale-load-notice p { flex: 1 1 260px; margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.locale-load-notice button {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #bdf24b;
+  color: #173a2a;
+  font: inherit;
+  font-weight: 700;
+  white-space: normal;
+  cursor: pointer;
+}
+.locale-load-notice button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.locale-load-notice button:disabled { opacity: .65; cursor: wait; }
