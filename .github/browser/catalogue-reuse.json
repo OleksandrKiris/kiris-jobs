@@ -1,0 +1,70 @@
+{
+  "head": "4179fb918180c63b99d88933ec0258086ae232fe",
+  "base": "62cb57883e617d67e54d8ba5b280f616ca651848",
+  "artifact": 12116086659,
+  "run": 39072907975,
+  "zipSHA256": "f80ca679016d6c5ce71f3ea6ba9c099efb98045a3ff4f689c151f6fd0ab5afb3",
+  "scope": "Original33 browser groups / unchanged public runtime;24SW red-green proof retained. Mandatory npm tests remain unchanged.",
+  "files": {
+    "index.html": {
+      "bytes": 14365,
+      "sha256": "856c53bb61e59ca7375cdfc0b731d7cae0b5bff76f41119bd829116c0e9d2463"
+    },
+    "sw.js": {
+      "bytes": 11742,
+      "sha256": "69bdeefc6536109b110b4050b884a4b60c653647ad35e697d309160e1cea0acb"
+    },
+    "assets/bootstrap.js": {
+      "bytes": 1979,
+      "sha256": "c8fa68baf93047b9a18ae48bd2b3ac722a5a5cfa2dabbad48a13a09393a31d24"
+    },
+    "assets/candidate.js": {
+      "bytes": 66136,
+      "sha256": "619eec002cf1d23ed3ab5cbc0fdddf51f063afa5fcdccc9e7bc11ef059db4710"
+    },
+    "assets/i18n.js": {
+      "bytes": 18615,
+      "sha256": "fa6b43aa1eecfcb7e509f4006429c89cdf54b29d3f6e1425fb04387b6c2384d8"
+    },
+    "assets/candidate-base.css": {
+      "bytes": 280050,
+      "sha256": "8912e5f77ec986a8ca5493d59c204cb4c0981d7434782fdb365a92173253f606"
+    },
+    "assets/clean.css": {
+      "bytes": 177239,
+      "sha256": "0da036f0eee1ab97420ea8ba908586f941878090f38c8fed18e1210f8a6cf393"
+    },
+    "assets/homepage.css": {
+      "bytes": 32979,
+      "sha256": "75a992d9c0fd680b1db5c003b9ac0c31b4d1ef9b41662ca072fd92ee3483c9d7"
+    },
+    "data/content.js": {
+      "bytes": 68198,
+      "sha256": "30d88f947f5647a44a7446e2b4335c6cbb0ea5126b3a9684511339910c5b3c58"
+    },
+    "manifest.webmanifest": {
+      "bytes": 1287,
+      "sha256": "0546e22dd60761f999aad33eb36a4a4099443c3247f967e1748f7d8b4b949f92"
+    },
+    "tools/coordinator/index.html": {
+      "bytes": 2161,
+      "sha256": "c4a0b566e37495c7a58a3394ede4bb99e8a1740a9b84a9a1c4eb22d63c16922d"
+    },
+    "tools/coordinator/model.js": {
+      "bytes": 2675,
+      "sha256": "c245ccc24b67dcb23e31185a8bf445d3358e4db383aebf732d794ee6554ab7a8"
+    },
+    "tools/coordinator/app.js": {
+      "bytes": 19230,
+      "sha256": "b0e6c859dabbe5f02a3776c15027f2539ef538909cfb0c35078bd05b614f0e0b"
+    },
+    "tools/coordinator/style.css": {
+      "bytes": 1955,
+      "sha256": "ff0a673c7625c9dbc2d4cad0feddd8b2340bcec44be4413761a7767f36663481"
+    },
+    "tools/coordinator/primserv-logo.svg": {
+      "bytes": 11391,
+      "sha256": "1a29802a4a0065ad84e8f8dbdd5bc46dcb9b67bbecb2190de6a99464feaf5157"
+    }
+  }
+}
