@@ -2,8 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { modules, run } from './local-prototypes.mjs';
+import { dirname, join, posix, win32 } from 'node:path';
+import { inside, modules, run } from './local-prototypes.mjs';
+
+for (const [name, api, root] of [['Windows', win32, 'C:\\fixture\\checkout'], ['POSIX', posix, '/fixture/checkout']]) {
+  test(`${name} containment rejects parents and siblings without rejecting children`, () => {
+    assert.equal(inside(root, root, api), true);
+    assert.equal(inside(root, api.join(root, 'report'), api), true);
+    assert.equal(inside(root, api.join(root, '..notes', 'report'), api), true);
+    assert.equal(inside(root, api.dirname(root), api), false);
+    assert.equal(inside(root, api.join(api.dirname(root), 'evidence'), api), false);
+    assert.equal(inside(root, `${root}-other`, api), false);
+  });
+}
+test('Windows containment rejects another drive and UNC share', () => {
+  assert.equal(inside('C:\\fixture\\checkout', 'D:\\evidence', win32), false);
+  assert.equal(inside('\\\\server\\share\\checkout', '\\\\server\\other\\evidence', win32), false);
+});
 
 function fixture(t) {
   const temp = mkdtempSync(join(tmpdir(), 'primserv-ci-fixture-'));
