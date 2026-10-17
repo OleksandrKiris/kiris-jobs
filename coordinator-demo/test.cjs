@@ -6,7 +6,77 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
-const {seedFixture}=require('./browser-fixtures.cjs');
+const {seedFixture,acceptanceStatus}=require('./browser-fixtures.cjs');
+
+function observedDocument(data,observe=false,mode='v1') {
+  const calls=[];
+  class Storage {
+    getItem(k){calls.push(['getItem',k]);return data.get(k)??null;}
+    setItem(k,v){calls.push(['setItem',k,v]);data.set(k,v);}
+    removeItem(k){calls.push(['removeItem',k]);data.delete(k);}
+  }
+  const area=new Storage(), browserWindow={localStorage:area};
+  const args={key:M.KEY,other:'fixture:other',mode,observe,
+    previous:JSON.stringify({version:1,statuses:{...M.initial(),'demo-02':'done'}})};
+  vm.runInNewContext('('+seedFixture.toString()+')(args)',{
+    args,window:browserWindow,localStorage:area,Storage,DOMException,
+    location:{href:'file:///fixture/index.html?lang=en'},document:{readyState:'loading'},
+    performance:{timeOrigin:1,now:()=>2,getEntriesByType:()=>[{type:'reload'}]}
+  });
+  browserWindow.CoordinatorDemo=M;
+  const model=browserWindow.CoordinatorDemo.create(area);
+  return {calls,area,model,window:browserWindow};
+}
+
+test('passive observer preserves exact storage operation sequence and real model state',()=>{
+  const control=observedDocument(new Map()), passive=observedDocument(new Map(),'passive');
+  control.model.set('demo-01','doing');passive.model.set('demo-01','doing');
+  assert.deepEqual(passive.calls,control.calls);
+  assert.deepEqual(passive.model.snapshot(),control.model.snapshot());
+  assert.equal(passive.window.__coordinatorObservedModel,passive.model);
+  assert.equal(control.window.__coordinatorObservedModel,undefined);
+  const evidence=passive.window.__coordinatorEvidence;
+  assert.equal(evidence.preSeedProbe,undefined);
+  assert.equal(evidence.navigation,'reload');
+  assert.equal(evidence.events[0].key,'primserv:acceptance:coordinator-seeded');
+  assert.equal(evidence.events[0].result,null);
+  assert.equal(evidence.events.at(-1).phase,'app');
+  assert.equal(evidence.events.at(-1).operation,'setItem');
+});
+
+test('explicit pre-seed observer adds exactly one labelled read, not an implicit flush fix',()=>{
+  const passive=observedDocument(new Map(),'passive'), active=observedDocument(new Map(),'preseed');
+  assert.equal(active.calls.length,passive.calls.length+1);
+  assert.deepEqual(active.calls.filter((_,i)=>i!==1),passive.calls);
+  assert.equal(active.window.__coordinatorEvidence.preSeedProbe.raw,null);
+  assert.equal(active.window.__coordinatorEvidence.preSeedProbe.marker,null);
+  assert.equal(active.window.__coordinatorEvidence.preSeedProbe.addedReads,1);
+  assert.deepEqual(active.model.snapshot(),passive.model.snapshot());
+});
+
+test('observations distinguish continuous, fresh and stale storage with identical v1 DOM possibilities',()=>{
+  const marker='primserv:acceptance:coordinator-seeded';
+  const raw=status=>JSON.stringify({version:1,statuses:{...M.initial(),'demo-01':status,'demo-02':'done'}});
+  for(const [kind,data,expected,writes] of [
+    ['continuous',new Map([[marker,'yes'],[M.KEY,raw('doing')]]),'doing',0],
+    ['fresh',new Map(),'todo',1],
+    ['stale',new Map([[marker,'yes'],[M.KEY,raw('todo')]]),'todo',0]
+  ]) {
+    const h=observedDocument(data,'preseed'),e=h.window.__coordinatorEvidence;
+    assert.equal(h.model.snapshot().statuses['demo-01'],expected,kind);
+    assert.equal(h.model.snapshot().statuses['demo-02'],'done',kind);
+    assert.equal(e.events.filter(x=>x.phase==='fixture'&&x.operation==='setItem'&&x.key===M.KEY).length,writes,kind);
+    assert.equal(e.initialModel.statuses['demo-01'],expected,kind);
+    assert.equal(e.preSeedProbe.raw,kind==='fresh'?null:raw(expected),kind);
+  }
+});
+
+test('continuing independent scenarios retains any failure and zero-test failure',()=>{
+  assert.equal(acceptanceStatus([]),'failed');
+  assert.equal(acceptanceStatus([{status:'passed'},{status:'failed'},{status:'passed'}]),'failed');
+  assert.equal(acceptanceStatus([{status:'passed'},{status:'unknown'}]),'failed');
+  assert.equal(acceptanceStatus([{status:'passed'}]),'passed');
+});
 
 function fixtureDocument(data,mode,previous) {
   // A new document has new prototypes/session storage, while local state survives.

@@ -34,12 +34,30 @@ for (const name of files) {
 report.runtimeBytes = report.resources.reduce((sum, file) => sum + file.bytes, 0);
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
-const { seedFixture } = createRequire(import.meta.url)('./browser-fixtures.cjs');
+const { seedFixture, acceptanceStatus } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const KEY = 'primserv:coordinator-demo:v1', OTHER = 'primserv:acceptance:unrelated';
 const initial = { version: 1, statuses: { 'demo-01': 'todo', 'demo-02': 'todo', 'demo-03': 'todo' } };
 const previous = JSON.stringify({ version: 1, statuses: { ...initial.statuses, 'demo-02': 'done' } });
 const fileURL = pathToFileURL(join(dir, 'index.html')).href;
-const focus = async (page, id) => assert.equal(await page.evaluate(() => document.activeElement.id), id);
+const readEvidence=()=>({
+  fixture:window.__coordinatorEvidence||null,model:window.__coordinatorObservedModel?.snapshot()||null,
+  focused:document.activeElement?.id,url:location.href,
+  dom:{summary:document.querySelector('#summary')?.textContent,storage:document.querySelector('#storage')?.textContent,
+    filter:document.querySelector('#filter')?.value,tasks:[...document.querySelectorAll('#tasks select')].map(x=>({id:x.id,value:x.value}))}
+});
+report.storageEvidence=[];
+report.observationProtocol={control:'Original storage operations and browser action order; no observer',
+  passive:'Wrap existing storage calls and retain real model; no added storage reads, but CPU/payload timing changes',
+  preseed:'Passive plus one explicitly labelled raw read after existing marker read',
+  failure:'Unobserved controls inspected only after the original assertion failed; never retried'};
+const collectEvidence=async(page,scenario,phase)=>report.storageEvidence.push({scenario:scenario.name,phase,...await page.evaluate(readEvidence)});
+const focus = async (page, id, scenario) => {
+  if(!scenario?.observe)return assert.equal(await page.evaluate(() => document.activeElement.id), id);
+  // Same existing evaluate call; larger returned payload, no added storage read.
+  const data=await page.evaluate(readEvidence);
+  report.storageEvidence.push({scenario:scenario.name,phase:'existing-focus-read',...data});
+  assert.equal(data.focused,id);
+};
 const fits = async page => assert.ok(await page.evaluate(() =>
   document.documentElement.scrollWidth <= innerWidth), 'No horizontal overflow');
 const ready = async page => {
@@ -54,7 +72,12 @@ try {
   for (const scenario of [
     { name: 'board-wide', width: 1280, mode: 'empty' },
     { name: 'board-narrow', width: 320, mode: 'empty' },
-    ...['v1', 'corrupt', 'future', 'denied-read', 'denied-write', 'denied-remove'].map(mode => ({ name: mode, width: 320, mode }))
+    ...['v1', 'corrupt', 'future', 'denied-read', 'denied-write', 'denied-remove'].map(mode => ({ name: mode, width: 320, mode })),
+    ...['passive','preseed'].flatMap(observe=>[
+      {name:'observed-wide-'+observe,width:1280,mode:'empty',observe},
+      {name:'observed-narrow-'+observe,width:320,mode:'empty',observe},
+      {name:'observed-v1-'+observe,width:320,mode:'v1',observe}
+    ])
   ]) {
     const viewport = { width: scenario.width, height: 900 };
     const context = await browser.newContext({ viewport });
@@ -63,7 +86,7 @@ try {
     context.on('request', request => { if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() }); });
     // Any attempted network request is blocked and fails the run, including GET.
     await context.route(/^https?:/, route => route.abort());
-    await context.addInitScript(seedFixture, { key: KEY, other: OTHER, mode: scenario.mode, previous });
+    await context.addInitScript(seedFixture, { key: KEY, other: OTHER, mode: scenario.mode, previous, observe:scenario.observe||false });
     await context.tracing.start({ screenshots: true, snapshots: true });
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
@@ -83,10 +106,11 @@ try {
         }
         await page.locator('#demo-01').focus();
         await page.keyboard.press('End'); await page.keyboard.press('Enter');
-        assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focus(page, 'demo-01');
+        assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focus(page, 'demo-01',scenario);
         await page.locator('#filter').selectOption('done');
         await page.locator('#language').selectOption('uk');
         await page.reload(); await ready(page);
+        if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#filter').inputValue(), 'done');
         assert.equal(await page.locator('#demo-01').inputValue(), 'done');
@@ -118,6 +142,7 @@ try {
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#fallback').isVisible(), false);
         await context.setOffline(false); await page.reload(); await ready(page);
+        if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
       } else {
         if (scenario.mode === 'v1') assert.equal(await page.locator('#demo-02').inputValue(), 'done');
         if (['corrupt', 'future'].includes(scenario.mode)) assert.match(await page.locator('#storage').innerText(), /preserved/);
@@ -133,13 +158,20 @@ try {
           await page.evaluate(() => sessionStorage.clear());
         }
         if (scenario.mode !== 'denied-read') {
-          const raw = await page.evaluate(key => localStorage.getItem(key), KEY);
+          let raw;
+          if(scenario.observe) {
+            // Reuse the existing getItem/RPC rather than adding a pre-reload read.
+            const capture=await page.evaluate(key=>({raw:localStorage.getItem(key),fixture:window.__coordinatorEvidence,
+              model:window.__coordinatorObservedModel?.snapshot()}),KEY);
+            raw=capture.raw;report.storageEvidence.push({scenario:scenario.name,phase:'existing-raw-read',...capture});
+          } else raw=await page.evaluate(key => localStorage.getItem(key), KEY);
           if (scenario.mode === 'corrupt') assert.equal(raw, '{broken');
           if (scenario.mode === 'future') assert.equal(raw, JSON.stringify({ version: 2, statuses: {} }));
           if (scenario.mode === 'denied-write') assert.equal(raw, previous);
           assert.equal(await page.evaluate(key => localStorage.getItem(key), OTHER), 'keep');
         }
         await page.reload(); await ready(page);
+        if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
         if (scenario.mode === 'v1' || scenario.mode === 'denied-remove') {
           assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
           assert.equal(await page.locator('#demo-02').inputValue(), 'done');
@@ -156,14 +188,27 @@ try {
     } catch (error) {
       report.scenarios.push({ ...scenario, viewport, status: 'failed', error: error.stack });
       await page.screenshot({ path: join(reportDir, `${scenario.name}-failure.png`), fullPage: true }).catch(() => {});
-      throw error;
+      if(scenario.observe)await collectEvidence(page,scenario,'failure-after-assertion').catch(()=>{});
+      else {
+        // Post-failure inspection cannot turn the already failed assertion green.
+        const data=await page.evaluate(()=>{
+          let storage;
+          try {storage={raw:localStorage.getItem('primserv:coordinator-demo:v1'),marker:localStorage.getItem('primserv:acceptance:coordinator-seeded')};}
+          catch(error){storage={error:error.name};}
+          return {storage,url:location.href,summary:document.querySelector('#summary')?.textContent,
+            tasks:[...document.querySelectorAll('#tasks select')].map(x=>({id:x.id,value:x.value}))};
+        }).catch(error=>({captureError:error.message}));
+        report.storageEvidence.push({scenario:scenario.name,phase:'control-post-failure-only',...data});
+      }
+      // Continue independent diagnostic scenarios, retaining this failure and exit 1.
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
       await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) });
       await context.close();
     }
   }
-  report.status = 'passed';
+  report.status = acceptanceStatus(report.scenarios);
+  if(report.status==='failed')process.exitCode=1;
 } catch (error) { report.status = 'failed'; report.error = error.stack; process.exitCode = 1; }
 finally {
   await browser?.close(); report.finished = new Date().toISOString();
