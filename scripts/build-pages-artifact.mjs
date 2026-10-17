@@ -49,12 +49,35 @@ export function inventory(root, { source = false } = {}) {
     }
   };
   walk(root);
-  return files;
+  return files.sort((a,b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
+}
+
+// Only these reviewed files may cross the local-module publication boundary.
+export const coordinatorRuntime = Object.freeze(['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg']);
+function publishedTools(src) {
+  const manifest = join(src, '.github/public-tools.json');
+  if (!existsSync(manifest)) return [];
+  for (const path of ['.github', '.github/public-tools.json', 'coordinator-demo']) {
+    if (lstatSync(join(src, path)).isSymbolicLink()) throw Error(`Symlink tool source: ${path}`);
+  }
+  const config = JSON.parse(readFileSync(manifest, 'utf8'));
+  if (JSON.stringify(config) !== '{"coordinator":true}') throw Error('Unknown public tool manifest');
+  if (existsSync(join(src, 'tools/coordinator'))) throw Error('Reserved generated tool path exists in source');
+  return coordinatorRuntime.map(name => {
+    const source = join(src, 'coordinator-demo', name);
+    if (!lstatSync(source).isFile() || lstatSync(source).isSymbolicLink()) throw Error(`Invalid tool resource: ${name}`);
+    const data = readFileSync(source);
+    return { path: `tools/coordinator/${name}`, bytes: data.length,
+      sha256: createHash('sha256').update(data).digest('hex') };
+  });
+}
+export function publicationInventory(src) {
+  return [...inventory(src, { source: true }), ...publishedTools(src)].sort((a,b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
 }
 
 export function verifyArtifact(source, destination) {
   const { src, dst } = roots(source, destination);
-  const expected = inventory(src, { source: true });
+  const expected = publicationInventory(src);
   const actual = inventory(dst);
   if (!expected.some(file => file.path === 'index.html')) throw new Error('Missing index.html');
   if (JSON.stringify(expected) !== JSON.stringify(actual)) {
@@ -66,13 +89,15 @@ export function verifyArtifact(source, destination) {
 export function buildArtifact(source, destination) {
   const { src, dst } = roots(source, destination);
   if (existsSync(dst)) throw new Error('Artifact destination must not exist; use a fresh path');
-  const files = inventory(src, { source: true });
+  const files = publicationInventory(src);
   if (!files.some(file => file.path === 'index.html')) throw new Error('Missing index.html');
   mkdirSync(dst);
   for (const file of files) {
     const target = join(dst, ...file.path.split('/'));
     mkdirSync(dirname(target), { recursive: true });
-    copyFileSync(join(src, ...file.path.split('/')), target);
+    const sourcePath = file.path.startsWith('tools/coordinator/')
+      ? 'coordinator-demo/' + file.path.split('/').at(-1) : file.path;
+    copyFileSync(join(src, ...sourcePath.split('/')), target);
   }
   return verifyArtifact(src, dst);
 }
@@ -90,3 +115,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     process.exitCode = 1;
   }
 }
+
