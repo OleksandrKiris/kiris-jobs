@@ -3,11 +3,12 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
-import { execFileSync, spawn } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { once } from 'node:events';
+import { staticOrigin } from './static-origin.mjs';
+import { acceptCoordinatorRefresh, TOOL_FILES } from './coordinator-refresh.mjs';
 
 assert.equal(process.env.GITHUB_ACTIONS, 'true', 'Use the authorized CI runner');
 const require = createRequire(import.meta.url);
@@ -37,21 +38,12 @@ for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candid
 const serveRoot = await mkdtemp(join(tmpdir(), 'primserv-browser-site-'));
 await symlink(artifact, join(serveRoot, 'kiris-jobs'), 'dir');
 const base = 'http://127.0.0.1:4173/kiris-jobs/';
-let server;
+const origin = staticOrigin(serveRoot);
 async function startServer() {
-  server = spawn(process.execPath, [join(checkout, 'scripts/serve.mjs'), '4173'], {
-    cwd: serveRoot, stdio: ['ignore', 'pipe', 'pipe']
-  });
-  await Promise.race([
-    once(server.stdout, 'data'),
-    once(server, 'exit').then(([code]) => { throw Error(`Server exited: ${code}`); }),
-    new Promise((_, reject) => setTimeout(() => reject(Error('Server startup timeout')), 10000).unref())
-  ]);
+  await origin.start();
 }
 async function stopServer() {
-  const exited = once(server, 'exit');
-  server.kill('SIGTERM');
-  await exited;
+  await origin.stop();
   await assert.rejects(fetch(base), 'The origin must really be unreachable during offline acceptance');
 }
 let browser;
@@ -424,6 +416,8 @@ try {
   // There must be no online tool visit/refresh after activation of the head SW.
   const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js'];
   const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
+  const headTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
+    [name, await readFile(join(artifact, 'tools/coordinator', name))])));
   const headCache = headFiles.get('sw.js').toString().match(/const CACHE_VERSION = "([^"]+)"/)[1];
   const baseWorker = execFileSync('git', ['show', `${report.base}:sw.js`]).toString();
   const baseCache = baseWorker.match(/const CACHE_VERSION = "([^"]+)"/)[1];
@@ -453,6 +447,12 @@ try {
     await ctx.tracing.start({screenshots:true,snapshots:true,sources:false});
     try {
       for (const file of upgradeFiles) await writeFile(join(artifact, file), execFileSync('git', ['show', `${report.base}:${file}`]));
+      const baseToolHashes = {};
+      for (const name of TOOL_FILES) {
+        const bytes = execFileSync('git', ['show', `${report.base}:coordinator-demo/${name}`]);
+        baseToolHashes[new URL('tools/coordinator/' + name, base).href] = sha256(bytes);
+        await writeFile(join(artifact, 'tools/coordinator', name), bytes);
+      }
       await page.goto(`${base}?lang=uk#jobs`); await ready(page);
       await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
       await page.locator('#job-search').fill('Siechnice');
@@ -464,6 +464,7 @@ try {
       await page.goto(base+'?lang=uk#jobs');await ready(page);
       const before=await toolSnapshot(page);
       assert.equal(before.length,5);assert(before.every(item=>!new URL(item.url).search));
+      for (const item of before) assert.equal(item.sha256, baseToolHashes[item.url], 'Base phase must use actual base tool bytes');
       assert.ok((await page.evaluate(()=>caches.keys())).includes(baseCache));
       await page.evaluate(async () => {
         localStorage.setItem('shortcut-unrelated', 'keep');
@@ -475,6 +476,7 @@ try {
       };
       ctx.on('request',observe);
       for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
+      for (const [name, bytes] of headTools) await writeFile(join(artifact, 'tools/coordinator', name), bytes);
       await page.evaluate(async () => { const registration = await navigator.serviceWorker.ready; await registration.update(); });
       await page.waitForFunction(async ({headCache,baseCache}) => {
         const keys = await caches.keys();
@@ -518,14 +520,19 @@ try {
       assert.deepEqual(await toolSnapshot(page),before);
       assert.deepEqual(errors,[]);
       report.results.push({scenario:'actual base complete tool → head shell → origin stopped/offline first tool entry, reload, languages, return and saved fictional statuses',
-        width,status:'passed',baseCache,headCache,before,after,onlineToolRequests});
+        width,status:'passed',baseCache,headCache,baseToolHashes,before,after,onlineToolRequests});
     } finally {
       for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
+      for (const [name, bytes] of headTools) await writeFile(join(artifact, 'tools/coordinator', name), bytes);
       if(originStopped)await startServer();
       await ctx.tracing.stop({path:join(reportDir,`demo-upgrade-${width}.zip`)});
       await ctx.close(); activePage = null;
     }
   }
+
+  // A changed tool must refresh atomically even if the worker bytes do not change.
+  await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
+    ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer });
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
     // Use a separate request context so the existing navigation SW fallback
@@ -547,7 +554,7 @@ try {
   process.exitCode = 1;
 } finally {
   await browser?.close();
-  server?.kill('SIGTERM');
+  await origin.stop();
   report.finished = new Date().toISOString(); report.blockedMutations = mutations;
   await writeFile(join(reportDir, 'acceptance.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));

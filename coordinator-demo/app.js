@@ -56,9 +56,14 @@
       }).catch(()=>{if(attempt!==offlineAttempt)return;clearTimeout(offlineTimer);offlineState='unavailable';renderPublished();});
   }
   const initialURL = new URL(location.href);
-  let requested = initialURL.searchParams.get('lang') || 'en';
+  // Keep a downloaded file's path and query stable: file localStorage is
+  // browser-defined and changing the document URL can select another area.
+  // A fragment carries view state without changing the file's storage address.
+  const fileView = location.protocol === 'file:'
+    ? new URLSearchParams(initialURL.hash.split('?').slice(1).join('?')) : null;
+  let requested = fileView?.get('lang') || initialURL.searchParams.get('lang') || 'en';
   let lang = M.language(requested);
-  let filter = initialURL.searchParams.get('status') || 'all';
+  let filter = fileView?.get('status') || initialURL.searchParams.get('status') || 'all';
   if (!['all', ...M.STATUSES].includes(filter)) filter = 'all';
   // Accessing localStorage itself can throw; no other keys are read.
   const storage = {
@@ -76,9 +81,17 @@
   function syncURL() {
     try {
       const url = new URL(location.href);
-      url.searchParams.set('lang', lang);
-      if (filter === 'all') url.searchParams.delete('status');
-      else url.searchParams.set('status', filter);
+      if (location.protocol === 'file:') {
+        const view = new URLSearchParams();
+        view.set('lang', lang);
+        // Always include 'all' so a legacy query status cannot override it.
+        view.set('status', filter);
+        url.hash = url.hash.split('?')[0] + '?' + view.toString();
+      } else {
+        url.searchParams.set('lang', lang);
+        if (filter === 'all') url.searchParams.delete('status');
+        else url.searchParams.set('status', filter);
+      }
       history.replaceState(history.state, '', url);
     } catch { /* Board still works without browser history. */ }
   }
