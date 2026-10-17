@@ -133,7 +133,8 @@ try {
       const offer = page.locator('[data-open-job="greenhouse-tomatoes"]');
       await offer.focus(); await page.keyboard.press('Enter');
       await page.locator('#job-page-title').waitFor();
-      await ready(page);
+      // Direct vacancy pages do not render the catalogue grid.
+      await page.waitForFunction(() => Boolean(window.PortalI18n));
       assert.match(page.url(), /vacancies\/greenhouse-tomatoes/);
       await fits(page);
       const form = page.locator('#direct-vacancy-content [data-hrappka-link]');
@@ -223,7 +224,10 @@ try {
   for (const path of ['apply/', 'apply/pdf/', 'manifest.webmanifest', 'sw.js', 'assets/primserv-logo.svg']) {
     assert.equal((await fetch(base + path)).status, 200, path);
   }
-  assert.deepEqual(mutations, []);
+  // Existing aggregate page-view telemetry is intercepted, never sent.
+  // Any business submission or other mutation attempt still fails acceptance.
+  assert.deepEqual(mutations.filter(request => request.method !== 'POST'
+    || request.url !== 'https://candidate-form-flow.lovable.app/api/public/funnel'), []);
   report.status = 'passed';
 } catch (error) {
   report.status = 'failed'; report.error = error.stack;
