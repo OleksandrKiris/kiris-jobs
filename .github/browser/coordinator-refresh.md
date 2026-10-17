@@ -1,3 +1,13 @@
+## Addressed source-review P2 on beb
+
+A child nonzero exit or timeout is rejected BEFORE reading its JSON; stale
+passed JSON cannot authorize success. Zero exit AND a passed current report
+remain mandatory. The published62cb tuple is kept atomic while event base
+is separate provenance, including after accepted NEW68 becomes the base.
+Isolated regression entry points extracted from the reviewed beb predicates
+produced15/18PASS with3red cases; their log/source are preserved. This is not
+a rerun of beb browser CI or actual future consumer acceptance.
+
 # Shared publication guard — issue87
 
 The current guard uses the real Pages publisher's verifyArtifact and destination
@@ -21,9 +31,11 @@ The actual five staged coordinator hashes are classified BEFORE any overlay.
 Accepted NEW tuple: mandatory19 uses the captured actual HEAD buffers; the
 external candidate loader is never called. Verified OLD tuple: a separate
 explicitly labelled composite19 may still use pinned candidatec896, while the
-actual OLD receipt is retained. Unknown/mixed tuples fail closed. The refreshed
-legacy phase uses exact event base as published input, so worker equality is
-recorded honestly; no fresh worker-upgrade claim follows from unchanged bytes.
+actual OLD receipt is retained. Unknown/mixed tuples fail closed. The legacy
+phase keeps the reviewed published62cb ref/body/hash tuple atomic, separately
+from event base. After NEW68 becomes event base, OLD hashes are never attached
+to that NEW ref. Worker equality/upgrade is reported for the actual pinned
+inputs; it is not relabelled as an event-base upgrade.
 Full manifests/digests, actual head/checkout, historical receipt, optional full
 current report and19 current case results remain separate. Original staging
 is restored and verified against Git/publication after the test phases.

@@ -94,6 +94,23 @@ export function toolInput(mode, actualFiles, loadCandidate) {
   return mode === 'actual-staged-head' ? { files: actualFiles } : loadCandidate();
 }
 
+// Process success and reported assertions are separate mandatory conditions.
+// A passed or stale JSON is never authority for a failed/timeout child.
+export function assertFullCurrentResult(failure, report) {
+  assert.ok(failure == null, 'Full-current child must exit0; process failure: ' +
+    (failure?.code || failure?.status || failure?.message || 'unknown'));
+  assert.equal(report?.status, 'passed', report?.error || 'Missing passed child report');
+}
+
+export function transitionForTarget(reference, { head, base, hashes, mode }) {
+  for (const ref of [head, base, reference.published.ref, reference.target.ref]) assert.match(ref, /^[0-9a-f]{40}$/);
+  // Keep the reviewed historical ref and hashes atomic. Event base may already
+  // contain NEW tools after their release; it is independent provenance.
+  return { ...reference, eventBase: base,
+    published: { ...reference.published, hashes: { ...reference.published.hashes } },
+    target: { ref: mode === 'actual-staged-head' ? head : reference.target.ref, hashes } };
+}
+
 export function publicationReuse(reference, current) {
   const before = new Map(reference.map(x => [x.path, x.blob]));
   const after = new Map(current.map(x => [x.path, x.blob]));

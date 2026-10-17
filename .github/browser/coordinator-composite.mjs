@@ -8,7 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
-import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput } from './catalogue-scope.mjs';
+import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
 import { acceptCoordinatorHTTP } from './coordinator-http.mjs';
 import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, publishedToolBytes, TOOL_FILES } from './coordinator-refresh.mjs';
 
@@ -27,7 +27,7 @@ const report = {
   limits: ['Desktop Chromium; narrow viewport is not a physical phone.',
     'External services are blocked; HRappka delivery and Telegram are not tested.',
     'Coordinator offline tests disable the browser network and stop the origin server; a cold entry has no cached tool.',
-    'The actual base worker downloads the tool before upgrading to the head worker; subsequent tool entry is offline with the origin stopped.']
+    'Pinned historical published worker/tool input is separate from event base; subsequent tool entry is offline with the origin stopped.']
 };
 for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candidate.js',
   'assets/i18n.js', 'assets/candidate-base.css', 'assets/clean.css', 'assets/homepage.css',
@@ -127,14 +127,20 @@ try {
       execFileSync(process.execPath, [new URL('./catalogue-full.mjs', import.meta.url).pathname, '--current-only'],
         { env: { ...process.env, BROWSER_REPORT: fullDir }, timeout: 300000, maxBuffer: 8 * 1024 * 1024 });
     } catch (error) { failure = error; }
+    if (failure) {
+      report.fullCurrentCatalogue = { status: 'process-failed', processSucceeded: false,
+        exitCode: failure.status ?? null, code: failure.code || null, error: failure.message };
+      // Reject BEFORE reading any possibly stale passed JSON.
+      assertFullCurrentResult(failure, undefined);
+    }
     const full = JSON.parse(await readFile(join(fullDir, 'acceptance.json'), 'utf8'));
-    report.fullCurrentCatalogue = { status: full.status, head: full.head, base: full.base,
+    report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
       checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), error: full.error || null };
     assert.equal(full.scope, 'full-current-catalogue-core; historical tool overlays excluded');
     assert.equal(full.head, report.head); assert.equal(full.checkout, report.checkout);
-    assert.equal(full.status, 'passed', full.error || failure?.message);
+    assertFullCurrentResult(failure, full);
     assert.ok(report.fullCurrentCatalogue.passed >= 16, 'All actual catalogue and coordinator core cases must execute');
     for (const name of TOOL_FILES) assert.equal(full.files['tools/coordinator/' + name].sha256, actualHashes[name]);
     assert.equal(captureStagedPublication(checkout, artifact, report.checkout).sha256, staged.sha256,
@@ -143,12 +149,11 @@ try {
 
   const candidate = toolInput(mode, originalTools, () => publishedToolBytes(JOINT_TOOL_TRANSITION.target, false));
   const targetHashes = Object.fromEntries([...candidate.files].map(([name, bytes]) => [name, sha256(bytes)]));
-  const transition = { ...JOINT_TOOL_TRANSITION,
-    published: { ...JOINT_TOOL_TRANSITION.published, ref: report.base },
-    target: { ref: mode === 'actual-staged-head' ? report.head : JOINT_TOOL_TRANSITION.target.ref, hashes: targetHashes } };
+  const transition = transitionForTarget(JOINT_TOOL_TRANSITION,
+    { head: report.head, base: report.base, hashes: targetHashes, mode });
   report.compositeReceipt = {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
-    currentStagedHead: report.currentStagedHead,
+    currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
       workerBlob: '50ef25e6f86f4d95897e94bb391896d8d22141c6', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
     candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',

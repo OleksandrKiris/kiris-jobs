@@ -42,7 +42,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { buildArtifact, coordinatorRuntime } from '../../scripts/build-pages-artifact.mjs';
-import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput } from './catalogue-scope.mjs';
+import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
 const hash = value => createHash('sha256').update(value).digest('hex');
 function publicationFixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'primserv-scope-regression-'));
@@ -172,4 +172,36 @@ test('NEW target keeps captured HEAD buffers and never calls the external overla
   for (const name of TOOL_FILES) assert.equal(candidate.files.get(name), actual.get(name));
   const overlay = toolInput('verified-old-with-explicit-candidate-overlay', actual, () => { calls++; return { files: new Map() }; });
   assert.equal(calls, 1); assert.notEqual(overlay.files, actual);
+});
+
+
+for (const reason of ['nonzero exit', 'timeout']) test('full-current rejects ' + reason + ' even with a stale passed JSON', () => {
+  const failure = new Error('Fictional child ' + reason);
+  failure.status = reason === 'timeout' ? null : 1;
+  if (reason === 'timeout') failure.code = 'ETIMEDOUT';
+  assert.throws(() => assertFullCurrentResult(failure, { status: 'passed', results: [] }), /child|process|exit|timeout/i);
+});
+
+test('full-current requires both successful process and passed report', () => {
+  assert.doesNotThrow(() => assertFullCurrentResult(undefined, { status: 'passed' }));
+  assert.throws(() => assertFullCurrentResult(undefined, { status: 'failed', error: 'Fictional assertion failure' }));
+  assert.throws(() => assertFullCurrentResult(undefined, undefined));
+});
+
+test('after NEW is accepted as event base, pinned published ref/body/hashes stay one consistent tuple', t => {
+  const f = publicationFixture(t), oldRef = f.git(['rev-parse', 'HEAD']);
+  for (const name of coordinatorRuntime) if (name !== 'primserv-logo.svg') f.write('coordinator-demo/' + name, 'new-' + name);
+  const newBase = f.commit();
+  const reference = { id: 'fictional-transition', published: { ref: oldRef, hashes: f.oldHashes },
+    target: { ref: newBase, hashes: f.acceptedHashes } };
+  const transition = transitionForTarget(reference, { head: newBase, base: newBase,
+    hashes: f.acceptedHashes, mode: 'actual-staged-head' });
+  const actualPublishedBodies = new Map(TOOL_FILES.map(name => [name, Buffer.from(f.git(['show',
+    transition.published.ref + ':coordinator-demo/' + name]))]));
+  assert.doesNotThrow(() => assertToolManifest(actualPublishedBodies, transition.published.hashes),
+    'An event-base change must not falsely compare NEW bodies with historical OLD hashes');
+  assert.equal(transition.published.ref, oldRef);
+  assert.deepEqual(transition.published.hashes, f.oldHashes);
+  assert.equal(transition.eventBase, newBase, 'Event base remains separate provenance');
+  assert.equal(transition.target.ref, newBase);
 });
