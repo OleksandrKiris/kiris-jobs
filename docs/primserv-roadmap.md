@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (17 октября, 22:48 UTC). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (17 октября, 23:08 UTC). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -68,7 +68,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 17.10.2026
 
-Последняя сверка main: `3ad9f93f66776613443f767403cd239c4678d605`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77.
+Последняя сверка main: `374d5bddbd4630352f75e902536a11c2175c5411`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60.
 Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
 Ранее приняты Dragon9/10; текущий Dragon main после PR11 — `95ba121c42e82582a9efdff0d4b4b38e577e7840`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
@@ -651,21 +651,21 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | PR60@cba/base3ad: source-delta и current19 runtime CLEAR, оба CI SUCCESS | Следующий отдельный guard10; исторические33/48 на4179 и red697 не смешаны с current19 |
-| 2 | HYDRA14@efbb5a8:136unit/66current-browser, независимые source/runtime/peer4 CLEAR | Готов к отдельному guard;36 URL-сочетаний проверены VM, внешний Dragon браузером не открывался; ещё не опубликован |
+| 1 | PR60 принят374d5bdd; Pages39077298495/Backend39077298482 SUCCESS,26public assets exact | Новый узкий WIP общего browser guard:68 отклонён как новый tool,74/86 как непубличный diff; до исправления общий кандидат не ready |
+| 2 | HYDRA14@efbb5a8:136unit/66current-browser, независимые source/runtime/peer4 CLEAR | Готов, не опубликован; новый peer-review4: baseline36language×location и36URL-priority подтверждают gap старых9 языков; feature-head ещё нужен |
 | 3 | Local58005b9f,182unit; независимые14/14 HTTP200 exact bytes | IAB HTTP bootstrap timeout; разрешённая инвентаризация не нашла другого HTTP-браузера; UI/offline NOTRUN |
-| 4 | Dragon11@5ac принят95ba121c; Pages39075670274 SUCCESS,8public assets exact | ka/tr/hy текст, выбор площадки и public-copy опубликованы; WIP закрыт, проверка носителем отдельно |
+| 4 | Dragon11 опубликован95ba121c; новый PR12@80162bbb реализует all12 picker/return/reset | CI/unit этап успешен по owner; browser и независимые source/runtime/peer проверки ещё в работе, функция не опубликована |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | PR68@c896:8green checks,6×24PASS/72samples; prerequisite60@cba независимо CLEAR | Сначала выпуск60, затем одна интеграция main и свежая приёмка68; материалы пока не опубликованы |
-| 10 | Новый проход22:32: Dragon11 опубликован95ba; Pages/8bytes PASS | Тот же docs PR84; один merge использован, следующая очередь60→68 |
+| 9 | PR68@44383dc/base374d:14owned paths и412tree entries сохранены; Backend и6native checks SUCCESS | Catalogue39077510467 FAIL до первого case: старый baseline tool-hash; mandatory prototypes SKIPPED/NOTRUN. Материалы не опубликованы |
+| 10 | Проход22:56: PR60 опубликован374d, post-check26assets PASS; один guard использован | Тот же PR84 готовится как общий кандидат68+86+74+fix1; импорт только проверенных commits, один свежий combined CI и будущий guard |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | PR86@b564/base3ad: localGET materials,68CI tests; independent14 source/15 runtime CLEAR | Готов к отдельному guard;14новых тестов выполнены независимо, backend не merged/deployed |
+| 12 | PR86@173f1b28/base374d: прежние5source blobs сохранены; fresh Backend39077586323/68tests SUCCESS | Catalogue39077586327 FAIL до cases:5non-public backend/docs paths; mandatory prototypes SKIPPED/NOTRUN. Не merged/deployed |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Company-boundary исследован source-only,10 acceptance-векторов NOTRUN; docs84 review завершено | Чистого canonical company-provider нет: context-guard отложен, новый framework/validator не создаётся |
-| 15 | PR85 принят; QA68@c896 завершён:6×24PASS/72samples, bounded telemetry141/156 | Только новая подтверждённая неисправность/новый head потребуют адресной проверки; неизменённые CI не повторять |
+| 14 | PR74@fd9a721/base374d:2integration paths, matrix blob сохранён, literal privacy.html owner1;20tests PASS | Catalogue39077558915 FAIL до cases на2docs; native NOTSCHEDULED. Company-context без canonical provider отложен,10векторов NOTRUN |
+| 15 | Exact failed68 log: line107 old receipt vsactual new staged coordinator, results=[];74/86 scope guards отдельно атрибутированы | Один independent runtime/regression review будущего fix1; не повторять старые audits/ZIP/CI, новый issue ведёт author1 |
 
 PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
 Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
@@ -846,6 +846,56 @@ publication не выполнялись, frontend online-adapter выключе�
 в принятом core нет чистого canonical company-provider, callback-spy или
 существующий ORM importer не подтверждают такую интеграцию. Десять векторов14
 сохранены как NOTRUN, новый параллельный backend framework не создаётся.
+
+### Выпуск каталога и устранение общего препятствия — 18 октября, 01:08
+
+По очередному прямому поручению пользователя PR60 выпущен с guard exact
+`cba1c2fc4acd753c5df6114e030b4a4a4d85c2f1` / base3ad9f93f →
+`374d5bddbd4630352f75e902536a11c2175c5411`. Tested/merged tree
+`d38641c8cadf5f72c960fa2e2a2d2fe63c90dc3a` совпал. Свежие обязательные CI и
+независимые source/current19 browser proofs проверены до merge; исторические
+33/48 на4179 имеют отдельное происхождение. [Pages39077298495](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39077298495)
+и [Backend39077298482](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39077298482)
+SUCCESS. После завершения публикации26уникальных публичных файлов вернули
+HTTP200 и точные принятые bytes/SHA256/Git blobs:21изменённый файл оболочки/
+вакансий и5прежних runtime coordinator. Материалы68 этим выпуском не опубликованы;
+локальный backend не развёрнут. Literal `privacy.html` передан owner1 только
+для существующего frontend bootstrap scope; юридическая экспертиза не заявлена.
+
+Владельцы9/12/14 один раз обычным merge включили новый main в прежние PR68/86/74.
+Чужие принятые blobs и собственные manifests сохранены, конфликтов нет.
+Новые Catalogue failures подтверждены до первого browser case:
+68@44383dc падает на сравнении actual нового coordinator со старым baseline
+receipt4179 (line107);74@fd9a721 и86@173f1b28 — на line115, которая ошибочно
+считает весь non-browser diff публичным и допускает лишь три старых backend77
+пути. Это дефект применимости общего harness, а не доказанная неисправность
+функций материалов/API. Для68 все6native checks и Backend успешны отдельно;
+для86 fresh68backend tests PASS; mandatory prototype steps после раннего
+Catalogue failure пропущены. Старый зелёный CI не выдан за готовность новых head.
+
+Владелец1 исправляет одну общую причину отдельным узким WIP;15 проверяет
+регрессию, независимый source-reviewer проверяет границы reuse. Защита
+исторических33 должна опираться на реально публикуемые неизменные bytes,
+текущие19 — на настоящий staged candidate. Простая замена хешей, отключение
+assertions и добавление частных исключений для каждого PR не принимаются.
+Готовые части собираются обычным Git merge в существующем PR84 с отдельными
+manifests и владельцами. После исправления требуется свежая приёмка общего
+head; следующий guarded merge будет отдельным проходом. Это убирает очередь
+отдельных docs-only выпусков и сохраняет один guard на проход. Новый PR той же
+роли и новые расписания не создаются.
+
+Новый пользовательский срез Dragon: единый выбор/смена/сброс площадки для всех
+12языков. Независимые36language×location и36URL-priority baseline fixtures
+подтвердили, что на опубликованном95ba picker и last-site доступны только
+ka/tr/hy, а явного reset нет. Роль4 реализовала функцию в одном draft
+[Dragon PR12](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/12),
+head `80162bbb3b01c8d41734380de13ead2b08bd3910` / base95ba. Первый CI выявил
+потерю кнопки возврата после reload с полностью запрещённым storage; автор
+сохранил failure, исправил причину и добавил12регрессий. Текущий browser job
+ещё идёт; независимые source/peer2 проверки нового head начаты. Девять
+существующих аудио, URL-priority, optional storage,
+sanitized public-copy и отсутствие autoplay остаются критериями приёмки.
+Код и авторские проверки ещё не означают завершённую приёмку или публикацию.
 
 ### История очереди — ранняя сверка 17.10.2026, не задания к повтору
 
