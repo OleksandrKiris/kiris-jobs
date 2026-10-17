@@ -3,7 +3,8 @@
 Локальный поиск одного материала с источником, Russian fallback и read-only
 snapshot/mock описан в [журнале](../docs/platform/materials-slice-20261017.md).
 PR68 возобновлён обычным merge принятого main `54b597f` (PR76). Локально проходят
-46 тестов, включая fragment/native-profile совместимость, и 16 сравнений с
+47 тестов, включая fragment/native-profile совместимость и cleanup при отказе
+route/tracing/newPage setup, и 16 сравнений с
 принятым контрактом `bf0fd233`. Harness сохраняет 14 controls и два настоящих
 закрытия/открытия native profile без storage import/replay. Новый exact head/CI
 фиксируется в PR68. Успех конкретного сценария не устанавливает универсальную

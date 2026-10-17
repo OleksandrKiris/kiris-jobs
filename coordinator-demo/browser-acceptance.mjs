@@ -6,7 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createFileProfile } from './browser-profile.mjs';
+import { withFileProfile } from './browser-profile.mjs';
 
 if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Run only in the approved GitHub Actions acceptance job. No local browser launch.');
 const { PLAYWRIGHT_PACKAGE, BROWSER_REPORT, TESTED_HEAD, TESTED_BASE } = process.env;
@@ -80,7 +80,7 @@ try {
     ])
   ]) {
     const viewport = { width: scenario.width, height: 900 };
-    const profile = await createFileProfile(chromium, viewport);
+    await withFileProfile(chromium,viewport,async profile=>{
     const context = profile.context;
     browser = context.browser();
     report.browser = `Chromium ${browser.version()}`;
@@ -229,15 +229,15 @@ try {
       // Continue independent diagnostic scenarios, retaining this failure and exit 1.
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
-      try { await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) }); }
-      finally { await profile.dispose(); }
+      await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) });
     }
+    });
   }
   // Mandatory durability checks: restart the browser with its native profile,
   // without an init script/seed, storageState(), or any test-side state write.
   for (const width of [1280, 320]) {
     const name = `profile-restart-${width}`, viewport = { width, height: 900 };
-    const profile = await createFileProfile(chromium, viewport);
+    await withFileProfile(chromium,viewport,async profile=>{
     const requests = [], errors = [];
     let context = profile.context;
     const prepare = async () => {
@@ -292,9 +292,9 @@ try {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
-      try { if (tracing) await context.tracing.stop({ path: join(reportDir, `${name}-after-trace.zip`) }); }
-      finally { await profile.dispose(); }
+      if (tracing) await context.tracing.stop({ path: join(reportDir, `${name}-after-trace.zip`) });
     }
+    });
   }
   report.status = acceptanceStatus(report.scenarios);
   if(report.status==='failed')process.exitCode=1;

@@ -48,13 +48,18 @@ malformed and over32768-byte responses are refused. HTML uses textContent; CSP
 connect-src 'none' remains. Search is bounded to120 characters, never sent or put
 in a URL. Future GET /api/v1/materials/ is not claimed available.
 
-46/46 own Node tests pass including accepted native-profile/fragment regressions, source text/date,
+47/47 own Node tests pass including accepted native-profile/fragment regressions, source text/date,
 alias/fallback, search/mode UI handlers, no-match, negative responses and storage.
 `node coordinator-demo/contract-parity.cjs`
 passes exact fixture and16 combinations8languages x limits1/20 against actual
 Python mock and both frontend readers in the merged accepted contract tree.
 Another role checkout was not modified.
 Syntax and git diff --check pass. Exact-head CI/browser results belong in PR body.
+
+Profile lifecycle setup is inside withFileProfile ownership in both runner loops:
+route/tracing.start/newPage failures close context and remove the allocated temp
+directory. A pure fake-context regression checks all three setup failures without
+launching a real browser. The fixture/storage/profile reopen behavior is retained.
 
 Browser runner retains14 accepted controls and2 real native-profile restarts,
 CI-only guard/no storage replay, and adds mode equality/search/no-match/aliases

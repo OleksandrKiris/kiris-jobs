@@ -36,6 +36,23 @@ test('file profile launch failures remove the newly allocated directory',async()
   assert.equal(fs.existsSync(directory),false);
 });
 
+test('profile ownership cleans directory when route, tracing or page setup fails',async()=>{
+  const {withFileProfile}=await import('./browser-profile.mjs');
+  assert.equal((read('browser-acceptance.mjs').match(/await withFileProfile\(/g)||[]).length,2);
+  assert.doesNotMatch(read('browser-acceptance.mjs'),/const profile = await createFileProfile/);
+  for(const phase of ['route','tracing','newPage']) {
+    let directory,closes=0;
+    const fail=stage=>{if(phase===stage)throw Error(stage+' setup failed');};
+    const context={async close(){closes++;},async route(){fail('route');},
+      tracing:{async start(){fail('tracing');}},async newPage(){fail('newPage');}};
+    const chromium={async launchPersistentContext(dir){directory=dir;return context;}};
+    await assert.rejects(withFileProfile(chromium,{width:320,height:900},async profile=>{
+      await profile.context.route();await profile.context.tracing.start();await profile.context.newPage();
+    }),new RegExp(phase+' setup failed'));
+    assert.equal(closes,1,phase);assert.equal(fs.existsSync(directory),false,phase);
+  }
+});
+
 test('file profile restart failures still allow cleanup',async()=>{
   const {createFileProfile}=await import('./browser-profile.mjs');
   let launches=0;
