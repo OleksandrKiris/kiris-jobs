@@ -64,8 +64,8 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 17.10.2026
 
-Последняя сверка main: `f89e0e4a3bf0a58714de0883970e6569c78e318d`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78.
-Отдельными проходами приняты HYDRA11/12, main `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b`.
+Последняя сверка main: `558e6e75e85734e1895b323094d47a43a8792fde`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83.
+Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
 Следующим проходом принят Dragon9, main `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
@@ -304,6 +304,15 @@ success; tested/merged tree совпали. Семь public runtime assets HTTP2
 побайтно совпали с tested head; упаковка переносит пять исходников из
 `coordinator-demo/` в `tools/coordinator/`. Django этим merge не опубликован.
 
+Аудит 15 направлений завершил приёмку [HYDRA13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13):
+guardcbb35d46/baseb820 → merge533360d7, tested/merged tree594df011 совпал.
+Независимые99unit/66browser entries/6current PNG относятся к этому head.
+Pages39067949384 success; HTML/SW/manifest HTTP200 exact-tested bytes.
+Публичная ссылка на площадку/effective язык копируется явным действием;
+при отказе API доступен выделяемый readonly URL. Реальный OS clipboard не проверен.
+Для внешнего PR83/main558 также завершён post-check: Backend39065923209,
+Pages39065923321 success, семь public runtime bytes совпали с tested d4db033a.
+
 Новый gate1 в PR60@40edbe38 доказал18 прежних+10 warm browser случаев:
 каждый из пяти ресурсов ×1280/320, реальные socket cuts, старые5 hashes/одна
 generation/progress, восстановление нового пакета и offline после stop origin.
@@ -475,14 +484,14 @@ PR68 просмотра материалов9 возобновлён в том �
 Контракт14 PR67 закрыт после отдельной приёмки.
 Перед действием перечитать их head/CI и проверить совместный результат с новым main.
 Функциональные изменения не принимать по старой зелёной версии после нового push.
-HYDRA PR11/12 приняты и опубликованы, guard/post-check выше. Следующий единственный
+HYDRA PR11/12/13 приняты и опубликованы, guard/post-check выше. Завершённый
 WIP2 — [HYDRA PR13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13),
 headcbb35d46/baseb820: передача публичной ссылки на выбранную площадку/язык, без персональных
 данных и автоматических отправок, с ручным выделяемым URL при отказе clipboard.
 CI39060090874 success; независимая проверка exact-head завершена:
 99 unit,66 entries (54 прежних+12 clipboard), шесть current PNG просмотрены,
 scope/tree/hashes сохранены. Clipboard outcomes смоделированы; реальный OS clipboard
-не проверен. PR13 frozen/draft, не merged/не опубликован; следующий свежий guard отдельно.
+не проверен. PR13 merged533360d7/Pages39067949384/три live bytes подтверждены.
 Предыдущий дефект layout и случайные удаления исправлены до приёмки12;
 исторические9e2c/1ef5 proof сохранены отдельно, не названы принятыми head.
 Существующий WIP4 завершён [Dragon PR9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9),
@@ -625,10 +634,67 @@ basef89e0e4, меняет только fixture/acceptance/tests/workflow/docs. A
 и шесть fixed reports16/16 прошли, включая native2. Mandatory Catalogue39063711982
 FAILURE позже в shift-duration/corrupt после reload; последующие future/denied
 сценарии не запускались. Owner11 получил адресный разбор этого случая.
-PR83 не принят; независимое source review и общий gate остаются обязательными.
-Source review clear относится только к46209753. Последующая fresh metadata уже
-показала headd4db033a; он включает новый срез calculator fixture и требует
-своих delta review/CI. Старые42unit/6×16 и red сохраняются как история462.
+На историческом head46209753 PR83 ещё не был принят: source review и общий gate тогда оставались обязательными.
+Source review clear46209753 не переносился автоматически на d4db033a.
+Последующая проверка d4db завершена: independent source/gate clear и семь rawlogs
+exact head/base — mandatory и6fixed jobs имеют16coordinator+8calculator PASS;
+matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. Старые462red сохранены.
+
+### Очередь и исполнение после аудита всех 15 направлений
+
+Это текущий срез очереди; ниже остаётся история проверенных head. Число тестов
+не заменяет пользовательскую, контрактную и публикационную готовность.
+
+| Роль | Подтверждено | Один оставшийся результат / зависимость |
+| --- | --- | --- |
+| 1 | PR60@21d0f22f: cold-body fix и прежний33-case public gate подготовлены | Shared preflight15; затем current public old5/new5 gate с материалом68 |
+| 2 | HYDRA13 принят533360d7; Pages/3актива проверены | WIP завершён; следующий полезный срез из этой очереди |
+| 3 | Local58005b9f,182unit; browser timeout до navigation | Одна доступная approved-browser приёмка; remote отказ отдельно |
+| 4 | Dragon10@6cb: independent153unit/17browser/6PNG | Отдельный слот10, frozen head |
+| 5 | Local0c099a6,181unit+author UI; manifest исправлен на22paths | CI-browser matrix/independent acceptance и разрешённая remote передача |
+| 6 | Local742435d9,176Node20+author UI/upgrade; bundle сверён | Independent local acceptance; прежний remote refusal не снят |
+| 7 | Local843c40d,208unit+author UI/upgrade; replay tree9f92 | Independent local acceptance; exact IDG6 не повторять |
+| 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
+| 9 | PR68@cc2/base558: mandatory green, functional16 в обеих версиях | Chromium156 histogram unavailable: capability/gate review; public gate1 |
+| 10 | PR78/внешнее83 проверены; audit обновляет тот же PR84 | Готовая очередь перед новым WIP; один guarded merge и post-check |
+| 11 | Local1f087fe/base558:26unit,6/6ZIP runtime exact | Combined browser gate; новый file-protocol policy отказ отдельно |
+| 12 | PR77@d2cbb0fb/base558 READY; оба exact CI success,3 пути прежние | Свежий guard10; не повторять54+8 на unchanged serializer |
+| 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
+| 14 | PR74@ada95214: mandatory green, matrix preflight failure | Общий fix15, не новый параллельный fixture repair |
+| 15 | Preflight60/74 локализован до browser | Review существующего PR85@af008c86; второго автора/PR нет |
+
+PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
+Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
+recovery доказан fixture, не live. Нужны свежий guard10 и один affected consumer.
+Queue85 →77/Dragon10;60/68 получают слот после своих конкретных gates. Готовый77
+не ждёт универсального объяснения file-storage. Исторический red не является
+текущим результатом нового head.
+
+Matrix68 на Chromium156: functional16 PASS, но histogram unavailable даёт
+diagnostic gate FAIL; calculator там NOTRUN. Это не preflight85 и не потеря задачи.
+Owner9/15 готовят capability/contract review; обязательные gates ради green не снимаются.
+
+На WIP назначаются один автор, один source-reviewer и один runtime-verifier.
+Один current manifest содержит repo/head/base/runtime hashes, proof/команды/результат,
+author/independent attribution, один remaining gate/его owner и точный refusal.
+История отдельно; parent получает один consolidated handoff по head/готовности/блокеру.
+Unchanged не вызывает повторный CI, ZIP download, полный audit или уведомление.
+Готовый автор не начинает новый срез до приёмки. Тяжёлых local jobs одновременно
+не более2, browser session1: это протокол поручений, не установленный глобальный lock.
+Единственный heartbeat primserv-15 сохранён без изменения расписания; active/dispatch
+не являются выполнением. Повторно не требовать у пользователя отсутствующие originals.
+
+К десяти CI-путям15 вручную добавлен `.github/workflows/offline-file-fixture-regression.yml`.
+Будущие `coordinator-storage-comparison.yml`/`coordinator-storage-init-probe.yml`
+в той же папке назначены15, но отсутствуют в main558 и не импортируются из82.
+Module fixtures9/11 и browser1 сохраняют владельцев. Existing external author85
+завершает свой уже открытый срез;15 независимо ревьюит, не пишет конкурента.
+
+Отдельные10 standalone Django-приложений1.6 сохраняют своего владельца. Их metadata
+2538PASS/391SKIP не являются общей многокомпанейной production-платформой. Перед
+стыком нужны capability/skip-reason matrix и existing primserv.companyv1 boundary;
+новый параллельный core/framework/обязательный online backend не создаются. Текущий
+1.7 другого владельца не прерывается и автоматически сюда не принимается.
 На a418 независимо устранён P3 ?lang=RU → requested=en:
 новый case-тест падает со старым app и проходит с новым;36 локальных тестов,
 16 snapshot/mock parity, оба CI и10 browser-сценариев прошли. Два controls не

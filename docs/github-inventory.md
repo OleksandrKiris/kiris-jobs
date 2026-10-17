@@ -12,8 +12,8 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `f89e0e4a3bf0a58714de0883970e6569c78e318d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77) draft, [#82](https://github.com/OleksandrKiris/kiris-jobs/pull/82) diagnostic draft, [#83](https://github.com/OleksandrKiris/kiris-jobs/pull/83) draft | [39063588437](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39063588437) |
-| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b` | [#13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13) draft | [39059220706](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39059220706) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `558e6e75e85734e1895b323094d47a43a8792fde` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77) ready, [#82](https://github.com/OleksandrKiris/kiris-jobs/pull/82) diagnostic draft, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft, [#85](https://github.com/OleksandrKiris/kiris-jobs/pull/85) CI fix | [39065923321](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39065923321) |
+| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | нет; PR13 принят | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `3a7ea5e0b70abece336f41c00c31cf510928aaeb` | [#10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10) draft | [39061616083](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39061616083) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
@@ -22,6 +22,17 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 ## Приёмка и ограничения
 
+- Аудит всех15 направлений: snapshots чатов, REST metadata и current artifacts
+  проверены раздельно. Один author/source-reviewer/runtime-verifier, один current
+  manifest; raw history не переписывается. Очередь и точные remaining gates —
+  в единственном roadmap. Повторные неизменённые audits/CI/статусы убраны из поручений.
+- HYDRA13 принят guardcbb35d46/baseb820 →533360d7. Independent99unit/66entries/6PNG,
+  Pages39067949384 success и3public exact bytes подтверждены; OSclipboard fixture only.
+- Внешний83 acceptedmain558: postBackend39065923209/Pages39065923321 success,
+  tested/merged tree и7public runtime bytes совпали. Новые60/74 failures — git ancestry
+  preflight до браузера; existing85 af008c86 независимо reviewed15, второго автора нет.
+  Новые77d2cbb/base558 обаCIgreen/ready;68cc2/base558 mandatorygreen, но Chromium156
+  histogram недоступен и diagnosticmatrixFAIL/calculatorNOTRUN. Это отдельные причины.
 - PR78 принят guard611089b7/base54b597 →f89e0e4a: только два документа,
   независимое ревью clear. Exact Backend39062359825/Catalogue39062359944 success
   (module16/16, оба native restart). Post Backend39063588523/Pages39063588437 success,
@@ -69,7 +80,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
   Следующий WIP2 — PR13@cbb35d46/baseb820, копирование публичной ссылки;
   автоматических отправок нет. CI39060090874 success, independent review clear:
   99 unit/66 entries/6 current PNG. Clipboard outcomes смоделированы;
-  frozen/draft/unpublished, следующий guard отдельно.
+  Принят533360d7; Pages39067949384/3publicbytes/tree594df011 verified.
 - Dragon PR9@810125c0/base79fdd78 принят, guarded merge3a7ea5e0.
   Accepted binary blobs сохранены. Старый green31270 имел BASE-cache gate,
   не доказывающий HEAD-upgrade (issue81); de798 red выявил requestedtr loss
