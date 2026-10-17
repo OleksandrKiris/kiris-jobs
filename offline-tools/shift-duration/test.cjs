@@ -42,6 +42,17 @@ test('corrupt, future and incompatible formats are never overwritten', () => {
     assert.equal(C.save(()=>s,good()),'unsupported'); assert.equal(s.getItem(C.KEY),raw);
   }
 });
+test('denied read never overwrites an unseen record even when writes work; recovery is explicit', () => {
+  const raw=JSON.stringify({version:1,value:{...good(),start:'07:00'}}), s=storage(raw);
+  let blocked=true, writes=0;
+  const access={getItem(key){if(blocked)throw Error('read denied');return s.getItem(key);},
+    setItem(key,value){writes++;s.setItem(key,value);}};
+  assert.equal(C.save(()=>access,good()),'saveFailed');
+  assert.equal(writes,0);assert.equal(s.getItem(C.KEY),raw);assert.equal(s.getItem('other'),'keep');
+  assert.equal(C.calculate(good()).net,450);
+  blocked=false;assert.equal(C.save(()=>access,good()),'saved');
+  assert.equal(writes,1);assert.deepEqual(C.read(()=>s).value,good());
+});
 test('denied storage, quota and cancelled/confirmed forget', () => {
   const denied=()=>{throw Error('denied');};
   assert.equal(C.read(denied).status,'unavailable'); assert.equal(C.save(denied,good()),'saveFailed'); assert.equal(C.forget(denied,true),'saveFailed');
@@ -79,6 +90,15 @@ test('actual controller: manual save, reload, cancel and confirmed forget preser
   u.event('save','click');const v=ui('en',u.s.getItem(C.KEY));assert.equal(v.els.get('start').value,'06:00');assert.match(v.els.get('result').textContent,/7 h 30 min/);
   v.event('forget','click');assert.notEqual(v.s.getItem(C.KEY),null);
   v.window.confirm=()=>true;v.event('forget','click');assert.equal(v.s.getItem(C.KEY),null);assert.equal(v.els.get('start').value,'06:00');assert.equal(v.s.getItem('other'),'keep');
+});
+test('Save button reports read denial without overwriting or losing the current calculation', () => {
+  const raw=JSON.stringify({version:1,value:good()}),u=ui('en',raw);
+  u.s.getItem=()=>{throw Error('read denied');};
+  u.set({start:'07:00'});u.event('save','click');
+  assert.equal(u.s.map.get(C.KEY),raw);assert.equal(u.s.map.get('other'),'keep');
+  assert.match(u.els.get('storageStatus').textContent,/Could not save/);
+  assert.match(u.els.get('result').textContent,/6 h 30 min/);
+  assert.equal(u.els.get('start').value,'07:00');
 });
 test('all UI labels exist, fallback, denied storage still calculates', () => {
   for(const lang of C.LANGS) {const u=ui(lang);assert.equal(u.document.documentElement.lang,lang);assert(u.labels.every(e=>typeof e.textContent==='string'&&e.textContent.length));}

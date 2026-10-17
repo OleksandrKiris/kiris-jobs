@@ -41,6 +41,8 @@
     if (!validState(value)) return 'saveFailed';
     const old = read(getStorage);
     if (old.status === 'unsupported') return 'unsupported';
+    // A failed read is not an empty slot: preserve the unseen previous record.
+    if (old.status === 'unavailable') return 'saveFailed';
     try { getStorage().setItem(KEY, JSON.stringify({ version: 1, value })); return 'saved'; }
     catch { return 'saveFailed'; }
   }
