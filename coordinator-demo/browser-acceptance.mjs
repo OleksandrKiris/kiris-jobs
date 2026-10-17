@@ -76,6 +76,10 @@ try {
       assert.equal(await page.locator('#materials article').count(),1);
       assert.match(await page.locator('#materialsStatus').innerText(),/en.*ru/);
       assert.equal(await page.locator('#materials h3').getAttribute('lang'),'ru');
+      const snapshotText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),snapshotText);
+      await page.locator('#materialsSource').selectOption('snapshot');
       await page.locator('#materialQuery').fill('bogatynia');
       assert.equal(await page.locator('#materials article').count(),0);
       assert.match(await page.locator('#materialsStatus').innerText(),/No confirmed material/);

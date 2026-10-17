@@ -26,7 +26,8 @@
     uk:{title:'Матеріали з джерелом',search:'Пошук у тексті джерела',notice:'Локальний знімок лише для читання · онлайн вимкнено. Текст звірено з репозиторієм 2026-10-17; джерело оновлено 2026-07-23. Це не підтвердження поточних умов роботи.',fallback:'Запитана мова: {requested} · Показано: ru. Перекладу цього матеріалу немає.',empty:'Підтверджений матеріал не знайдено. Відповідь не вигадується.',source:'Джерело (потрібен інтернет)'},
     pl:{title:'Materiały ze źródłem',search:'Szukaj w tekście źródłowym',notice:'Lokalna kopia tylko do odczytu · tryb online wyłączony. Tekst sprawdzono w repozytorium 2026-10-17; źródło zaktualizowano 2026-07-23. Nie potwierdza to aktualnych warunków pracy.',fallback:'Wybrany język: {requested} · Wyświetlono: ru. Brak tłumaczenia tego materiału.',empty:'Nie znaleziono potwierdzonego materiału. Odpowiedź nie jest wymyślana.',source:'Źródło (wymaga internetu)'}
   };
-  const reader=M.materialReader();
+  let materialMode='snapshot', reader=M.materialReader();
+  const sourceCopy={en:['Local source','Snapshot','Local mock'],ru:['Локальный источник','Снимок','Локальный mock'],uk:['Локальне джерело','Знімок','Локальний mock'],pl:['Lokalne źródło','Kopia','Lokalny mock']};
   function renderMaterials() {
     const t=materialCopy[lang];
     // Unsupported URL language stays visible in provenance; it is not silently relabelled EN.
@@ -34,6 +35,9 @@
     const response=reader.read({language:requestedLanguage});
     const items=M.searchMaterials(response,$('materialQuery').value||'');
     $('materialsTitle').textContent=t.title; $('materialsLabel').textContent=t.search;
+    $('materialsSourceLabel').textContent=sourceCopy[lang][0];
+    $('materialsSource').replaceChildren(...['snapshot','mock'].map((mode,i)=>{const option=node('option',sourceCopy[lang][i+1]);option.value=mode;return option;}));
+    $('materialsSource').value=materialMode;
     $('materialsNotice').textContent=t.notice;
     $('materialsStatus').textContent=items.length?(response.fallback?t.fallback.replace('{requested}',response.requested_language):'ru · Zgorzelec'):t.empty;
     $('materials').replaceChildren(...items.map(item=>{
@@ -41,7 +45,7 @@
       heading.lang=item.language;text.lang=item.language;
       source.href='https://github.com/'+item.source.repo+'/blob/'+item.source.ref+'/'+item.source.path;
       source.target='_blank';source.rel='noopener noreferrer';
-      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector,'muted'),source);
+      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector+' · '+item.source.ref.slice(0,8),'muted'),source);
       return article;
     }));
   }
@@ -145,6 +149,11 @@
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
   $('filter').addEventListener('change',()=>{filter=$('filter').value;syncURL();render();});
   $('materialQuery').addEventListener('input',renderMaterials);
+  $('materialsSource').addEventListener('change',()=>{
+    materialMode=$('materialsSource').value;
+    reader=M.materialReader(materialMode==='mock'?{mode:'mock',mock:q=>JSON.stringify(M.materialSnapshot(q))}:{});
+    renderMaterials();
+  });
   $('reset').addEventListener('click',()=>{$('resetConfirm').hidden=false;$('cancel').focus();});
   $('cancel').addEventListener('click',()=>{$('resetConfirm').hidden=true;$('reset').focus();});
   $('confirm').addEventListener('click',()=>{model.reset(true);$('resetConfirm').hidden=true;render();$('reset').focus();});

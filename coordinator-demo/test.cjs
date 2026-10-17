@@ -202,6 +202,9 @@ test('source UI searches locally with honest fallback, no answer, and pinned saf
   assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
   assert.equal(h.$('materials').children.length,1);
   const article=h.$('materials').children[0];
+  h.change('materialsSource','mock');
+  assert.equal(h.$('materialsSource').value,'mock');
+  assert.equal(h.$('materials').children[0].children[1].textContent,article.children[1].textContent);
   assert.equal(article.children[0].lang,'ru');
   assert.equal(article.children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/'+M.CONTENT_VERSION+'/data/content.js');
   assert.equal(article.children[3].rel,'noopener noreferrer');

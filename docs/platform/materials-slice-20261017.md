@@ -1,83 +1,76 @@
-# Role 9: one source-backed material, local preparation
+# Role 9: one source-backed material
 
-Owner: 9. Repo: OleksandrKiris/kiris-jobs. Allowed paths: coordinator-demo/**,
-docs/platform/**. Existing WIP branch: primserv/t09/turkish-coordinator-demo;
-remote b7ae5d2 had no role-9 changes or open PR. Continued that branch locally
-by fast-forward, without creating a second WIP. The earlier Turkish locale draft
-is not available in this checkout and has not been overwritten or claimed complete.
+Owner9; repo OleksandrKiris/kiris-jobs. Allowed coordinator-demo/**, docs/platform/**.
+Base e93dc59c6339a94020e955969a074c8c1d3a5956 includes accepted fixture fix PR66.
+This resumes saved material patch9b6fa61 in codex/role9-material-snapshot; original
+patch and branch remain preserved. It excludes the old Turkish locale draft and
+its historically rejected write. Role10 expressly authorized this new scoped
+material implementation. No second functional PR exists for the role.
 
-Tested base: fbf5683a1c253a2eb740e998d17c58addd64673c (fresh main after PR56).
-Source content stays pinned to fc672d805fb884eb1d09bdc8ca342ba530ad83f4.
-Dependency: role-14 local contract commit 870e7829640f93e9f68c4fe14a2edd6bfa1fbda9,
+Dependency: draft PR67 head7225ba73c273c06c233053e157180eb434cb3723,
 contracts/materials-v1/{response.schema.json,snapshot.json,local_mock.py}.
-Contract acceptance and public SW revision are separate dependencies for release.
+The dependency is proposed, not accepted centrally. This client stays independent
+of Django and has no online mode. Root SW/cache integration belongs to role1;
+acceptance, merge and release belong to role10.
 
-## Useful scenario and current map
+## Scenario and provenance
 
-- Already working: three fictional tasks, statuses, filters, v1 local storage,
-  explicit corrupt/denied storage states and confirmed demo-only reset.
-- No newly reproduced product failure: PR53/55 and issue54 are not reopened.
-- Gap addressed: source-backed knowledge was absent. The coordinator can now
-  search one accepted Russian summary, see its location, ID and pinned original.
-- Explicit no-match gives no inferred answer. Search is only in memory; it is
-  neither saved nor placed in URLs, and clears on reload. Task statuses keep their
-  existing persistence. No employee records or external actions are introduced.
+Already working: three fictional tasks, statuses, filters, v1 storage, explicit
+corrupt/denied states and confirmed demo-only reset. PR53/55 and issue54 are not
+reopened; no new product failure is claimed.
+
+Gap addressed: coordinator can search one accepted Russian summary, see location,
+stable material/job IDs, historical date and pinned original link. Source selection
+switches between a snapshot and an explicitly local JSON mock in the same screen.
+No confirmed match means no inferred answer. Search and source mode are memory-only
+and reset on reload; task statuses preserve their existing persistence and format.
+No employee data, background sync or external actions are introduced.
 
 Material site-cleaning-summary-ru is exactly jobs[id=site-cleaning] title/summary
-from data/content.js. Original location is Zgorzelec; zgorzelec is an explicit new
-mapping agreed with role14, not a claimed pre-existing housing ID. It is never
-mapped to Bogatynia. Source updated date remains 2026-07-23. The 2026-10-17 date
-means verified-against-repository only, not verification of current employment
-conditions, availability, rates or legal advice. No such conditions are copied.
+from data/content.js at fc672d805fb884eb1d09bdc8ca342ba530ad83f4. Original location
+Zgorzelec maps explicitly to new location_id zgorzelec as agreed with role14; it is
+not a claimed pre-existing housing ID and is never mapped to Bogatynia.
+Source updated date stays2026-07-23. verified_on2026-10-17 means only
+verified-against-repository, not current conditions/availability/rates approval.
+No pay, availability, private contact or legal assertions are copied.
 
-The four existing UI languages explain material fallback to Russian. Requested
-ua stays ua in the response, canonical comparison uses uk, effective language is
-ru. Unsupported UI languages retain the existing explicit EN fallback.
+Four existing UI languages explain fallback to Russian. requested_language ua
+remains ua; canonical comparison uses uk; effective_language is ru. Unsupported UI
+languages preserve the explicit EN fallback. Existing task translations unchanged.
 
-## Implementation and checks
+## Implementation and evidence
 
-model.js contains the pinned snapshot, typed request boundary, read-only snapshot
-reader and explicitly injected local JSON mock reader. Default is snapshot;
-online mode is rejected. Both readers validate the same pinned required content;
-v1 additive response fields remain compatible. The mock is a synchronous local
-function, not HTTP. It does not make a Django endpoint available. Transport
-query strings belong to the role14 mock; internal limits are integers.
+model.js contains the pinned data, typed query boundary and two read-only readers.
+Default snapshot; mock is a synchronous JSON function, never a URL. Required data
+is checked against the pinned slice; v1 additive fields remain compatible. Bad
+requests, other locations, wrong provenance/text/schema, synthetic/unverified data,
+malformed and over32768-byte responses are refused. HTML uses textContent; CSP
+connect-src 'none' remains. Search is bounded to120 characters, never sent or put
+in a URL. Future GET /api/v1/materials/ is not claimed available.
 
-`node --test coordinator-demo/test.cjs`: 33 passed, including existing storage
-regressions, exact source text/date, aliases, search UI handlers, limit/cursor and
-language validation, refusal of wrong location/source/schema/synthetic data,
-malformed/oversize responses, additive fields and no external data APIs.
+35/35 own Node tests pass including PR66 fixture regressions, source text/date,
+alias/fallback, search/mode UI handlers, no-match, negative responses and storage.
+`node coordinator-demo/contract-parity.cjs ../contract67/contracts/materials-v1`
+passes exact fixture and16 combinations8languages x limits1/20 against actual
+Python mock and both frontend readers. contract67 was exported with git archive
+from fetched remote PR67 head7225ba73; another role checkout was not modified.
+Syntax and git diff --check pass. Exact-head CI/browser results belong in PR body.
 
-`node coordinator-demo/contract-parity.cjs <role14 contracts/materials-v1>`:
-exact snapshot fixture plus 16 combinations (8 languages x limits 1/20) passed
-against the actual Python local_mock, frontend snapshot and frontend JSON mock.
-Python runs with -B; the other checkout is only read. This command is repeatable
-after contract integration with the default contracts/materials-v1 path.
+Browser runner retains CI-only guard and tests mode equality, search/no-match,
+material language, existing keyboard/languages/reload/Back/storage faults/offline.
+Local DOM tests are not browser acceptance. No fresh screenshots/CI are claimed
+until that run completes; native-speaker and physical-device review not performed.
 
-Syntax checks for model.js, app.js, contract-parity.cjs and browser-acceptance.mjs,
-and git diff --check passed. Browser acceptance runner now includes source/search
-and no-match checks while offline, but has NOT run for this slice. Its existing
-CI-only guard is preserved. DOM tests do not substitute for browser acceptance,
-screenshots, narrow viewport, keyboard, reload/Back or worker upgrade checks.
+## Release boundary
 
-## Publication and remaining step
+Same five runtime assets, no new dependencies or network requests. Source link
+needs internet only when opened. Reading/search work with downloaded files.
+No root SW, packaging, workflow or backend changes. PR55 cache generations and
+PR66 fixture protections preserved. Runtime byte delta is reported in PR metadata.
+Role1 must prepare the public worker/cache revision after this exact head is
+accepted; this functional PR alone is not evidence of an updated public offline
+package. No merge/deploy or schedule changes by role9.
 
-No new runtime files, dependencies, requests, backend, keys or service worker
-changes. Same five runtime assets; byte totals are recorded in the delivery report.
-Source links require internet when explicitly opened. Search/reading itself needs
-no network after the files are present. CSP still has connect-src 'none'.
-Role1 must coordinate the public SW/cache revision after accepting this exact head;
-role10 alone owns merge and release. Existing PR55 generation protocol is untouched.
-Rollback is a reviewed revert of this slice; the task storage format/key is unchanged.
-
-Function: locally implemented and unit/parity verified. Contract: matches the
-specified local role14 commit; not yet accepted centrally. Acceptance/publication:
-not performed, no new remote PR, merge or deploy.
-
-Historical block: the prior role9 chat reports that automatic security review
-rejected code writes to GitHub for this WIP, but exposes no raw operation/reason.
-No replacement GitHub write mechanism has been used. Local commit and patch are
-authorized by the current task. Remaining step: resolve the exact historical write
-refusal, then publish this existing branch through the permitted mechanism and
-run approved exact-head CI/browser acceptance; hand SW integration to role1 and
-acceptance/release to role10. Do not treat historical CI as proof of this slice.
+Rollback: normal reviewed revert of this slice; task storage key/version unchanged.
+Function locally implemented and unit/parity verified. Contract matches proposed
+PR67; central contract/client acceptance and publication are separate pending steps.
