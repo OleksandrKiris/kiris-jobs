@@ -16,28 +16,47 @@ const oldHashes = {
   'style.css': 'ff0a673c7625c9dbc2d4cad0feddd8b2340bcec44be4413761a7767f36663481',
   'primserv-logo.svg': '1a29802a4a0065ad84e8f8dbdd5bc46dcb9b67bbecb2190de6a99464feaf5157'
 };
+export const JOINT_TOOL_TRANSITION = {
+  id: 'pr68',
+  published: { ref: '62cb57883e617d67e54d8ba5b280f616ca651848', hashes: {
+    ...oldHashes, 'app.js': 'b0e6c859dabbe5f02a3776c15027f2539ef538909cfb0c35078bd05b614f0e0b'
+  } },
+  target: { ref: 'c896d09da3901be3b6bbec92c1aa1bcbfb0b8e15', hashes: {
+    'index.html': 'b293dc2a3f88b1319ad8c13c4d196bc65e5bca760e14ae79a6df8730d09e18ab',
+    'model.js': '133dc7a06b60d0d1a733985217abce4142e75cbf850dfdcf79459073fcce11ae',
+    'app.js': 'a64b96a515dfbe4d63666ca1b5d6097fdc49616b5bd8a8313a9e8286304c9599',
+    'style.css': '6433dce6e6a8ce3c5350d29d10f02f896dc4e3d5e6d4e03e538bf7fe776396cd',
+    'primserv-logo.svg': oldHashes['primserv-logo.svg']
+  } }
+};
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const KEY = 'primserv:coordinator-demo:v1';
 const stateCache = 'primserv-coordinator-state-v1';
 const packPrefix = 'primserv-coordinator-pack-v1-';
 
-export function publishedToolBytes() {
+export function assertToolManifest(files, expected) {
+  assert.deepEqual([...files.keys()].sort(), [...TOOL_FILES].sort(), 'Exactly five source resources are required');
+  assert.deepEqual(Object.keys(expected).sort(), [...TOOL_FILES].sort(), 'Exactly five pinned hashes are required');
+  for (const name of TOOL_FILES) assert.equal(hash(files.get(name)), expected[name], 'Pinned source hash: ' + name);
+}
+export function publishedToolBytes(source = { ref: PUBLISHED_TOOL_BASE, hashes: oldHashes }, includeShell = true) {
   assert.equal(process.env.GITHUB_ACTIONS, 'true', 'Historical Git reads belong to the authorized CI runner');
+  assert.match(source.ref, /^[0-9a-f]{40}$/, 'Only an exact commit is a source');
   const git = args => execFileSync('git', args, { timeout: 60000, maxBuffer: 2 * 1024 * 1024 });
   let fetched = false;
-  try { git(['cat-file', '-e', PUBLISHED_TOOL_BASE + '^{commit}']); }
+  try { git(['cat-file', '-e', source.ref + '^{commit}']); }
   catch {
     // PR event-base preparation does not promise this separately pinned release.
     // At most one exact-object fetch; never replace it with current main.
-    git(['fetch', '--no-tags', '--depth=1', '--filter=blob:none', 'origin', PUBLISHED_TOOL_BASE]);
+    git(['fetch', '--no-tags', '--depth=1', '--filter=blob:none', 'origin', source.ref]);
     fetched = true;
   }
   const files = new Map(TOOL_FILES.map(name => {
-    const bytes = git(['show', `${PUBLISHED_TOOL_BASE}:coordinator-demo/${name}`]);
-    assert.equal(hash(bytes), oldHashes[name], 'Published tool hash: ' + name);
+    const bytes = git(['show', `${source.ref}:coordinator-demo/${name}`]);
     return [name, bytes];
   }));
-  const shell = new Map(SHELL_FILES.map(name => [name, git(['show', `${PUBLISHED_TOOL_BASE}:${name}`])]));
+  assertToolManifest(files, source.hashes);
+  const shell = new Map(includeShell ? SHELL_FILES.map(name => [name, git(['show', `${source.ref}:${name}`])]) : []);
   return { files, shell, fetched };
 }
 
@@ -81,10 +100,14 @@ function interruption(origin, pathname) {
 }
 
 export async function acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin,
-  context, ready, fits, shot, active, startServer, stopServer }) {
-  const legacy = publishedToolBytes();
-  const currentFiles = new Map(await Promise.all(TOOL_FILES.map(async name =>
+  context, ready, fits, shot, active, startServer, stopServer, transition = null }) {
+  const legacy = publishedToolBytes(transition?.published);
+  const originalFiles = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
+  const pinnedTarget = transition ? publishedToolBytes(transition.target, false) : null;
+  const currentFiles = pinnedTarget?.files || originalFiles;
+  const oldHashes = Object.fromEntries([...legacy.files].map(([name, bytes]) => [name, hash(bytes)]));
+  const prefix = transition ? transition.id + '-' : '';
   const currentShell = new Map(await Promise.all(SHELL_FILES.map(async name => [name, await readFile(join(artifact, name))])));
   const headHashes = Object.fromEntries([...currentFiles].map(([name, bytes]) => [name, hash(bytes)]));
   assert.ok(TOOL_FILES.some(name => oldHashes[name] !== headHashes[name]), 'This must exercise a REAL tool-byte change');
@@ -92,11 +115,13 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
   const workerHash = hash(await readFile(join(artifact, 'sw.js')));
   const publishedCache = legacy.shell.get('sw.js').toString().match(/const CACHE_VERSION = "([^"]+)"/)[1];
   const headCache = currentShell.get('sw.js').toString().match(/const CACHE_VERSION = "([^"]+)"/)[1];
-  report.toolRefresh = { publishedBase: PUBLISHED_TOOL_BASE, publishedFiles: oldHashes,
+  report[transition ? 'jointToolRefresh' : 'toolRefresh'] = {
+    publishedBase: transition?.published.ref || PUBLISHED_TOOL_BASE, publishedFiles: oldHashes,
+    sourceTarget: transition?.target.ref || report.head,
     testedHead: report.head, headFiles: headHashes, workerSHA256: workerHash,
     publishedShell: Object.fromEntries([...legacy.shell].map(([name, bytes]) => [name, hash(bytes)])),
     publishedCache, headCache,
-    historicalCommitFetched: legacy.fetched,
+    historicalCommitFetched: legacy.fetched, targetCommitFetched: pinnedTarget?.fetched || false,
     limits: ['Same head worker remains active for each tool refresh; shell upgrade is a separate scenario.',
       'Cuts are real loopback HTTP socket interruptions after partial 200 bodies, not production network measurements.'] };
   const stage = async files => {
@@ -112,8 +137,39 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
   };
 
+  const materialProof = async (page, id) => {
+    if (!transition) return null;
+    assert.equal(await page.evaluate(() => navigator.onLine), false, 'Material proof runs with browser offline');
+    await page.locator('#materialQuery').waitFor();
+    assert.equal(await page.locator('#materials article').count(), 1);
+    assert.equal(await page.locator('#materials h3').innerText(), 'Уборка территории');
+    assert.equal(await page.locator('#materials h3').getAttribute('lang'), 'ru');
+    assert.match(await page.locator('#materialsStatus').innerText(), /ru/);
+    const notice = await page.locator('#materialsNotice').innerText();
+    assert.match(notice, /2026-07-23/); assert.match(notice, /2026-10-17/);
+    const source = await page.locator('#materials a').getAttribute('href');
+    assert.equal(source, 'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');
+    const snapshot = await page.locator('#materials article').innerText();
+    await page.locator('#materialsSource').selectOption('mock');
+    assert.equal(await page.locator('#materials article').innerText(), snapshot);
+    await page.locator('#materialQuery').focus();
+    assert.equal(await page.locator('#materialQuery').evaluate(node => node === document.activeElement), true);
+    await page.locator('#materialQuery').fill('joint-no-such-material');
+    assert.equal(await page.locator('#materials article').count(), 0);
+    assert.ok((await page.locator('#materialsStatus').innerText()).length > 0);
+    await page.locator('#materialQuery').fill('территории');
+    assert.equal(await page.locator('#materials article').count(), 1);
+    await page.locator('#materialQuery').fill('');
+    await page.locator('#materialsSource').selectOption('snapshot');
+    await page.locator('#materialsTitle').scrollIntoViewIfNeeded();
+    await fits(page); await shot(page, id + '-materials-offline');
+    return { title: 'Уборка территории', language: 'ru', source, snapshotMockEqual: true,
+      emptySearch: true, restoredSearch: true, sourceDate: '2026-07-23', verifiedDate: '2026-10-17' };
+  };
+
+  try {
   for (const width of [1280, 320]) for (const failedFile of TOOL_FILES) {
-    const id = `tool-refresh-${failedFile.replaceAll('.', '-')}-${width}`;
+    const id = `${prefix}tool-refresh-${failedFile.replaceAll('.', '-')}-${width}`;
     const ctx = await context({ width, height: 900 }), page = await ctx.newPage();
     active(page);
     let stopped = false;
@@ -127,6 +183,7 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
       await page.locator('#job-search').fill('Siechnice');
       await page.locator('[data-primserv-service="coordinator"]').click(); await toolReady(page);
+      if (transition) assert.equal(await page.locator('#materialQuery').count(), 0, 'Published old runtime has no material slice');
       await page.locator('#demo-01').selectOption('doing');
       await page.locator('#demo-03').selectOption('done');
       const raw = await page.evaluate(key => localStorage.getItem(key), KEY);
@@ -185,11 +242,14 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       await page.reload(); await toolReady(page); await taskState(page, raw);
       complete(await packSnapshot(page, base), headExpected);
       await fits(page); await shot(page, id + '-recovered-offline');
+      const material = await materialProof(page, id);
+      await taskState(page, raw);
       await catalogue(page);
       assert.equal(hash(await readFile(join(artifact, 'sw.js'))), workerHash, 'Worker bytes must remain unchanged throughout refresh');
       assert.deepEqual(errors, []);
       report.results.push({ scenario: 'published old five → new tool bytes with unchanged worker / each HTTP cut / last-good / reconnect / recovered offline',
-        width, failedFile, status: 'passed', before, recovered, cutProof, progress: JSON.parse(raw), workerSHA256: workerHash });
+        width, failedFile, status: 'passed', transition: transition?.id || null, material,
+        before, recovered, cutProof, progress: JSON.parse(raw), workerSHA256: workerHash });
     } catch (error) {
       await page.screenshot({ path: join(reportDir, id + '-failure.png') }).catch(() => {});
       throw error;
@@ -203,7 +263,7 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
 
   // A cold interrupted package has no last-good fallback and must remain unavailable.
   for (const failedFile of TOOL_FILES) {
-    const id = `tool-cold-cut-${failedFile.replaceAll('.', '-')}-320`;
+    const id = `${prefix}tool-cold-cut-${failedFile.replaceAll('.', '-')}-320`;
     const ctx = await context({ width: 320, height: 900 }), page = await ctx.newPage(); active(page);
     let stopped = false; report.currentScenario = id;
     await ctx.tracing.start({ screenshots: true, snapshots: true, sources: false });
@@ -236,8 +296,10 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       await page.reload(); await toolReady(page);
       assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
       complete(await packSnapshot(page, base), headExpected);
+      const material = await materialProof(page, id);
       report.results.push({ scenario: 'cold partial HTTP body → unavailable offline → reconnect and complete download → offline reload',
-        width: 320, failedFile, status: 'passed', unavailableStatus: 503, offlineReady: false, cutProof });
+        width: 320, failedFile, status: 'passed', transition: transition?.id || null, material,
+        unavailableStatus: 503, offlineReady: false, cutProof });
     } catch (error) {
       await page.screenshot({ path: join(reportDir, id + '-failure.png') }).catch(() => {});
       throw error;
@@ -248,4 +310,7 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
     }
   }
   delete report.currentScenario;
+  } finally {
+    await stage(originalFiles); await stageShell(currentShell);
+  }
 }

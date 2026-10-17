@@ -8,7 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
-import { acceptCoordinatorRefresh, TOOL_FILES } from './coordinator-refresh.mjs';
+import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, TOOL_FILES } from './coordinator-refresh.mjs';
 
 assert.equal(process.env.GITHUB_ACTIONS, 'true', 'Use the authorized CI runner');
 const require = createRequire(import.meta.url);
@@ -533,6 +533,12 @@ try {
   // A changed tool must refresh atomically even if the worker bytes do not change.
   await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
     ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer });
+
+  // Additional immutable public62cb → actualPR68 bytes. The original33 groups
+  // remain above; this separate gate uses the combined PR60 worker/SW80 fix.
+  await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
+    ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer,
+    transition: JOINT_TOOL_TRANSITION });
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
     // Use a separate request context so the existing navigation SW fallback

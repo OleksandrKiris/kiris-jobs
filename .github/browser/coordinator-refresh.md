@@ -1,5 +1,47 @@
 # Public coordinator generation acceptance
 
+## Additional current PR68 joint gate
+
+The original33 catalogue groups and24 SW regressions are retained. One
+additional15-case transition is pinned to published
+`62cb57883e617d67e54d8ba5b280f616ca651848` (old5,37412B) and actual PR68
+`c896d09da3901be3b6bbec92c1aa1bcbfb0b8e15` (new5,46529B,+9117B).
+Both sets are read from their exact Git blobs and checked against all five
+independently recorded SHA256 pins. No source/fixture/runtime of owner9 is
+changed. Only the temporary staged test directory receives the five target
+resources; the original staged bytes are restored in finally.
+
+This is a COMBINED test of PR68 runtime with the PR60 root shell/SW80 fix,
+not proof that PR68 alone fixes the known cold-body error in published SW.
+The old phase downloads the actual published shell+worker+five old files.
+The target phase applies the PR60 worker, verifies retention of the old
+whole pack, then makes the first tool entry with stopped origin+browser
+offline. Every resource is interrupted separately at both widths; recovery
+uses the same target worker. Five additional cold cases require503 and
+honest not-ready before recovery. Each new offline runtime also exercises
+the actual source-backed material, RU fallback, unchanged dates/source link,
+snapshot/mock parity, no-match/search recovery, focus and unchanged raw task
+progress. Source links are inspected, never opened or sent anywhere.
+
+`jointToolRefresh` records the exact published/sourceTarget/testedHead pins,
+all five old/new and shell/worker hashes. Every extra result has
+transition=pr68 and images/traces use the pr68- prefix; original artifacts
+remain distinguishable. Current screenshots still require actual review.
+This does not certify different future PR68 bytes or deployed clients.
+
+| File | New PR68 SHA256 |
+| --- | --- |
+| index.html | b293dc2a3f88b1319ad8c13c4d196bc65e5bca760e14ae79a6df8730d09e18ab |
+| model.js | 133dc7a06b60d0d1a733985217abce4142e75cbf850dfdcf79459073fcce11ae |
+| app.js | a64b96a515dfbe4d63666ca1b5d6097fdc49616b5bd8a8313a9e8286304c9599 |
+| style.css | 6433dce6e6a8ce3c5350d29d10f02f896dc4e3d5e6d4e03e538bf7fe776396cd |
+| primserv-logo.svg | 1a29802a4a0065ad84e8f8dbdd5bc46dcb9b67bbecb2190de6a99464feaf5157 |
+
+Only .github/browser/** and the owner1 package test command change in this
+new slice. Main62cb fixture83, shared preflight85, owner15 workflows/CI and
+other owners' files are inherited verbatim by an ordinary merge. No code
+publication, real data, network adapter, polling or new runtime dependency.
+
 Owner1; existing PR60 only. No coordinator runtime, owner9 fixture,
 transferred CI path or production server is changed by this slice.
 The root SW body-read fix below is separate from the test helpers.

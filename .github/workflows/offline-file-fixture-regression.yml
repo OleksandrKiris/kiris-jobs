@@ -35,6 +35,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Make exact event base and bounded ancestry available
+        run: python3 quality/security/exact_base.py
       - name: Install exact browser tooling
         run: |
           npm install --prefix "$RUNNER_TEMP/coordinator-browser" --no-save --no-package-lock "playwright@$TESTED_PLAYWRIGHT"
