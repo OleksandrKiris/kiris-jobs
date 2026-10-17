@@ -30,7 +30,9 @@ function harness(storage = new Map()) {
         async put(request, response) {
           const url = keyOf(request);
           if (controls.failPut(name, url)) throw Error('Quota fixture');
-          entries.set(url, response.clone());
+          // Cache.put consumes the response stream and rejects truncated bodies.
+          const bytes = await response.arrayBuffer();
+          entries.set(url, new Response(bytes, { status: response.status, headers: response.headers }));
         },
         async addAll(paths) { for (const path of paths) await this.put(path, new Response('shell')); },
         async add(path) { await this.put(path, await fetcher(keyOf(path))); }
@@ -48,6 +50,12 @@ function harness(storage = new Map()) {
     requests.push({ url, options });
     if (controls.gate) await controls.gate;
     if (controls.offline || controls.failNetwork?.(url)) throw Error('Offline fixture');
+    if (controls.failBody?.(url)) return new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('partial'));
+        controller.error(Error('Truncated HTTP body fixture'));
+      }
+    }));
     return new Response(`${controls.revision}:${url.split('/').at(-1)}`);
   }
   vm.runInNewContext(source, {
@@ -114,6 +122,40 @@ test('failed network refresh leaves all five old responses intact', async () => 
   h.controls.offline = false; h.controls.failNetwork = url => url.endsWith('/app.js');
   assert.equal(await (await h.get('', true)).text(), 'old:index.html');
   await assertRuntime(h, 'old'); assert.equal(await committed(h), old); assert.equal(await h.ready(), true);
+});
+
+for (const failedFile of files) test(`cold truncated ${failedFile} body is unavailable until a complete recovery`, async () => {
+  const h = harness(); h.controls.offline = false;
+  h.controls.failBody = url => url.endsWith('/' + failedFile);
+  const response = await h.get('', true);
+  assert.equal(response.status, 503, 'A partial network body is not a runnable memory fallback');
+  assert.match(await response.text(), /tool-unavailable/);
+  assert.equal(await h.ready(), false);
+  assert.ok(!(await h.caches.keys()).some(name => name.startsWith(prefix)));
+  h.controls.failBody = null;
+  assert.equal(await (await h.get('', true)).text(), 'new:index.html');
+  await assertRuntime(h, 'new'); assert.equal(await h.ready(), true); await committed(h);
+  const offline = harness(h.storage);
+  assert.equal((await offline.get('', true)).status, 200);
+  await assertRuntime(offline, 'new'); assert.equal(await offline.ready(), true);
+});
+
+for (const failedFile of files) test(`warm truncated ${failedFile} body retains one whole generation and can recover`, async () => {
+  const h = harness(); await seed(h); await h.install(); await h.activate();
+  const old = await committed(h); h.controls.offline = false;
+  h.controls.failBody = url => url.endsWith('/' + failedFile);
+  assert.equal(await (await h.get('', true)).text(), 'old:index.html');
+  await assertRuntime(h, 'old'); assert.equal(await committed(h), old);
+  assert.deepEqual((await h.caches.keys()).filter(name => name.startsWith(prefix)), [old]);
+  assert.equal(await h.ready(), true);
+  h.controls.failBody = null;
+  assert.equal(await (await h.get('', true)).text(), 'new:index.html');
+  await assertRuntime(h, 'new'); const current = await committed(h);
+  assert.notEqual(current, old);
+  assert.deepEqual((await h.caches.keys()).filter(name => name.startsWith(prefix)), [current]);
+  const offline = harness(h.storage);
+  assert.equal((await offline.get('', true)).status, 200);
+  await assertRuntime(offline, 'new'); assert.equal(await offline.ready(), true);
 });
 
 for (const failedFile of [...files, 'pointer']) test(`failed ${failedFile} write cannot publish or mix a refresh`, async () => {
