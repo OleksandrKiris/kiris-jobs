@@ -138,6 +138,14 @@ try {
         await page.goto(`${fileURL}?lang=ua`); await ready(page);
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#fallback').isVisible(), false);
+        await page.goto(`${fileURL}?lang=RU`); await ready(page);
+        assert.equal(await page.locator('html').getAttribute('lang'), 'ru');
+        assert.equal(await page.locator('#materialsStatus').innerText(),'ru · Zgorzelec');
+        assert.equal(new URL(page.url()).searchParams.get('lang'),'RU');
+        await page.goto(`${fileURL}?lang=UA`); await ready(page);
+        assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
+        assert.match(await page.locator('#materialsStatus').innerText(),/ua.*ru/);
+        assert.equal(new URL(page.url()).searchParams.get('lang'),'UA');
         await context.setOffline(false); await page.reload(); await ready(page);
       } else {
         if (scenario.mode === 'v1') assert.equal(await page.locator('#demo-02').inputValue(), 'done');

@@ -197,6 +197,24 @@ for(const lang of M.LANGS)test(lang+': real UI handlers, filter, focus, language
   h.click('reset');h.click('confirm');assert.equal(h.document.activeElement.id,'reset');assert.deepEqual(M.create(h.store).snapshot().statuses,M.initial());
   h.change('filter','all');assert.equal(h.$('tasks').children.length,3);assert.equal(h.$('empty').hidden,true);
 });
+test('URL language case is normalized for material request without losing ua alias or raw URL',()=>{
+  const ru=ui({lang:'RU'});
+  assert.equal(ru.document.documentElement.lang,'ru');
+  assert.equal(ru.$('materialsStatus').textContent,'ru · Zgorzelec');
+  assert.equal(ru.location.searchParams.get('lang'),'RU');
+  for(const raw of ['UA','Ua','ua']) {
+    const uk=ui({lang:raw});
+    assert.equal(uk.document.documentElement.lang,'uk');
+    assert.match(uk.$('materialsStatus').textContent,/ua.*ru/);
+    assert.equal(uk.location.searchParams.get('lang'),raw);
+    uk.change('materialsSource','mock');
+    assert.match(uk.$('materialsStatus').textContent,/ua.*ru/);
+  }
+  const en=ui({lang:'EN'});
+  assert.equal(en.document.documentElement.lang,'en');
+  assert.match(en.$('materialsStatus').textContent,/en.*ru/);
+});
+
 test('source UI searches locally with honest fallback, no answer, and pinned safe link',()=>{
   const h=ui({lang:'ua'});
   assert.match(h.$('materialsStatus').textContent,/ua.*ru/);

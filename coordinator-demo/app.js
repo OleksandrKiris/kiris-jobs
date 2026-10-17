@@ -31,7 +31,8 @@
   function renderMaterials() {
     const t=materialCopy[lang];
     // Unsupported URL language stays visible in provenance; it is not silently relabelled EN.
-    const requestedLanguage=['ru','ua','uk','pl','en','ka','tr','hy'].includes(requested)?requested:'en';
+    const normalizedLanguage=String(requested).toLowerCase();
+    const requestedLanguage=['ru','ua','uk','pl','en','ka','tr','hy'].includes(normalizedLanguage)?normalizedLanguage:'en';
     const response=reader.read({language:requestedLanguage});
     const items=M.searchMaterials(response,$('materialQuery').value||'');
     $('materialsTitle').textContent=t.title; $('materialsLabel').textContent=t.search;
