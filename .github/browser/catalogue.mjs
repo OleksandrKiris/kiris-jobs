@@ -23,8 +23,8 @@ const report = {
   started: new Date().toISOString(), browser: '', results: [], files: {},
   limits: ['Desktop Chromium; narrow viewport is not a physical phone.',
     'External services are blocked; HRappka delivery and Telegram are not tested.',
-    'Offline means browser network disabled after successful local installation.',
-    'Existing v220 shell → shortcut cache is tested without submitting data.']
+    'Coordinator offline tests disable the browser network and stop the origin server; a cold entry has no cached tool.',
+    'Existing v220 shell → coordinator cache is tested without submitting data.']
 };
 for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candidate.js',
   'assets/i18n.js', 'assets/candidate-base.css', 'assets/clean.css', 'assets/homepage.css',
@@ -36,19 +36,29 @@ for (const file of ['index.html', 'sw.js', 'assets/bootstrap.js', 'assets/candid
 
 const serveRoot = await mkdtemp(join(tmpdir(), 'primserv-browser-site-'));
 await symlink(artifact, join(serveRoot, 'kiris-jobs'), 'dir');
-const server = spawn(process.execPath, [join(checkout, 'scripts/serve.mjs'), '4173'], {
-  cwd: serveRoot, stdio: ['ignore', 'pipe', 'pipe']
-});
 const base = 'http://127.0.0.1:4173/kiris-jobs/';
-let browser;
-let activePage;
-const mutations = [];
-try {
+let server;
+async function startServer() {
+  server = spawn(process.execPath, [join(checkout, 'scripts/serve.mjs'), '4173'], {
+    cwd: serveRoot, stdio: ['ignore', 'pipe', 'pipe']
+  });
   await Promise.race([
     once(server.stdout, 'data'),
     once(server, 'exit').then(([code]) => { throw Error(`Server exited: ${code}`); }),
     new Promise((_, reject) => setTimeout(() => reject(Error('Server startup timeout')), 10000).unref())
   ]);
+}
+async function stopServer() {
+  const exited = once(server, 'exit');
+  server.kill('SIGTERM');
+  await exited;
+  await assert.rejects(fetch(base), 'The origin must really be unreachable during offline acceptance');
+}
+let browser;
+let activePage;
+const mutations = [];
+try {
+  await startServer();
   browser = await chromium.launch({ headless: true });
   report.browser = `Chromium ${browser.version()} / Playwright 1.56.1`;
 
@@ -273,12 +283,21 @@ try {
       await page.locator('#job-search').fill('Siechnice');
       await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
       // No visit to the tool yet: offline navigation must explain the missing copy.
+      assert.equal(await page.evaluate(async()=>{
+        const names=await caches.keys();
+        const all=await Promise.all(names.map(async name=>(await (await caches.open(name)).keys()).map(r=>r.url)));
+        return all.flat().filter(url=>url.includes('/tools/coordinator/')).length;
+      }),0);
+      // Stop the actual origin as well: this browser version can still send
+      // worker requests after setOffline. A cached page must never mask that.
+      await stopServer();
       await ctx.setOffline(true);
       await page.locator('[data-primserv-service="coordinator"]').click();
       await page.locator('#tool-unavailable').waitFor();await fits(page);
       await shot(page,`demo-cold-offline-${width}`);
       await page.locator('a').click();await ready(page);
       assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');
+      await startServer();
       await ctx.setOffline(false);
       const entry=page.locator('[data-primserv-service="coordinator"]');
       await entry.focus();await page.keyboard.press('Enter');
@@ -302,6 +321,7 @@ try {
       await page.goto(base+'tools/coordinator/?lang=ua&fromLang=uk');
       assert.equal(await page.locator('html').getAttribute('lang'),'uk');
       await page.locator('#offline[data-offline-state="ready"]').waitFor();
+      await stopServer();
       await ctx.setOffline(true);await page.reload();
       assert.equal(await page.locator('#demo-01').inputValue(),'doing');
       await page.locator('#offline[data-offline-state="ready"]').waitFor();
@@ -313,6 +333,7 @@ try {
       await page.locator('[data-primserv-service="coordinator"]').click();
       assert.equal(await page.locator('#demo-02').inputValue(),'done');
       await page.goBack();await ready(page);
+      await startServer();
       await ctx.setOffline(false);await page.reload();await ready(page);
       assert.equal(await page.locator('#job-search').inputValue(),'Siechnice');
       assert.deepEqual(errors,[]);
@@ -404,7 +425,7 @@ try {
   process.exitCode = 1;
 } finally {
   await browser?.close();
-  server.kill('SIGTERM');
+  server?.kill('SIGTERM');
   report.finished = new Date().toISOString(); report.blockedMutations = mutations;
   await writeFile(join(reportDir, 'acceptance.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
