@@ -107,6 +107,13 @@ function unavailableTool(url) {
 
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+  if (event.data?.type === 'CACHE_LOCALE'
+    && ['ru','uk','pl','en','az','ka','id','es','fil','ne','hy'].includes(event.data.locale)) {
+    const url = new URL(`./data/locales/${event.data.locale}.js?v=220`, self.location.href).href;
+    event.waitUntil(caches.open(CACHE_VERSION).then(async cache => {
+      if (!await cache.match(url)) await cache.add(url);
+    }).catch(() => {}));
+  }
   if (event.data?.type === 'CACHE_COORDINATOR') event.waitUntil(loadToolPack().then(pack => {
     event.ports?.[0]?.postMessage({ ready: Boolean(pack?.stored) });
   }));

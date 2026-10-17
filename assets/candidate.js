@@ -1093,7 +1093,13 @@
 
     const hadController = Boolean(navigator.serviceWorker.controller);
     let refreshing = false;
+    // The first locale import may finish before the worker controls this page.
+    // Save that active locale explicitly so the first offline return can boot.
+    const cacheCurrentLocale = () => navigator.serviceWorker.controller?.postMessage({
+      type: "CACHE_LOCALE", locale: i18n.locale
+    });
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      cacheCurrentLocale();
       if (!hadController || refreshing) return;
       if (document.body.classList.contains("standalone-application-page")
         || document.querySelector(".application-modal[open]")) {
@@ -1110,6 +1116,7 @@
         registration.update().catch(() => {});
       })
       .catch(() => {});
+    navigator.serviceWorker.ready.then(cacheCurrentLocale).catch(() => {});
   }
 
   function init() {

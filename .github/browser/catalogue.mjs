@@ -282,6 +282,7 @@ try {
       await page.goto(base+'?lang=uk');await ready(page);
       await page.locator('#job-search').fill('Siechnice');
       await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
+      await page.waitForFunction(async()=>Boolean(await caches.match(new URL('data/locales/uk.js?v=220',location.href).href)));
       // No visit to the tool yet: offline navigation must explain the missing copy.
       assert.equal(await page.evaluate(async()=>{
         const names=await caches.keys();
