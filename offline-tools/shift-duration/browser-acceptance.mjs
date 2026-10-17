@@ -159,9 +159,13 @@ try {
     await page.goto(url); // No query: restore saved language, not a URL override.
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
     await result(page, '7 год 30 хв');
-    await page.goto(`${url}?lang=ka`);
-    assert.equal(await page.locator('html').getAttribute('lang'), 'en');
-    assert.match(await page.locator('#fallback').innerText(), /English is shown/);
+    for (const language of ['ka', 'tr', 'hy']) {
+      await page.goto(`${url}?lang=${language}`);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+      assert.match(await page.locator('#fallback').innerText(), /English is shown/);
+      await result(page);
+      assert.equal(await page.locator('#start').inputValue(), '22:00');
+    }
     await page.goto(`${url}?lang=ua`);
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
     assert.equal(await page.locator('#fallback').isVisible(), false);
@@ -247,3 +251,4 @@ try {
   await writeFile(path.join(reportDir, 'acceptance.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify({ status: report.status, head, base, scenarios: report.scenarios.map(s => ({ name: s.name, status: s.status })), externalRequestCount: report.externalRequestCount }));
 }
+

@@ -112,6 +112,28 @@ test('packaged dependencies are local, no network API or service worker, origina
   assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);assert.match(html,/aria-live="polite"/);
   assert.deepEqual(fs.readFileSync(path.join(__dirname,'primserv-logo.svg')),fs.readFileSync(path.join(__dirname,'../../assets/primserv-logo.svg')));
 });
+test('advertised languages match the connected language picker', () => {
+  const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+  const picker=html.match(/<select id="language">([\s\S]*?)<\/select>/)[1];
+  const choices=Array.from(picker.matchAll(/value="([^"]+)"/g), m=>m[1]);
+  assert.deepEqual([...C.LANGS].sort(),choices.sort());
+});
+test('prepared ka/tr/hy dictionaries do not break fallback or overwrite saved fields', () => {
+  for(const lang of ['ka','tr','hy']) {
+    assert.equal(C.language(lang),'en');
+    const raw=JSON.stringify({version:1,value:good()});
+    for(const denied of [false,true]) {
+      const u=ui(lang,raw,denied);
+      assert.equal(u.document.documentElement.lang,'en');
+      assert.equal(u.els.get('fallback').hidden,false);
+      assert.ok(u.labels.every(e=>typeof e.textContent==='string'&&e.textContent.length));
+      u.set(good());u.event('calculator','submit');
+      assert.match(u.els.get('result').textContent,/7 h 30 min/);
+      assert.equal(u.s.getItem(C.KEY),raw);
+      assert.equal(u.s.getItem('other'),'keep');
+    }
+  }
+});
 test('browser entry refuses execution outside CI before loading a browser or accessing git', () => {
   const run = spawnSync(process.execPath, [path.join(__dirname, 'browser-acceptance.mjs')], {
     env: { ...process.env, GITHUB_ACTIONS: 'false', PLAYWRIGHT_PACKAGE: '/nonexistent/playwright', TESTED_HEAD: '', TESTED_BASE: '' },
@@ -142,3 +164,4 @@ test('prepared CI entry records exact version, offline scenarios and closes reso
   for (const scenario of ['previous-v1', 'corrupt', 'future', 'read-denied', 'write-denied', 'remove-denied']) assert(source.includes(scenario));
   assert.doesNotMatch(source, /--no-sandbox|createServer|\.install\(/);
 });
+
