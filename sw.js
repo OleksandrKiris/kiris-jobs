@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v220-coordinator-2026-10-17-1";
+const CACHE_VERSION = "kiris-jobs-v220-coordinator-2026-10-17-2";
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -44,6 +44,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then(async (cache) => {
       await cache.addAll(CORE_SHELL);
+      // Installation failure leaves the previous worker active. Activation is
+      // too late to make this required migration transactional with the upgrade.
+      await preserveToolPack();
       await self.skipWaiting();
     })
   );
@@ -51,7 +54,7 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
+    cachedToolPack().then(pack => cleanToolCaches(pack?.name)).then(() => caches.keys())
       .then((keys) => Promise.all(
         keys
           .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_VERSION)
@@ -64,27 +67,90 @@ self.addEventListener("activate", (event) => {
 const TOOL_ROOT = new URL('./tools/coordinator/', self.location.href);
 const TOOL_FILES = ['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg'];
 const toolUrls = TOOL_FILES.map(name => new URL(name, TOOL_ROOT).href);
+// This namespace survives shell updates. Only a complete immutable generation
+// is published by the single atomic pointer write; staging is never served.
+const TOOL_CACHE_PREFIX = 'primserv-coordinator-pack-v1-';
+const TOOL_STATE_CACHE = 'primserv-coordinator-state-v1';
+const TOOL_POINTER = new URL('./sw.js?coordinator-pack=v1', self.location.href).href;
+let toolLoad;
+let onlineToolPack;
+async function readToolPack(name, exact = true) {
+  const cache = await caches.open(name);
+  if (exact) {
+    const keys = await cache.keys();
+    if (keys.length !== toolUrls.length || keys.some(key => !toolUrls.includes(key.url))) return null;
+  }
+  const responses = await Promise.all(toolUrls.map(url => cache.match(url)));
+  return responses.every(response => response?.ok) ? { name, responses, stored: true } : null;
+}
 async function cachedToolPack() {
   try {
-    const cache = await caches.open(CACHE_VERSION);
-    const responses = await Promise.all(toolUrls.map(url => cache.match(url)));
-    return responses.every(Boolean) ? { responses, stored: true } : null;
+    const state = await caches.open(TOOL_STATE_CACHE);
+    const name = await (await state.match(TOOL_POINTER))?.text();
+    return name?.startsWith(TOOL_CACHE_PREFIX) && (await caches.keys()).includes(name)
+      ? await readToolPack(name) : null;
   } catch { return null; }
 }
-async function loadToolPack(refresh = false) {
+async function cleanToolCaches(current) {
+  const keys = await caches.keys();
+  await Promise.all(keys.filter(key => key.startsWith(TOOL_CACHE_PREFIX) && key !== current)
+    .map(key => caches.delete(key)));
+}
+async function storeToolPack(responses) {
+  const name = TOOL_CACHE_PREFIX + crypto.randomUUID();
+  try {
+    const cache = await caches.open(name);
+    // Wait for every write to settle before removing a failed staging cache.
+    const writes = await Promise.allSettled(responses.map((response, i) => cache.put(toolUrls[i], response.clone())));
+    if (writes.some(result => result.status === 'rejected')) throw Error('Tool package write failed');
+    const pack = await readToolPack(name);
+    if (!pack) throw Error('Incomplete stored tool package');
+    const state = await caches.open(TOOL_STATE_CACHE);
+    await state.put(TOOL_POINTER, new Response(name));
+    await cleanToolCaches(name).catch(() => {});
+    return pack;
+  } catch (error) {
+    await caches.delete(name).catch(() => {});
+    throw error;
+  }
+}
+async function preserveToolPack() {
+  let pack = await cachedToolPack();
+  if (!pack) {
+    // Upgrade from the legacy shared shell cache: copy only the five canonical
+    // files from one complete cache. Never combine pieces from different caches.
+    const names = (await caches.keys()).filter(name => name.startsWith(CACHE_PREFIX)).reverse();
+    for (const name of names) {
+      const legacy = await readToolPack(name, false);
+      if (!legacy) continue;
+      // A migration write failure aborts installation before skipWaiting.
+      pack = await storeToolPack(legacy.responses);
+      break;
+    }
+  }
+}
+async function prepareToolPack(refresh) {
   const cached = await cachedToolPack();
   if (cached && !refresh) return cached;
+  if (onlineToolPack && !refresh) return onlineToolPack;
   try {
     const responses = await Promise.all(toolUrls.map(url => fetch(url, { cache: 'no-store', credentials: 'omit' })));
     if (responses.some(response => !response.ok)) throw Error('Incomplete tool package');
-    let stored = false;
     try {
-      const cache = await caches.open(CACHE_VERSION);
-      await Promise.all(responses.map((response, i) => cache.put(toolUrls[i], response.clone())));
-      stored = true;
-    } catch { /* A cache failure must not prevent the online page from opening. */ }
-    return { responses, stored };
-  } catch { return cached; }
+      const pack = await storeToolPack(responses);
+      onlineToolPack = null;
+      return pack;
+    } catch {
+      // Keep the last complete runtime on storage failure. A first online visit
+      // can still run from memory, but is never advertised as offline-ready.
+      return cached || (onlineToolPack = { responses, stored: false });
+    }
+  } catch { return cached || onlineToolPack; }
+}
+function loadToolPack(refresh = false) {
+  if (!toolLoad) toolLoad = prepareToolPack(refresh).finally(() => { toolLoad = null; });
+  // Concurrent navigation/message requests share the transaction, not response bodies.
+  return toolLoad.then(pack => pack && { ...pack, responses: pack.responses.map(response => response.clone()) });
 }
 function unavailableTool(url) {
   const requested = url.searchParams.get('lang') || 'en';
@@ -134,8 +200,8 @@ self.addEventListener("fetch", (event) => {
     if (event.request.mode === 'navigate') {
       event.respondWith(loadToolPack(true).then(pack => pack ? pack.responses[TOOL_FILES.indexOf(name)] : unavailableTool(requestUrl)));
     } else {
-      event.respondWith(caches.open(CACHE_VERSION).then(cache => cache.match(canonical)).catch(() => null)
-        .then(cached => cached || fetch(canonical, { cache: 'no-store', credentials: 'omit' })));
+      event.respondWith(loadToolPack().then(pack => pack?.responses[TOOL_FILES.indexOf(name)]
+        || fetch(canonical, { cache: 'no-store', credentials: 'omit' })));
     }
     return;
   }
