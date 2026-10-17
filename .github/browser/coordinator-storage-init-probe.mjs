@@ -16,7 +16,7 @@ const root = resolve(import.meta.dirname, '../..');
 const git = (...args) => execFileSync('git', ['-C', root, ...args]);
 for (const sha of [TESTED_HEAD, TESTED_BASE]) git('merge-base', '--is-ancestor', sha, 'HEAD');
 const report = { head: TESTED_HEAD, base: TESTED_BASE, checkout: git('rev-parse', 'HEAD').toString().trim(),
-  protocol: 'Three fixed samples per mode and action sequence, fresh profile each. Within each action sequence only init-script registration differs.',
+  protocol: 'Three fixed samples per mode and action sequence, fresh profile each. Compare no fixture, original init fixture and the same fixture executed once after readiness.',
   limitations: ['Small diagnostic sample; observer and scheduler effects remain possible.',
     'A pass is not a durability guarantee; the existing full acceptance suite is unchanged.'], resources: [], scenarios: [] };
 for (const name of ['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg']) {
@@ -31,7 +31,7 @@ const { seedFixture } = require('../../coordinator-demo/browser-fixtures.cjs');
 const KEY = 'primserv:coordinator-demo:v1';
 const url = pathToFileURL(join(root, 'coordinator-demo/index.html')).href + '?lang=en&from=acceptance#board';
 try {
-  for (let sample = 1; sample <= 3; sample++) for (const actions of ['status-only', 'full-board']) for (const mode of ['no-init-script', 'empty-fixture']) {
+  for (let sample = 1; sample <= 3; sample++) for (const actions of ['status-only', 'full-board']) for (const mode of ['no-init-script', 'empty-fixture', 'ready-fixture']) {
     const name = `${actions}-${mode}-${sample}`, profile = await createFileProfile(chromium, { width: 320, height: 900 });
     const context = profile.context, result = { name, mode, sample, actions, status: 'running' };
     const requests = [], errors = [];
@@ -51,6 +51,9 @@ try {
       const ready = async () => { await page.locator('#language').waitFor();
         await page.waitForFunction(() => document.querySelector('#filter').options.length === 4); };
       await page.goto(url); await ready();
+      if (mode === 'ready-fixture') await page.evaluate(seedFixture, {
+        key: KEY, other: 'primserv:acceptance:unrelated', mode: 'empty', previous: '', observe: false
+      });
       assert.equal(await page.locator('#demo-01').inputValue(), 'todo');
       if (actions === 'full-board') {
         // Match the full acceptance's existing keyboard/language/filter calls.
@@ -101,7 +104,7 @@ try {
   }
 } catch (error) { report.error = error.stack; }
 finally {
-  report.status = !report.error && report.scenarios.length === 12 && report.scenarios.every(s => s.status === 'passed') ? 'passed' : 'failed';
+  report.status = !report.error && report.scenarios.length === 18 && report.scenarios.every(s => s.status === 'passed') ? 'passed' : 'failed';
   if (report.status === 'failed') process.exitCode = 1;
   await writeFile(join(BROWSER_REPORT, 'init-probe.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
