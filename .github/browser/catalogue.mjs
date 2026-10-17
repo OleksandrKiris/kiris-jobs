@@ -272,8 +272,14 @@ try {
     await page.evaluate(async () => { localStorage.setItem('shortcut-unrelated', 'keep'); await caches.open('unrelated-shortcut-cache'); });
     for (const [file, bytes] of headFiles) await writeFile(join(artifact, file), bytes);
     await page.evaluate(async () => { const registration = await navigator.serviceWorker.ready; await registration.update(); });
-    await page.waitForFunction(async () => (await caches.keys()).includes('kiris-jobs-v220-shortcuts-2026-10-17-1'));
-    // Existing app reloads once on controllerchange; wait for the new target.
+    await page.waitForFunction(async () => {
+      const keys = await caches.keys();
+      return keys.includes('kiris-jobs-v220-shortcuts-2026-10-17-1')
+        && !keys.includes('kiris-jobs-v220-primserv-brand-2026-10-15-1');
+    });
+    // A first-visit tab deliberately does not auto-reload on controllerchange.
+    // Explicitly reopen the newly cached shell before checking its focus.
+    await page.reload(); await ready(page);
     await page.waitForFunction(() => document.activeElement?.id === 'job-search');
     assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
     assert.equal(await page.evaluate(() => localStorage.getItem('shortcut-unrelated')), 'keep');

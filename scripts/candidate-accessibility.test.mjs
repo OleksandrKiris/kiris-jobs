@@ -17,7 +17,7 @@ test("installed shortcuts focus existing targets, preserve URLs/context, and lea
     const calls = [];
     const nodes = Object.fromEntries(['job-search', 'footer-whatsapp', 'main-content'].map(id => [id, {
       focus(options) { calls.push(['focus', id, options.preventScroll]); },
-      scrollIntoView(options) { calls.push(['scroll', id, options.block]); }
+      scrollIntoView(options) { calls.push(['scroll', id, options.block, options.behavior]); }
     }]));
     const window = { location };
     const context = vm.createContext({ window, location, URL, Intl, Date,
@@ -32,7 +32,7 @@ test("installed shortcuts focus existing targets, preserve URLs/context, and lea
       location.hash = hash; calls.length = 0; const before = location.href;
       window.shortcutTest.focusCatalogShortcut();
       assert.equal(location.href, before, 'Language/query/hash remain intact');
-      assert.deepEqual(calls, direct ? [] : [['focus', id, true], ['scroll', id, 'center']]);
+      assert.deepEqual(calls, direct ? [] : [['focus', id, true], ['scroll', id, 'center', 'instant']]);
     }
     for (const hash of ['', '#job=greenhouse-tomatoes', '#unknown', '#%E0%A4%A']) {
       location.hash = hash; calls.length = 0; window.shortcutTest.focusCatalogShortcut();

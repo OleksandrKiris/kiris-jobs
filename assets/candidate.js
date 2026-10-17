@@ -1046,7 +1046,7 @@
     const target = $(id);
     if (!target) return;
     target.focus({ preventScroll: true });
-    target.scrollIntoView({ block: "center" });
+    target.scrollIntoView({ block: "center", behavior: "instant" });
   }
 
   function openDeepLink() {
