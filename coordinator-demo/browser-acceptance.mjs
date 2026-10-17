@@ -36,7 +36,7 @@ for (const name of files) {
 report.runtimeBytes = report.resources.reduce((sum, file) => sum + file.bytes, 0);
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
-const { seedFixture, acceptanceStatus } = createRequire(import.meta.url)('./browser-fixtures.cjs');
+const { seedNativeFixture, installFixtureHooks, acceptanceStatus } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const KEY = 'primserv:coordinator-demo:v1', OTHER = 'primserv:acceptance:unrelated';
 const initial = { version: 1, statuses: { 'demo-01': 'todo', 'demo-02': 'todo', 'demo-03': 'todo' } };
 const previous = JSON.stringify({ version: 1, statuses: { ...initial.statuses, 'demo-02': 'done' } });
@@ -48,9 +48,9 @@ const readEvidence=()=>({
     filter:document.querySelector('#filter')?.value,tasks:[...document.querySelectorAll('#tasks select')].map(x=>({id:x.id,value:x.value}))}
 });
 report.storageEvidence=[];
-report.observationProtocol={control:'Original storage operations and browser action order; no observer',
+report.observationProtocol={control:'No observer; one native fixture preparation before the tested journey',
   passive:'Wrap existing storage calls and retain real model; no added storage reads, but CPU/payload timing changes',
-  preseed:'Passive plus one explicitly labelled raw read after existing marker read',
+  preseed:'Passive plus one labelled raw read during ready-document fixture preparation, before tested edits',
   failure:'Unobserved controls inspected only after the original assertion failed; never retried'};
 const collectEvidence=async(page,scenario,phase)=>report.storageEvidence.push({scenario:scenario.name,phase,...await page.evaluate(readEvidence)});
 const focus = async (page, id, scenario) => {
@@ -89,7 +89,6 @@ try {
     context.on('request', request => { if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() }); });
     // Any attempted network request is blocked and fails the run, including GET.
     await context.route(/^https?:/, route => route.abort());
-    await context.addInitScript(seedFixture, { key: KEY, other: OTHER, mode: scenario.mode, previous, observe:scenario.observe||false });
     await context.tracing.start({ screenshots: true, snapshots: true });
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
@@ -97,6 +96,13 @@ try {
       // Start already offline: all five runtime files must already be on disk.
       await context.setOffline(true);
       await page.goto(`${fileURL}?lang=en&from=acceptance#board`); await ready(page);
+      const fixtureArgs={key:KEY,other:OTHER,mode:scenario.mode,previous,observe:scenario.observe||false};
+      // Initialize this owned profile once, after a real file document is ready.
+      // Subsequent reloads have observation/denial hooks but NO seeding or replay.
+      const preparation=await page.evaluate(seedNativeFixture,fixtureArgs);
+      if(scenario.observe)report.storageEvidence.push({scenario:scenario.name,...preparation});
+      await context.addInitScript(installFixtureHooks,fixtureArgs);
+      await page.reload(); await ready(page);
       const originalFileSearch = new URL(page.url()).search;
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('.task').count(), 3);
