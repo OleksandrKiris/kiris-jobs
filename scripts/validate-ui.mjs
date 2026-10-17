@@ -1,6 +1,7 @@
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { publicationInventory } from "./build-pages-artifact.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => readFile(path.join(root, relativePath), "utf8");
@@ -507,12 +508,16 @@ for (const match of serviceWorker.matchAll(/["']\.\/([^"'?]+)(?:\?[^"']*)?["']/g
   localFiles.add(match[1]);
 }
 
+// Generated public routes must resolve to the exact checked publication plan,
+// not be ignored as missing source directories.
+const publishedFiles = new Set(publicationInventory(root).map(file => file.path));
 for (const relativePath of localFiles) {
   if (!relativePath || relativePath === ".") continue;
   try {
     await access(path.join(root, relativePath));
   } catch {
-    errors.push(`Missing local UI asset: ${relativePath}`);
+    const publicFile = relativePath.endsWith('/') ? relativePath + 'index.html' : relativePath;
+    if (!publishedFiles.has(publicFile)) errors.push(`Missing local UI asset: ${relativePath}`);
   }
 }
 
@@ -522,3 +527,4 @@ if (errors.length) {
 }
 
 console.log(`UI quality check passed: ${staticIds.length} static ids, ${localFiles.size} local assets, v${styleVersion}.`);
+

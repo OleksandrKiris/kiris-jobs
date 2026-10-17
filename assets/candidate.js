@@ -844,7 +844,17 @@
     const trainingLocale = supported.includes(requested) ? requested : "en";
     const trainingUrl = new URL("https://oleksandrkiris.github.io/citronex-hydra-project/");
     trainingUrl.searchParams.set("lang", trainingLocale);
+    const demoCopy = {
+      ru: 'Кабинет координатора · демо · только вымышленные задачи',
+      uk: 'Кабінет координатора · демо · лише вигадані завдання',
+      pl: 'Panel koordynatora · demo · tylko fikcyjne zadania',
+      en: 'Coordinator demo · fictional tasks only'
+    };
+    const demoUrl = new URL('tools/coordinator/', document.baseURI || location.href);
+    demoUrl.searchParams.set('lang', i18n.locale);
+    demoUrl.searchParams.set('fromLang', i18n.locale);
     const services = {
+      coordinator: { href: demoUrl.href, label: (demoCopy[i18n.locale] || demoCopy.en + " (EN)") },
       company: { href: "https://www.primserv.pl/", label: enhancementCopy("serviceCompany") },
       training: {
         href: trainingUrl.toString(),
@@ -1083,7 +1093,13 @@
 
     const hadController = Boolean(navigator.serviceWorker.controller);
     let refreshing = false;
+    // The first locale import may finish before the worker controls this page.
+    // Save that active locale explicitly so the first offline return can boot.
+    const cacheCurrentLocale = () => navigator.serviceWorker.controller?.postMessage({
+      type: "CACHE_LOCALE", locale: i18n.locale
+    });
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      cacheCurrentLocale();
       if (!hadController || refreshing) return;
       if (document.body.classList.contains("standalone-application-page")
         || document.querySelector(".application-modal[open]")) {
@@ -1100,6 +1116,7 @@
         registration.update().catch(() => {});
       })
       .catch(() => {});
+    navigator.serviceWorker.ready.then(cacheCurrentLocale).catch(() => {});
   }
 
   function init() {
@@ -1119,3 +1136,4 @@
 
   init();
 })();
+

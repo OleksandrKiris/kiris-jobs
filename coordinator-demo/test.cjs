@@ -65,10 +65,10 @@ test('denied read never overwrites unseen previous data, even if writes would wo
 test('unsupported language and alias have deterministic fallback',()=>{
   assert.equal(M.language('ua'),'uk');assert.equal(M.language('UK'),'uk');assert.equal(M.language('ka'),'en');assert.equal(M.language('<script>'),'en');
 });
-function ui({lang='en',filter='all',store=storage(),historyDenied=false}={}) {
+function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true}={}) {
   let document;
   class Node {
-    constructor(tag){this.tagName=tag;this.children=[];this.handlers={};this.hidden=false;this.value='';this.textContent='';this.id='';this.attrs={};}
+    constructor(tag){this.tagName=tag;this.children=[];this.handlers={};this.hidden=false;this.value='';this.textContent='';this.id='';this.attrs={};this.dataset={};}
     append(...nodes){this.children.push(...nodes);}
     replaceChildren(...nodes){this.children=nodes;}
     setAttribute(k,v){this.attrs[k]=v;}
@@ -77,12 +77,12 @@ function ui({lang='en',filter='all',store=storage(),historyDenied=false}={}) {
   }
   const roots=[...read('index.html').matchAll(/id="([^"]+)"/g)].map(([,id])=>{const n=new Node('fixture');n.id=id;return n;});
   const find=(id,nodes)=>{for(const node of nodes){if(node.id===id)return node;const child=find(id,node.children);if(child)return child;}return null;};
-  document={documentElement:{},activeElement:null,title:'',createElement:t=>new Node(t),getElementById:id=>find(id,roots)};
-  const location=new URL('https://example.test/coordinator-demo/?lang='+lang+'&status='+filter+'&from=fixture#board');
+  document={documentElement:{},activeElement:null,title:'',createElement:t=>new Node(t),getElementById:id=>find(id,roots),querySelector:()=>({prepend(node){roots.unshift(node);}})};
+  const location=new URL(baseUrl+'?lang='+lang+'&status='+filter+'&from=fixture#board');
   const forbidden=()=>{throw Error('External network/operational action forbidden');};
   const window={CoordinatorDemo:M,localStorage:store};const historyCalls=[];
   const history={state:{keep:true},replaceState(s,title,url){if(historyDenied)throw Error('denied');assert.equal(s.keep,true);historyCalls.push(String(url));location.href=String(url);}};
-  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden}});
+  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})}});
   return {document,location,store,historyCalls,$:id=>document.getElementById(id),change(id,value){const n=this.$(id);n.focus();n.value=value;n.handlers.change();},click(id){this.$(id).handlers.click();}};
 }
 for(const lang of M.LANGS)test(lang+': real UI handlers, filter, focus, language, reload, cancel/reset',()=>{
@@ -111,11 +111,26 @@ test('UI remains interactive with forbidden history and storage',()=>{
 test('UI warns about corrupt storage without clearing it on initial render or edit',()=>{
   const s=storage([[M.KEY,'{broken']]),h=ui({store:s});assert.match(h.$('storage').textContent,/preserved/);h.change('demo-03','done');assert.equal(s.data.get(M.KEY),'{broken');
 });
-test('runtime has no network APIs, free text inputs, forms, SW or dependencies; all assets local',()=>{
+test('runtime has no data network APIs, free text inputs or forms; all assets local',()=>{
   const js=read('app.js')+read('model.js'),html=read('index.html');
-  assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|serviceWorker|setInterval|innerHTML/);
+  assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|setInterval|innerHTML/);
   assert.doesNotMatch(html,/<form\b|<input\b|https?:\/\//);assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);
   for(const [,name] of html.matchAll(/(?:src|href)="([^"]+)"/g))assert.ok(fs.existsSync(path.join(__dirname,name)),name);
   assert.equal(read('primserv-logo.svg'),fs.readFileSync(path.join(__dirname,'../assets/primserv-logo.svg'),'utf8'));
   assert.match(read('style.css'),/max-width:560px/);assert.match(read('style.css'),/focus-visible/);
+});
+
+
+test('downloaded file and source demo never register the online worker',()=>{
+  for(const baseUrl of ['file:///tmp/coordinator-demo/index.html','https://example.test/coordinator-demo/']) {
+    const h=ui({baseUrl});h.change('demo-01','doing');assert.equal(h.$('demo-01').value,'doing');
+    assert.equal(h.$('catalogue-return'),null);
+  }
+});
+test('published demo returns to same-origin catalogue and reports unavailable offline storage honestly',()=>{
+  const h=ui({baseUrl:'https://example.test/kiris-jobs/tools/coordinator/',lang:'ka',worker:false});
+  assert.equal(h.document.documentElement.lang,'en');
+  assert.equal(h.$('catalogue-return').href,'https://example.test/kiris-jobs/?lang=en');
+  assert.equal(h.$('offline').dataset.offlineState,'unavailable');
+  h.change('demo-02','done');assert.equal(h.$('demo-02').value,'done');
 });

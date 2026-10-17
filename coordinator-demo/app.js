@@ -20,6 +20,41 @@
     }
   };
   const $ = id => document.getElementById(id);
+  const published = /^https?:$/.test(location.protocol) && /\/tools\/coordinator\/(?:index\.html)?$/.test(location.pathname);
+  let offlineState = 'loading', offlineAttempt = 0, offlineTimer;
+  const webCopy = {
+    en: {back:'Back to vacancies', loading:'Preparing an offline copy…', ready:'Offline copy ready on this device. Demo statuses remain local. External links need internet.', unavailable:'Offline copy is unavailable. Keep this page open or reconnect and reload; local statuses are not deleted.'},
+    pl: {back:'Wróć do ofert', loading:'Przygotowywanie kopii offline…', ready:'Kopia offline jest gotowa na tym urządzeniu. Statusy demo są lokalne. Linki zewnętrzne wymagają internetu.', unavailable:'Kopia offline jest niedostępna. Nie zamykaj strony albo połącz się z siecią i odśwież. Lokalne statusy nie są usuwane.'},
+    ru: {back:'Вернуться к вакансиям', loading:'Подготовка копии для работы без сети…', ready:'Копия для работы без сети готова на этом устройстве. Демо-статусы остаются здесь. Внешним ссылкам нужен интернет.', unavailable:'Копия для работы без сети недоступна. Оставьте страницу открытой или подключитесь к сети и обновите её. Локальные статусы не удалены.'},
+    uk: {back:'Повернутися до вакансій', loading:'Підготовка копії для роботи без мережі…', ready:'Копія для роботи без мережі готова на цьому пристрої. Демо-статуси залишаються тут. Зовнішнім посиланням потрібен інтернет.', unavailable:'Копія для роботи без мережі недоступна. Залиште сторінку відкритою або підключіться до мережі й оновіть її. Локальні статуси не видалено.'}
+  };
+  function renderPublished() {
+    if (!published) return;
+    let back = $('catalogue-return');
+    if (!back) {
+      back = node('a'); back.id='catalogue-return';
+      document.querySelector('main').prepend(back);
+    }
+    const url = new URL('../../', location.href);
+    const original = new URL(location.href).searchParams.get('fromLang') || lang;
+    if (/^[a-z]{2,3}$/.test(original)) url.searchParams.set('lang', original);
+    back.href=url.href; back.textContent=webCopy[lang].back;
+    $('offline').textContent=webCopy[lang][offlineState];
+    $('offline').dataset.offlineState=offlineState;
+    $('offline').setAttribute('role','status');
+  }
+  function prepareOffline() {
+    if (!published) return;
+    if (!('serviceWorker' in navigator)) {offlineState='unavailable';renderPublished();return;}
+    const attempt=++offlineAttempt; clearTimeout(offlineTimer);
+    offlineTimer=setTimeout(()=>{if(attempt===offlineAttempt){offlineState='unavailable';renderPublished();}},15000);
+    navigator.serviceWorker.register(new URL('../../sw.js',location.href),{updateViaCache:'none'})
+      .then(()=>navigator.serviceWorker.ready).then(reg=>{
+        const channel=new MessageChannel();
+        channel.port1.onmessage=event=>{channel.port1.close();if(attempt!==offlineAttempt)return;clearTimeout(offlineTimer);offlineState=event.data?.ready?'ready':'unavailable';renderPublished();};
+        reg.active.postMessage({type:'CACHE_COORDINATOR'},[channel.port2]);
+      }).catch(()=>{if(attempt!==offlineAttempt)return;clearTimeout(offlineTimer);offlineState='unavailable';renderPublished();});
+  }
   const initialURL = new URL(location.href);
   let requested = initialURL.searchParams.get('lang') || 'en';
   let lang = M.language(requested);
@@ -78,6 +113,7 @@
     $('links').setAttribute('aria-label',t.links);
     const paths=[['company','https://www.primserv.pl/'],['jobs','https://oleksandrkiris.github.io/kiris-jobs/?lang='+lang],['training','https://oleksandrkiris.github.io/citronex-hydra-project/?lang='+(lang==='uk'?'ua':lang)],['bot','https://t.me/KirisWorkPoland_bot']];
     $('links').replaceChildren(...paths.map(([key,url])=>{const a=node('a',t[key]);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}));
+    renderPublished();
     if (focused && M.IDS.includes(focused)) ($(focused) || $('filter')).focus();
   }
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
@@ -86,4 +122,7 @@
   $('cancel').addEventListener('click',()=>{$('resetConfirm').hidden=true;$('reset').focus();});
   $('confirm').addEventListener('click',()=>{model.reset(true);$('resetConfirm').hidden=true;render();$('reset').focus();});
   render();
+  if(published && 'serviceWorker' in navigator) navigator.serviceWorker.addEventListener('controllerchange', prepareOffline);
+  prepareOffline();
 })();
+
