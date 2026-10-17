@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, 01:08 Europe/Budapest; kiris-jobs main374d5bdd после60. Владелец: роль10.
+Сверка: 18.10.2026, 01:20 Europe/Budapest; kiris-jobs main374d5bdd после60. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -15,7 +15,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `374d5bddbd4630352f75e902536a11c2175c5411` | [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft; [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68)44383, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74)fd9, [#86](https://github.com/OleksandrKiris/kiris-jobs/pull/86)173f: общий Catalogue blocker; [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) draft, будущий общий кандидат | [39077298495](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39077298495) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) ready,efbb5a8 | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
-| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `95ba121c42e82582a9efdff0d4b4b38e577e7840` | [#12](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/12) draft,80162bbb: all12 picker/return/reset, приёмка идёт | [39075670274](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39075670274) |
+| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `95ba121c42e82582a9efdff0d4b4b38e577e7840` | [#12](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/12) ready,80162bbb: all12 picker/return/reset;230unit/53browser и independent source/runtime/peer CLEAR, не опубликован | [39075670274](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39075670274) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
