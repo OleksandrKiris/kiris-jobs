@@ -38,6 +38,11 @@ history. Blob filtering avoids historical media eagerly; Git may lazily fetch
 the exact worker and subsequent old files needed by the existing upgrade test.
 Actual transfer bytes depend on object reuse/server support and were not
 measured on GitHub here. File:// fixture servers may ignore filtering.
+The real-Git regression records exactly two explicit fetch commands with the
+specified SHA/refspec, depths and filter. A separate unrequested branch carries
+a 575,000-byte fictional payload; its blob remains absent after preparation
+and no extra remote-tracking branch is created. This is fixture evidence of
+bounded scope, not a measurement of GitHub wire bytes or lazy-fetch count.
 If ancestry exceeds the depth64 bound or the server rejects the exact object,
 CI fails clearly rather than weakening acceptance. This is an explicit limit.
 

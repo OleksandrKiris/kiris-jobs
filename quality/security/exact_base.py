@@ -36,7 +36,10 @@ def prepare(root, base, head):
         # exact merge's bounded history, with blobs filtered, once. A base that
         # remains unrelated/unprovable fails; never accept a replacement base.
         git(root, 'fetch', '--no-tags', '--depth=64', '--filter=blob:none', 'origin', checkout)
-        git(root, 'merge-base', '--is-ancestor', base, checkout)
+        try:
+            git(root, 'merge-base', '--is-ancestor', base, checkout)
+        except subprocess.CalledProcessError as error:
+            raise ValueError('Exact base ancestry unproven within depth64; retain event SHA and review history availability') from error
     if git(root, 'rev-parse', 'HEAD') != checkout:
         raise ValueError('Tested checkout changed')
     print(f'exact-base={base} head={head} checkout={checkout} fetched={fetched}')

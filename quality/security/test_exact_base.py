@@ -2,6 +2,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from exact_base import git, prepare
 
@@ -16,6 +17,7 @@ class ExactBaseTests(unittest.TestCase):
         git(self.remote, 'init', '-b', 'main')
         git(self.remote, 'config', 'user.name', 'Fixture')
         git(self.remote, 'config', 'user.email', 'fixture@example.invalid')
+        git(self.remote, 'config', 'uploadpack.allowFilter', 'true')
         self.commit('sw.js', 'old worker')
         self.base = git(self.remote, 'rev-parse', 'HEAD')
         git(self.remote, 'switch', '-c', 'feature')
@@ -35,9 +37,23 @@ class ExactBaseTests(unittest.TestCase):
 
     def test_depth_two_missing_base_restored_without_checkout_change(self):
         before = git(self.checkout, 'rev-parse', 'HEAD')
+        git(self.remote, 'switch', '-c', 'unrelated-media')
+        self.commit('large-fixture.txt', 'fictional-media-payload-' * 25000)
+        unrelated_blob = git(self.remote, 'rev-parse', 'HEAD:large-fixture.txt')
+        git(self.remote, 'switch', 'main')
         with self.assertRaises(subprocess.CalledProcessError):
             git(self.checkout, 'show', f'{self.base}:sw.js')
-        self.assertTrue(prepare(self.checkout, self.base, self.head))
+        with patch('exact_base.git', wraps=git) as observed:
+            self.assertTrue(prepare(self.checkout, self.base, self.head))
+        fetches = [call.args[1:] for call in observed.call_args_list if call.args[1] == 'fetch']
+        self.assertEqual(len(fetches), 2)
+        self.assertEqual(fetches[0], ('fetch', '--no-tags', '--depth=1', '--filter=blob:none', 'origin', self.base))
+        self.assertEqual(fetches[1], ('fetch', '--no-tags', '--depth=64', '--filter=blob:none', 'origin', before))
+        # Enumerate existing objects without triggering a promisor lazy fetch.
+        objects = git(self.checkout, 'cat-file', '--batch-all-objects', '--batch-check=%(objectname)').splitlines()
+        self.assertNotIn(unrelated_blob, objects)
+        self.assertEqual(git(self.checkout, 'for-each-ref', '--format=%(refname)', 'refs/remotes'),
+                         'refs/remotes/origin/HEAD\nrefs/remotes/origin/main')
         self.assertEqual(git(self.checkout, 'show', f'{self.base}:sw.js'), 'old worker')
         self.assertEqual(git(self.checkout, 'rev-parse', 'HEAD'), before)
         self.assertFalse(prepare(self.checkout, self.base, self.head))
@@ -55,7 +71,7 @@ class ExactBaseTests(unittest.TestCase):
         git(self.remote, 'switch', '--orphan', 'unrelated')
         self.commit('sw.js', 'unrelated worker')
         base = git(self.remote, 'rev-parse', 'HEAD')
-        with self.assertRaises(subprocess.CalledProcessError):
+        with self.assertRaisesRegex(ValueError, 'ancestry unproven within depth64'):
             prepare(self.checkout, base, self.head)
 
     def test_genuine_missing_worker_is_not_skipped(self):
