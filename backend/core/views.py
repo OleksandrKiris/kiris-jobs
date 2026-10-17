@@ -30,3 +30,15 @@ def not_found(request):
 
 def server_error(request):
     return api_error("internal_error", "The request could not be completed.", status=500)
+
+
+def csrf_failure(request, reason=""):
+    # Exclude the supplied reason, origin, token and request URL.
+    return api_error("csrf_failed", "The request could not be verified.", status=403)
+
+
+def bad_request(request, exception):
+    if request.path.startswith('/api/'):
+        return api_error('invalid_request', 'The request could not be parsed.', status=400)
+    from django.views.defaults import bad_request as default_bad_request
+    return default_bad_request(request, exception)

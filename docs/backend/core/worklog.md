@@ -1,13 +1,16 @@
-# Role12 worklog — 2026-10-17
+# Local core acceptance — 2026-10-17
 
-Branch: feat/backend-core-local-v1-20261017. Local Django 6.1.2
-health/version scaffold and in-memory test configuration created.
-Python compileall passed; dependency-free unit test: 1 passed.
-Django check and API tests not executed: no Django package in runtime;
-package-index DNS unavailable.
+PR48 originally contained health/version handlers and response headers only.
+The earlier missing-Python-CI and Pages-publication blockers were resolved by
+accepted PR50 and PR45. PR44 supplies the separate pure domain library.
 
-Important: a draft PR could not be opened by the GitHub action
-(tool safety rejection). No PR or merge exists for this branch.
-Next step: open a draft PR from this branch, then run Django tests
-on an environment with Django 6.1.2. Keep it unmerged until the
-Pages artifact excludes backend/ and docs/backend/.
+Continuation implements body-size and shared local rate enforcement, bounded
+thread-safe admission, JSON CSRF/host failures, protective headers and safe
+structured logging. Sixteen new regression tests cover actual failure paths,
+body boundaries, concurrent admission, time-window recovery and log redaction.
+All 37 core/domain tests pass locally on Python3.12 and pinned Django6.1.2;
+Django check and migration-drift check also pass. GitHub exact-commit results
+are linked in PR48 after completion.
+
+No server was deployed and no real data or persistent database was connected.
+The former note that no PR exists and Django cannot be tested is obsolete.

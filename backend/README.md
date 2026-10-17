@@ -1,26 +1,38 @@
-# PrimServ · Django core (local-only draft)
+# PrimServ · local Django core
 
-The published catalogue and recruitment bot remain independent. No real
-users, candidate data, AI, Neon, external services or production settings.
+Read-only local API scaffold, independent of the catalogue and recruitment bot.
+No real users, candidate records, external services or production deployment.
 
-Python 3.12+; install Django 6.1.2 once, then run on loopback:
+Python 3.12+; install the pinned requirements in an isolated environment:
 
 ```sh
-cd backend
-python -m venv "$HOME/.venvs/primserv-core"
-. "$HOME/.venvs/primserv-core/bin/activate"
-python -m pip install -r requirements.txt
-python manage.py check --settings=config.settings.test
-python manage.py test tests.core --settings=config.settings.test
-python manage.py runserver 127.0.0.1:8000 --settings=config.settings.dev
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -r backend/requirements.txt
+python .github/scripts/backend-ci.py
+python backend/manage.py runserver 127.0.0.1:8000 --settings=config.settings.dev
 ```
 
-Local routes: `/api/v1/health/`, `/api/v1/version/`.
-SQLite is in memory only; no production database or migrations.
-Pure no-dependency test: `python -m unittest discover -s tests/core -p test_stdlib.py`.
+Routes: `/api/v1/health/` and `/api/v1/version/` (GET/HEAD). Database and test
+configuration use only in-memory SQLite. Pages excludes backend/ and docs/backend/.
 
-**Draft limitations:** active request throttling, payload-size enforcement,
-structured request logging and corresponding negative Django tests are not
-yet connected. Do not expose runserver publicly. Default Django request/server
-logging is silenced to avoid URLs with personal query data.
-Docs: `../docs/backend/core/api-v1.md`.
+API guards enforce a 16,384-byte body limit and a shared 120-request, 60-second
+window per middleware instance/process. The counter is lock-protected, bounded
+and stores no client identifiers. It resets on process restart. This is a local
+resource guard, not a distributed production rate limiter; an upstream server
+must bound request buffering and connections before Django in any future deployment.
+
+API responses carry no-store, API version, generated request ID and protective
+headers. JSON failures cover 400/403/404/405/413/429/500; 429 includes Retry-After.
+CSRF remains enabled; unsafe requests without a valid token can return 403 before
+the read-only view returns 405. Unexpected exceptions return generic JSON when
+DEBUG=False. Development DEBUG=True can display Django diagnostics locally.
+
+Structured logs contain only API version, generated ID, allowlisted method/route,
+status and elapsed milliseconds. Paths, query strings, bodies, IPs, credentials,
+headers and exception details are excluded. Django's request/server/security
+loggers remain silenced. No log storage or external collector is configured.
+
+`backend-ci.py` runs all core/domain test files and Django checks. Request guards,
+concurrent admission, recovery, body boundaries, CSRF, errors and redaction are
+covered by tests. See `../docs/backend/core/api-v1.md`.

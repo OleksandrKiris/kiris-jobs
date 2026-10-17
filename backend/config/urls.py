@@ -10,3 +10,4 @@ urlpatterns = [
 ]
 
 handler500 = "core.views.server_error"
+handler400 = "core.views.bad_request"

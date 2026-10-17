@@ -8,9 +8,9 @@ DEBUG = False
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]", "testserver"]
 INSTALLED_APPS = ["core"]
 MIDDLEWARE = [
+    "core.middleware.APIGuardMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "core.middleware.APIGuardMiddleware",
 ]
 ROOT_URLCONF = "config.urls"
 TEMPLATES = []
@@ -31,6 +31,7 @@ SECURE_REFERRER_POLICY = "no-referrer"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
+CSRF_FAILURE_VIEW = "core.views.csrf_failure"
 X_FRAME_OPTIONS = "DENY"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 16_384
 FILE_UPLOAD_MAX_MEMORY_SIZE = 16_384

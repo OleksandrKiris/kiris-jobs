@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>PrimServ · Coordinator demo</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="model.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header><img src="primserv-logo.svg" alt="PrimServ" width="43" height="60"><div><p class="eyebrow">PRIMSERV · LOCAL DEMO · v0.1.0</p><h1 id="title">Coordinator demo</h1></div></header>
+  <main>
+    <p id="demoNotice" class="notice">Fictional tasks only. No employee records, bookings or messages.</p>
+    <div class="toolbar">
+      <label><span id="languageLabel">Language</span><select id="language"><option value="en">English</option><option value="pl">Polski</option><option value="uk">Українська</option><option value="ru">Русский</option></select></label>
+      <label><span id="filterLabel">Status</span><select id="filter"></select></label>
+    </div>
+    <p id="fallback" class="notice" hidden></p>
+    <p id="storage" role="status" aria-live="polite"></p>
+    <p id="summary" role="status" aria-live="polite"></p>
+    <section id="tasks" aria-label="Demo tasks"></section>
+    <p id="empty" hidden></p>
+    <section class="reset-area">
+      <button id="reset" type="button">Reset demo progress</button>
+      <div id="resetConfirm" hidden>
+        <p id="confirmText">Remove this demo's progress?</p>
+        <button id="confirm" type="button">Reset</button><button id="cancel" type="button">Cancel</button>
+      </div>
+    </section>
+    <p id="offline" class="muted"></p>
+    <nav id="links" aria-label="PrimServ links"></nav>
+    <noscript>JavaScript is required for the demo. No data has been sent. Для работы демонстрации включите JavaScript. Данные не отправлялись.</noscript>
+  </main>
+</body>
+</html>
