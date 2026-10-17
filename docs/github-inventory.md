@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 17.10.2026, 17:36 Europe/Budapest; kiris-jobs дополнен после приёмки67. Владелец: роль10.
+Сверка: 17.10.2026, 17:36 Europe/Budapest; kiris-jobs дополнен после приёмки72. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `bf0fd233d12cb80939addbabc9526156e871b67c` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) ready, [#61](https://github.com/OleksandrKiris/kiris-jobs/pull/61) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft | [39048649677](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39048649677) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `a8093c9e251f117dd113649fa82c3441ed5846e8` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#61](https://github.com/OleksandrKiris/kiris-jobs/pull/61) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#73](https://github.com/OleksandrKiris/kiris-jobs/pull/73), [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#75](https://github.com/OleksandrKiris/kiris-jobs/pull/75) draft | [39049976240](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39049976240) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `02a1bfdb08b1ccf72e49113f57ca144ab14cd328` | [#11](https://github.com/OleksandrKiris/citronex-hydra-project/pull/11) draft | [39035254461](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39035254461) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
@@ -61,7 +61,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
   Post Backend39048649759/Pages39048649677 success; семь публичных runtime-ресурсов
   побайтно совпали с main. Контракт принят отдельно, HTTP backend не опубликован.
   старый failure39047515282 относится к shallow base issue69. Десять CI-путей
-  переданы вручную, ownership-gate и запуск этих20 тестов в CI пока не установлены.
+  переданы вручную, live ownership-gate не установлен; запуск20 тестов позже принят72.
 - Причина fixture failure из PR61 установлена до app: повторный seed при утрате
   session marker. PR66 принят на head604e627b2025328f2831ef8f2db738de90d20c99,
   merge e93dc59c6339a94020e955969a074c8c1d3a5956. Независимые 29 тестов, две регрессии
@@ -80,17 +80,35 @@ recruitmentbot. Остальной аккаунт не объявляется о
   отдельно; старые упавшие workflow не перезапускаются вслепую. В новых PR67/68
   helper и полные CI прошли, fetched=False: base уже доступен после merge.
   Живой missing-base fetch этим не доказан; его проверяют реальные Git fixtures.
-- PR62 остаётся внутренней библиотекой: независимо 33 domain-теста и совпадение
-  snapshot67 подтверждены; validator spy не доказывает полный JSON Schema.
-  После67 нужны настоящий validator/config12, parity/negative integration13/12,
-  затем локальный URL12. Production API и новые реальные компании не подключены.
-- PR68 готовит read-only материалы, 35 локальных+16 parity-проверок. Head1384773
-  прошёл Catalogue39048491983/Backend39048492008 и8/8 browser. Это не доказывает
-  причину прежнего done/reload failure. Headf241d58 прошёл Catalogue39048655674/
-  Backend39048655735 и10/10 browser, включая2 no-preread controls; initial raw до
-  app сохранил done. Независимо найден P3 ?lang=RU → requested=en при русском UI,
-  исправление и case-регрессия поручены9. Публикация требует принятого67 и cache/SW
-  интеграции1 с upgrade/offline/taskprogress/interruption до merge68.
+- PR72 принят headdeb34683d2fb65b50376dd5b02cd8466a3ac9b36/mergea8093c9:
+ 20 принятых тестов и4 проверки runner прошли независимо; expectedFailure больше не маскирует
+ падение. Post Backend39049976165/Pages39049976240 success,7 publicbytes совпали.
+ Тесты выполняются в отдельной CI venv; Django environment не меняется, hardlock отсутствует.
+- PR62 отдельно проверен как библиотека (33 теста); spy не доказывает schema.
+ PR73@b41b6c6a независимо прошёл 46 backend-тестов, а combined73+62@177872e3 —61 тест
+ и6 настоящих schema/domain integrations, включая16 сочетаний языка и лимита. Это не merge
+ и не HTTP. Совместный73head5d00a7c/basea809 имеет прежние backend/deps/schema
+ bytes и только accepted72 CI delta; независимое reviewclear,
+ Backend39050175711/Catalogue39050175723 success. Merge73, затем62 иURL12 ещё впереди.
+- PR68 CLOSED/PARKED, NOTmerged: exacta41851cf8477584e5aeeff47b518e3577f7968df,
+ ветка сохранена; bundleverify/patch/manifest/metadata сохранены9. Независимо
+ P3case исправлен red/green,36tests/16parity иCI39048930084/39048930092green,
+ artifact12106589116:10browserPASS,0externalHTTP/errors. Runtime45 789B;
+ appSHA2564c081403d2434593a4b5f7ec635277eff30d1e475d9b1976f1d45b92e0c111f0.
+ Ранние initreads вno-prereadcontrols остаются; историческая причина не доказана.
+ После fixturefix переоткрывать68; cache/SW интеграция1 до publicmerge обязательна.
+- PR61@02485d33 run39049003896 и прежнийPR72@594 run39048985559 выявили разные
+ reload failures mainfixture: v1todo!=doing иboard-narrowmissingdemo01. Старые
+ входные raw подтверждены trace, initraw/marker нет. PureVM continuousstorage
+ сохраняет состояние; fresh/stale input дают одинаковые сочетания статусов, причинного
+ browserдоказательства нет. PR75@b808045/basea809 — единственный diagnosticWIP9,
+ независимо подтверждены прежние8controls/assertions и33 unit-теста; измерения отдельно,observereffect указан.
+ Catalogue39050068735 FAILURE(13/14), Backend39050068823 success; original8 иpassive3
+ прошли. Независимо artifact12107372113 подтвердил initialKEY/marker=null доfixture,
+ 0fixtureKEYwrites/removals, первыйappget=null иrealmodelTODO. Для этого случая
+ исключены fixtureoverwrite/nativeformrestore; storagewhy/связь со старымv1 не доказаны.
+- PR74@3f5ddeb — подготовленная9-row HRappka evidence/gap matrix; исправлены
+ live APIguide/S5→S6 и parked68. Это не второйroadmap или доказанное превосходство.
 
 ## Регулярное продолжение
 
