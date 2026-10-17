@@ -19,7 +19,7 @@ assert(relativeReport.startsWith(`..${path.sep}`) || path.isAbsolute(relativeRep
 const git = args => execFileSync('git', args, { cwd: root, timeout: 15000 });
 git(['merge-base', '--is-ancestor', base, 'HEAD']);
 git(['merge-base', '--is-ancestor', head, 'HEAD']);
-const runtime = ['index.html', 'core.js', 'app.js', 'style.css', 'primserv-logo.svg'];
+const runtime = ['index.html', 'core.js', 'locales.js', 'app.js', 'style.css', 'primserv-logo.svg'];
 const resources = [];
 for (const name of runtime) {
   const resource = `offline-tools/shift-duration/${name}`;
@@ -117,7 +117,7 @@ try {
   browser = await chromium.launch({ headless: true });
   report.browser = `Chromium ${browser.version()}`;
   for (const width of [1280, 320]) await scenario(`route-${width}`, { width, height: 900 }, async (page, context, item) => {
-    item.actions.push('Offline first load, empty state, invalid form, overnight calculation, keyboard Save, reload/Back, four locales and fallback, reset, online recovery');
+    item.actions.push('Offline first load, empty state, invalid form, overnight calculation, keyboard Save, reload/Back, seven locales and fallback, reset, online recovery');
     assert.match(await page.locator('#storageStatus').innerText(), /Nothing saved/);
     await calculate(page);
     assert.equal(await page.locator('#start').getAttribute('aria-invalid'), 'true');
@@ -144,7 +144,7 @@ try {
     await page.goto('about:blank');
     await page.goBack();
     await result(page);
-    for (const [lang, expected] of [['ru', '7 ч 30 мин'], ['uk', '7 год 30 хв'], ['pl', '7 godz. 30 min'], ['en', '7 h 30 min']]) {
+    for (const [lang, expected] of [['ru', '7 ч 30 мин'], ['uk', '7 год 30 хв'], ['pl', '7 godz. 30 min'], ['en', '7 h 30 min'], ['ka', '7 სთ 30 წთ'], ['tr', '7 sa 30 dk'], ['hy', '7 ժ 30 ր']]) {
       await page.locator('#language').selectOption(lang);
       assert.equal(await page.locator('html').getAttribute('lang'), lang);
       assert.equal(await page.locator('#start').inputValue(), '22:00');
@@ -161,11 +161,21 @@ try {
     await result(page, '7 год 30 хв');
     for (const language of ['ka', 'tr', 'hy']) {
       await page.goto(`${url}?lang=${language}`);
-      assert.equal(await page.locator('html').getAttribute('lang'), 'en');
-      assert.match(await page.locator('#fallback').innerText(), /English is shown/);
-      await result(page);
+      assert.equal(await page.locator('html').getAttribute('lang'), language);
+      assert.equal(await page.locator('#fallback').isVisible(), false);
+      assert.equal(await page.locator('#externalNotice').isVisible(), true);
+      await result(page, {ka:'7 სთ 30 წთ',tr:'7 sa 30 dk',hy:'7 ժ 30 ր'}[language]);
+      await page.locator('#save').click();
+      await page.goto(url);
+      assert.equal(await page.locator('html').getAttribute('lang'), language);
+      await page.screenshot({path:path.join(reportDir, `language-${language}-${width}.png`), fullPage:true});
+      if(width === 320) await narrow(page);
       assert.equal(await page.locator('#start').inputValue(), '22:00');
     }
+    await page.goto(`${url}?lang=xx`);
+    assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+    assert.equal(await page.locator('#fallback').isVisible(), true);
+    await result(page);
     await page.goto(`${url}?lang=ua`);
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
     assert.equal(await page.locator('#fallback').isVisible(), false);
@@ -251,4 +261,5 @@ try {
   await writeFile(path.join(reportDir, 'acceptance.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify({ status: report.status, head, base, scenarios: report.scenarios.map(s => ({ name: s.name, status: s.status })), externalRequestCount: report.externalRequestCount }));
 }
+
 

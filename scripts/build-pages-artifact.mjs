@@ -3,9 +3,12 @@ import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSy
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-// Match upload-pages-artifact@v5's default hidden-file exclusion, then exclude
-// ONLY these two root-level applications. Never modify or delete source files.
+// Match upload-pages-artifact@v5's default hidden-file exclusion. Keep the
+// existing offline boundary and exclude only explicitly registered development
+// paths; similarly named public assets and existing docs remain unchanged.
 export const offlineRoots = Object.freeze(['coordinator-demo', 'offline-tools']);
+const nonPublicPaths = Object.freeze([...offlineRoots, 'backend', 'contracts', 'quality',
+  'docs/backend', 'docs/integration', 'docs/quality']);
 const inside = (parent, child) => {
   const rel = relative(parent, child);
   return rel === '' || (!rel.startsWith(`..${sep}`) && rel !== '..' && !isAbsolute(rel));
@@ -27,9 +30,11 @@ export function inventory(root, { source = false } = {}) {
   const walk = (directory, prefix = '') => {
     for (const name of readdirSync(directory).sort()) {
       // The existing Pages action excludes dot paths at every depth.
-      if (source && (name.startsWith('.') || (!prefix && offlineRoots.includes(name)))) continue;
       const path = prefix ? `${prefix}/${name}` : name;
-      if (!source && (name.startsWith('.') || (!prefix && offlineRoots.includes(name)))) {
+      const forbidden = name.startsWith('.') || nonPublicPaths.includes(path);
+      // Skip the whole registered subtree before reading any of its contents.
+      if (source && forbidden) continue;
+      if (!source && forbidden) {
         throw new Error(`Forbidden artifact path: ${path}`);
       }
       const absolute = join(directory, name);

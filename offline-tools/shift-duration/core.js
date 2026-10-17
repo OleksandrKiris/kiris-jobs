@@ -1,9 +1,7 @@
 (function (root) {
   'use strict';
   const KEY = 'primserv.offline.shift-duration.v1';
-  // Advertise only dictionaries connected to the current UI. Prepared ka/tr/hy
-  // translations remain in locales.js until their complete integration.
-  const LANGS = ['ru', 'uk', 'pl', 'en'];
+  const LANGS = ['ru', 'uk', 'pl', 'en', 'ka', 'tr', 'hy'];
   const empty = () => ({ start: '', end: '', nextDay: false, breakMinutes: '0', lang: 'en' });
   function language(value) { return value === 'ua' ? 'uk' : LANGS.includes(value) ? value : 'en'; }
   function minutes(value) {
@@ -57,4 +55,5 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ShiftDuration = api;
 })(typeof window !== 'undefined' ? window : this);
+
 
