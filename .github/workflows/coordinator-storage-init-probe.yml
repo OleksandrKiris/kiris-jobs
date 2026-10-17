@@ -1,0 +1,49 @@
+name: Coordinator storage init probe
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/coordinator-storage-init-probe.yml
+      - .github/browser/coordinator-storage-init-probe.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Init probe / Playwright ${{ matrix.playwright }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        playwright: ['1.56.1', '1.64.1']
+    env:
+      TESTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      TESTED_BASE: ${{ github.event.pull_request.base.sha || github.sha }}
+      COMPARED_PLAYWRIGHT: ${{ matrix.playwright }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install exact tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/coordinator-browser" --no-save --no-package-lock "playwright@$COMPARED_PLAYWRIGHT"
+          "$RUNNER_TEMP/coordinator-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Compare same-URL reload with and without the unchanged empty fixture
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/coordinator-browser/node_modules/playwright
+          BROWSER_REPORT: ${{ runner.temp }}/coordinator-init-report
+        run: node .github/browser/coordinator-storage-init-probe.mjs
+      - name: Preserve all probe outcomes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coordinator-init-pw${{ matrix.playwright }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/coordinator-init-report
+          if-no-files-found: error
+          retention-days: 7
