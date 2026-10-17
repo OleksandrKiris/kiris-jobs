@@ -17,7 +17,7 @@ Backend requirements and its environment are unchanged. `pip check` is required.
 
 The explicit runner requires at least nine materials and eleven ownership
 tests, logs actual discovered counts, and fails missing, reduced, failed or
-skipped required tests. Additions are permitted. Changing this baseline needs
+skipped or expected-failing required tests. Additions are permitted. Changing this baseline needs
 review; this does not prevent deliberate malicious PR edits to test code.
 Before running, it probes valid/invalid `date` format checking; no optional
 format extras are necessary for these accepted date-only schemas. A future
@@ -26,8 +26,10 @@ new schema format requires its own dependency/probe review.
 Local Python3.11.9 isolated environment: 20/20 accepted regressions passed,
 including invalid dates, schema/source parity, unknown/foreign paths, eight
 independent areas, map changes, dependency versions and real Git copy/rename
-fixtures. Three runner regressions prove missing/empty/reduced suites fail,
-an intentional failure remains failed, and skips cannot produce success.
+fixtures. Four runner regressions prove missing/empty/reduced suites fail,
+an intentional failure remains failed, skips cannot produce success, and a
+20-case suite of real `expectedFailure` tests is rejected despite unittest's
+successful result. This closes the independent P2 review finding in PR72.
 `pip check` passed. Exact-head Python3.12 Ubuntu CI remains required.
 
 ```text

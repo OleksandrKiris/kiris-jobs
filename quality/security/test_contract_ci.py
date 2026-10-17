@@ -31,3 +31,16 @@ class ContractDiscoveryTests(unittest.TestCase):
         result = unittest.TestResult()
         result.skipped.append(('fixture', 'intentional skipped test'))
         self.assertFalse(passed(result))
+
+    def test_expected_failures_do_not_pass_required_suite(self):
+        class RequiredRegression(unittest.TestCase):
+            @unittest.expectedFailure
+            def test_required(self):
+                self.fail('intentional expected failure')
+
+        result = unittest.TestResult()
+        unittest.TestSuite(RequiredRegression('test_required') for _ in range(20)).run(result)
+        self.assertEqual(result.testsRun, 20)
+        self.assertEqual(len(result.expectedFailures), 20)
+        self.assertTrue(result.wasSuccessful())
+        self.assertFalse(passed(result))

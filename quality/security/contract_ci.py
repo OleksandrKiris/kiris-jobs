@@ -38,7 +38,7 @@ def main():
 
 
 def passed(result):
-    return result.wasSuccessful() and not result.skipped
+    return result.wasSuccessful() and not result.skipped and not result.expectedFailures
 
 
 if __name__ == '__main__':
