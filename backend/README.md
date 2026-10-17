@@ -36,3 +36,13 @@ loggers remain silenced. No log storage or external collector is configured.
 `backend-ci.py` runs all core/domain test files and Django checks. Request guards,
 concurrent admission, recovery, body boundaries, CSRF, errors and redaction are
 covered by tests. See `../docs/backend/core/api-v1.md`.
+
+## Local configuration regression checks
+
+`test_local_configuration.py` imports dev/test settings in fresh isolated Python
+processes with invented external database/cache/secret settings. Both remain on
+in-memory SQLite and local memory cache; no production values are read. The
+migration regression executes `migrate` twice against the runner's in-memory
+SQLite and verifies the current empty migration graph and unchanged table set.
+There are no persistent models yet; this is not evidence of future data migration
+or PostgreSQL compatibility.
