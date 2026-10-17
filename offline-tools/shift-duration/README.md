@@ -9,8 +9,8 @@
 
 ## Запуск и офлайн
 
-Скачайте всю папку `offline-tools/shift-duration/` вместе с пятью ресурсами
-`index.html`, `core.js`, `app.js`, `style.css`, `primserv-logo.svg` на устройство.
+Скачайте всю папку `offline-tools/shift-duration/` вместе с шестью ресурсами
+`index.html`, `core.js`, `locales.js`, `app.js`, `style.css`, `primserv-logo.svg` на устройство.
 Откройте `index.html` в браузере. Классические скрипты, без ES-модулей/fetch/CDN,
 сборки и установки зависимостей. При ограничении локальных файлов браузером:
 
