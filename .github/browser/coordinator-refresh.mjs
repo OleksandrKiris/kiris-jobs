@@ -99,6 +99,35 @@ function interruption(origin, pathname) {
   return proof;
 }
 
+export async function verifyMaterialOffline(page, { id, fits, shot }) {
+    assert.equal(await page.evaluate(() => navigator.onLine), false, 'Material proof runs with browser offline');
+    await page.locator('#materialQuery').waitFor();
+    assert.equal(await page.locator('#materials article').count(), 1);
+    assert.equal(await page.locator('#materials h3').innerText(), 'Уборка территории');
+    assert.equal(await page.locator('#materials h3').getAttribute('lang'), 'ru');
+    assert.match(await page.locator('#materialsStatus').innerText(), /ru/);
+    const notice = await page.locator('#materialsNotice').innerText();
+    assert.match(notice, /2026-07-23/); assert.match(notice, /2026-10-17/);
+    const source = await page.locator('#materials a').getAttribute('href');
+    assert.equal(source, 'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');
+    const snapshot = await page.locator('#materials article').innerText();
+    await page.locator('#materialsSource').selectOption('mock');
+    assert.equal(await page.locator('#materials article').innerText(), snapshot);
+    await page.locator('#materialQuery').focus();
+    assert.equal(await page.locator('#materialQuery').evaluate(node => node === document.activeElement), true);
+    await page.locator('#materialQuery').fill('joint-no-such-material');
+    assert.equal(await page.locator('#materials article').count(), 0);
+    assert.ok((await page.locator('#materialsStatus').innerText()).length > 0);
+    await page.locator('#materialQuery').fill('территории');
+    assert.equal(await page.locator('#materials article').count(), 1);
+    await page.locator('#materialQuery').fill('');
+    await page.locator('#materialsSource').selectOption('snapshot');
+    await page.locator('#materialsTitle').scrollIntoViewIfNeeded();
+    await fits(page); await shot(page, id + '-materials-offline');
+    return { title: 'Уборка территории', language: 'ru', source, snapshotMockEqual: true,
+      emptySearch: true, restoredSearch: true, sourceDate: '2026-07-23', verifiedDate: '2026-10-17' };
+  }
+
 export async function acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin,
   context, ready, fits, shot, active, startServer, stopServer, transition = null }) {
   const legacy = publishedToolBytes(transition?.published);
@@ -137,35 +166,7 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
   };
 
-  const materialProof = async (page, id) => {
-    if (!transition) return null;
-    assert.equal(await page.evaluate(() => navigator.onLine), false, 'Material proof runs with browser offline');
-    await page.locator('#materialQuery').waitFor();
-    assert.equal(await page.locator('#materials article').count(), 1);
-    assert.equal(await page.locator('#materials h3').innerText(), 'Уборка территории');
-    assert.equal(await page.locator('#materials h3').getAttribute('lang'), 'ru');
-    assert.match(await page.locator('#materialsStatus').innerText(), /ru/);
-    const notice = await page.locator('#materialsNotice').innerText();
-    assert.match(notice, /2026-07-23/); assert.match(notice, /2026-10-17/);
-    const source = await page.locator('#materials a').getAttribute('href');
-    assert.equal(source, 'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');
-    const snapshot = await page.locator('#materials article').innerText();
-    await page.locator('#materialsSource').selectOption('mock');
-    assert.equal(await page.locator('#materials article').innerText(), snapshot);
-    await page.locator('#materialQuery').focus();
-    assert.equal(await page.locator('#materialQuery').evaluate(node => node === document.activeElement), true);
-    await page.locator('#materialQuery').fill('joint-no-such-material');
-    assert.equal(await page.locator('#materials article').count(), 0);
-    assert.ok((await page.locator('#materialsStatus').innerText()).length > 0);
-    await page.locator('#materialQuery').fill('территории');
-    assert.equal(await page.locator('#materials article').count(), 1);
-    await page.locator('#materialQuery').fill('');
-    await page.locator('#materialsSource').selectOption('snapshot');
-    await page.locator('#materialsTitle').scrollIntoViewIfNeeded();
-    await fits(page); await shot(page, id + '-materials-offline');
-    return { title: 'Уборка территории', language: 'ru', source, snapshotMockEqual: true,
-      emptySearch: true, restoredSearch: true, sourceDate: '2026-07-23', verifiedDate: '2026-10-17' };
-  };
+  const materialProof = (page, id) => transition ? verifyMaterialOffline(page, { id, fits, shot }) : null;
 
   try {
   for (const width of [1280, 320]) for (const failedFile of TOOL_FILES) {

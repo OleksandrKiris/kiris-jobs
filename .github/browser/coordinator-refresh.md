@@ -1,5 +1,33 @@
 # Public coordinator generation acceptance
 
+## Current default scope:19 composite groups
+
+After the first combined head4179fb918180c63b99d88933ec0258086ae232fe
+passed48 groups (artifact12116086659, SHA256f80ca679016d6c5ce71f3ea6ba9c099efb98045a3ff4f689c151f6fd0ab5afb3),
+root requested four explicit HTTP functional groups on the actual candidate.
+The normal catalogue entry now runs ONLY the19 current composite groups:
+4HTTP functional (1280/320 normal,320 corrupt/denied) +10 warm cuts +5 cold
+cuts. The complete previous runner/assertions are preserved byte-for-byte
+as catalogue-full.mjs and remain available through catalogue.mjs --full.
+There is no implicit 'all old groups reran' claim. catalogue-reuse.json pins
+the verified earlier report and all15 baseline runtime hashes; the new
+runner checks unchanged root/branch hashes before reusing that evidence.
+Mandatory npm tests are unchanged; no extra manual24VM run is requested.
+
+The report has an explicit kind=composite-test-inputs receipt with THREE
+independent source pins: current PR60 shell/SW commit, candidate5=c896d09d,
+publishedOLD5=62cb5788. It records worker Git blob50ef25e and SHA69bdeefc,
+all file hashes and CI checkout. The staged overlay is not represented as
+candidate product files committed to the shell head. Only test input is
+copied; owned sources/fixtures/workflows remain untouched.
+
+Four functional groups additionally prove supported/unsupported languages,
+honest RU material fallback, reload/Back/return context, first cold offline
+entry, search/no-match/mock parity and offline material. Corrupt records
+remain untouched; denied/protected storage edits honestly reset on reload.
+They do not promise durable progress when storage is unavailable. Fixture83
+is inherited; this public HTTP runner never rewrites owner9 file fixtures.
+
 ## Additional current PR68 joint gate
 
 The original33 catalogue groups and24 SW regressions are retained. One
