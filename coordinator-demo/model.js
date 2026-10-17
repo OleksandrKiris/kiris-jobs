@@ -54,5 +54,58 @@
       }
     };
   }
-  return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create});
+  const CONTENT_VERSION = 'fc672d805fb884eb1d09bdc8ca342ba530ad83f4';
+  const material = {
+    id:'site-cleaning-summary-ru', type:'job-summary', job_id:'site-cleaning',
+    location_id:'zgorzelec', language:'ru', title:'Уборка территории',
+    text:'Уборка территории предприятия, сбор отходов и простые хозяйственные работы внутри технических зон и на улице.',
+    source:{repo:'OleksandrKiris/kiris-jobs',path:'data/content.js',ref:CONTENT_VERSION,
+      selector:'jobs[id=site-cleaning]',source_updated_on:'2026-07-23',
+      verified_on:'2026-10-17',verification_status:'verified-against-repository'},
+    synthetic:false
+  };
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function materialRequest(request={}) {
+    if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['location_id','language','limit','cursor'].includes(k)))throw Error('invalid_request');
+    const {location_id='zgorzelec',language='en',limit=20,cursor=null}=request;
+    if (location_id !== 'zgorzelec' ||
+        !['ru','ua','uk','pl','en','ka','tr','hy'].includes(language) ||
+        !Number.isInteger(limit) || limit < 1 || limit > 20 || cursor !== null) throw Error('invalid_request');
+    return {location_id,language,limit,cursor};
+  }
+  function materialSnapshot(request={}) {
+    const q=materialRequest(request), canonical=q.language==='ua'?'uk':q.language;
+    return {api_version:'v1',schema_version:'1.0.0',content_version:CONTENT_VERSION,
+      requested_language:q.language,effective_language:'ru',fallback:canonical!=='ru',
+      items:[clone(material)],next_cursor:null};
+  }
+  // Deliberately synchronous and local: mock is a JSON transport, never a URL.
+  // Both sources must return this exact pinned, reviewed slice; no online mode.
+  function materialReader({mode='snapshot',mock}={}) {
+    if (!['snapshot','mock'].includes(mode) || (mode==='mock' && typeof mock!=='function')) throw Error('online_disabled');
+    return Object.freeze({read(request={}) {
+      const q=materialRequest(request), expected=materialSnapshot(q);
+      if(mode==='snapshot') return expected;
+      const raw=mock(clone(q));
+      if(typeof raw!=='string'||raw.length>32768||new TextEncoder().encode(raw).length>32768) throw Error('invalid_response');
+      let response;
+      try {response=JSON.parse(raw);} catch {throw Error('invalid_response');}
+      // v1 additive fields and JSON property order remain compatible.
+      const equal=(a,b)=>{
+        if(a===b)return true;
+        if(!a||!b||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b))return false;
+        if(Array.isArray(a)&&a.length!==b.length)return false;
+        return Object.keys(b).every(k=>Object.hasOwn(a,k)&&equal(a[k],b[k]));
+      };
+      if(!equal(response,expected))throw Error('invalid_response');
+      return clone(response);
+    }});
+  }
+  function searchMaterials(response,query='') {
+    if(typeof query!=='string'||query.length>120)throw Error('invalid_query');
+    const words=query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    return response.items.filter(item=>words.every(word=>(item.title+' '+item.text+' '+item.location_id).toLocaleLowerCase().includes(word)));
+  }
+  return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create,
+    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials});
 });

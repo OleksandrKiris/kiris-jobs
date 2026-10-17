@@ -23,6 +23,13 @@
     <p id="summary" role="status" aria-live="polite"></p>
     <section id="tasks" aria-label="Demo tasks"></section>
     <p id="empty" hidden></p>
+    <section aria-labelledby="materialsTitle">
+      <h2 id="materialsTitle">Source materials</h2>
+      <label><span id="materialsLabel">Search source text</span><input id="materialQuery" type="search" maxlength="120"></label>
+      <p id="materialsNotice" class="muted"></p>
+      <p id="materialsStatus" role="status" aria-live="polite"></p>
+      <div id="materials"></div>
+    </section>
     <section class="reset-area">
       <button id="reset" type="button">Reset demo progress</button>
       <div id="resetConfirm" hidden>

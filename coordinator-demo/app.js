@@ -20,6 +20,31 @@
     }
   };
   const $ = id => document.getElementById(id);
+  const materialCopy={
+    en:{title:'Source materials',search:'Search source text',notice:'Local read-only snapshot · online off. Repository text checked on 2026-10-17; source updated 2026-07-23. This does not confirm current working conditions.',fallback:'Requested: {requested} · Shown: ru. No translation is available for this material.',empty:'No confirmed material matches. No answer is inferred.',source:'Original source (internet required)'},
+    ru:{title:'Материалы с источником',search:'Поиск по тексту источника',notice:'Локальный снимок только для чтения · онлайн выключен. Текст сверен с репозиторием 2026-10-17; источник обновлён 2026-07-23. Это не подтверждение текущих условий работы.',fallback:'Запрошен язык: {requested} · Показан: ru. Перевода этого материала нет.',empty:'Подтверждённый материал не найден. Ответ не придумывается.',source:'Исходный материал (нужен интернет)'},
+    uk:{title:'Матеріали з джерелом',search:'Пошук у тексті джерела',notice:'Локальний знімок лише для читання · онлайн вимкнено. Текст звірено з репозиторієм 2026-10-17; джерело оновлено 2026-07-23. Це не підтвердження поточних умов роботи.',fallback:'Запитана мова: {requested} · Показано: ru. Перекладу цього матеріалу немає.',empty:'Підтверджений матеріал не знайдено. Відповідь не вигадується.',source:'Джерело (потрібен інтернет)'},
+    pl:{title:'Materiały ze źródłem',search:'Szukaj w tekście źródłowym',notice:'Lokalna kopia tylko do odczytu · tryb online wyłączony. Tekst sprawdzono w repozytorium 2026-10-17; źródło zaktualizowano 2026-07-23. Nie potwierdza to aktualnych warunków pracy.',fallback:'Wybrany język: {requested} · Wyświetlono: ru. Brak tłumaczenia tego materiału.',empty:'Nie znaleziono potwierdzonego materiału. Odpowiedź nie jest wymyślana.',source:'Źródło (wymaga internetu)'}
+  };
+  const reader=M.materialReader();
+  function renderMaterials() {
+    const t=materialCopy[lang];
+    // Unsupported URL language stays visible in provenance; it is not silently relabelled EN.
+    const requestedLanguage=['ru','ua','uk','pl','en','ka','tr','hy'].includes(requested)?requested:'en';
+    const response=reader.read({language:requestedLanguage});
+    const items=M.searchMaterials(response,$('materialQuery').value||'');
+    $('materialsTitle').textContent=t.title; $('materialsLabel').textContent=t.search;
+    $('materialsNotice').textContent=t.notice;
+    $('materialsStatus').textContent=items.length?(response.fallback?t.fallback.replace('{requested}',response.requested_language):'ru · Zgorzelec'):t.empty;
+    $('materials').replaceChildren(...items.map(item=>{
+      const article=node('article'),heading=node('h3',item.title),text=node('p',item.text),source=node('a',t.source);
+      heading.lang=item.language;text.lang=item.language;
+      source.href='https://github.com/'+item.source.repo+'/blob/'+item.source.ref+'/'+item.source.path;
+      source.target='_blank';source.rel='noopener noreferrer';
+      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector,'muted'),source);
+      return article;
+    }));
+  }
   const published = /^https?:$/.test(location.protocol) && /\/tools\/coordinator\/(?:index\.html)?$/.test(location.pathname);
   let offlineState = 'loading', offlineAttempt = 0, offlineTimer;
   const webCopy = {
@@ -114,10 +139,12 @@
     const paths=[['company','https://www.primserv.pl/'],['jobs','https://oleksandrkiris.github.io/kiris-jobs/?lang='+lang],['training','https://oleksandrkiris.github.io/citronex-hydra-project/?lang='+(lang==='uk'?'ua':lang)],['bot','https://t.me/KirisWorkPoland_bot']];
     $('links').replaceChildren(...paths.map(([key,url])=>{const a=node('a',t[key]);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}));
     renderPublished();
+    renderMaterials();
     if (focused && M.IDS.includes(focused)) ($(focused) || $('filter')).focus();
   }
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
   $('filter').addEventListener('change',()=>{filter=$('filter').value;syncURL();render();});
+  $('materialQuery').addEventListener('input',renderMaterials);
   $('reset').addEventListener('click',()=>{$('resetConfirm').hidden=false;$('cancel').focus();});
   $('cancel').addEventListener('click',()=>{$('resetConfirm').hidden=true;$('reset').focus();});
   $('confirm').addEventListener('click',()=>{model.reset(true);$('resetConfirm').hidden=true;render();$('reset').focus();});

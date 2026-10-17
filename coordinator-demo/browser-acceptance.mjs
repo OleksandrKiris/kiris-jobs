@@ -73,6 +73,15 @@ try {
       await page.goto(`${fileURL}?lang=en&from=acceptance#board`); await ready(page);
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('.task').count(), 3);
+      assert.equal(await page.locator('#materials article').count(),1);
+      assert.match(await page.locator('#materialsStatus').innerText(),/en.*ru/);
+      assert.equal(await page.locator('#materials h3').getAttribute('lang'),'ru');
+      await page.locator('#materialQuery').fill('bogatynia');
+      assert.equal(await page.locator('#materials article').count(),0);
+      assert.match(await page.locator('#materialsStatus').innerText(),/No confirmed material/);
+      await page.locator('#materialQuery').fill('отходов');
+      assert.equal(await page.locator('#materials article').count(),1);
+      await page.locator('#materialQuery').fill('');
       await fits(page);
       if (scenario.mode === 'empty') {
         await page.locator('#language').focus(); await page.keyboard.press('Tab'); await focus(page, 'filter');
