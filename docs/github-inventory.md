@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `558e6e75e85734e1895b323094d47a43a8792fde` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77) ready, [#82](https://github.com/OleksandrKiris/kiris-jobs/pull/82) diagnostic draft, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft, [#85](https://github.com/OleksandrKiris/kiris-jobs/pull/85) CI fix | [39065923321](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39065923321) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `62cb57883e617d67e54d8ba5b280f616ca651848` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77) ready, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft | [39070310282](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39070310282) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | нет; PR13 принят | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `3a7ea5e0b70abece336f41c00c31cf510928aaeb` | [#10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10) draft | [39061616083](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39061616083) |
@@ -239,6 +239,9 @@ recruitmentbot. Остальной аккаунт не объявляется о
   каталоговый этап33PASS (18old+10warm+5cold503/recovery), последующий coordinator
   file-gate79FAILURE; Backend39057420520SUCCESS. Не merged/не опубликован.
   Это proof ace6655→76/60, будущие5runtime68 отдельно. Подробности в issue80.
+
+
+PR85 принят17октября: headaf008c86/base558e6e75 →merge62cb5788, восемь exact-headchecksSUCCESS; post Backend39070310347/Pages39070310282SUCCESS,7public assets HTTP200/exact bytes. Только2строки CI, runtime прежний. Affected consumer74@e7311a10/base62cb интегрировал принятое исправление: Backend39070535484/Catalogue39070535513SUCCESS, actual preflight/16+8PASS. Общий workflow разрешён владельцем15 точным accepted blob40250282. Net diff74 — один Markdown; native matrix NOTSCHEDULED по paths, прежние85sixjobs атрибутированы unchanged runtime/fixtures, нового шестикратного запуска нет. PR82 закрыт без merge; его будущие diagnostic workflows не импортировались.
 
 ## Регулярное продолжение
 

@@ -64,7 +64,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 17.10.2026
 
-Последняя сверка main: `558e6e75e85734e1895b323094d47a43a8792fde`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83.
+Последняя сверка main: `62cb57883e617d67e54d8ba5b280f616ca651848`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85.
 Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
 Следующим проходом принят Dragon9, main `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
@@ -660,19 +660,40 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 11 | Local1f087fe/base558:26unit,6/6ZIP runtime exact | Combined browser gate; новый file-protocol policy отказ отдельно |
 | 12 | PR77@d2cbb0fb/base558 READY; оба exact CI success,3 пути прежние | Свежий guard10; не повторять54+8 на unchanged serializer |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | PR74@ada95214: mandatory green, matrix preflight failure | Общий fix15, не новый параллельный fixture repair |
-| 15 | Preflight60/74 локализован до browser | Review существующего PR85@af008c86; второго автора/PR нет |
+| 14 | PR74@e7311a10/base62cb: mandatory green, exact preflight/16+8 PASS | Runtime/fixtures byte-identical85; native matrix NOTSCHEDULED для sole docs diff; отдельная docs-приёмка |
+| 15 | PR85@af008c86 принят62cb5788, post-CI/7public assets PASS | Один affected consumer74; завершить review telemetry9, второго автора/PR нет |
 
 PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
 Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
-recovery доказан fixture, не live. Нужны свежий guard10 и один affected consumer.
-Queue85 →77/Dragon10;60/68 получают слот после своих конкретных gates. Готовый77
+recovery доказан fixture, не live. Guard10 завершён: exact af008/base558 принят
+merge62cb5788; post Backend39070310347 и Pages39070310282 SUCCESS, семь публичных
+runtime-файлов HTTP200 совпадают с ранее проверенными байтами; tested/merged tree610028a7.
+Это единственный guarded merge прохода20:59. Один affected consumer — PR74: обычная
+интеграция принятого main остановлена на add/add общего workflow; owner15 подтвердил
+точный accepted blob40250282 и восстановил его в index/worktree; unmerged entries0.
+Consumer74 завершил integration heade7311a10/base62cb; Backend39070535484 и
+Catalogue39070535513 SUCCESS, actual exact-base/preflight fetched=False и16+8 PASS.
+Новый PR74 net diff — один integration Markdown; runtime/fixtures/workflow равны62cb.
+Native matrix на e731 NOTSCHEDULED по accepted paths, а не PASS/FAIL: шесть прежних85
+jobs относятся к тем же байтам, нового выполнения шести jobs здесь нет. Scoped review
+не требует искусственного запуска для sole docs diff. Массовый rerun60/74 не выполнялся.
+Переход missing-base в live consumer ещё не доказан; PR74 ещё не merged.
+Queue77/Dragon10;60/68 получают слот после своих конкретных gates. Готовый77
 не ждёт универсального объяснения file-storage. Исторический red не является
 текущим результатом нового head.
 
 Matrix68 на Chromium156: functional16 PASS, но histogram unavailable даёт
 diagnostic gate FAIL; calculator там NOTRUN. Это не preflight85 и не потеря задачи.
-Owner9/15 готовят capability/contract review; обязательные gates ради green не снимаются.
+Новый source-контракт proposalSHA2560f600a79/fixturesfe9bc7c9 получил CLEAR14/15
+и независимую delta-проверку. Никаких сопоставимых same-name пар, mixed incomparable,
+all-missing/unknown/malformed дают FAIL; absent-both не превращается в ноль.
+Owner9 подготовил один local helper/test/docs patch SHA256f169c5b8: авторский новый
+fake-CDP suite9/9 PASS, combined64/64; old-helper9tests даёт1PASS/8FAIL.
+Независимое review реализации ещё требуется: новые RPC-имена и runtime не наблюдались,
+авторский результат не заменяет приёмку. Root review нужен до одного changed-head CI; functional16
+и shift8 остаются обязательными, общий nonzero не снимается.
+Первый independent review local patch нашёл P2: consumer report ещё подписывает156
+legacy141 scope/revision. Передана малая metadata-only коррекция; CI до приёмки не запускается.
 
 На WIP назначаются один автор, один source-reviewer и один runtime-verifier.
 Один current manifest содержит repo/head/base/runtime hashes, proof/команды/результат,
