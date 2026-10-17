@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77), [#78](https://github.com/OleksandrKiris/kiris-jobs/pull/78) draft | [39055542734](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39055542734) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `f89e0e4a3bf0a58714de0883970e6569c78e318d` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) reopened draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77) draft, [#82](https://github.com/OleksandrKiris/kiris-jobs/pull/82) diagnostic draft, [#83](https://github.com/OleksandrKiris/kiris-jobs/pull/83) draft | [39063588437](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39063588437) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b` | [#13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13) draft | [39059220706](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39059220706) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `3a7ea5e0b70abece336f41c00c31cf510928aaeb` | [#10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10) draft | [39061616083](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39061616083) |
@@ -22,6 +22,11 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 ## Приёмка и ограничения
 
+- PR78 принят guard611089b7/base54b597 →f89e0e4a: только два документа,
+  независимое ревью clear. Exact Backend39062359825/Catalogue39062359944 success
+  (module16/16, оба native restart). Post Backend39063588523/Pages39063588437 success,
+  семь public runtime assets HTTP200 exact-tested bytes/tree58b58b09 совпал.
+  Issue79 открыт: этот docs-only pass не исправляет непостоянный reload.
 - PR56 kiris-jobs принят guarded merge `fbf5683a1c253a2eb740e998d17c58addd64673c`.
   Head `a9ad1a43cee0e53bdb8b3dfa3f6c501462e504bb`; 39 backend-тестов, 10 проверок
   CI-runner, Django check и проверка миграций прошли. Это локальная пустая SQLite,
@@ -74,21 +79,28 @@ recruitmentbot. Остальной аккаунт не объявляется о
   Issue81 CLOSED, Pages39061616083 success и пять public runtime assets HTTP200
   exact-tested bytes. Старые недостаточные/красные proofs сохранены, не исправление79.
   Следующий WIP4 — PR10@6cb0c3dd/base3a7, публичная guide-ссылка/requested context
-  и clipboard fallback. CI39062064278 success; независимая приёмка ещё выполняется.
-  Draft, не merged/не опубликован; второй merge в этом проходе не выполняется.
+  и clipboard fallback. CI39062064278 success; independent review clear153unit/17browser,
+  шесть current PNG просмотрены,7paths/no deletes/11binarysame/actualHEADofflineJS.
+  OS clipboard — fixtures; late rejection unit/static, browser late resolve only.
+  Frozen/draft, не merged/не опубликован; следующий guard отдельно.
 - Pinned company-import source проверен отдельно на synthetic :memory: fixture:
   preview-valid/apply-UnicodeEncodeError на4 surrogate inputs, baseline unchanged.
   Private PROPOSED guard+test candidate:8 generic CommandError/SQL0/validemojiPASS;
-  independent review clear. Source repo/production не изменены, полного project suite
+  independent review clear. Actual TestCase: old10PASS, old11 с новой регрессией
+  четыре preview FAIL/четыре apply ERROR, candidate11PASS. Источники/proposal immutable.
+  Source repo/production не изменены, полного project suite
   или tenant isolation proof нет; это условие перед reuse, не внедрённый backend fix.
 - Роли3/5/6/7/9/11 подготовили отдельные локальные commits/patches и адресные тесты.
   В передаче имеются исторические отказы отдельных GitHub write/PR операций без
   полного исходного ответа. Эти операции не повторялись другим инструментом.
   Не объявлять локальные patches опубликованными или общий запрет всех новых операций.
 - Роль8 read-only сверила безопасные metadata: recruitmentbot current/active deployment37
-  completed. Код v4 и canonical archive26 находятся в прежнем cloud/Library-контексте;
-  байты candidate ZIP локально не получены. Соответствие исходников deployment,
-  новый deploy и реальная отправка не выполнялись. Это отдельная зависимость передачи.
+  completed. Исходный v4 ZIP теперь получен:664425B/SHA256b0b33003…a79ee74,
+  72 entries проверены. Owner local evidence:110 MiniApp/472 total tests/build PASS,
+  preservation7c106d1/validation8933e5c, runtime/lockfile unchanged, deliverable ZIP+bundle.
+  Canonical26/deployment-source correspondence и exactbuild browser acceptance
+  не подтверждены; прежний administrator-blocked HTTP preview не обходился.
+  Новый deploy, production/env/DB и реальные отправки не выполнялись.
 - Роль14 опубликовала read-only срез и карту в PR67. Head2f26bf5 независимо
   прошёл 20 тестов: 9 материалов с JSON Schema/FormatChecker и 11 ownership,
   включая настоящие Git copy/source-edit/rename. Старый task-write пакет не
@@ -160,6 +172,19 @@ recruitmentbot. Остальной аккаунт не объявляется о
  сообщают одинаковые target/context/storageKey, но observed-v1 initial raw/marker
  после reload=null до fixture. Внутренняя identity/причина этим не доказаны;
  bounded primary-source research не нашёл подтверждённого upstream fix. Issue79 открыт.
+ Same68 следующий704961af/base54b: один отдельно разрешённый CI показал12 доступных
+ literal backend-open histograms (count1/sum0/OK), шесть zero-delta pairs.
+ Catalogue39063668245 red15/16 observed-v1-preseed, Backend39063668373 success;
+ native2 PASS. Это не KEY commit/load proof. Synthetic parser P2 принят в работу;
+ actual12 coherent, local correction отдельно на ревью, не исправление79.
+- Внешние diagnostic82@f319 и fixture83@462 — draft, не приняты.
+  Current82 fixed3samples/version:1.56.1 триsuccess/1.64.1 триfailure; init1.64
+  16/18, ready-once vs init-each-document confound. Три rawlogs просмотрены.
+  Exact83:42unit/6×16browser PASS, но mandatoryCatalogue39063711982 red позже
+  в shift-duration/corrupt; future/denied NOTRUN. Owner11 разбирает новый случай;
+  source/runtime proof и global gate отдельно, без вывода о причине/storage fix.
+  После этого PR83 перешёл наd4db033a; новая delta/CI ещё не приняты.
+  Source clear и прежние42unit/6×16 относятся только к46209753.
 - PR61@02485d33 run39049003896 и прежнийPR72@594 run39048985559 выявили разные
  reload failures mainfixture: v1todo!=doing иboard-narrowmissingdemo01. Старые
  входные raw подтверждены trace, initraw/marker нет. PureVM continuousstorage

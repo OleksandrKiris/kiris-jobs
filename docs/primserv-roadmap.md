@@ -64,7 +64,7 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 17.10.2026
 
-Последняя сверка main: `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d`, после PR53/55/56/59/66/64/70/67/72/61/73/76.
+Последняя сверка main: `f89e0e4a3bf0a58714de0883970e6569c78e318d`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78.
 Отдельными проходами приняты HYDRA11/12, main `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b`.
 Следующим проходом принят Dragon9, main `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
@@ -293,6 +293,17 @@ JS79991B, CSS19323B, SW1659B и manifest323B HTTP200 exact-tested bytes.
 Это пять runtime-файлов;11 прежних binary blobs сохранены, нового полного
 аудита audio, OS voices или физического телефона не было.
 
+Принят [PR78](https://github.com/OleksandrKiris/kiris-jobs/pull/78):
+head `611089b76032878b02051893f0c42e651e68ceb9`, base `54b597fc`,
+guarded merge `f89e0e4a3bf0a58714de0883970e6569c78e318d`.
+Только roadmap/inventory; остальные tracked bytes сохранены. Независимое
+финальное ревью clear, exact Backend39062359825/Catalogue39062359944 success,
+16/16 module scenarios и оба native restarts прошли. Это зелёный docs-only run,
+не исправление непостоянного issue79. Post Backend39063588523/Pages39063588437
+success; tested/merged tree совпали. Семь public runtime assets HTTP200
+побайтно совпали с tested head; упаковка переносит пять исходников из
+`coordinator-demo/` в `tools/coordinator/`. Django этим merge не опубликован.
+
 Новый gate1 в PR60@40edbe38 доказал18 прежних+10 warm browser случаев:
 каждый из пяти ресурсов ×1280/320, реальные socket cuts, старые5 hashes/одна
 generation/progress, восстановление нового пакета и offline после stop origin.
@@ -456,7 +467,8 @@ PR44/48 приняты как локальные backend-модули, PR34 — 
 локализация калькулятора. Они закрыты и не остаются незавершёнными PR.
 При сверке main `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` PR59/66/64/70/67/72/61/73/76 merged;
 остаются PR60 каталога, PR62 локального домена, PR74 матрицы14,
-PR77 сериализации12 и draft PR78 этой фиксации. PR75 закрыт, не merged.
+PR77 сериализации12. Документация PR78 принята отдельным guarded mergef89e0e4,
+post-check выше. PR75 закрыт, не merged.
 PR68 просмотра материалов9 возобновлён в том же PR, draft, не merged:
 первый head после возобновленияc7a06df6/base54b597; новый P3 cleanup профиля в работе.
 Прежний a418 сохранён, продолжение совмещает материалы с file-логикой76 и gate1.
@@ -477,8 +489,12 @@ scope/tree/hashes сохранены. Clipboard outcomes смоделирова�
 guard/post-check выше. Следующий единственный WIP4 — [Dragon PR10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10),
 head6cb0c3dd/base3a7: копирование публичной guide-ссылки с requested языком,
 allowlisted context/существующим anchor и ручным fallback, без произвольных
-query/hash/прогресса/отправок. CI39062064278 success; независимая приёмка
-ещё выполняется. Draft, не merged/не опубликован; второй merge в этом проходе не нужен.
+query/hash/прогресса/отправок. CI39062064278 success; независимая приёмка clear:
+153 unit/17 browser (9 прежних+8 clipboard fixtures), шесть current PNG просмотрены,
+семь net paths без удалений/11 binary blobs сохранены. Actual changed/activated
+HEAD/offline exact JS подтверждены. OS clipboard не проверен; late rejection
+проверен unit/static, browser pending cases покрывают late resolve. Frozen/draft,
+не merged/не опубликован; следующий guard отдельно.
 Прежний head810125c0/base79fdd78 принят; бинарные активы сохранены.
 Старый green31270 не доказал HEAD-upgrade: helper ждал BASE-cache; это
 [issue81](https://github.com/OleksandrKiris/kiris-jobs/issues/81), owner4.
@@ -550,8 +566,12 @@ Unicode+emoji roundtrip и четыре ASCII-escaped surrogate input (name/phon
 дали generic CommandError, SQL=0, baseline unchanged; обычный Unicode/emoji прошёл.
 Python3.12.14/Django5.2.18/SQLite3.53.1, только :memory: и одна CompanyProfile table.
 Независимое source/raw-proof review clear;8 исходников и старый repro сохранены.
-Полный project suite и предложенный TestCase не исполнялись; socket=0 относится
-к guarded fixture phase после django.setup. Исходный репозиторий не изменён,
+Дополнительно исполнен actual CompanyTransferTests на трёх private copies:
+старые10 методов 10/10 PASS; та же новая регрессия на старом importer даёт
+четыре preview FAIL и четыре apply UnicodeEncodeError, exit1; candidate11/11 PASS.
+Оригинальные8 файлов, proposed2 и старый repro побайтно сохранены. Только
+одна memory table, строк после TestCase0. Полный project suite не исполнялся;
+socket=0 относится к guarded phase после django.setup. Исходный репозиторий не изменён,
 патч не принят в семь репозиториев и не означает внедрение всех10 приложений.
 Перед reuse нужна передача владельцу, проверка в исходном проекте и отдельная
 совместимость с core6.1.2; реальные компании/импорт/tenant права не подключать.
@@ -579,10 +599,36 @@ CDP identity не доказывает одинаковое внутреннее
 Observer effect указан. Ограниченный разбор WHATWG/Chromium141/Playwright1.56.1
 не нашёл подтверждённого upstream fix; успешный setItem не объявлен disk acknowledgement.
 Причина issue79 остаётся открытой, повторных CI без полезного изменения нет.
-Последующий ограниченный разбор нашёл backend UMA LocalStorage.DatabaseOpen,
-но не подтвердил надёжную доставку его samples в обычном CI storage-service topology.
-Отсутствие histogram не означает успешную запись; open-result не доказывает per-key
-commit/load. Новая запись CI на основании одного существования API не запускалась.
+Последующий разбор headless topology нашёл source-supported backend UMA
+`LocalStorage.DatabaseOpen`; pinned Chromium tag совпал с сообщённым CDP revision,
+но отсутствие Playwright patches этим не доказано. После отдельного прямого
+разрешения пользователя исполнен один полезный diagnostic CI на том же68,
+head `704961af5b9bc9176b3cfa176bdc54c284aa6008`, base54b597, checkout0a0210de.
+Backend39063668373 success, Catalogue39063668245 FAILURE15/16: observed-v1-preseed
+todo!=doing; оба native restart PASS. Все12 literal histogram snapshots доступны:
+count1/sum0/один OK bucket; шесть cumulative pairs дают нулевую дельту.
+Это доказывает доступность данного open-signal, не KEY commit/load или отсутствие
+backend failure. До reload raw/modeldoing, после initial raw/marker=null до fixture.
+Остаток упавшего scenario после первого assertion не исполнялся; later cases сохранены.
+Независимый review обнаружил parser P2: synthetic duplicate buckets/impossible sum
+могли получить observed. Actual12 samples coherent; их результат не переобозначен.
+Подготовлен малый local correction и отрицательные регрессии, отдельно на ревью.
+
+Внешний пользовательский [PR82](https://github.com/OleksandrKiris/kiris-jobs/pull/82)
+headf3196914 оставлен diagnostic draft. Current fixed comparison: Playwright1.56.1
+три jobs success,1.64.1 три failure. Из трёх прочитанных rawlogs sample1 даёт
+16/16 против12/16; init1.64 —16/18. No-init и once-after-ready по6/6, ранний
+empty init4/6; ready-once и init-each-document различаются жизненным циклом.
+Это association, не доказательство причины Chromium/fixture или готовый fix.
+Следующий [PR83](https://github.com/OleksandrKiris/kiris-jobs/pull/83) head46209753,
+basef89e0e4, меняет только fixture/acceptance/tests/workflow/docs. Actual42unit
+и шесть fixed reports16/16 прошли, включая native2. Mandatory Catalogue39063711982
+FAILURE позже в shift-duration/corrupt после reload; последующие future/denied
+сценарии не запускались. Owner11 получил адресный разбор этого случая.
+PR83 не принят; независимое source review и общий gate остаются обязательными.
+Source review clear относится только к46209753. Последующая fresh metadata уже
+показала headd4db033a; он включает новый срез calculator fixture и требует
+своих delta review/CI. Старые42unit/6×16 и red сохраняются как история462.
 На a418 независимо устранён P3 ?lang=RU → requested=en:
 новый case-тест падает со старым app и проходит с новым;36 локальных тестов,
 16 snapshot/mock parity, оба CI и10 browser-сценариев прошли. Два controls не
@@ -883,6 +929,17 @@ GitHub продолжался. Прежний общий запрет на лю�
   ведёт на EN с понятным предупреждением, не выдуманным переводом.
 
 ## Журнал существенных изменений
+
+- **2026-10-17, PR78:** единый roadmap принят на guard611 →f89e0e4,
+  post Backend/Pages и семь public bytes проверены. Company importer получил
+  actual TestCase red/green proof в private copies; source proposal не применён.
+  Dragon10 independently clear/frozen. Новые storage diagnostics68/82/83
+  продолжают отдельную приёмку; причиной issue79 или завершённым fix не названы.
+
+- **2026-10-17, передача8:** получен прежний v4 source ZIP и подтверждены
+  его72 entries. Owner evidence:110 MiniApp/472 total tests и build PASS,
+  local preservation+validation commits; runtime/lockfile сохранены. Это
+  восстановление reviewable source, не новый deploy/canonical26 acceptance.
 
 - **2026-10-17, Dragon9:** исправлены явный TR fallback и requested context после
   reload/Back; guard810 →3a7, Pages39061616083 и пять runtime bytes проверены.
