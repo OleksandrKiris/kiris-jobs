@@ -193,19 +193,37 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       assert.ok((await page.evaluate(() => caches.keys())).includes(publishedCache));
       await catalogue(page);
 
+      const changesWorker = hash(legacy.shell.get('sw.js')) !== workerHash;
+      // The catalogue really reloads on controllerchange. Cache deletion happens
+      // earlier during activation, so cache names alone are not a navigation barrier.
+      const automaticReload = changesWorker ? page.waitForEvent('load') : null;
       await stageShell(currentShell);
       await stage(currentFiles);
       const pathname = new URL('tools/coordinator/' + failedFile, base).pathname;
       origin.cut(pathname);
-      if (hash(legacy.shell.get('sw.js')) !== workerHash) {
+      if (changesWorker) {
         assert.notEqual(publishedCache, headCache, 'Changed worker needs a different cache version');
         await page.evaluate(async () => (await navigator.serviceWorker.ready).update());
         await page.waitForFunction(async ({ publishedCache, headCache }) => {
           const names = await caches.keys();
           return names.includes(headCache) && !names.includes(publishedCache);
         }, { publishedCache, headCache });
-        await page.reload(); await ready(page);
+        await automaticReload; await ready(page);
+        await page.waitForFunction(async () => {
+          const registration = await navigator.serviceWorker.ready;
+          return registration.active?.state === 'activated'
+            && navigator.serviceWorker.controller === registration.active;
+        });
       }
+      const shellTransition = await page.evaluate(async () => {
+        const registration = await navigator.serviceWorker.ready;
+        return { activeState: registration.active?.state,
+          controllerMatchesActive: navigator.serviceWorker.controller === registration.active,
+          navigation: performance.getEntriesByType('navigation')[0]?.type, url: location.href };
+      });
+      assert.equal(shellTransition.activeState, 'activated');
+      assert.equal(shellTransition.controllerMatchesActive, true);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
       assert.deepEqual(await packSnapshot(page, base), before, 'Shell update alone preserves actual published tool bytes');
       assert.equal(origin.cuts.length, 0, 'A tool visit must not hide migration with an early refresh');
       await page.waitForFunction(async headCache => Boolean(await (await caches.open(headCache))
@@ -250,7 +268,7 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
       assert.deepEqual(errors, []);
       report.results.push({ scenario: 'published old five → new tool bytes with unchanged worker / each HTTP cut / last-good / reconnect / recovered offline',
         width, failedFile, status: 'passed', transition: transition?.id || null, material,
-        before, recovered, cutProof, progress: JSON.parse(raw), workerSHA256: workerHash });
+        before, recovered, cutProof, shellTransition, progress: JSON.parse(raw), workerSHA256: workerHash });
     } catch (error) {
       await page.screenshot({ path: join(reportDir, id + '-failure.png') }).catch(() => {});
       throw error;

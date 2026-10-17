@@ -2,6 +2,25 @@
 
 ## Current default scope:19 composite groups
 
+The first scoped19 head6979459/run39073975495 passed all4 HTTP functional
+groups and4 warm cuts, then failed BEFORE the fifth resource's HTTP cut at
+the first post-upgrade offline tool entry. Artifact12116133156 (SHA256
+af70c9b4a65854fb17ae28236d78983d71ce206b2674380c1752a7b8d443ab9d)
+preserves the original failed PNG and trace: call2337 manually reloads after
+cache-name readiness; call2351 starts tool navigation, which is aborted,
+then root navigation completes and UK locale falls back toPL. This is not
+evidence that a logo-body cut lost the pack; the cut had not occurred.
+
+The helper now waits for the real catalogue load caused by its existing
+controllerchange handler, with the observer registered BEFORE staging the
+worker. It additionally requires registration.active.state=activated and
+controller===active, records shellTransition, checks UK and retained old5
+before stopping the origin. No manual second reload races the pending
+automatic transition. Existing pack/raw-state/offline/cut assertions remain
+unchanged. This strengthens phase readiness; it does not change runtime,
+add sleeps/retries or claim a browser/storage root cause. Fresh exact-head
+acceptance is required; the old red result is not replaced or relabelled.
+
 After the first combined head4179fb918180c63b99d88933ec0258086ae232fe
 passed48 groups (artifact12116086659, SHA256f80ca679016d6c5ce71f3ea6ba9c099efb98045a3ff4f689c151f6fd0ab5afb3),
 root requested four explicit HTTP functional groups on the actual candidate.
