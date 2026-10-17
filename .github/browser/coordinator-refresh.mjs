@@ -129,11 +129,16 @@ export async function verifyMaterialOffline(page, { id, fits, shot }) {
   }
 
 export async function acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin,
-  context, ready, fits, shot, active, startServer, stopServer, transition = null }) {
+  context, ready, fits, shot, active, startServer, stopServer, transition = null, targetFiles = null }) {
   const legacy = publishedToolBytes(transition?.published);
   const originalFiles = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
-  const pinnedTarget = transition ? publishedToolBytes(transition.target, false) : null;
+  if (targetFiles) {
+    assert.ok(transition, 'Captured target requires an explicit source receipt');
+    assertToolManifest(targetFiles, transition.target.hashes);
+  }
+  const pinnedTarget = targetFiles ? { files: targetFiles, fetched: false }
+    : transition ? publishedToolBytes(transition.target, false) : null;
   const currentFiles = pinnedTarget?.files || originalFiles;
   const oldHashes = Object.fromEntries([...legacy.files].map(([name, bytes]) => [name, hash(bytes)]));
   const prefix = transition ? transition.id + '-' : '';

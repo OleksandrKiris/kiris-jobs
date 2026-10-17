@@ -76,6 +76,57 @@ test('native preparation preserves existing unknown records and labels its optio
   }
 });
 
+function fakeIdentityContext(failMethod='',key='file-key') {
+  const sends=[];let detached=0;
+  const results={'Browser.getVersion':{product:'Chrome/141.0.7390.37',protocolVersion:'1.3'},
+    'Page.getFrameTree':{frameTree:{frame:{id:'frame-a',loaderId:'loader-a',url:'file:///test/index.html#board',securityOrigin:'file://'}}},
+    'Target.getTargetInfo':{targetInfo:{targetId:'target-a'}},
+    'Storage.getStorageKeyForFrame':{storageKey:key}};
+  const context={async newCDPSession(){return {async send(method,params){
+    sends.push({method,params});if(method===failMethod)throw Error('unsupported method');return results[method];
+  },async detach(){detached++;}};}};
+  return {context,sends,get detached(){return detached;}};
+}
+
+test('identity probe records four literal read-only requests/results and actual version, no DOM/storage evaluation',async()=>{
+  const {captureStorageIdentity}=await import('./storage-identity.mjs');const h=fakeIdentityContext();
+  const r=await captureStorageIdentity(h.context,{});
+  assert.equal(r.status,'observed');assert.equal(h.detached,1);
+  assert.deepEqual(h.sends,[{method:'Browser.getVersion',params:{}},{method:'Page.getFrameTree',params:{}},
+    {method:'Target.getTargetInfo',params:{}},{method:'Storage.getStorageKeyForFrame',params:{frameId:'frame-a'}}]);
+  assert.equal(r.identity.product,'Chrome/141.0.7390.37');assert.equal(r.identity.browserContextId,null);
+  assert.equal(r.requests[3].result.storageKey,'file-key');
+});
+
+test('unsupported or empty identity stays unavailable and debugger is detached without retries',async()=>{
+  const {captureStorageIdentity}=await import('./storage-identity.mjs');
+  for(const h of [fakeIdentityContext('Storage.getStorageKeyForFrame'),fakeIdentityContext('','')]) {
+    const r=await captureStorageIdentity(h.context,{});assert.equal(r.status,'unavailable');
+    assert.equal(h.sends.length,4);assert.equal(h.detached,1);
+  }
+  const r=await captureStorageIdentity({async newCDPSession(){throw Error('attach unavailable');}},{});
+  assert.equal(r.status,'unavailable');assert.equal(r.requests.length,0);assert.match(r.error.message,/attach unavailable/);
+});
+
+test('identity comparison distinguishes reported keys without treating frame/loader changes as a cause',async()=>{
+  const {captureStorageIdentity,compareStorageIdentity}=await import('./storage-identity.mjs');
+  const a=await captureStorageIdentity(fakeIdentityContext().context,{});
+  const b=structuredClone(a);b.identity.frameId='new-frame';b.identity.loaderId='new-loader';
+  assert.equal(compareStorageIdentity(a,b),'same-reported-target-and-storage-key');
+  b.identity.storageKey='other';assert.equal(compareStorageIdentity(a,b),'different-reported-storage-key');
+  b.identity.product='different';assert.equal(compareStorageIdentity(a,b),'incomparable-version');
+  assert.equal(compareStorageIdentity(a,{status:'unavailable'}),'unavailable');
+});
+
+test('identity availability gate rejects missing, duplicate or unavailable measurements',async()=>{
+  const {captureStorageIdentity,hasCompleteIdentity}=await import('./storage-identity.mjs');
+  const a=await captureStorageIdentity(fakeIdentityContext().context,{});
+  const before={...a,scenario:'observed',phase:'before-state-reload'},after={...a,scenario:'observed',phase:'after-state-reload'};
+  assert.equal(hasCompleteIdentity([before,after],['observed']),true);
+  for(const samples of [[],[before],[before,before],[before,{...after,status:'unavailable'}]])assert.equal(hasCompleteIdentity(samples,['observed']),false);
+  const runner=read('browser-acceptance.mjs');assert.match(runner,/if\(report\.identityGate\.status!=='observed'\)report\.status='failed'/);
+});
+
 test('file profiles are isolated and restart the same native directory without replaying state',async()=>{
   const {createFileProfile}=await import('./browser-profile.mjs');
   const launches=[],closes=[];
@@ -102,6 +153,23 @@ test('file profile launch failures remove the newly allocated directory',async()
   let directory;
   await assert.rejects(createFileProfile({async launchPersistentContext(dir){directory=dir;throw Error('launch failed');}},{}),/launch failed/);
   assert.equal(fs.existsSync(directory),false);
+});
+
+test('profile ownership cleans directory when route, tracing or page setup fails',async()=>{
+  const {withFileProfile}=await import('./browser-profile.mjs');
+  assert.equal((read('browser-acceptance.mjs').match(/await withFileProfile\(/g)||[]).length,2);
+  assert.doesNotMatch(read('browser-acceptance.mjs'),/const profile = await createFileProfile/);
+  for(const phase of ['route','tracing','newPage']) {
+    let directory,closes=0;
+    const fail=stage=>{if(phase===stage)throw Error(stage+' setup failed');};
+    const context={async close(){closes++;},async route(){fail('route');},
+      tracing:{async start(){fail('tracing');}},async newPage(){fail('newPage');}};
+    const chromium={async launchPersistentContext(dir){directory=dir;return context;}};
+    await assert.rejects(withFileProfile(chromium,{width:320,height:900},async profile=>{
+      await profile.context.route();await profile.context.tracing.start();await profile.context.newPage();
+    }),new RegExp(phase+' setup failed'));
+    assert.equal(closes,1,phase);assert.equal(fs.existsSync(directory),false,phase);
+  }
 });
 
 test('file profile restart failures still allow cleanup',async()=>{
@@ -222,6 +290,67 @@ test('missing local fixture marker cannot overwrite corrupt, future or edited re
     assert.equal(data.get(M.KEY),raw);
   }
 });
+
+test('material snapshot reproduces accepted source text and historical source date',()=>{
+  const scope={window:{}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../data/content.js'),'utf8'),scope);
+  const source=scope.window.PORTAL_CONTENT.jobs.find(x=>x.id==='site-cleaning');
+  const response=M.materialReader().read();const item=response.items[0];
+  assert.equal(item.title,source.title);assert.equal(item.text,source.summary);
+  assert.equal(item.source.source_updated_on,source.updatedAt);
+  assert.equal(source.location,'Zgorzelec');assert.equal(item.location_id,'zgorzelec');
+  assert.equal(item.source.ref,M.CONTENT_VERSION);assert.equal(item.synthetic,false);
+  assert.equal(item.source.verification_status,'verified-against-repository');
+  assert.equal(item.source.verified_on,'2026-10-17');
+});
+
+test('snapshot and local JSON mock agree for aliases, fallback and distinct locations',()=>{
+  const snapshot=M.materialReader();
+  const mock=M.materialReader({mode:'mock',mock:q=>JSON.stringify(M.materialSnapshot(q))});
+  for(const language of ['ru','ua','uk','en','pl','ka','tr','hy'])for(const location_id of ['zgorzelec']) {
+    const q={language,location_id,limit:1};const response=snapshot.read(q);
+    assert.deepEqual(mock.read(q),response);
+    assert.equal(response.requested_language,language);assert.equal(response.effective_language,'ru');
+    assert.equal(response.fallback,language!=='ru');
+    assert.equal(response.items.length,1);
+  }
+});
+
+test('material request boundaries reject malformed language, pagination and limits',()=>{
+  for(const mode of ['snapshot','mock']) {
+    const reader=M.materialReader({mode,mock:q=>JSON.stringify(M.materialSnapshot(q))});
+    for(const q of [{limit:0},{limit:21},{limit:'1'},{cursor:'next'},{language:'RU'},{language:'../ru'},{language:'de'},{location_id:'bogatynia'},{location_id:'Zgorzelec'},{location_id:''},{unknown:1},null])
+      assert.throws(()=>reader.read(q),/invalid_request/);
+  }
+  assert.throws(()=>M.materialReader({mode:'online'}),/online_disabled/);
+  assert.throws(()=>M.materialReader({mode:'mock'}),/online_disabled/);
+});
+
+test('mock rejects damaged, excessive, unverified, foreign or synthetic material responses',()=>{
+  const valid=M.materialSnapshot();
+  const changed=fn=>{const x=structuredClone(valid);fn(x);return JSON.stringify(x);};
+  for(const raw of ['{bad','null','x'.repeat(12001),changed(x=>x.items[0].location_id='bogatynia'),
+    changed(x=>x.items[0].source.ref='a'.repeat(40)),changed(x=>x.items[0].synthetic=true),
+    changed(x=>x.items[0].source.verification_status='unverified'),changed(x=>x.items[0].text='invented'),
+    changed(x=>delete x.items[0].text),changed(x=>x.schema_version='2.0.0')])
+    assert.throws(()=>M.materialReader({mode:'mock',mock:()=>raw}).read(),/invalid_response/);
+  // Order is not part of JSON wire compatibility.
+  const reorder=Object.fromEntries(Object.entries(valid).reverse());
+  assert.deepEqual(M.materialReader({mode:'mock',mock:()=>JSON.stringify(reorder)}).read(),valid);
+  const additive=structuredClone(valid);additive.items[0].future_field='allowed';
+  assert.deepEqual(M.materialReader({mode:'mock',mock:()=>JSON.stringify(additive)}).read(),additive);
+  additive.items[0].future_field='я'.repeat(17000);
+  assert.throws(()=>M.materialReader({mode:'mock',mock:()=>JSON.stringify(additive)}).read(),/invalid_response/);
+});
+
+test('read results cannot mutate later source reads; search is bounded and has honest no-match',()=>{
+  const reader=M.materialReader(),r=reader.read();r.items[0].text='changed';
+  assert.notEqual(reader.read().items[0].text,'changed');
+  assert.equal(M.searchMaterials(reader.read(),' УБОРКА   отходов ').length,1);
+  assert.equal(M.searchMaterials(reader.read(),'bogatynia').length,0);
+  assert.equal(M.searchMaterials(reader.read(),'несуществующий ответ').length,0);
+  assert.throws(()=>M.searchMaterials(reader.read(),'x'.repeat(121)),/invalid_query/);
+});
 test('browser entry refuses local execution before loading any browser or git checkout',()=>{
   const result=spawnSync(process.execPath,[path.join(__dirname,'browser-acceptance.mjs')],{
     env:{...process.env,GITHUB_ACTIONS:'false',PLAYWRIGHT_PACKAGE:'must-not-be-loaded'},encoding:'utf8',timeout:5000
@@ -314,6 +443,46 @@ for(const lang of M.LANGS)test(lang+': real UI handlers, filter, focus, language
   h.click('reset');h.click('confirm');assert.equal(h.document.activeElement.id,'reset');assert.deepEqual(M.create(h.store).snapshot().statuses,M.initial());
   h.change('filter','all');assert.equal(h.$('tasks').children.length,3);assert.equal(h.$('empty').hidden,true);
 });
+test('URL language case is normalized for material request without losing ua alias or raw URL',()=>{
+  const ru=ui({lang:'RU'});
+  assert.equal(ru.document.documentElement.lang,'ru');
+  assert.equal(ru.$('materialsStatus').textContent,'ru · Zgorzelec');
+  assert.equal(ru.location.searchParams.get('lang'),'RU');
+  for(const raw of ['UA','Ua','ua']) {
+    const uk=ui({lang:raw});
+    assert.equal(uk.document.documentElement.lang,'uk');
+    assert.match(uk.$('materialsStatus').textContent,/ua.*ru/);
+    assert.equal(uk.location.searchParams.get('lang'),raw);
+    uk.change('materialsSource','mock');
+    assert.match(uk.$('materialsStatus').textContent,/ua.*ru/);
+  }
+  const en=ui({lang:'EN'});
+  assert.equal(en.document.documentElement.lang,'en');
+  assert.match(en.$('materialsStatus').textContent,/en.*ru/);
+});
+
+test('source UI searches locally with honest fallback, no answer, and pinned safe link',()=>{
+  const h=ui({lang:'ua'});
+  assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
+  assert.equal(h.$('materials').children.length,1);
+  const article=h.$('materials').children[0];
+  h.change('materialsSource','mock');
+  assert.equal(h.$('materialsSource').value,'mock');
+  assert.equal(h.$('materials').children[0].children[1].textContent,article.children[1].textContent);
+  assert.equal(article.children[0].lang,'ru');
+  assert.equal(article.children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/'+M.CONTENT_VERSION+'/data/content.js');
+  assert.equal(article.children[3].rel,'noopener noreferrer');
+  h.$('materialQuery').value='bogatynia';h.$('materialQuery').handlers.input();
+  assert.equal(h.$('materials').children.length,0);assert.match(h.$('materialsStatus').textContent,/не знайдено/);
+  h.$('materialQuery').value='отходов';h.$('materialQuery').handlers.input();
+  assert.equal(h.$('materials').children.length,1);
+  h.change('language','en');assert.equal(h.$('materialQuery').value,'отходов');
+  assert.match(h.$('materialsStatus').textContent,/en.*ru/);
+  // Query stays in memory: no new saved data and no search text in URL.
+  assert.equal(h.store.calls.filter(x=>x[0]!=='get').length,0);
+  assert.doesNotMatch(h.location.href,/%D0%BE%D1%82/);
+});
+
 test('UI language fallback is explicit; invalid filter resets safely; uk/ua links mapped',()=>{
   const h=ui({lang:'ka',filter:'invalid'});assert.equal(h.document.documentElement.lang,'en');assert.equal(h.$('fallback').hidden,false);assert.equal(h.$('filter').value,'all');
   h.change('language','uk');assert.equal(h.$('fallback').hidden,true);const urls=h.$('links').children.map(x=>x.href);
@@ -327,10 +496,11 @@ test('UI remains interactive with forbidden history and storage',()=>{
 test('UI warns about corrupt storage without clearing it on initial render or edit',()=>{
   const s=storage([[M.KEY,'{broken']]),h=ui({store:s});assert.match(h.$('storage').textContent,/preserved/);h.change('demo-03','done');assert.equal(s.data.get(M.KEY),'{broken');
 });
-test('runtime has no data network APIs, free text inputs or forms; all assets local',()=>{
+test('runtime has no data network APIs or forms; only bounded local search; all assets local',()=>{
   const js=read('app.js')+read('model.js'),html=read('index.html');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|setInterval|innerHTML/);
-  assert.doesNotMatch(html,/<form\b|<input\b|https?:\/\//);assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);
+  assert.doesNotMatch(html,/<form\b|https?:\/\//);assert.equal((html.match(/<input\b/g)||[]).length,1);
+  assert.match(html,/<input id="materialQuery" type="search" maxlength="120">/);assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);
   for(const [,name] of html.matchAll(/(?:src|href)="([^"]+)"/g))assert.ok(fs.existsSync(path.join(__dirname,name)),name);
   assert.equal(read('primserv-logo.svg'),fs.readFileSync(path.join(__dirname,'../assets/primserv-logo.svg'),'utf8'));
   assert.match(read('style.css'),/max-width:560px/);assert.match(read('style.css'),/focus-visible/);
@@ -365,6 +535,22 @@ test('file all-filter fragment overrides a legacy done query without changing th
   assert.equal(h.location.search,'?lang=ru&status=done&from=fixture');
   assert.equal(h.location.hash,'#board?lang=en&status=all');
 });
+test('materials honor file fragment alias while preserving query and restoring task context',()=>{
+  const h=ui({href:'file:///tmp/coordinator-demo/index.html?lang=RU&from=legacy#board?lang=UA&status=all'});
+  const query=h.location.search,path=h.location.pathname;
+  assert.equal(h.document.documentElement.lang,'uk');
+  assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
+  h.change('materialsSource','mock');assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
+  h.change('demo-01','done');h.change('filter','done');h.change('language','pl');
+  assert.equal(h.location.search,query);assert.equal(h.location.pathname,path);
+  assert.equal(h.location.hash,'#board?lang=pl&status=done');
+  const reload=ui({href:h.location.href,store:h.store});
+  assert.equal(reload.$('demo-01').value,'done');assert.equal(reload.$('filter').value,'done');
+  assert.match(reload.$('materialsStatus').textContent,/pl.*ru/);
+  assert.equal(reload.$('materialsSource').value,'snapshot');
+  assert.equal(reload.$('materials').children.length,1);
+});
+
 test('published demo returns to same-origin catalogue and reports unavailable offline storage honestly',()=>{
   const h=ui({baseUrl:'https://example.test/kiris-jobs/tools/coordinator/',lang:'ka',worker:false});
   assert.equal(h.document.documentElement.lang,'en');

@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **17 октября 2026**, Europe/Budapest. Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (17 октября, 23:37 UTC). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -8,6 +8,10 @@
 Ниже остаются **10 продуктовых направлений**: это не количество исполнителей.
 Другие документы `docs/` — доказательства отдельных
 исправлений, а не альтернативные планы.
+
+Текущая очередь — в [таблице 15 ролей](#очередь-и-исполнение-после-аудита-всех-15-направлений).
+Датированные записи приёмки сохраняют прежние head и ограничения; поручения
+для нового прохода брать из текущей очереди, а не из старых слов «следующий».
 
 ## Продуктовая цель: превзойти HRappka
 
@@ -64,9 +68,9 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 17.10.2026
 
-Последняя сверка main: `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d`, после PR53/55/56/59/66/64/70/67/72/61/73/76.
-Отдельными проходами приняты HYDRA11/12, main `b820e85fe44cbc0c36a0d86ecdcc1e95f131431b`.
-Следующим проходом принят Dragon9, main `3a7ea5e0b70abece336f41c00c31cf510928aaeb`.
+Последняя сверка main: `374d5bddbd4630352f75e902536a11c2175c5411`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60.
+Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
+Ранее приняты Dragon9/10/11; текущий Dragon main после PR12 — `f51c280d90697cd3ad2d9e0623dedc020fa2073d`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
 `da054fd69b2f831de93d16842991cc38e280233a` прошёл CI; merge `fc672d8`,
@@ -293,6 +297,26 @@ JS79991B, CSS19323B, SW1659B и manifest323B HTTP200 exact-tested bytes.
 Это пять runtime-файлов;11 прежних binary blobs сохранены, нового полного
 аудита audio, OS voices или физического телефона не было.
 
+Принят [PR78](https://github.com/OleksandrKiris/kiris-jobs/pull/78):
+head `611089b76032878b02051893f0c42e651e68ceb9`, base `54b597fc`,
+guarded merge `f89e0e4a3bf0a58714de0883970e6569c78e318d`.
+Только roadmap/inventory; остальные tracked bytes сохранены. Независимое
+финальное ревью clear, exact Backend39062359825/Catalogue39062359944 success,
+16/16 module scenarios и оба native restarts прошли. Это зелёный docs-only run,
+не исправление непостоянного issue79. Post Backend39063588523/Pages39063588437
+success; tested/merged tree совпали. Семь public runtime assets HTTP200
+побайтно совпали с tested head; упаковка переносит пять исходников из
+`coordinator-demo/` в `tools/coordinator/`. Django этим merge не опубликован.
+
+Аудит 15 направлений завершил приёмку [HYDRA13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13):
+guardcbb35d46/baseb820 → merge533360d7, tested/merged tree594df011 совпал.
+Независимые99unit/66browser entries/6current PNG относятся к этому head.
+Pages39067949384 success; HTML/SW/manifest HTTP200 exact-tested bytes.
+Публичная ссылка на площадку/effective язык копируется явным действием;
+при отказе API доступен выделяемый readonly URL. Реальный OS clipboard не проверен.
+Для внешнего PR83/main558 также завершён post-check: Backend39065923209,
+Pages39065923321 success, семь public runtime bytes совпали с tested d4db033a.
+
 Новый gate1 в PR60@40edbe38 доказал18 прежних+10 warm browser случаев:
 каждый из пяти ресурсов ×1280/320, реальные socket cuts, старые5 hashes/одна
 generation/progress, восстановление нового пакета и offline после stop origin.
@@ -456,29 +480,34 @@ PR44/48 приняты как локальные backend-модули, PR34 — 
 локализация калькулятора. Они закрыты и не остаются незавершёнными PR.
 При сверке main `54b597fcc5d50180adcf50d4d40dc9d81d83cc4d` PR59/66/64/70/67/72/61/73/76 merged;
 остаются PR60 каталога, PR62 локального домена, PR74 матрицы14,
-PR77 сериализации12 и draft PR78 этой фиксации. PR75 закрыт, не merged.
+PR77 сериализации12. Документация PR78 принята отдельным guarded mergef89e0e4,
+post-check выше. PR75 закрыт, не merged.
 PR68 просмотра материалов9 возобновлён в том же PR, draft, не merged:
 первый head после возобновленияc7a06df6/base54b597; новый P3 cleanup профиля в работе.
 Прежний a418 сохранён, продолжение совмещает материалы с file-логикой76 и gate1.
 Контракт14 PR67 закрыт после отдельной приёмки.
 Перед действием перечитать их head/CI и проверить совместный результат с новым main.
 Функциональные изменения не принимать по старой зелёной версии после нового push.
-HYDRA PR11/12 приняты и опубликованы, guard/post-check выше. Следующий единственный
+HYDRA PR11/12/13 приняты и опубликованы, guard/post-check выше. Завершённый
 WIP2 — [HYDRA PR13](https://github.com/OleksandrKiris/citronex-hydra-project/pull/13),
 headcbb35d46/baseb820: передача публичной ссылки на выбранную площадку/язык, без персональных
 данных и автоматических отправок, с ручным выделяемым URL при отказе clipboard.
 CI39060090874 success; независимая проверка exact-head завершена:
 99 unit,66 entries (54 прежних+12 clipboard), шесть current PNG просмотрены,
 scope/tree/hashes сохранены. Clipboard outcomes смоделированы; реальный OS clipboard
-не проверен. PR13 frozen/draft, не merged/не опубликован; следующий свежий guard отдельно.
+не проверен. PR13 merged533360d7/Pages39067949384/три live bytes подтверждены.
 Предыдущий дефект layout и случайные удаления исправлены до приёмки12;
 исторические9e2c/1ef5 proof сохранены отдельно, не названы принятыми head.
 Существующий WIP4 завершён [Dragon PR9](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/9),
 guard/post-check выше. Следующий единственный WIP4 — [Dragon PR10](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/10),
 head6cb0c3dd/base3a7: копирование публичной guide-ссылки с requested языком,
 allowlisted context/существующим anchor и ручным fallback, без произвольных
-query/hash/прогресса/отправок. CI39062064278 success; независимая приёмка
-ещё выполняется. Draft, не merged/не опубликован; второй merge в этом проходе не нужен.
+query/hash/прогресса/отправок. CI39062064278 success; независимая приёмка clear:
+153 unit/17 browser (9 прежних+8 clipboard fixtures), шесть current PNG просмотрены,
+семь net paths без удалений/11 binary blobs сохранены. Actual changed/activated
+HEAD/offline exact JS подтверждены. OS clipboard не проверен; late rejection
+проверен unit/static, browser pending cases покрывают late resolve. Frozen/draft,
+не merged/не опубликован; следующий guard отдельно.
 Прежний head810125c0/base79fdd78 принят; бинарные активы сохранены.
 Старый green31270 не доказал HEAD-upgrade: helper ждал BASE-cache; это
 [issue81](https://github.com/OleksandrKiris/kiris-jobs/issues/81), owner4.
@@ -550,8 +579,12 @@ Unicode+emoji roundtrip и четыре ASCII-escaped surrogate input (name/phon
 дали generic CommandError, SQL=0, baseline unchanged; обычный Unicode/emoji прошёл.
 Python3.12.14/Django5.2.18/SQLite3.53.1, только :memory: и одна CompanyProfile table.
 Независимое source/raw-proof review clear;8 исходников и старый repro сохранены.
-Полный project suite и предложенный TestCase не исполнялись; socket=0 относится
-к guarded fixture phase после django.setup. Исходный репозиторий не изменён,
+Дополнительно исполнен actual CompanyTransferTests на трёх private copies:
+старые10 методов 10/10 PASS; та же новая регрессия на старом importer даёт
+четыре preview FAIL и четыре apply UnicodeEncodeError, exit1; candidate11/11 PASS.
+Оригинальные8 файлов, proposed2 и старый repro побайтно сохранены. Только
+одна memory table, строк после TestCase0. Полный project suite не исполнялся;
+socket=0 относится к guarded phase после django.setup. Исходный репозиторий не изменён,
 патч не принят в семь репозиториев и не означает внедрение всех10 приложений.
 Перед reuse нужна передача владельцу, проверка в исходном проекте и отдельная
 совместимость с core6.1.2; реальные компании/импорт/tenant права не подключать.
@@ -579,10 +612,118 @@ CDP identity не доказывает одинаковое внутреннее
 Observer effect указан. Ограниченный разбор WHATWG/Chromium141/Playwright1.56.1
 не нашёл подтверждённого upstream fix; успешный setItem не объявлен disk acknowledgement.
 Причина issue79 остаётся открытой, повторных CI без полезного изменения нет.
-Последующий ограниченный разбор нашёл backend UMA LocalStorage.DatabaseOpen,
-но не подтвердил надёжную доставку его samples в обычном CI storage-service topology.
-Отсутствие histogram не означает успешную запись; open-result не доказывает per-key
-commit/load. Новая запись CI на основании одного существования API не запускалась.
+Последующий разбор headless topology нашёл source-supported backend UMA
+`LocalStorage.DatabaseOpen`; pinned Chromium tag совпал с сообщённым CDP revision,
+но отсутствие Playwright patches этим не доказано. После отдельного прямого
+разрешения пользователя исполнен один полезный diagnostic CI на том же68,
+head `704961af5b9bc9176b3cfa176bdc54c284aa6008`, base54b597, checkout0a0210de.
+Backend39063668373 success, Catalogue39063668245 FAILURE15/16: observed-v1-preseed
+todo!=doing; оба native restart PASS. Все12 literal histogram snapshots доступны:
+count1/sum0/один OK bucket; шесть cumulative pairs дают нулевую дельту.
+Это доказывает доступность данного open-signal, не KEY commit/load или отсутствие
+backend failure. До reload raw/modeldoing, после initial raw/marker=null до fixture.
+Остаток упавшего scenario после первого assertion не исполнялся; later cases сохранены.
+Независимый review обнаружил parser P2: synthetic duplicate buckets/impossible sum
+могли получить observed. Actual12 samples coherent; их результат не переобозначен.
+Подготовлен малый local correction и отрицательные регрессии, отдельно на ревью.
+
+Внешний пользовательский [PR82](https://github.com/OleksandrKiris/kiris-jobs/pull/82)
+headf3196914 оставлен diagnostic draft. Current fixed comparison: Playwright1.56.1
+три jobs success,1.64.1 три failure. Из трёх прочитанных rawlogs sample1 даёт
+16/16 против12/16; init1.64 —16/18. No-init и once-after-ready по6/6, ранний
+empty init4/6; ready-once и init-each-document различаются жизненным циклом.
+Это association, не доказательство причины Chromium/fixture или готовый fix.
+Следующий [PR83](https://github.com/OleksandrKiris/kiris-jobs/pull/83) head46209753,
+basef89e0e4, меняет только fixture/acceptance/tests/workflow/docs. Actual42unit
+и шесть fixed reports16/16 прошли, включая native2. Mandatory Catalogue39063711982
+FAILURE позже в shift-duration/corrupt после reload; последующие future/denied
+сценарии не запускались. Owner11 получил адресный разбор этого случая.
+На историческом head46209753 PR83 ещё не был принят: source review и общий gate тогда оставались обязательными.
+Source review clear46209753 не переносился автоматически на d4db033a.
+Последующая проверка d4db завершена: independent source/gate clear и семь rawlogs
+exact head/base — mandatory и6fixed jobs имеют16coordinator+8calculator PASS;
+matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. Старые462red сохранены.
+
+### Очередь и исполнение после аудита всех 15 направлений
+
+Это текущий срез очереди; ниже остаётся история проверенных head. Число тестов
+не заменяет пользовательскую, контрактную и публикационную готовность.
+
+| Роль | Подтверждено | Один оставшийся результат / зависимость |
+| --- | --- | --- |
+| 1 | PR88@dae521a: оба source P2 CLOSED, independent18tests+3old/new probes PASS; OLDoverlay19 CI PASS | Source/fixture delta принята для интеграции; actualNEW/full-current ещё требует общего CI84 |
+| 2 | HYDRA14@efbb5a8 готов/не опубликован; peer Dragon12 завершён CLEAR | Новый bounded peer13trace-retention наb6b0ca; без повторов old12VM/browser/CI |
+| 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
+| 4 | Dragon12 опубликованf51c280d; Pages39079184115 SUCCESS,8public assets exact | Новый PR13@b6b0ca: сокращение successful traces, сохранение failure/worker evidence; independent source/runtime/peer идут |
+| 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
+| 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
+| 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
+| 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
+| 9 | PR68@44383dc/base374d:14owned paths и412tree entries сохранены; Backend и6native checks SUCCESS | Catalogue39077510467 FAIL до первого case: старый baseline tool-hash; mandatory prototypes SKIPPED/NOTRUN. Материалы не опубликованы |
+| 10 | Проход23:26: Dragon12 опубликованf51,8exact assets; один guard использован | Тот же84 включает68+86+74+принятыйfix88dae+2rootdocs;417entries preserved. Один свежий combined CI, будущий guard отдельно |
+| 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
+| 12 | PR86@173f1b28/base374d: прежние5source blobs сохранены; fresh Backend39077586323/68tests SUCCESS | Catalogue39077586327 FAIL до cases:5non-public backend/docs paths; mandatory prototypes SKIPPED/NOTRUN. Не merged/deployed |
+| 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
+| 14 | PR74@fd9a721/base374d:2integration paths, matrix blob сохранён, literal privacy.html owner1;20tests PASS | Catalogue39077558915 FAIL до cases на2docs; native NOTSCHEDULED. Company-context без canonical provider отложен,10векторов NOTRUN |
+| 15 | Exact88dae: independent18/3probes/rawhash CLEAR; old19CI PASS/fullCurrent NOTRUN | Sole combined84 runtime verifier: actual staged NEW5, полный current core и mandatory19; свежие оба prototype suites/CI, без старых ZIP/rerun |
+
+PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
+Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
+recovery доказан fixture, не live. Guard10 завершён: exact af008/base558 принят
+merge62cb5788; post Backend39070310347 и Pages39070310282 SUCCESS, семь публичных
+runtime-файлов HTTP200 совпадают с ранее проверенными байтами; tested/merged tree610028a7.
+Это единственный guarded merge прохода20:59. Один affected consumer — PR74: обычная
+интеграция принятого main остановлена на add/add общего workflow; owner15 подтвердил
+точный accepted blob40250282 и восстановил его в index/worktree; unmerged entries0.
+Consumer74 завершил integration heade7311a10/base62cb; Backend39070535484 и
+Catalogue39070535513 SUCCESS, actual exact-base/preflight fetched=False и16+8 PASS.
+Новый PR74 net diff — один integration Markdown; runtime/fixtures/workflow равны62cb.
+Native matrix на e731 NOTSCHEDULED по accepted paths, а не PASS/FAIL: шесть прежних85
+jobs относятся к тем же байтам, нового выполнения шести jobs здесь нет. Scoped review
+не требует искусственного запуска для sole docs diff. Массовый rerun60/74 не выполнялся.
+Переход missing-base в live consumer ещё не доказан; PR74 ещё не merged.
+По прямому запросу пользователя о видимых функциях21:48 готовый Dragon10 выпущен: guarded merge70b0f74e, tested/merged tree18b4d00e, Pages39072598765SUCCESS; восемь public assets HTTP200/exact bytes. Кнопка копирования guide-ссылки сохраняет язык/локацию и даёт ручной вариант при недоступном clipboard. Это единственный merge этого отдельного пользовательского прохода. Следующий видимый кандидат — материалы координатора PR68@c896: свежие8checksSUCCESS; independent integration4blobs/runtime5/workflows CLEAR; QA15 подтверждает actual141legacy/156OnDisk,6×24PASS/72telemetry samples. Это process-wide open measurement, не доказательство commit/durability. До выпуска68 остаётся совместный public old5/new5 gate1. Локальный backend77@0fe5f63a/62cb с новым зелёным CI сохраняет отдельный следующий слот. Готовый77
+не ждёт универсального объяснения file-storage. Исторический red не является
+текущим результатом нового head.
+
+Историческая matrix68@cc2 на Chromium156: functional16 PASS, но histogram unavailable давал
+diagnostic gate FAIL; calculator там NOTRUN. Это не preflight85 и не потеря задачи.
+Новый source-контракт proposalSHA2560f600a79/fixturesfe9bc7c9 получил CLEAR14/15
+и независимую delta-проверку. Никаких сопоставимых same-name пар, mixed incomparable,
+all-missing/unknown/malformed дают FAIL; absent-both не превращается в ноль.
+Исторический локальный срез: owner9 подготовил helper/test/docs patch SHA256f169c5b8: авторский новый
+fake-CDP suite9/9 PASS, combined64/64; old-helper9tests даёт1PASS/8FAIL.
+Тогда независимое review реализации ещё требовалось: новые RPC-имена и runtime не наблюдались,
+авторский результат не заменял приёмку. Root review требовался до одного changed-head CI; functional16
+и shift8 остаются обязательными, общий nonzero не снимается.
+Первый independent review local patch нашёл P2: consumer report подписывал156
+legacy141 scope/revision. Metadata-only коррекция d3d01 затем получила independent CLEAR:
+72assertions/runner body неизменны, один pure metadata check PASS. Обычный pushc896
+после accepted62cb integration дал8green checks; actual156OnDisk подтверждён QA15.
+Этот новый результат закрывает прежний telemetry gate, не выдаёт process-wide open за
+KEY commit/durability и не закрывает историческую проблему79. Public gate1 остаётся.
+
+На WIP назначаются один автор, один source-reviewer и один runtime-verifier.
+Один current manifest содержит repo/head/base/runtime hashes, proof/команды/результат,
+author/independent attribution, один remaining gate/его owner и точный refusal.
+История отдельно; parent получает один consolidated handoff по head/готовности/блокеру.
+Unchanged не вызывает повторный CI, ZIP download, полный audit или уведомление.
+Готовый автор не начинает новый срез до приёмки. Тяжёлых local jobs одновременно
+не более2, browser session1: это протокол поручений, не установленный глобальный lock.
+Единственный heartbeat primserv-15 сохранён без изменения расписания; active/dispatch
+не являются выполнением. Повторно не требовать у пользователя отсутствующие originals.
+
+К десяти CI-путям15 вручную добавлен `.github/workflows/offline-file-fixture-regression.yml`.
+Будущие `coordinator-storage-comparison.yml`/`coordinator-storage-init-probe.yml`
+в той же папке назначены15, но отсутствуют в main558 и не импортируются из82.
+Module fixtures9/11 и browser1 сохраняют владельцев. Existing external author85
+завершает свой уже открытый срез;15 независимо ревьюит, не пишет конкурента.
+
+Отдельные10 standalone Django-приложений1.6 сохраняют своего владельца. Их metadata
+2538PASS/391SKIP не являются общей многокомпанейной production-платформой. Перед
+стыком нужны capability/skip-reason matrix и existing primserv.companyv1 boundary;
+новый параллельный core/framework/обязательный online backend не создаются. Текущий
+1.7 другого владельца не прерывается и автоматически сюда не принимается.
 На a418 независимо устранён P3 ?lang=RU → requested=en:
 новый case-тест падает со старым app и проходит с новым;36 локальных тестов,
 16 snapshot/mock parity, оба CI и10 browser-сценариев прошли. Два controls не
@@ -611,6 +752,222 @@ Ownership-карта14 принята вручную в67; её подключе
 приёмкой. Передача десяти CI-путей ниже принята техлидом, hard lock не включён.
 Успех Python CI не означает, что ownership-check уже установлен.
 Не расширять backend до реальных данных, авторизации или онлайн-публикации.
+
+### Новый функциональный проход — 18 октября, 00:20 Europe/Budapest
+
+По прямому запросу пользователя владельцу4 передана реализация текстового пути
+грузинский/турецкий/армянский в существующем issue41. Подготовлен один
+[Dragon PR11](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/11),
+head `5ac5dd049f7e8407b94cd1bdb9618106d7c1a283`, base70b0f74e.
+Текст, controls, выбор трёх существующих локаций, URL и public-copy сохраняют язык.
+Английское вступление запускается явно по кнопке; новые MP3/TTS не добавлены.
+CI39073440703:167unit/35browser PASS, в том числе18 новых путей; runtime+18544B,
+11 binary assets сохранены. Независимые source/runtime/VM проверки CLEAR:6PNG просмотрены,15VM PASS. Переводы не проверены
+носителем, целевые сайты могут переводить материалы частично. Пока не опубликован.
+
+В этом проходе выполнен один guarded merge [PR77](https://github.com/OleksandrKiris/kiris-jobs/pull/77):
+exact head0fe5f63a/base62cb → `3ad9f93f66776613443f767403cd239c4678d605`,
+tested/merged treec9938ac0 совпал. Три serializer-пути сохранили reviewed bytes;
+Backend39071027081/Catalogue39071027060 SUCCESS,54 backend tests.
+Post Backend39073288882/Pages39073288866 SUCCESS, семь public assets HTTP200/exact.
+Это принятие локального backend helper32KiB, без route, DB-изменений и публикации Django.
+Прежние нижеупомянутые READY/red77 относятся к старым head.
+
+Совместный public gate60@4179 получил независимые48/48 PASS:33 прежних,
+10 warm и5 cold с OLD62cb/NEWc896/SW60,25 socket cuts и просмотренными PNG.
+Текущий60 уже6979459d/base3ad с семью изменёнными browser-файлами и19 composite
+группами. Дерево сохранено: backend77 exact, удалений0. Verify39073975495 FAILURE:
+8/19 PASS, logo1280 timeout при первом offline tool-entry; следующие10 NOTRUN,
+localprototypes SKIPPED. Причина продукта/обвязки ещё не установлена; владелец1
+разбирает сохранённый trace. Старые48PASS не заменяют приёмку нового head.
+Материалы координатора68 ещё не опубликованы; сначала prerequisite60, затем68.
+После этого red владелец1 подготовил head cba1c2fc4acd753c5df6114e030b4a4a4d85c2f1: ожидание actual controller/автоматического reload усилено без изменения runtime. Независимое delta-review и новый CI ещё не завершены; это не принятое исправление.
+
+Перекрёстное source-ревью5/6/7 выявило реальный R6-LANG-01: сохранённый польский
+язык перекрывал явный турецкий запрос. Владелец6 исправил свой единственный WIP
+доaf02e06e;182unit PASS, независимая дельта-проверка7 закрыла P2. Проверки5/7
+без новых source findings. Эти локальные результаты не выданы за публикацию.
+QA11 проверил14/14 HTTP runtime bytes приезда3; разрешённый IAB HTTP bootstrap
+завершился timeout до страницы. Инвентаризация доступных поверхностей успешна,
+другого поддержанного HTTP-браузера нет. UI/offline NOTRUN, повторного цикла нет.
+
+### Выпуск Dragon и следующий функциональный срез — 18 октября, 00:38
+
+По новому прямому поручению пользователя готовый Dragon11 выпущен отдельным
+guarded merge: head `5ac5dd049f7e8407b94cd1bdb9618106d7c1a283`,
+base70b0f74e → `95ba121c42e82582a9efdff0d4b4b38e577e7840`.
+Свежая база, service-worker CI39073440703, отсутствие review-блокеров и
+неизменность source/tree сверены перед merge. Дерево принятой версии совпало
+с проверенным6fc651d0. [Pages39075670274](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39075670274)
+успешен; все восемь публичных файлов вернули HTTP200 с точными размерами/SHA256.
+Новые текстовые пути грузинского, турецкого и армянского доступны на сайте;
+выбор локации и публичная ссылка сохраняют язык, английское аудио запускается
+явно по кнопке. Независимые167unit/35browser/15VM/6PNG доказательства сохранены.
+Черновые переводы не проверены носителем, полные переводы целевых обучений
+и системное аудио/clipboard на физическом телефоне не сертифицированы.
+
+В этом проходе выполнен один merge. PR60@cba1c2fc теперь имеет независимое
+source-ревью двух browser-файлов и current19 runtime CLEAR:4 functional,
+10 warm,5 cold,25 partial-body cuts,10 actual reload/controller receipts,
+три просмотренных PNG. Verify39074332390/Backend39074332378 SUCCESS.
+Исторические33/48 на4179 имеют отдельное происхождение; red697 сохранён.
+Выпуск60 и последующий68 остаются очередными отдельными слотами.
+
+Владелец2 подготовил [HYDRA PR14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14),
+head `efbb5a8a6f989586b3f335335f550bed6cbe1d7f` / base533360d7: явная ссылка
+на гида выбранной площадки с requested language и пояснением следующего шага.
+CI39075737482:136unit/66current-browser PASS; независимые source/runtime/peer4 проверки CLEAR.
+Внешний Dragon в этих тестах не открывался; публикации14 пока нет.
+Текущий runtime-отчёт содержит66 записей, включая сохранённые проверки.
+Новые CTA assertions выполнялись в10 last-site группах:3 площадки сua и
+12 языков наZgorzelec. Отдельные36 сочетаний площадки/языка,3 alias и
+negative/storage/fallback случаи проверены peer4 через VM. Из четырёх
+просмотренных PNG новый CTA показан вka на320/1280; tr/hy снимки относятся
+к прежнему welcome modal. Это не полная декартова browser-матрица и не
+реальная межсайтовая навигация.
+Владелец12 подготовил [PR86](https://github.com/OleksandrKiris/kiris-jobs/pull/86),
+head `b564c93663e8645a5c33ebeb775f73ea4501f0b4` / base3ad9f93f:
+локальный `GET /api/v1/materials/` на существующем canonical mock/snapshot и
+serializer77. Авторский runner:68backend PASS, включая14 новых HTTP-тестов
+и16 комбинаций реального provider; check0, миграций нет. Backend39076208129
+и Catalogue39076208133 SUCCESS. Роль14 независимо приняла source/contract,
+роль15 проверила raw CI и выполнила только14 новых HTTP-тестов в отдельной
+копии exactb564:14PASS наDjango6.1.2, Python3.12.14 (CI3.12.15). Старые54
+локально не повторялись. Raw CI и независимый лог сверены root поSHA256,
+пять source-manifest совпали. Граница compact32768/32769 доказана отдельно
+инъекционными transport-тестами; actual fixedsnapshot проверен через реальный
+provider, его прежний более ранний spacedJSON cap сохранён. Разрешены только
+material_http, commonURLs, targetedtests, один core-doc и минимальный trusted
+request-ID/route mapping в middleware. Contract GET-only/HEAD405 сохраняется,
+ошибки view имеют accepted code/request_id, header/body/log ID генерируется
+сервером. Core guards до view сохраняют прежний envelope. Новый endpoint
+подготовлен и независимо принят в этом объёме, PR86 ready; merge и backend
+publication не выполнялись, frontend online-adapter выключен. Предложение company-context guard отложено:
+в принятом core нет чистого canonical company-provider, callback-spy или
+существующий ORM importer не подтверждают такую интеграцию. Десять векторов14
+сохранены как NOTRUN, новый параллельный backend framework не создаётся.
+
+### Выпуск каталога и устранение общего препятствия — 18 октября, 01:20
+
+По очередному прямому поручению пользователя PR60 выпущен с guard exact
+`cba1c2fc4acd753c5df6114e030b4a4a4d85c2f1` / base3ad9f93f →
+`374d5bddbd4630352f75e902536a11c2175c5411`. Tested/merged tree
+`d38641c8cadf5f72c960fa2e2a2d2fe63c90dc3a` совпал. Свежие обязательные CI и
+независимые source/current19 browser proofs проверены до merge; исторические
+33/48 на4179 имеют отдельное происхождение. [Pages39077298495](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39077298495)
+и [Backend39077298482](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39077298482)
+SUCCESS. После завершения публикации26уникальных публичных файлов вернули
+HTTP200 и точные принятые bytes/SHA256/Git blobs:21изменённый файл оболочки/
+вакансий и5прежних runtime coordinator. Материалы68 этим выпуском не опубликованы;
+локальный backend не развёрнут. Literal `privacy.html` передан owner1 только
+для существующего frontend bootstrap scope; юридическая экспертиза не заявлена.
+
+Владельцы9/12/14 один раз обычным merge включили новый main в прежние PR68/86/74.
+Чужие принятые blobs и собственные manifests сохранены, конфликтов нет.
+Новые Catalogue failures подтверждены до первого browser case:
+68@44383dc падает на сравнении actual нового coordinator со старым baseline
+receipt4179 (line107);74@fd9a721 и86@173f1b28 — на line115, которая ошибочно
+считает весь non-browser diff публичным и допускает лишь три старых backend77
+пути. Это дефект применимости общего harness, а не доказанная неисправность
+функций материалов/API. Для68 все6native checks и Backend успешны отдельно;
+для86 fresh68backend tests PASS; mandatory prototype steps после раннего
+Catalogue failure пропущены. Старый зелёный CI не выдан за готовность новых head.
+
+Владелец1 исправляет одну общую причину в [issue87](https://github.com/OleksandrKiris/kiris-jobs/issues/87)
+отдельным узким WIP;15 проверяет
+регрессию, независимый source-reviewer проверяет границы reuse. Защита
+исторических33 должна опираться на реально публикуемые неизменные bytes,
+текущие19 — на настоящий staged candidate. Простая замена хешей, отключение
+assertions и добавление частных исключений для каждого PR не принимаются.
+Проверенные исходники уже собраны обычным Git merge в локальной ветке
+существующего PR84: промежуточный headafc19dee/treec216e8fb содержит21component
+путь(14+5+2), два root-документа и393неизменённых base entries. Независимо
+сверены все416mode/type/blob entries, потерь/скрытых правок нет. Это локальный
+draft с известным красным guard: его не отправляли на заведомо неуспешный CI и
+не объявляли ready. Manifests, патч и Git bundle сохранены. После добавления
+проверенного fix1 потребуется один push и свежая приёмка всего общего head;
+следующий guarded merge будет отдельным проходом. Это убирает очередь
+отдельных docs-only выпусков и сохраняет один guard на проход. Новый PR той же
+роли и новые расписания не создаются.
+
+Новый пользовательский срез Dragon: единый выбор/смена/сброс площадки для всех
+12языков. Независимые36language×location и36URL-priority baseline fixtures
+подтвердили, что на опубликованном95ba picker и last-site доступны только
+ka/tr/hy, а явного reset нет. Роль4 реализовала функцию в одном
+[Dragon PR12](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/12),
+head `80162bbb3b01c8d41734380de13ead2b08bd3910` / base95ba. Первый CI выявил
+потерю кнопки возврата после reload с полностью запрещённым storage; автор
+сохранил failure, исправил причину и добавил12регрессий.
+[CI39077674513](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39077674513)
+SUCCESS:230unit/53current-browser. Независимые source/runtime/peer2 проверки
+CLEAR: семь путей/11binary сохранены;36language×location+36URL-priority и
+адресные storage/reset/callback VM; восемь runtime bytes/Git blobs, raw CI/report
+53records и actual BASE→HEAD worker/offline proof совпали. Четыре текущих PNG
+320/1280 просмотрены. Свежие head/main/base/CI/reviews сверены, PR12 ready.
+Девять существующих аудио, URL-priority, optional storage, sanitized public-copy
+и отсутствие autoplay сохранены. Функция принята в этом ограниченном объёме,
+но ещё не merged/опубликована; переводы не проверены носителем, OS media и
+физическое устройство не сертифицированы.
+
+Найдено лишнее потребление ресурсов: archive12118170261 имеет1007892499B,
+из них991172664Bcompressed —53успешныхtrace. Независимый verifier проверил
+выбранные acceptance.json/4PNG по central CRC и собственным SHA256, восемь
+runtime blobs и равенство raw CI. Полный SHA256 ZIP не проверен; handoff digest
+атрибутирован GitHub metadata, непрочитанные traces не объявлены проверенными.
+Получена одна неполная копия158007296B и65536Bcentral-directory tail без
+повторного полного скачивания. Root признал выбранные доказательства
+достаточными для описанного объёма приёмки. Ограничить успешные traces с
+сохранением failure evidence — следующий отдельный WIP после выпуска функции.
+
+Дельта01:23: guardfix сохранён в [PR88](https://github.com/OleksandrKiris/kiris-jobs/pull/88),
+head `beb025c68f33b3a1758ff02f79a73c7abb75466d` / base374d,
+tree9a62e038. Ровно шесть browser harness файлов,14адресных тестов автора PASS,
+один штатный CI запущен. Независимые source/runtime проверки начаты; этот fix
+ещё не включён в локальный общий84 и не считается принятой реализацией.
+NEW68/full-current fallback требуют свежего совместного CI, old-tool88 green
+не заменит эту проверку. Незавершённая передача и исходники сохранены отдельно.
+Независимое source-review beb выявило два P2: failed/timeout full-current child
+может быть принят по оставшемуся passed JSON; замена published.ref на eventbase
+с прежними OLD-хешами создаст несогласованную tuple после выпуска68. Автор1
+исправляет оба в том же87/88 с адресными регрессиями. Независимые14tests и
+current19old-tool CI88 PASS имеют ограниченный объём и не закрывают эти P2;
+fullCurrent на88 NOTRUN. До нового head и закрытия findings88 не импортируется.
+
+### Опубликован выбор площадки и подготовлена общая сборка — 18 октября, 01:37
+
+Dragon12 принят с expectedhead80162bbb/base95ba →
+`f51c280d90697cd3ad2d9e0623dedc020fa2073d`. Свежая независимая сверка11условий
+совпала с принятыми source/runtime/peer proofs. [Pages39079184115](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39079184115)
+SUCCESS; восемь уникальных HTTP200 файлов совпали по размеру/SHA256/Git blob,
+tested/merged tree8ef8b332 совпал. Выбор/возврат/очистка площадки теперь
+опубликованы для всех12языков. Это единственный guarded merge прохода23:26.
+Отдельная новая publicHTTPS UI-попытка роли3 остановлена после IAB bootstrap
+timeout30.1485s: страницы/PNG/перехода к обучению и Back нет. Она не заменяет
+успешную CI-приёмку и не доказывает дефект сайта; повторного цикла не запускали.
+
+Оба P2 старого88beb закрыты в `dae521a094c27614fef222bdbda09ed14942f889`:
+process success проверяется до чтения JSON, historical OLD tuple атомарен,
+eventBase записан отдельно. Независимые18tests PASS и три exact-source old/new
+probes воспроизводят старые допуски и новые отказы. Это чистые probes, не
+реальный browser timeout. CI39079187539/39079187543 SUCCESS:19OLDoverlay,
+fullCurrent NOTRUN. Fix принят только как source/fixture component, а не
+как новая full-current browser приёмка материалов68.
+
+Обычный локальный merge88dae в existing84 дал промежуточный head3b83175e,
+tree37b8a70e: все417mode/type/blob entries совпали с ожидаемым составом.
+Сохранены21component пути9/12/14, шесть browser путей1 и два документа10;
+исходники авторов не переписаны. Один общий push/CI должен впервые проверить
+реальные staged NEW5, весь current-core и mandatory19, восстановление stage,
+оба prototype suites и предусмотренные native checks. Свежий результат
+этого head фиксируется в PR84 и техническом реестре; старые green не переносятся.
+До этой проверки общий кандидат не ready; следующий main guard отдельно.
+
+Владелец4 начал один следующий [Dragon PR13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13),
+headb6b0ca667fe5c3ff999f5f8abf5ff6d355913e2c/basef51: ограничить успешные
+traces, сохранив failure trace, representative worker trace, все assertions,
+screenshots/report и runtime manifest. Четыре пути, независимые source/runtime/
+peer проверки ещё идут. Объём нового artifact пока не объявлен измеренным;
+публичный runtime этим тестовым WIP менять не разрешено.
 
 ### История очереди — ранняя сверка 17.10.2026, не задания к повтору
 
@@ -883,6 +1240,21 @@ GitHub продолжался. Прежний общий запрет на лю�
   ведёт на EN с понятным предупреждением, не выдуманным переводом.
 
 ## Журнал существенных изменений
+
+- **2026-10-18, выпуск Dragon11:** опубликован текстовый путь ka/tr/hy, guarded95ba121c, Pages39075670274 и8точных публичных файлов. Current19 prerequisite60 независимо CLEAR, выпуск60→68 впереди. Следующие задачи поручены владельцам2/12; незавершённый код не объявлен готовым.
+
+- **2026-10-18, функциональный проход:** новый Dragon11 ka/tr/hy подготовлен с167unit/35browser PASS; независимые source/runtime/VM проверки CLEAR, выпуск отдельно. Локальный serializer77 принят3ad9f93 с post-CI/7public bytes. В Ryczywół исправлен найденный P2 с182tests. Совместный public gate4179 прошёл48сценариев, новый697 имеет отдельный timeout; материалы68 пока не опубликованы.
+
+- **2026-10-17, PR78:** единый roadmap принят на guard611 →f89e0e4,
+  post Backend/Pages и семь public bytes проверены. Company importer получил
+  actual TestCase red/green proof в private copies; source proposal не применён.
+  Dragon10 independently clear/frozen. Новые storage diagnostics68/82/83
+  продолжают отдельную приёмку; причиной issue79 или завершённым fix не названы.
+
+- **2026-10-17, передача8:** получен прежний v4 source ZIP и подтверждены
+  его72 entries. Owner evidence:110 MiniApp/472 total tests и build PASS,
+  local preservation+validation commits; runtime/lockfile сохранены. Это
+  восстановление reviewable source, не новый deploy/canonical26 acceptance.
 
 - **2026-10-17, Dragon9:** исправлены явный TR fallback и requested context после
   reload/Back; guard810 →3a7, Pages39061616083 и пять runtime bytes проверены.

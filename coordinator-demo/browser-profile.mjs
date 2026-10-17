@@ -28,3 +28,12 @@ export async function createFileProfile(chromium, viewport) {
     dispose
   };
 }
+
+// The ownership scope includes setup (route/tracing/newPage), not only assertions.
+export async function withFileProfile(chromium,viewport,run) {
+  let profile;
+  try {
+    profile=await createFileProfile(chromium,viewport);
+    return await run(profile);
+  } finally {await profile?.dispose();}
+}
