@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 17.10.2026, 17:36 Europe/Budapest; kiris-jobs дополнен после приёмки72. Владелец: роль10.
+Сверка: 17.10.2026, после приёмки73; kiris-jobs mainace6655. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `a8093c9e251f117dd113649fa82c3441ed5846e8` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#61](https://github.com/OleksandrKiris/kiris-jobs/pull/61) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#73](https://github.com/OleksandrKiris/kiris-jobs/pull/73), [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#75](https://github.com/OleksandrKiris/kiris-jobs/pull/75) draft | [39049976240](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39049976240) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `ace6655eff143e674dc93e07a3a8709e45d5d14c` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#75](https://github.com/OleksandrKiris/kiris-jobs/pull/75) draft | [39054979967](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39054979967) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `02a1bfdb08b1ccf72e49113f57ca144ab14cd328` | [#11](https://github.com/OleksandrKiris/citronex-hydra-project/pull/11) draft | [39035254461](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39035254461) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `79fdd78cde1d3f46e1e8d9e17b6178a3e13a2d9a` | нет | [39016686598](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39016686598) |
@@ -40,11 +40,17 @@ recruitmentbot. Остальной аккаунт не объявляется о
   coordinator-demo/browser-acceptance.mjs:157 denied-remove/reload: todo != doing.
   Предыдущие шесть сценариев прошли; дальнейшее причинное исправление fixture
   принято в66, см. ниже. Проверка не выключена и повтор вслепую не выполнялся.
-  Документационный WIP согласован с новым main обычным merge;
-  новый exact head должен пройти проверки и сохраняет draft до необходимой приёмки.
-- HYDRA PR11: head `39d18a27881e07de5577fb216b84f038c6254700`, draft, CI39045329094
-  success. Более ранний failure39045212681 относится к `b2ed637`, не текущему head.
-  Непроведённая лингвистическая проверка не считается выполненной.
+  Позднее PR61 принят на head3f11c589, guarded merge3c2c73fb;
+  post Backend39050890139/Pages39050890058 success, семь public bytes совпали.
+  Старый failure не является состоянием принятого head.
+- HYDRA PR11: head `beb192c684dea9a770b8d8c9c29c69cad767af02`, draft,
+  base02a1bfd, CI39049963079 success. Дельта от ранее проверенного39d18a2 —
+  только tests/browser.mjs; runtime/SW/переводы прежние. Независимо прочитан
+  artifact12106809441:30 уникальных ka/tr/hy ×1280/320 ×5fault-case,
+  guide целиком во viewport/clipping bounds с center hit-test,
+  14 Tab stops с прямым/обратным циклом и wrap. Три guide-320 screenshot просмотрены;
+  десять прежних сценариев и upgrade/offline сохранены, всего41 запись.
+  PR ещё не принят. Носитель языка, физический телефон и внешнее обучение не проверены.
 - Роли3/5/6/7/9/11 подготовили отдельные локальные commits/patches и адресные тесты.
   В передаче имеются исторические отказы отдельных GitHub write/PR операций без
   полного исходного ответа. Эти операции не повторялись другим инструментом.
@@ -86,10 +92,12 @@ recruitmentbot. Остальной аккаунт не объявляется о
  Тесты выполняются в отдельной CI venv; Django environment не меняется, hardlock отсутствует.
 - PR62 отдельно проверен как библиотека (33 теста); spy не доказывает schema.
  PR73@b41b6c6a независимо прошёл 46 backend-тестов, а combined73+62@177872e3 —61 тест
- и6 настоящих schema/domain integrations, включая16 сочетаний языка и лимита. Это не merge
- и не HTTP. Совместный73head5d00a7c/basea809 имеет прежние backend/deps/schema
- bytes и только accepted72 CI delta; независимое reviewclear,
- Backend39050175711/Catalogue39050175723 success. Merge73, затем62 иURL12 ещё впереди.
+ и6 настоящих schema/domain integrations, включая16 сочетаний языка и лимита.
+ PR73 принят на head98a30113/base3c2: backend/deps/schema bytes неизменны,
+ независимое delta review clear, Backend39054315640/Catalogue39054315607 success.
+ Guarded mergeace6655; post Backend39054980031/Pages39054979967 success,
+ семь public ресурсов HTTP200 побайтно совпали с main. Принят локальный validator,
+ PR62 и HTTP/URL12 ещё впереди. Backend не опубликован, production tenancy не доказана.
 - PR68 CLOSED/PARKED, NOTmerged: exacta41851cf8477584e5aeeff47b518e3577f7968df,
  ветка сохранена; bundleverify/patch/manifest/metadata сохранены9. Независимо
  P3case исправлен red/green,36tests/16parity иCI39048930084/39048930092green,
@@ -107,6 +115,16 @@ recruitmentbot. Остальной аккаунт не объявляется о
  прошли. Независимо artifact12107372113 подтвердил initialKEY/marker=null доfixture,
  0fixtureKEYwrites/removals, первыйappget=null иrealmodelTODO. Для этого случая
  исключены fixtureoverwrite/nativeformrestore; storagewhy/связь со старымv1 не доказаны.
+- Supported-origin policy75 принята только для реализации: восемь обязательных
+ semantic assertions на фиксированном HTTP origin плюс отдельный file:// offline UI,
+ публичный SW/offline gate остаётся у1. Локальные code/helper статически reviewed clear,
+ runtime/SW неизменны, нового remote head/CI нет. Запись карты в
+ docs/platform/main-reload-diagnostics.md через exec_command/PowerShell Set-Content
+ с последующими checks отклонена до исполнения: blocked by policy, подробностей нет.
+ Исходный caller request, видимый усечённый ответ и unapplied patches сохранены;
+ README/doc пока расходятся. Тот же документ не записывался другим способом.
+ Для75 upgrade=N/A; будущий68 требует реальных old5tool→new5tool, per5interrupt,
+ last-good и tool status после reconnect: нынешняя root-shell overlay этого не доказывает.
 - PR74@3f5ddeb — подготовленная9-row HRappka evidence/gap matrix; исправлены
  live APIguide/S5→S6 и parked68. Это не второйroadmap или доказанное превосходство.
 
