@@ -42,6 +42,8 @@
     "minutes": "წთ",
     "total": "მთელი მონაკვეთი",
     "breakLabel": "შესვენება",
+    "decimalLabel": "ათწილადი საათები",
+    "roundingNote": "დამრგვალებულია ორ ათწილადამდე",
     "externalNotice": "გარე ბმულები სხვა სერვისებს ხსნის. მათში ეს ენა შესაძლოა ჯერ არ იყოს ხელმისაწვდომი და ტექსტი ინგლისურად გამოჩნდეს. ინტერნეტი საჭიროა."
   },
   "tr": {
@@ -84,6 +86,8 @@
     "minutes": "dk",
     "total": "Toplam aralık",
     "breakLabel": "Mola",
+    "decimalLabel": "Ondalık saat",
+    "roundingNote": "iki ondalık basamağa yuvarlandı",
     "externalNotice": "Dış bağlantılar başka hizmetleri açar. Bu dil henüz her hizmette bulunmayabilir; İngilizce gösterilebilir. İnternet gerekir."
   },
   "hy": {
@@ -126,6 +130,8 @@
     "minutes": "ր",
     "total": "Ամբողջ ժամանակահատվածը",
     "breakLabel": "Ընդմիջում",
+    "decimalLabel": "Տասնորդական ժամեր",
+    "roundingNote": "կլորացված է մինչև երկու տասնորդական նիշ",
     "externalNotice": "Արտաքին հղումները բացում են այլ ծառայություններ։ Այս լեզուն դրանցից որոշներում դեռ կարող է հասանելի չլինել, և բովանդակությունը ցուցադրվել անգլերեն։ Ինտերնետ է պահանջվում։"
   }
 };

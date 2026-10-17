@@ -21,6 +21,12 @@
     if (rest >= total) return { error: 'breakError', field: 'breakMinutes' };
     return { total, rest, net: total - rest };
   }
+  // Rounded readout only; exact minute arithmetic and v1 saves are unchanged.
+  function decimalHours(netMinutes) {
+    if (!Number.isInteger(netMinutes) || netMinutes < 0 || netMinutes >= 1440) return null;
+    const hundredths = Math.round(netMinutes * 100 / 60);
+    return `${Math.floor(hundredths / 100)}.${String(hundredths % 100).padStart(2, '0')}`;
+  }
   function validState(v) {
     return v && typeof v === 'object' && !Array.isArray(v) &&
       Object.keys(v).length === 5 && ['start', 'end'].every(k => typeof v[k] === 'string' && (v[k] === '' || minutes(v[k]) !== null)) &&
@@ -51,7 +57,7 @@
     try { getStorage().removeItem(KEY); return 'forgotten'; }
     catch { return 'saveFailed'; }
   }
-  const api = { KEY, LANGS, empty, language, minutes, calculate, validState, read, save, forget };
+  const api = { KEY, LANGS, empty, language, minutes, calculate, decimalHours, validState, read, save, forget };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ShiftDuration = api;
 })(typeof window !== 'undefined' ? window : this);

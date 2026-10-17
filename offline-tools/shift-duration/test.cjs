@@ -194,3 +194,28 @@ test('real browser fixture never reseeds recovered data after a new document', (
     assert.equal(afterReset.localStorage.getItem(C.KEY),null);
   }
 });
+
+
+test('decimal-hours readout uses precise minutes and rounds display to hundredths', () => {
+  for (const [minutes, expected] of [[0,'0.00'],[1,'0.02'],[29,'0.48'],[30,'0.50'],[59,'0.98'],[60,'1.00'],[450,'7.50'],[1439,'23.98']])
+    assert.equal(C.decimalHours(minutes),expected);
+  for (const invalid of [-1,1440,1.5,NaN,Infinity,'450',null]) assert.equal(C.decimalHours(invalid),null);
+  const u=ui();u.set(good());u.event('calculator','submit');
+  assert.match(u.els.get('result').children[1].textContent,/Decimal hours: 7\.50 h \(rounded to 2 decimal places\)/);
+  assert.equal(u.s.getItem(C.KEY),null,'Displaying decimal hours must not auto-save');
+  u.set({language:'ru'});u.event('language','change');
+  assert.match(u.els.get('result').children[1].textContent,/7,50/);
+  assert.equal(u.els.get('start').value,'06:00');
+  u.set({breakMinutes:'480'});u.event('calculator','input');
+  assert.equal(u.els.get('result').children.length,0,'Invalid input must clear the rounded readout');
+});
+test('decimal label and rounding warning exist in all seven supported locales', () => {
+  for(const lang of C.LANGS) {
+    const u=ui(lang);u.set(good());u.event('calculator','submit');
+    assert.equal(u.els.get('result').children.length,2);
+    const decimal=u.els.get('result').children[1].textContent;
+    assert.match(decimal,/7[,.]50/);
+    assert.match(decimal,/\(.+\)$/);
+    assert.equal(u.els.get('result').children[1].className,'decimal-hours');
+  }
+});

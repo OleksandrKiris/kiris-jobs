@@ -118,6 +118,7 @@ try {
     assert.equal(await page.locator('button[type=submit]').evaluate(el => el === document.activeElement), true);
     await page.keyboard.press('Enter');
     await result(page);
+    assert.match(await page.locator('#result .decimal-hours').innerText(), /7[,.]50/);
     assert.equal(await saved(page), null, 'No implicit save');
     await page.keyboard.press('Tab');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'save');
@@ -135,6 +136,7 @@ try {
       assert.equal(await page.locator('html').getAttribute('lang'), lang);
       assert.equal(await page.locator('#start').inputValue(), '22:00');
       await result(page, expected);
+      assert.match(await page.locator('#result .decimal-hours').innerText(), /7[,.]50/);
       assert(await page.locator('[data-i18n]').evaluateAll(nodes => nodes.every(el => el.textContent.trim().length > 0)));
       assert((await page.locator('#jobs').getAttribute('href')).endsWith(`lang=${lang}`));
       assert((await page.locator('#hydra').getAttribute('href')).endsWith(`lang=${lang === 'uk' ? 'ua' : lang}`));
@@ -169,6 +171,7 @@ try {
     await page.locator('#nextDay').uncheck();
     assert.equal(await page.locator('#end').getAttribute('aria-invalid'), 'true');
     assert(!(await page.locator('#result').innerText()).includes('7 h'));
+    assert.equal(await page.locator('#result .decimal-hours').count(), 0, 'Invalid inputs must clear rounded value');
     await page.locator('#nextDay').check();
     await page.locator('#breakMinutes').fill('480');
     assert.equal(await page.locator('#breakMinutes').getAttribute('aria-invalid'), 'true');
