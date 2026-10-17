@@ -1,0 +1,2 @@
+# Exact security-patched Django release as of 2026-10-17 (no extras).
+Django==6.1.2
