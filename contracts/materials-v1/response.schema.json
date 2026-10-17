@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "api_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "content_version": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "requested_language": {
+      "type": "string",
+      "enum": [
+        "ua",
+        "uk",
+        "ru",
+        "pl",
+        "en",
+        "ka",
+        "tr",
+        "hy"
+      ]
+    },
+    "effective_language": {
+      "type": "string",
+      "enum": [
+        "ru",
+        "uk",
+        "pl",
+        "en"
+      ]
+    },
+    "fallback": {
+      "type": "boolean"
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,80}$"
+          },
+          "type": {
+            "type": "string",
+            "const": "job-summary"
+          },
+          "job_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,80}$"
+          },
+          "location_id": {
+            "type": "string",
+            "enum": [
+              "zgorzelec"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "ru",
+              "uk",
+              "pl",
+              "en"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "repo": {
+                "type": "string",
+                "const": "OleksandrKiris/kiris-jobs"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "ref": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "selector": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "source_updated_on": {
+                "type": "string",
+                "format": "date"
+              },
+              "verified_on": {
+                "type": "string",
+                "format": "date"
+              },
+              "verification_status": {
+                "type": "string",
+                "enum": [
+                  "verified-against-repository",
+                  "unverified"
+                ]
+              }
+            },
+            "required": [
+              "repo",
+              "path",
+              "ref",
+              "selector",
+              "source_updated_on",
+              "verified_on",
+              "verification_status"
+            ]
+          },
+          "synthetic": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "job_id",
+          "location_id",
+          "language",
+          "title",
+          "text",
+          "source",
+          "synthetic"
+        ]
+      }
+    },
+    "next_cursor": {
+      "type": "null"
+    }
+  },
+  "required": [
+    "api_version",
+    "schema_version",
+    "content_version",
+    "requested_language",
+    "effective_language",
+    "fallback",
+    "items",
+    "next_cursor"
+  ]
+}
