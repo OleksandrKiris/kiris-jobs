@@ -651,7 +651,7 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | PR60 принят374d5bdd; Pages39077298495/Backend39077298482 SUCCESS,26public assets exact | Новый browser guard WIP в issue87; source-design согласован, новый exact fix-head ещё не передан, общий кандидат не ready |
+| 1 | PR60 принят374d5bdd; Pages39077298495/Backend39077298482 SUCCESS,26public assets exact | Issue87/PR88@beb025c6:6browser paths,14author tests PASS; independent source/runtime ещё в работе, общий кандидат не ready |
 | 2 | HYDRA14@efbb5a8 готов/не опубликован; peer Dragon12@801 завершён CLEAR |36language×location+36URL-priority и адресные denied/reset/callback fixtures PASS; это VM, не второй browser/CI |
 | 3 | Local58005b9f,182unit; независимые14/14 HTTP200 exact bytes | IAB HTTP bootstrap timeout; разрешённая инвентаризация не нашла другого HTTP-браузера; UI/offline NOTRUN |
 | 4 | Dragon12@80162bbb:230unit/53current-browser; independent source/runtime/peer CLEAR, PR ready | Все12языков: выбор/возврат/очистка площадки. Не опубликован; следующий fresh-base/head/CI guard и postPages/8bytes |
@@ -918,6 +918,14 @@ runtime blobs и равенство raw CI. Полный SHA256 ZIP не про�
 повторного полного скачивания. Root признал выбранные доказательства
 достаточными для описанного объёма приёмки. Ограничить успешные traces с
 сохранением failure evidence — следующий отдельный WIP после выпуска функции.
+
+Дельта01:23: guardfix сохранён в [PR88](https://github.com/OleksandrKiris/kiris-jobs/pull/88),
+head `beb025c68f33b3a1758ff02f79a73c7abb75466d` / base374d,
+tree9a62e038. Ровно шесть browser harness файлов,14адресных тестов автора PASS,
+один штатный CI запущен. Независимые source/runtime проверки начаты; этот fix
+ещё не включён в локальный общий84 и не считается принятой реализацией.
+NEW68/full-current fallback требуют свежего совместного CI, old-tool88 green
+не заменит эту проверку. Незавершённая передача и исходники сохранены отдельно.
 
 ### История очереди — ранняя сверка 17.10.2026, не задания к повтору
 
