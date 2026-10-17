@@ -34,6 +34,7 @@ for (const name of files) {
 report.runtimeBytes = report.resources.reduce((sum, file) => sum + file.bytes, 0);
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
+const { seedFixture } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const KEY = 'primserv:coordinator-demo:v1', OTHER = 'primserv:acceptance:unrelated';
 const initial = { version: 1, statuses: { 'demo-01': 'todo', 'demo-02': 'todo', 'demo-03': 'todo' } };
 const previous = JSON.stringify({ version: 1, statuses: { ...initial.statuses, 'demo-02': 'done' } });
@@ -62,24 +63,7 @@ try {
     context.on('request', request => { if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() }); });
     // Any attempted network request is blocked and fails the run, including GET.
     await context.route(/^https?:/, route => route.abort());
-    await context.addInitScript(({ key, other, mode, previous }) => {
-      if (!sessionStorage.getItem('coordinator-acceptance-seeded')) {
-        localStorage.setItem(other, 'keep');
-        const raw = mode === 'corrupt' ? '{broken' : mode === 'future'
-          ? JSON.stringify({ version: 2, statuses: {} }) : mode === 'empty' ? null : previous;
-        if (raw !== null) localStorage.setItem(key, raw);
-        sessionStorage.setItem('coordinator-acceptance-seeded', 'yes');
-      }
-      if (mode === 'denied-read') Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Denied fixture', 'SecurityError'); } });
-      if (mode === 'denied-write' || mode === 'denied-remove') {
-        const method = mode === 'denied-write' ? 'setItem' : 'removeItem';
-        const original = Storage.prototype[method];
-        Storage.prototype[method] = function (name, ...args) {
-          if (name === key) throw new DOMException('Denied fixture', 'SecurityError');
-          return original.call(this, name, ...args);
-        };
-      }
-    }, { key: KEY, other: OTHER, mode: scenario.mode, previous });
+    await context.addInitScript(seedFixture, { key: KEY, other: OTHER, mode: scenario.mode, previous });
     await context.tracing.start({ screenshots: true, snapshots: true });
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
@@ -144,6 +128,9 @@ try {
         if (scenario.mode === 'denied-remove') {
           await keyClick(page, 'reset'); await keyClick(page, 'confirm');
           assert.match(await page.locator('#storage').innerText(), /cannot guarantee removal/);
+          assert.equal(JSON.parse(await page.evaluate(key => localStorage.getItem(key), KEY)).statuses['demo-01'], 'doing');
+          // Reproduce missing sessionStorage on file navigation deterministically.
+          await page.evaluate(() => sessionStorage.clear());
         }
         if (scenario.mode !== 'denied-read') {
           const raw = await page.evaluate(key => localStorage.getItem(key), KEY);
