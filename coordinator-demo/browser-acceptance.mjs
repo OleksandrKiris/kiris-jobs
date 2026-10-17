@@ -54,6 +54,8 @@ try {
   for (const scenario of [
     { name: 'board-wide', width: 1280, mode: 'empty' },
     { name: 'board-narrow', width: 320, mode: 'empty' },
+    { name: 'board-wide-no-preread', width: 1280, mode: 'empty', noPreread:true },
+    { name: 'board-narrow-no-preread', width: 320, mode: 'empty', noPreread:true },
     ...['v1', 'corrupt', 'future', 'denied-read', 'denied-write', 'denied-remove'].map(mode => ({ name: mode, width: 320, mode }))
   ]) {
     const viewport = { width: scenario.width, height: 900 };
@@ -100,8 +102,10 @@ try {
         await page.locator('#filter').selectOption('done');
         await page.locator('#language').selectOption('uk');
         report.storageDiagnostics??=[];
-        report.storageDiagnostics.push({scenario:scenario.name,phase:'before-reload',state:await page.evaluate(key=>({url:location.href,raw:localStorage.getItem(key),initial:window.__coordinatorInitialStorage}),KEY)});
-        assert.equal(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),KEY)).statuses['demo-01'],'done');
+        if(!scenario.noPreread) {
+          report.storageDiagnostics.push({scenario:scenario.name,phase:'before-reload',state:await page.evaluate(key=>({url:location.href,raw:localStorage.getItem(key),initial:window.__coordinatorInitialStorage}),KEY)});
+          assert.equal(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),KEY)).statuses['demo-01'],'done');
+        }
         await page.reload(); await ready(page);
         report.storageDiagnostics.push({scenario:scenario.name,phase:'after-reload',state:await page.evaluate(key=>({url:location.href,raw:localStorage.getItem(key),initial:window.__coordinatorInitialStorage}),KEY)});
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
