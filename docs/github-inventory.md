@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 17.10.2026, после приёмки73 и наблюдения76; kiris-jobs main54b597. Владелец: роль10.
+Сверка: 18.10.2026, 00:20 Europe/Budapest; kiris-jobs main3ad9f93 после77. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,10 +12,10 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `62cb57883e617d67e54d8ba5b280f616ca651848` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#77](https://github.com/OleksandrKiris/kiris-jobs/pull/77) ready, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft | [39070310282](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39070310282) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `3ad9f93f66776613443f767403cd239c4678d605` | [#60](https://github.com/OleksandrKiris/kiris-jobs/pull/60) draft, [#62](https://github.com/OleksandrKiris/kiris-jobs/pull/62) draft, [#68](https://github.com/OleksandrKiris/kiris-jobs/pull/68) draft, [#74](https://github.com/OleksandrKiris/kiris-jobs/pull/74) draft, [#84](https://github.com/OleksandrKiris/kiris-jobs/pull/84) docs draft | [39073288866](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39073288866) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | нет; PR13 принят | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
-| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `70b0f74e95d1556c85aa649d6204b106bd564c4f` | Нет открытых PR после выпуска10 | [39072598765](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39072598765) |
+| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `70b0f74e95d1556c85aa649d6204b106bd564c4f` | [#11](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/11) draft,5ac5dd0 | [39072598765](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39072598765) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
@@ -257,3 +257,16 @@ PR85 принят17октября: headaf008c86/base558e6e75 →merge62cb5788, �
 подключаются только по отдельному решению.
 
 17 октября, прямой приоритет видимых функций: Dragon10 опубликован70b0f74e, Pages39072598765SUCCESS,8public assets exact. Новая кнопка копирования публичной guide-ссылки с языком/локацией и ручным fallback. Следующий public-кандидат68c896 имеет8green checks; подтверждены runtime141/156 и6×24, совместныйpublic gate1 ещё требуется. Django77 обновлён0fe5f63a/base62cb, Backend39071027081/Catalogue39071027060SUCCESS; локальный backend не опубликован.
+
+18 октября, 00:20 Europe/Budapest: backend77 принят exact0fe5/base62cb →3ad9f93,
+post Backend39073288882/Pages39073288866 SUCCESS;7public runtime bytes exact,
+backend не опубликован. Dragon11@5ac5/base70b0 подготовлен: ka/tr/hy текстовый
+путь,167unit/35browser PASS (CI39073440703), независимые source/runtime/VM CLEAR,6PNG просмотрены; не опубликован.
+Joint gate60@4179:48PASS независимо проверены; current697/base3ad required verify
+39073975495 FAILURE,8/19PASS/logo1280 timeout/10NOTRUN; все3backend77blobs сохранены.
+Public материалы68 не приняты. Local Ryczywół af02: R6-LANG-01 исправлен,
+182unit PASS и независимое source CLEAR; браузерный результат742 не перенесён.
+QA приезда3:14HTTP exact bytes, IAB bootstrap timeout; UI/offline NOTRUN.
+Это текущая дельта; старые READY/FROZEN ниже/выше относятся к своим head.
+
+Следующий head60 cba1c2fc4acd753c5df6114e030b4a4a4d85c2f1/base3ad усиливает ожидание actual controller/reload без runtime-правки; независимое delta-review и новый CI ещё pending. Red697 сохранён, нового выпуска нет.
