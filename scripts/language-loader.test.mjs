@@ -46,6 +46,16 @@ test('unsupported locale does not cause an unexpected fetch', async () => {
   assert.equal(result.loaded.some(path => path.includes('/xx')), false);
   assert.ok(result.loaded.some(path => path.includes('candidate.js')));
 });
+test('all fallback bootstrap modules use the exact precached URLs', async () => {
+  const sw = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+  const shell = vm.runInNewContext(sw.match(/const CORE_SHELL = (\[[\s\S]*?\]);/)[1]);
+  const cached = new Set(shell.map(path => new URL(path, 'https://example.test/kiris-jobs/').href));
+  const result = await start({ fail: '/en.js' });
+  for (const path of result.loaded) {
+    const absolute = new URL(path, 'https://example.test/kiris-jobs/assets/bootstrap.js').href;
+    assert.ok(cached.has(absolute), `Not precached: ${absolute}`);
+  }
+});
 
 const i18nSource = await readFile(new URL('../assets/i18n.js', import.meta.url), 'utf8');
 function languageApp({ denied = false, failure = '', stored = 'en' } = {}) {

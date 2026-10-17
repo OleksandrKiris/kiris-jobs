@@ -39,7 +39,7 @@
   await import(`../data/content.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./vacancy-overrides.js?v=${window.PORTAL_ASSET_VERSION}`);
   await window.PORTAL_VACANCY_OVERRIDES_READY;
-  await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}`);
+  await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}&localeRecovery=1`);
   await import(`./application-loader.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}&shortcuts=1&coordinator=1`);
 })().catch((error) => {
