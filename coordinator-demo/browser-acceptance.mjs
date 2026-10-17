@@ -8,6 +8,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { withFileProfile } from './browser-profile.mjs';
 import { captureStorageIdentity,compareStorageIdentity,hasCompleteIdentity } from './storage-identity.mjs';
+import { captureBackendOpen,compareBackendOpen,hasCompleteBackendOpen } from './backend-open-observation.mjs';
 
 if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Run only in the approved GitHub Actions acceptance job. No local browser launch.');
 const { PLAYWRIGHT_PACKAGE, BROWSER_REPORT, TESTED_HEAD, TESTED_BASE } = process.env;
@@ -50,6 +51,11 @@ const readEvidence=()=>({
 });
 report.storageEvidence=[];
 report.storageIdentity=[];
+report.backendOpen=[];
+report.backendOpenObservation={effect:"Extra browser CDP attach/read/detach changes timing; not a fix",
+  scope:"Existing six observed state reloads only; cumulative process-wide LocalStorage.DatabaseOpen",
+  sourceRevision:"9f043f63b0e5b728c8d09f3e3ddfc1681a4bd58e",
+  limits:"Missing/empty is unavailable, unchanged is no new open sample; OK includes memory/recovery, not KEY commit/load/durability"};
 report.identityObservation={scope:'Only six explicitly observed scenarios, state reload only; original controls and restarts unchanged',
   effect:'Extra CDP attach/read-only RPC/detach round trips can change timing; not a causal fix',
   context:'Optional browserContextId is kept null when not reported; no fabricated context ID',
@@ -59,6 +65,7 @@ report.identityObservation={scope:'Only six explicitly observed scenarios, state
 const observeIdentity=async(context,page,scenario,phase)=>{
   const sample=await captureStorageIdentity(context,page);
   report.storageIdentity.push({scenario:scenario.name,phase,...sample});
+  report.backendOpen.push({scenario:scenario.name,phase,...await captureBackendOpen(context)});
 };
 report.observationProtocol={control:'Original storage operations and browser action order; no observer',
   passive:'Wrap existing storage calls and retain real model; no added storage reads, but CPU/payload timing changes',
@@ -321,6 +328,12 @@ try {
     status:observedNames.length===6&&hasCompleteIdentity(report.storageIdentity,observedNames)&&
       report.identityComparisons.every(x=>!['unavailable','incomparable-version'].includes(x.result))?'observed':'unavailable'};
   if(report.identityGate.status!=='observed')report.status='failed';
+  report.backendOpenComparisons=observedNames.map(scenario=>({scenario,...compareBackendOpen(
+    report.backendOpen.find(x=>x.scenario===scenario&&x.phase==='before-state-reload'),
+    report.backendOpen.find(x=>x.scenario===scenario&&x.phase==='after-state-reload'))}));
+  report.backendOpenGate={samples:report.backendOpen.length,status:hasCompleteBackendOpen(report.backendOpen,observedNames)&&
+    report.backendOpenComparisons.every(x=>x.status==='observed')?'observed':'unavailable'};
+  if(report.backendOpenGate.status!=='observed')report.status='failed';
   if(report.status==='failed')process.exitCode=1;
 } catch (error) { report.status = 'failed'; report.error = error.stack; process.exitCode = 1; }
 finally {
