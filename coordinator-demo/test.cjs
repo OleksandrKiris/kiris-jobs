@@ -6,6 +6,44 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const M = require('./model.js');
 const read = name => fs.readFileSync(path.join(__dirname,name),'utf8');
+const {seedFixture}=require('./browser-fixtures.cjs');
+
+function fixtureDocument(data,mode,previous) {
+  // A new document has new prototypes/session storage, while local state survives.
+  class Storage {
+    getItem(k){return data.get(k)??null;}
+    setItem(k,v){data.set(k,v);}
+    removeItem(k){data.delete(k);}
+  }
+  const localStorage=new Storage();
+  vm.runInNewContext('('+seedFixture.toString()+')(args)',{
+    localStorage,Storage,window:{},DOMException,
+    args:{key:M.KEY,other:'fixture:unrelated',mode,previous}
+  });
+  return localStorage;
+}
+
+test('fixture survives missing session marker and keeps denied-remove state across documents',()=>{
+  const previous=JSON.stringify({version:1,statuses:{...M.initial(),'demo-02':'done'}});
+  const data=new Map(),first=fixtureDocument(data,'denied-remove',previous);
+  const model=M.create(first);model.set('demo-01','doing');model.reset(true);
+  assert.equal(model.snapshot().statuses['demo-01'],'todo');
+  assert.equal(model.snapshot().persistence,'blocked');
+  assert.equal(JSON.parse(data.get(M.KEY)).statuses['demo-01'],'doing');
+  const second=fixtureDocument(data,'denied-remove',previous);
+  assert.equal(M.create(second).snapshot().statuses['demo-01'],'doing');
+  assert.equal(M.create(second).snapshot().statuses['demo-02'],'done');
+  assert.throws(()=>second.removeItem(M.KEY),/Denied fixture/);
+  assert.equal(data.get('fixture:unrelated'),'keep');
+});
+
+test('missing local fixture marker cannot overwrite corrupt, future or edited records',()=>{
+  for(const raw of ['{broken',JSON.stringify({version:2,statuses:{}}),JSON.stringify({version:1,statuses:{...M.initial(),'demo-01':'doing'}})]) {
+    const data=new Map([[M.KEY,raw]]);
+    fixtureDocument(data,'v1','replacement');
+    assert.equal(data.get(M.KEY),raw);
+  }
+});
 test('browser entry refuses local execution before loading any browser or git checkout',()=>{
   const result=spawnSync(process.execPath,[path.join(__dirname,'browser-acceptance.mjs')],{
     env:{...process.env,GITHUB_ACTIONS:'false',PLAYWRIGHT_PACKAGE:'must-not-be-loaded'},encoding:'utf8',timeout:5000
