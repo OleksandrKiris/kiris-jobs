@@ -678,10 +678,8 @@ try {
   // Keep the existing deadline and every scenario; overlap independent UI waits.
   await Promise.all([
     acceptFormErrors({context,base,reportDir,report,active:page=>{activePage=page;}}),
-    (async()=>{
-      await acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}});
-      await acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}});
-    })()
+    acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}}),
+    acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}})
   ]);
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
