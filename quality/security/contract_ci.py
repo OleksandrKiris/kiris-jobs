@@ -7,6 +7,24 @@ import unittest
 
 SUITES = [('contracts/materials-v1/test_materials.py', 9),
           ('docs/integration/test_ownership.py', 11)]
+CAPABILITIES = Path('contracts/capabilities-v1')
+CAPABILITIES_FILES = ('response.schema.json', 'snapshot.json', 'test_capabilities.py')
+
+
+def required_suites(root):
+    suites = list(SUITES)
+    directory = root / CAPABILITIES
+    if not directory.exists() and not directory.is_symlink():
+        print('Capabilities contract: not applicable (contracts/capabilities-v1 absent)', flush=True)
+        return suites
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError('Capabilities contract must be a real directory')
+    for name in CAPABILITIES_FILES:
+        path = directory / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f'Incomplete capabilities contract: {name} must be a real file')
+    suites.append((str(CAPABILITIES / 'test_capabilities.py'), 9))
+    return suites
 
 
 def collect(path, minimum):
@@ -25,16 +43,21 @@ def collect(path, minimum):
     return suite
 
 
+def run_suites(root):
+    """Collect/run fixed suites; synthetic discovery fixtures need only stdlib."""
+    suite = unittest.TestSuite(collect(root / path, minimum)
+                               for path, minimum in required_suites(root))
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    return 0 if passed(result) else 1
+
+
 def main():
     from jsonschema import FormatChecker
     # Fail rather than silently ignoring the schema's required date format.
     checker = FormatChecker()
     if not checker.conforms('2026-10-17', 'date') or checker.conforms('2026-02-30', 'date'):
         raise ValueError('Required JSON Schema date format checker unavailable')
-    root = Path(__file__).resolve().parents[2]
-    suite = unittest.TestSuite(collect(root / path, minimum) for path, minimum in SUITES)
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
-    return 0 if passed(result) else 1
+    return run_suites(Path(__file__).resolve().parents[2])
 
 
 def passed(result):

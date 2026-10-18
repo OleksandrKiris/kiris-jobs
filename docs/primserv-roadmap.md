@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 01:35 UTC, выпуски PR89, HYDRA14 и Dragon13). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 02:34 UTC, выпуски PR94, HYDRA14 и Dragon13; объединение принятых частей92/95 назначено). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -68,7 +68,47 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 18.10.2026
 
-Последняя сверка main: `8abf8aaf9ad950e193d52b4f56d2a9cc0c011014`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60/84/89.
+Последняя сверка main: `6faaea9e2d109bc808ff0ca4eac863c4a2d65e3d`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60/84/89/94.
+Выпущено явное **избранное материалов**: Pin сохраняет requested language, Open
+использует текущий snapshot/mock reader, Remove удаляет только pin. После reload
+список остаётся видимым без autoopen; задачи, поиск, источник и last-pointer сохранены.
+PR94 tested head `ea941579813be675c1285b8d099f942f07dc8a2c` принят единственным
+guard прохода01:57 в `6faaea9e2d109bc808ff0ca4eac863c4a2d65e3d`, tree65616 и parents[8abf,EA].
+Pages39088679663 и Backend39088679636 SUCCESS;32 выбранных публичных HTTP-файла
+побайтно совпали с Git (размер/SHA256/blob), main до/после6faa. Ещё276 файлов
+проекции сохранены по Gitidentity, это не308 HTTP-проверок. Один P2 старого694
+воспроизведён двумя RED-пробами и закрыт двумя independent GREEN наEA: сохранённый язык
+и вновь появившийся invalid/future raw не перезаписываются устаревшим store.
+Native6 дал96 coordinator+48 calculator;12 выполнений Pin — по2 в каждом из6 наборов16,
+Catalogue2 Pin также внутри16. Author-local82/16parity и literalCatalogue73
+сохраняются раздельно; полного совпадения их команд/охвата не утверждаем.
+Реальный материал по-прежнему один; max5 — storage bound, не новые переводы.
+PR92 после ordinary integration main6faa и rootdocs1990 принят заново на
+`d9f7d10f0860cb6bb7eead104c3178ceac1ef891`, tree99d28/427entries/net14.
+Backend39089216166 и Catalogue39089216182 SUCCESS; независимые source/union и
+runtime CLEAR:10runner/87backend/29contracts (9capabilities+9materials+11ownership),
+core16+workerN/A, main19, prototypes16+8. Native не планировался; отдельные
+fullPOST16/mainPOST20 — ABORTED fixtures, не доставка и не ноль попыток.
+Root actualReady92 выполнен02:19:03; прежний5f12/base8abf остаётся историей.
+PR95 `4dafb3499b928bd8cf3164143781f4c114ce5296` на той жеmain6faa отдельно принят
+source1/runtime4, actualReady02:23:27. Добавлены backup/restore только3 вымышленных
+demo statuses: strictJSON до2048 UTF-8 bytes, preview без записи, Cancel и одноразовое
+подтверждение с повторной проверкой текущего storage/состояния. Авторские95unit/16parity,
+literalCatalogue86unit и Native109unit — отдельные команды; native6 browser96+48,
+два новых backup journeys внутри каждого прежнего набора16. OS-save не доказан.
+На02:34 оба компонента не merged. Чтобы не создавать две последовательные
+пересборки при изменении main, root назначил владельцу9 обычное объединение92 INTO
+существующий95 с этим компонентом2rootdocs перед одним combinedpush. PR95 снова draft;
+новый общий head требует своей полной source/union и CI/runtime-приёмки. Старые
+Ready/counts не переносятся на него. Один guarded merge прохода02:29 ещё не выполнен.
+HYDRA15 Copy route TEXT `7ae29ddfd98e2e6fa302e6d69324351b51f192bc` реализован:
+CI39088860365 SUCCESS,191unit/106browser; прежние136unit/66browser сохранены.
+Поздний actual runtime4 BOUNDED_RUNTIME_CLEAR получен отдельно; дополнительные
+clipboard traces не заявлены. Peer сообщил source CLEAR и сохранил5primary files,
+но финальная операция записи формального source-report была `Rejected: blocked by
+policy` без более точной причины. Точная команда и причина сохранены; повторения
+этой записи другим инструментом нет. PR15 остаётся draft; публикация не объявлена.
+Бэкенд локальный, online-adapter/AI выключены. Ниже история публикации PR89.
 В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/)
 опубликован явный возврат к последнему прочитанному материалу с сохранённым
 requested language. Самопроизвольного открытия после reload нет; очистка указателя
@@ -658,21 +698,21 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | Guard59 опубликован89→8abf, issue87 закрыт. Независимое source-ревью94@694 нашло P2 stale-memory write; два адресных source-probes RED | Проверить исправление того же94 на новом combinedhead; не менять frozen59 или browser harness. Старый694 не принимать по одному green CI |
-| 2 | HYDRA14@efbb опубликованb04fc730: Pages39086963240 SUCCESS, tested/merged treed107 и4HTTP bytes exact;12 прежних runtime assets сохранены по Gitidentity | Один runtime-verifier94 сохраняет уже полученные694 proofs как историю P2-head; следующая corrected94 проверка после нового exacthead. Peer Dragon14@a573 accepted отдельно; OS clipboard/crosssite execution не заявлены |
+| 1 | Source94EA: old694 два RED, currentEA два GREEN и419union CLEAR; guard59/Return89 сохранены. Избранное94 опубликовано6faa | Заморозить принятые source proofs; следующая независимая проверка только нового конкретного head, без повторных probes |
+| 2 | HYDRA14 опубликованb04f; новый Copy route TEXT15@7ae реализован,191unit/106browser и actual late runtime4 bounded CLEAR. Source peer CLEAR и5primary files сохранены | Draft15: конкретный отказ записи финального source-report сохранён дословно; эту операцию не повторять. Новая публикация/формальная приёмка не объявлены. Dragon14 peer history отдельно |
 | 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
 | 4 | Memo13 опубликованf088/8exact assets. Copy MEMO TEXT14@a573/basef088 source/runtime/peer CLEAR, actualready; correctedCI39084077900:413unit/59browser, старыйd000 P2 сохранён | Новый14 не merged/published. Root freshhead/base/CI/reviews и отдельный будущий guarded release; без повторных ZIP/CI/нового WIP. OS clipboard/save/physical/full12browser гарантии не заявлены |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Draft94@694 добавил Pin/Open/Remove; source1 выявил перезапись языка/future-format устаревшим экземпляром. Localfix6f598e38 читает актуальный ownkey перед mutation:82authorunit GREEN,2oldRED,16parity; не pushed | В тот же94 импортировать один root2docs-компонент до единственного corrected push/CI; затем independent source1 P2closure и runtime2. Не ready/published. Реальный materialID один; max5 только bound, без новых переводов/материалов |
-| 10 | Guard01:03 выпустил89→8abf/31exact; единственный guard01:28 выпустилHYDRA14→b04f/4exact,12unchanged Gitidentity. API92@5f12 actualready после source/runtime приёмки | Текущий root2docs-компонент идёт существующему94 вместе с P2fix перед однимCI. Ready92 и Dragon14 ждут следующих fresh guards; второго merge01:28 нет. Backend остаётся локальным |
+| 9 | Избранное94 опубликовано6faa/32HTTPexact; backup95@4daf отдельно принят source/runtime, actualReady02:23:27,7paths/420entries. Только3demo statuses, strict preview/confirm/cancel, raw/crosskey preservation | Root назначил ordinary merge accepted92@d9f INTO existing95 плюс новый2rootdocs перед одним push. Draft95 до новой exact-head whole-union/CI/runtime приёмки; прежняя4dafReady — история компонента |
+| 10 | Единственный guard01:57 выпустил94→6faa;92d9f и954daf приняты отдельно, HYDRA b04f/Dragon f088 сохранены | В проходе02:29 один guard ещё свободен. Владелец root2docs/интеграции/сайтов; принять новый общий95, затем post-merge/Pages и точные активы. Backend локальный |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | PR92@5f12f76f/base8abf source426union/net14 CLEAR, actual current Backend10runner/87+29 и early18/full16+workerN/A/main19/proto16+8 PASS; root actualready01:23:51 | Freeze5f12 до будущего fresh rootguard/postchecks. API5@627/schema5@9c/CI2@21/rootdocs5db сохранены. Native NOT_SCHEDULED;2Return/Clear внутри16, не дополнительные cases. Backend не merged/deployed; online/AI off |
+| 12 | Current92@d9f/base6faa tree99d28/427union/net14 принят source/runtime; Backend39089216166/Catalogue39089216182 SUCCESS и actualReady02:19:03.10runner/87backend/29contracts раздельно от browser core16/main19/proto16+8 | Компонент заморожен; owner9 объединяет92 INTO95. Не создавать вторую ветку/CI. Закрытие92 и issue93 возможно только после фактического source ancestry в main и post-check; backend не deployed |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Contract90@9c4d1f6e:5authored paths сохранены в actualready92@5f12; source426union CLEAR, новый hosted29PASS=9caps+9materials+11ownership | Canonical shape frozen. Schema/snapshot и SQLite fixtures не доказывают production authorization/multi-tenancy; root source-release92 впереди |
-| 15 | CI21 сохранён в actualready92@5f12; новые early18/Backend10+87+29 и Catalogue16/19/proto16+8 подтверждены raw. Issue87closed/93open | Freeze CI21, без rerun/повтора текущего ZIP. Issue93 закрывать только после guarded source-release92; POST16full/20main — разные aborted harness records, не zeroattempts/реальная отправка |
+| 14 | Authored contract9c:5paths сохранены в accepted92@d9f/427union; current29PASS=9caps+9materials+11ownership, прежний5f snapshot — история | Canonical shape frozen; следующая проверка только общего95 после ordinary92 union, без отдельной ветки/CI. SQLite fixtures не production multi-tenancy |
+| 15 | CI21 сохранён в accepted92@d9f; current early18/10runner/87+29/core16/main19/proto16+8 приняты; issue87closed/93open | Только main/head/CI delta общего95, без rerun неизменённых проектов.93 закрывать после фактического source-release21 и post-check; aborted fixture POST16full/20main не доставка |
 
 Предыдущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
 принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
@@ -711,6 +751,9 @@ Copy Link мог изменить status/focus нового Copy Memo и нао�
 viewport сценария), отдельная peer VM-матрица8GREEN. Доказательства runtime
 связывают обновление опубликованногоf088 с новымhead, offline activecontroller,
 восемь прежних TXT и три PNG. Fixtures clipboard не являются чтением OS clipboard.
+
+История точной приёмки до выпуска94; указанные ниже Ready/base8abf не текущая
+готовность92 после изменения main6faa.
 
 PR89 `6f006a453e389532d163daa24e8671f2af442826` сохраняет семь c2 feature blobs
 и четыре corrected59 guard blobs: independent418union и текущий runtime CLEAR.
@@ -1312,6 +1355,13 @@ GitHub продолжался. Прежний общий запрет на лю�
 ## Журнал существенных изменений
 
 - **2026-10-18, выпуск Dragon11:** опубликован текстовый путь ka/tr/hy, guarded95ba121c, Pages39075670274 и8точных публичных файлов. Current19 prerequisite60 независимо CLEAR, выпуск60→68 впереди. Следующие задачи поручены владельцам2/12; незавершённый код не объявлен готовым.
+
+- **2026-10-18, проход01:57:** опубликовано избранное PR94→6faa после source1
+  и runtime2 приёмкиEA; post Pages39088679663/Backend39088679636 SUCCESS,32HTTPexact.
+  Точный старый5f12 API92 сохранён, но root вернул PR в draft для ordinary
+  main6faa+rootdocs integration и новой приёмки. Назначены два независимых
+  функциональных среза: HYDRA Copy route TEXT и demo-status backup/restore;
+  поручение не означает готовую реализацию. Новых автоматизаций/второго merge нет.
 
 - **2026-10-18, функциональный проход:** новый Dragon11 ka/tr/hy подготовлен с167unit/35browser PASS; независимые source/runtime/VM проверки CLEAR, выпуск отдельно. Локальный serializer77 принят3ad9f93 с post-CI/7public bytes. В Ryczywół исправлен найденный P2 с182tests. Совместный public gate4179 прошёл48сценариев, новый697 имеет отдельный timeout; материалы68 пока не опубликованы.
 

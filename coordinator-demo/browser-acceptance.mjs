@@ -419,10 +419,69 @@ try {
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
       await page.locator('#filter').selectOption('all');
+      // Backup slice: export only current demo statuses, never other keys/context.
+      await page.locator('#language').selectOption('en');
+      await page.locator('#pin-site-cleaning-summary-ru').click();
+      await page.locator('#read-site-cleaning-summary-ru').click();
+      const backupOther=await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[lastKey,favouriteKey]);
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#materialQuery').fill('no matching backup source');
+      await page.locator('#filter').selectOption('doing');
+      const backupURL=page.url(),backupBefore=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      // Explicit download-unavailable fixture, not a simulated OS file save.
+      await page.evaluate(()=>{const original=URL.createObjectURL;window.__restoreBackupDownload=()=>{URL.createObjectURL=original;delete window.__restoreBackupDownload;};URL.createObjectURL=()=>{throw Error('Download fixture unavailable');};});
+      try {await keyClick(page,'backupExport');}finally {await page.evaluate(()=>window.__restoreBackupDownload?.());}
+      const backupJSON=await page.locator('#backupOutput').inputValue();
+      assert.deepEqual(JSON.parse(backupJSON),{format:'primserv-coordinator-demo-progress',version:1,statuses:JSON.parse(backupBefore).statuses});
+      assert.match(await page.locator('#backupNotice').innerText(),/manual copying.*no file save is confirmed/);
+      assert.equal(await page.locator('#backupOutput').getAttribute('readonly'),'');
+      const restoredStatuses={'demo-01':'done','demo-02':'todo','demo-03':'doing'};
+      const restoreJSON=JSON.stringify({format:'primserv-coordinator-demo-progress',version:1,statuses:restoredStatuses});
+      await page.locator('#backupInput').fill(restoreJSON);await keyClick(page,'backupPreview');
+      assert.equal(await page.locator('#backupChanges li').count(),3);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'backupReviewTitle');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),backupBefore);
+      await keyClick(page,'backupCancel');
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'backupInput');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),backupBefore);
+      await keyClick(page,'backupPreview');await fits(page);
+      await page.screenshot({path:join(reportDir,`${name}-backup-preview.png`),fullPage:true});
+      await keyClick(page,'backupApply');
+      assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),KEY)),{version:1,statuses:restoredStatuses});
+      assert.match(await page.locator('#backupNotice').innerText(),/restored and saved/);
+      assert.equal(await page.locator('#demo-03').inputValue(),'doing');
+      assert.equal(page.url(),backupURL);
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching backup source');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[lastKey,favouriteKey]),backupOther);
+      // A second model instance changes actual storage AFTER preview; abort, do not overwrite.
+      await keyClick(page,'backupPreview');
+      await page.evaluate(()=>window.CoordinatorDemo.create(localStorage).set('demo-02','done'));
+      const concurrentBackup=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      await keyClick(page,'backupApply');
+      assert.match(await page.locator('#backupNotice').innerText(),/changed after preview/);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      await page.locator('#backupInput').fill('{broken');await keyClick(page,'backupPreview');
+      assert.match(await page.locator('#backupNotice').innerText(),/Invalid demo backup/);
+      assert.equal(await page.locator('#backupReview').isHidden(),true);
+      // Confirmed import quota failure preserves original raw and current in-tab state.
+      await page.locator('#backupInput').fill(backupJSON);await keyClick(page,'backupPreview');
+      await page.evaluate(key=>{const original=Storage.prototype.setItem;window.__restoreBackupWrite=()=>{Storage.prototype.setItem=original;delete window.__restoreBackupWrite;};Storage.prototype.setItem=function(k,v){if(k===key)throw new DOMException('Backup fixture quota','QuotaExceededError');return original.call(this,k,v);};},KEY);
+      try {await keyClick(page,'backupApply');}finally {await page.evaluate(()=>window.__restoreBackupWrite?.());}
+      assert.match(await page.locator('#backupNotice').innerText(),/Restore aborted.*storage is unavailable/);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      assert.equal(await page.locator('#demo-03').inputValue(),'doing');
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[lastKey,favouriteKey]),backupOther);
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#backupReview').isHidden(),true);
+      assert.equal(await page.locator('#backupInput').inputValue(),'');
+      assert.equal(await page.locator('#backupOutput').inputValue(),'');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
       await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
       report.scenarios.push({ name, viewport, status: 'passed', offline: true,
-        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery'],
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort'],
         results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
     } catch (error) {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
