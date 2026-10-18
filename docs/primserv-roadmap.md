@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (17 октября, 23:37 UTC). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 00:10 UTC, выпуск PR84). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -66,9 +66,9 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 мобильный экран или проверку экранным диктором. Старые результаты ниже явно
 отделены от текущей сверки метаданных.
 
-## Актуальное состояние после исправлений — 17.10.2026
+## Актуальное состояние после исправлений — 18.10.2026
 
-Последняя сверка main: `374d5bddbd4630352f75e902536a11c2175c5411`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60.
+Последняя сверка main: `c032359519f1458e56963395bada7e0f711795da`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60/84.
 Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
 Ранее приняты Dragon9/10/11; текущий Dragon main после PR12 — `f51c280d90697cd3ad2d9e0623dedc020fa2073d`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
@@ -651,21 +651,37 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | PR88@dae521a: оба source P2 CLOSED, independent18tests+3old/new probes PASS; OLDoverlay19 CI PASS | Source/fixture delta принята для интеграции; actualNEW/full-current ещё требует общего CI84 |
-| 2 | HYDRA14@efbb5a8 готов/не опубликован; peer Dragon12 завершён CLEAR | Новый bounded peer13trace-retention наb6b0ca; без повторов old12VM/browser/CI |
+| 1 | Fix88 доставлен через84→c032; новый shared guard WIP назначен по reopened issue87 | PR89 отклонён до browser на unknown/mixed actual NEW5; complete next HEAD проверять явно, mixed/forged отклонять. Нового head1 нет, blind rerun89 не разрешён |
+| 2 | HYDRA14efbb frozen/ready; peer memo5ded CLEAR | Memo13 принят root и ready; peer VM48/17/6/12/2+invalid отдельно от реальных57 browser, нового WIP нет |
 | 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
-| 4 | Dragon12 опубликованf51c280d; Pages39079184115 SUCCESS,8public assets exact | Новый PR13@b6b0ca: сокращение successful traces, сохранение failure/worker evidence; independent source/runtime/peer идут |
+| 4 | Memo13@5ded принят root/ready: CI39080711663 —310unit/57browser,8real UTF8 TXT, source/runtime/peer CLEAR | Не merged/published; следующий fresh guard/Pages/exact-assets. OS-save, physical device и full12browser охват не заявлены |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | PR68@44383dc/base374d:14owned paths и412tree entries сохранены; Backend и6native checks SUCCESS | Catalogue39077510467 FAIL до первого case: старый baseline tool-hash; mandatory prototypes SKIPPED/NOTRUN. Материалы не опубликованы |
-| 10 | Проход23:26: Dragon12 опубликованf51,8exact assets; один guard использован | Тот же84 включает68+86+74+принятыйfix88dae+2rootdocs;417entries preserved. Один свежий combined CI, будущий guard отдельно |
+| 9 | PR89@c2edeff4/basec032 source CLEAR;71unit/16parity author; independent6native144cases,12actual Return journeys PASS | Catalogue39081219656 FAIL до browser, полный staged/prototype gate NOTRUN. Новый complete tuple подтверждён; owner1 исправляет issue87, blind rerun нет |
+| 10 | PR84→c032: Pages39080849475 и Backend39080849480 SUCCESS,30public assets exact; один guard прохода23:53 использован | Root актуализирует только свои два документа и технический реестр; следующая приёмка отдельно, без второго merge |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | PR86@173f1b28/base374d: прежние5source blobs сохранены; fresh Backend39077586323/68tests SUCCESS | Catalogue39077586327 FAIL до cases:5non-public backend/docs paths; mandatory prototypes SKIPPED/NOTRUN. Не merged/deployed |
+| 12 | Local candidate2500ce43/own627e0324:5owned paths поверх schema14+CI15, author19DjangoClient PASS,262B и8real material languages/max20 | Source-review текущего commit и один hosted combined CI ещё впереди; GET-only/HEAD405/trustedID/4096B. Только local backend, не deployment |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | PR74@fd9a721/base374d:2integration paths, matrix blob сохранён, literal privacy.html owner1;20tests PASS | Catalogue39077558915 FAIL до cases на2docs; native NOTSCHEDULED. Company-context без canonical provider отложен,10векторов NOTRUN |
-| 15 | Exact88dae: independent18/3probes/rawhash CLEAR; old19CI PASS/fullCurrent NOTRUN | Sole combined84 runtime verifier: actual staged NEW5, полный current core и mandatory19; свежие оба prototype suites/CI, без старых ZIP/rerun |
+| 14 | PR90@9c4d1f6e/tree3dab:5paths, source CLEAR; private actual29PASS=9caps+9materials+11ownership | Hosted legacy Backend39081220716 не доказывает новые9. Shape12 передан черезroot; следующий gate — общая12/14/15 интеграция |
+| 15 | Local45818545/basec032:2CIpaths source CLEAR,8focused+legacy20/current9c29 PASS;4blob bridgeab7→9c | Компонент imported в candidate12@2500, source blobs сохранены. Одному final combined head ещё нужен hosted CI; своего push/PR и нового аудита нет |
+
+Текущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
+принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
+Сохранены authored heads68/74/86/88; их автоматическое closed/merged
+не меняет канонический main-release SHA. После успешных Pages/Backend
+30 активных HTTP-файлов совпали по размеру и SHA256. Это публикация
+фронтенд-материалов и приёмка локального API source; Django-сервис
+не развёрнут, online-adapter/AI выключены.
+Memo `5ded5080976e70fcbebb6395b4f42ab485b34e7a`/basef51, parentb6, прошёл
+все три bounded-проверки и принят root; ready подтверждён отдельным receipt.
+Восьми browserTXT и57 current-записям не приписывается universal OS-save
+или полный12-язычный browser-охват. Memo ещё не опубликован. Новый89
+меняет material runtime и ждёт исправления одного shared guard по issue87;
+его failed gate не отменяет успешный выпуск84. Для capabilities90 контракт
+и CI458 приняты по source/private29; candidate endpoint12@2500 имеет19 author tests,
+но текущая source/hosted combined-приёмка ещё не завершена.
 
 PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
 Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
