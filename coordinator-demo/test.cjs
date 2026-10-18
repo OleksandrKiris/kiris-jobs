@@ -421,6 +421,7 @@ function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl=
     setAttribute(k,v){this.attrs[k]=v;}
     addEventListener(type,fn){this.handlers[type]=fn;}
     focus(){document.activeElement=this;}
+    select(){this.selectionStart=0;this.selectionEnd=this.value.length;}
   }
   const roots=[...read('index.html').matchAll(/id="([^"]+)"/g)].map(([,id])=>{const n=new Node('fixture');n.id=id;return n;});
   const find=(id,nodes)=>{for(const node of nodes){if(node.id===id)return node;const child=find(id,node.children);if(child)return child;}return null;};
@@ -779,4 +780,21 @@ for(const lang of [...M.LANGS,'ua','ka'])test(lang+': two materials search/read/
 
 test('source dates remain individual: historical source update and repository verification are distinct',()=>{
  for(const lang of M.LANGS){const h=ui({lang});const cards=h.$('materials').children;assert.match(cards[0].children[2].textContent,/2026-07-23.*2026-10-17/);assert.match(cards[1].children[2].textContent,/2026-07-23.*2026-10-18/);assert.equal(cards[0].children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');assert.equal(cards[1].children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/2e80ab811fa3573fc13ac7dd6ee65279865cc58b/data/content.js');}
+});
+
+for(const lang of M.LANGS)test(lang+': progress summary stays complete, localized and current through edit/reset/import',()=>{
+ const h=ui({lang}),initial=h.$('progressSummary').value;assert.match(initial,/DEMO/);assert.equal((initial.match(/DEMO-0[123] ·/g)||[]).length,3);assert.match(initial,/0 \/ 3/);assert.equal(h.store.calls.some(([op])=>op!=='get'),false);
+ h.change('demo-01','done');h.change('demo-02','doing');h.change('filter','done');h.$('materialQuery').value='private-search-marker';h.$('materialQuery').handlers.input();const text=h.$('progressSummary').value;
+ assert.equal((text.match(/DEMO-0[123] ·/g)||[]).length,3);assert.match(text,/1 \/ 3/);assert.doesNotMatch(text,/private-search-marker|primserv:|source_ref|site-cleaning|banana-warehouse|"version"|"statuses"|example.test/);assert.notEqual(text,initial);
+ const writes=h.store.calls.filter(([op])=>op!=='get').length;h.click('progressSummarySelect');assert.equal(h.document.activeElement.id,'progressSummary');assert.equal(h.$('progressSummary').selectionStart,0);assert.equal(h.$('progressSummary').selectionEnd,text.length);assert.equal(h.store.calls.filter(([op])=>op!=='get').length,writes);
+ h.click('reset');h.click('cancel');assert.equal(h.$('progressSummary').value,text);h.click('reset');h.click('confirm');assert.match(h.$('progressSummary').value,/0 \/ 3/);
+ h.$('backupInput').value=progressJSON({...M.initial(),'demo-03':'done'});h.click('backupPreview');const before=h.$('progressSummary').value;h.click('backupCancel');assert.equal(h.$('progressSummary').value,before);h.click('backupPreview');h.click('backupApply');assert.match(h.$('progressSummary').value,/1 \/ 3/);assert.notEqual(h.$('progressSummary').value,before);assert.equal(h.$('filter').value,'done');assert.equal(h.$('materialQuery').value,'private-search-marker');
+ const re=ui({lang,store:h.store,filter:'todo'});assert.equal(re.$('progressSummary').value,h.$('progressSummary').value);
+});
+test('progress summary uses supported language fallback and never includes unrelated raw/context data',()=>{
+ const raw='private-unreadable-record',store=storage([[M.KEY,raw],[M.FAVOURITES_KEY,'private-pins'],[M.LAST_MATERIAL_KEY,'private-last']], 'get');const h=ui({lang:'ka',store,href:'https://example.test/coordinator-demo/?lang=ka&private=query#private-hash'});h.change('demo-01','done');const summary=h.$('progressSummary').value;assert.match(summary,/Demo progress summary/);assert.match(summary,/Saving is not confirmed/);assert.match(summary,/1 \/ 3/);assert.doesNotMatch(summary,/private-|example.test|ka|Storage|primserv:/);assert.equal(store.data.get(M.KEY),raw);
+ h.change('language','ru');assert.match(h.$('progressSummary').value,/Сводка демо-прогресса/);assert.match(h.$('progressSummary').value,/1 \/ 3/);assert.doesNotMatch(h.$('progressSummary').value,/Demo progress summary/);
+});
+test('progress summary readonly UI preserves backup JSON format and has no new storage or transfer action',()=>{
+ assert.match(read('index.html'),/<textarea id="progressSummary"[^>]*readonly[^>]*aria-describedby="progressSummaryHelp"/);const h=ui(),before=[...h.store.data];h.click('progressSummarySelect');assert.deepEqual([...h.store.data],before);h.click('backupExport');assert.deepEqual(M.parseProgress(h.$('backupOutput').value),M.initial());assert.deepEqual(Object.keys(JSON.parse(h.$('backupOutput').value)).sort(),['format','statuses','version']);
 });

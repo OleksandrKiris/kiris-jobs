@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 03:10 UTC, выпуски PR95, HYDRA14 и Dragon13; второй материал принят по исходникам, общий CI ещё не запускался). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18T04:15:09.005603+00:00, Dragon14 опубликован; kiris96 сохранён). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -67,6 +67,24 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 отделены от текущей сверки метаданных.
 
 ## Актуальное состояние после исправлений — 18.10.2026
+
+В [Dragon guide](https://oleksandrkiris.github.io/citronex-dragon-guide/) опубликовано копирование готовой публичной памятки: PR14 tested `a57306ac862d3986748a7164e272745ed72e3868` → main `0b03581a621c8ec55ee8e073152fc2ac5daeb144`, tree `7d7b05cb1f69ae2f9db1fd5ea522fcc6bf659ff4`. Pages39096400094 terminalSUCCESS; 8 выбранных HTTP-файлов совпали с Git по размеру/SHA256/blob; 40 source entries сохранены, остальные32 проверены только по Gitidentity. Копирование запускается явным действием; успех показывается после fulfilled Promise. Denied/unavailable/syncThrow дают честный readonly manual fallback. Устаревшие callbacks после смены языка/места, очистки или другого copy/action не меняют текущий status/focus; уже начатая OS-запись не объявляется отменённой. Принятые exact-head413unit/59browser и peer8GREEN переиспользованы без нового прогона. OS clipboard/physical-device/full12browser гарантии не заявлены. Один guard04:08 использован; второго merge в этом проходе нет.
+
+Следующая локальная работа роли9 (не опубликована): Человекочитаемая readonly-сводка всех3 вымышленных задач и их статусов на EN/RU/UK/PL реализована в source57d470457f1fead1097e315d417385ad890e283d/base0986. Фильтр и поиск не сужают сводку; изменения, сброс и подтверждённый импорт обновляют её. Авторские6 и независимые QA6 адресных тестов PASS; exactbase без функции дал0/6. Это VM/DOM fixtures, native browser ещё не принят. Выделение текста не добавляет хранение или отправку. Published96 и его backend/материалы сохранены; общий head и обычный функциональный CI принимаются отдельно.
+
+### Состояние kiris96 и очередь — сохранённый snapshot 18.10.2026 03:56 UTC
+
+Последняя сверка main: `0986cc9ff47b6eae6d28814d38c17494e6b36bac`, после PR96.
+В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/) опубликован второй подтверждённый материал `banana-warehouse-poland-summary-ru`. Поиск, чтение, last и избранное работают с обоими ID; source refs остаются per-item. Default/max20 и explicit limit1, Zgorzelec filter/schema сохранены. Это существующие публичные title/summary, не новая проверка вакансии или перевод.
+Единственный guarded merge03:07: tested `10e899d351613799152cb0fbce2b42620e676d08` → main `0986cc9ff47b6eae6d28814d38c17494e6b36bac`, tree `32fe72cc38c3cf829b34491ecac7f45c4b9f0cd1`, orderedparents[2e80,10e899d351613799152cb0fbce2b42620e676d08].
+Pages39095191175 и Backend39095191167 terminalSUCCESS; 34 выбранных HTTP-файла exact bytes/SHA256/Gitblob, main до/после неизменен.
+Full projection310: остальные276 только по Gitidentity, не310HTTP. Django остаётся локальным; online-adapter/AIoff.
+Текущие проверки CI: Catalogue: core16, worker N/A, main19, prototypes16/8; Native: 6 jobs по121 tests, browser16/8 в каждом; Backend:10/87/33; early-security19. Три material-target fixture tests входят в текущую TAP-группу30. Группы исполнения учитываются отдельно.
+Авторские107=98 coordinator+9 backend-open-observation и24parity остаются историей локального прогона, не подменяют counts текущего CI. Локальные48+5 backend12 на eb95 остаются отдельным fixture proof; новые прогоны на408/rootdocs не выдумываются.
+Причина issue97 — обращение test fixture к отсутствующему историческому Git object в shallow checkout; исправление сохраняет exact-source/checksum/tamper проверки. Issue97 actualclosed 2026-10-18T03:55:08Z после postBackend39095191167; это отдельный actual close action. Issue98 actualclosed 2026-10-18T03:55:10Z после того же postBackend39095191167; исправлена старая проверка одной карточки в общем browser-helper.
+Один guard прохода использован. Следующий небольшой шаг — свежий guard уже READY Dragon14 в следующем проходе; сейчас дополнительного CI/merge нет.
+
+### История PR95 и подготовки PR96 — snapshot 18.10.2026 03:10 UTC
 
 Последняя сверка main: `2e80ab811fa3573fc13ac7dd6ee65279865cc58b`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60/84/89/94/95.
 Выпущено **резервное копирование и подтверждённое восстановление демо-прогресса**
@@ -745,21 +763,21 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | Source94EA: old694 два RED, currentEA два GREEN и419union CLEAR; guard59/Return89 сохранены. Избранное94 опубликовано6faa | Заморозить принятые source proofs; следующая независимая проверка только нового конкретного head, без повторных probes |
+| 1 | Новый AS_PATCH c63598:4 shared browser files принят и доставлен96; прежний own59/source94 history сохранён | Patch заморожен; actual current runtime4 принят, дополнительные probes/CI в этом проходе не назначать |
 | 2 | HYDRA14 опубликованb04f; новый Copy route TEXT15@7ae реализован,191unit/106browser и actual late runtime4 bounded CLEAR. Source peer CLEAR и5primary files сохранены | Draft15: конкретный отказ записи финального source-report сохранён дословно; эту операцию не повторять. Новая публикация/формальная приёмка не объявлены. Dragon14 peer history отдельно |
 | 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
-| 4 | Memo13 опубликованf088/8exact assets. Copy MEMO TEXT14@a573/basef088 source/runtime/peer CLEAR, actualready; correctedCI39084077900:413unit/59browser, старыйd000 P2 сохранён | Новый14 не merged/published. Root freshhead/base/CI/reviews и отдельный будущий guarded release; без повторных ZIP/CI/нового WIP. OS clipboard/save/physical/full12browser гарантии не заявлены |
+| 4 | Copy MEMO TEXT14@a573 опубликован`0b03581a621c8ec55ee8e073152fc2ac5daeb144`; Pages39096400094 SUCCESS,8HTTPexact; source/runtime/peer приняты на неизменном head | Сохранить выпущенный source. Readonly manual fallback и async stale-UI guards; OS clipboard/physical/full12browser гарантии не заявлены. Нового WIP/CI здесь нет |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Published95/2e80/33HTTPexact; новыйfrontend4e source CLEAR, author107unit/24parity; localunion904/430entries/net14 source CLEAR | Включить только408 OpenAPI prose+новые root2docs перед одним push. Затем точный общий CI/runtime; source CLEAR не означает browser-приёмку или публикацию |
-| 10 | Guard02:29 выпустил95→2e80, новые source14/9/15 и backend12 receipts приняты в своей области; root548 уже в904 | В03:07 один guard свободен. Единственный владелец root2docs/приёмки/выпуска; новый общий head проверить до Ready/guard и post-merge/Pages/точных активов. Django локальный |
+| 9 | Второй материал96@10e899d3 опубликован0986cc9f,34HTTPexact; exact current source/runtime приняты | Сохранить выпущенный source96; следующая локальная работа (не опубликована): Новый source57 summary3tasks/4locale реализован; author6/independentQA6 PASS, старыйbase0/6 показывает отсутствие функции. Exact общий head и браузерная приёмка отдельно; прежний published96 immutable. Функция summary пока не опубликована. |
+| 10 | Один guard04:08 выпустил Dragon14→`0b03581a621c8ec55ee8e073152fc2ac5daeb144`, Pages39096400094/8HTTPexact; kiris96 main0986/34HTTP и delivered5eab сохранены | Эти2docs — локальный неопубликованный компонент после adc7; второй merge не выполнен. Backend локальный, online-adapter/AIoff |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | API92d9f доставлен95; fixture2 exacteb95 совместим без backend patch: actual48targeted+5checks, independent bounded receipt CLEAR | NO_BACKEND_CHANGE source bridge сохранить; actual HTTP test-client не означает сервер/production. Свежий Backend CI общего head отдельно, online/AIoff |
+| 12 | NO_BACKEND_CHANGE fixture2 proof48+5 на eb95 сохранён; exact current aggregate Backend counts указаны выше | Django не deployed; online/AIoff. Не объявлять локальные fixtures полной production-проверкой |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Schema9c delivered95; новый2material fixtureeb95 source CLEAR, author13/9/11; firstitem неизменён, actualbanana source включаетZgorzelec | Tiny408 меняет только OpenAPI description, без смены формы/лимитов/provider/capabilities. Передать9 exactкомпонент, старые eb95 тесты не считать новым прогоном408 |
-| 15 | CI21 delivered95/issue93actualclosed; новый593b minimum13 source CLEAR, author19stdlib/33real schema | Только совместный import с13materialtests, один будущий CI integrator9; plannedcoverage не новая bug-причина. Проверять новые причины/head delta, без повторного аудита неизменённых проектов |
+| 14 | Contracteb95 и description408 source доставлены96; прежние13/9/11 относятся eb95 | Форма/лимиты/provider/capabilities неизменны; prose408 не новый test execution |
+| 15 | CI593 minimum13 доставлен96; actual current gates/postBackend39095191167 SUCCESS | Issue97 actualclosed 2026-10-18T03:55:08Z после postBackend39095191167; это отдельный actual close action. Новые CI/merge только при отдельной причине/следующем проходе Issue98 actualclosed 2026-10-18T03:55:10Z после того же postBackend39095191167; исправлена старая проверка одной карточки в общем browser-helper. |
 
 Предыдущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
 принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
