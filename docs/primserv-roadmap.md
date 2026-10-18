@@ -1,5 +1,14 @@
 # PrimServ — канонический план развития
 
+## Доступно сейчас — 2026-10-18T05:57:08.857209+00:00
+
+В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/) теперь доступна readonly-сводка всех3 DEMO-задач с явно сохранёнными material ID и requested language. Save/Back/reload/Clear обновляют или сохраняют соответствующую сводку; фильтр/поиск её не сужают. Без связи остаётся прежний текст, при неподтверждённом сохранении видна оговорка. Это не отметка о прочтении, отправке или реальный рабочий отчёт. EN/RU/UK/PL source/VM proof и текущая браузерная приёмка имеют отдельные границы.
+PR101: tested `c681356021bc0cae1f17028837133a964fc88e5e` → main `496f8ce31e271dab2755b7bf6b882d0c6a947f00`, Pages39102245391/Backend39102245393 SUCCESS attempt1.37 выбранных HTTP-файлов exact size/SHA256/Gitblob; full projection313, остальные276 только Gitidentity. Один guard05:35 использован; второго merge в этом проходе нет.
+Текущий runtime: Native6 по146 TAP и browser16+8; core16/worker N/A unchanged/main19/prototypes16+8; Backend10/108/39; earlysecurity21. Изменения summary находятся внутри прежних journeys; буквальные группы Catalogue и границы новых проверок сохранены в runtime receipt, не объявлены новыми общими case totals.
+Backend12/contract14/CI15 доставлены ранее100 и сохранены; Django остаётся локальным, online-adapter/AIoff. Source2docs `5f2bd38ca9fc911b48767b4d4340fd848ed5e0c1` доставлен101; предлагаемые post101docs — новый локальный неопубликованный компонент. Следующий продуктовый срез владельца9 root назначит отдельно; нового head/PR или результата для него здесь не заявлено.
+
+Далее сохранены датированные доказательства до публикации101. Старые head, слова «локально» и прежние поручения относятся к указанным snapshot; текущий выпуск описан выше, текущая зависимость9/10 — в таблице ролей.
+
 Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18T05:23:50.436355+00:00, task-material links100 опубликованы). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
@@ -811,8 +820,8 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Featurecd8 доставлен100→`95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`,36HTTPexact; old99 сохранён | Локальный0fb/base95eb/treefebd: source CLEAR; авторские6 новых+5 затронутых =11 PASS отдельно от browser/CI NOTRUN. Назначены добавочные Save/Back/reload/Clear/page-only проверки в двух прежних restart journeys; harness head/общий head/PR ещё неизвестны. Затем exact source/union/current CI и browser gates, без автоматической Ready/публикации. |
-| 10 | Единственный guard05:03 выпустил100→`95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`, Pages39100294800/Backend39100294791 SUCCESS | Root4043 и эти2docs остаются локальным неопубликованным компонентом. Sourcec111 доставлен100; доставка rootdocs будущему candidate только после actual import. В05:35 guard0; нового merge нет. Backend локальный/AIoff. |
+| 9 | Featurecd8 доставлен100→`95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`,36HTTPexact; old99 сохранён | Сводка с material ID/requested language опубликована101→`496f8ce31e271dab2755b7bf6b882d0c6a947f00`;37HTTPexact. Feature0fb/browserchilda77 приняты на aggregatec681. Следующий продуктовый срез владельца9 root назначит отдельно; нового head/PR или результата для него здесь не заявлено. |
+| 10 | Единственный guard05:03 выпустил100→`95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`, Pages39100294800/Backend39100294791 SUCCESS | Guard05:35 выпустил101→`496f8ce31e271dab2755b7bf6b882d0c6a947f00`; Pages39102245391/Backend39102245393 SUCCESS,37HTTP/313projection/276Git-only. Source5f2 доставлен; эти2docs локальные и неопубликованные, второго merge нет. |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
 | 12 | API96d2 local detail GET source доставлен100; это не backend deployment | Сохранить exact доставленный backend/source. Current aggregate counts указаны выше; старые авторские21new+69old остаются отдельным локальным proof. |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
