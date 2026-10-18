@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v220-form-error-locale-2026-10-18-1";
+const CACHE_VERSION = "kiris-jobs-v220-field-status-2026-10-18-2";
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -10,7 +10,7 @@ const CORE_SHELL = [
   "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1&localeRecovery=1&earlySearch=1&formErrorLocale=1",
   "./assets/privacy-bootstrap.js?v=220&localeRecovery=1",
   "./assets/candidate-base.css?v=220",
-  "./assets/clean.css?v=220&formErrorLocale=1",
+  "./assets/clean.css?v=220&formErrorLocale=1&fieldStatus=2",
   "./assets/homepage.css?v=220&localeRecovery=1&cardContrast=1",
   "./assets/privacy.css?v=220",
   "./assets/i18n.js?v=220&localeRecovery=1",

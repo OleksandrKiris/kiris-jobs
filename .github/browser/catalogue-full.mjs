@@ -588,7 +588,7 @@ try {
       for (const item of before) assert.equal(item.sha256, baseToolHashes[item.url], 'Base phase must use actual base tool bytes');
       assert.ok((await page.evaluate(()=>caches.keys())).includes(baseCache));
       const oldFormSha=sha256(execFileSync('git',['show',`${report.base}:assets/application-form.js`]));
-      const baseFormExact=await cachedFormHash(page,baseCache,new URL('assets/application-form.js?v=220',base).href)===oldFormSha;
+      const baseFormExact=await cachedFormHash(page,baseCache,new URL('assets/application-form.js?v=220&formErrorLocale=1',base).href)===oldFormSha;
       assert.equal(baseFormExact,true,'Base worker must cache actual old form bytes');
       await page.evaluate(async () => {
         localStorage.setItem('shortcut-unrelated', 'keep');
@@ -621,7 +621,7 @@ try {
       ctx.off('request',observe);
       const headFormExact=await cachedFormHash(page,headCache,new URL('assets/application-form.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-form.js'));
       const headLoaderExact=await cachedFormHash(page,headCache,new URL('assets/application-loader.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-loader.js'));
-      const headErrorStyleExact=await cachedFormHash(page,headCache,new URL('assets/clean.css?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/clean.css'));
+      const headErrorStyleExact=await cachedFormHash(page,headCache,new URL('assets/clean.css?v=220&formErrorLocale=1&fieldStatus=2',base).href)===sha256(headFiles.get('assets/clean.css'));
       assert.ok(headFormExact&&headLoaderExact&&headErrorStyleExact,'New worker must cache the exact new import/style chain');
       await stopServer();originStopped=true;await ctx.setOffline(true);
       await page.locator('[data-primserv-service="coordinator"]').click();
@@ -678,10 +678,8 @@ try {
   // Keep the existing deadline and every scenario; overlap independent UI waits.
   await Promise.all([
     acceptFormErrors({context,base,reportDir,report,active:page=>{activePage=page;}}),
-    (async()=>{
-      await acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}});
-      await acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}});
-    })()
+    acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}}),
+    acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}})
   ]);
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
