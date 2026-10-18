@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {pdfCopy,assertPdfCopy,assertEmptyGeometry} from './pdf-copy.mjs';
 
-test('all20 PDF languages have complete explicit visible copy, including captions formerly in English',()=>assertPdfCopy(pdfCopy()));
+test('all20 PDF languages have complete explicit visible copy, including photo errors and captions formerly in English',()=>assertPdfCopy(pdfCopy()));
 test('copy acceptance rejects missing language, missing caption and English placeholder fallback',()=>{
   for(const mutate of [d=>delete d.languages.ur,d=>delete d.explicit.ka.email,d=>d.explicit.si.empty=d.base.empty]){const d=pdfCopy();mutate(d);assert.throws(()=>assertPdfCopy(d));}
 });

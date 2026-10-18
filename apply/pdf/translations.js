@@ -48,16 +48,32 @@ window.PRIMSERV_PDF_I18N = {
   },
   "locales": {
     "pl": {
-      "localOnly": "PDF · Tylko na tym urządzeniu"
+      "localOnly": "PDF · Tylko na tym urządzeniu",
+      "checkingPhotos": "Sprawdzanie zdjęć…",
+      "imageNotAdded": "Nie dodano pliku",
+      "imageTooLarge": "Maksymalny rozmiar pliku to 20 MB.",
+      "imageUnreadable": "Nie można otworzyć tego obrazu. Wybierz inne zdjęcie JPG, PNG lub WEBP."
     },
     "uk": {
-      "localOnly": "PDF · Лише на цьому пристрої"
+      "localOnly": "PDF · Лише на цьому пристрої",
+      "checkingPhotos": "Перевірка фото…",
+      "imageNotAdded": "Файл не додано",
+      "imageTooLarge": "Максимальний розмір файлу — 20 МБ.",
+      "imageUnreadable": "Не вдалося відкрити зображення. Виберіть інше фото JPG, PNG або WEBP."
     },
     "ru": {
-      "localOnly": "PDF · Только на этом устройстве"
+      "localOnly": "PDF · Только на этом устройстве",
+      "checkingPhotos": "Проверяем фото…",
+      "imageNotAdded": "Файл не добавлен",
+      "imageTooLarge": "Максимальный размер файла — 20 МБ.",
+      "imageUnreadable": "Не удалось открыть изображение. Выберите другое фото JPG, PNG или WEBP."
     },
     "en": {
-      "localOnly": "PDF · On this device only"
+      "localOnly": "PDF · On this device only",
+      "checkingPhotos": "Checking photos…",
+      "imageNotAdded": "File not added",
+      "imageTooLarge": "The maximum file size is 20 MB.",
+      "imageUnreadable": "This image could not be opened. Choose another JPG, PNG or WEBP photo."
     },
     "ka": {
       "localOnly": "PDF · მხოლოდ ამ მოწყობილობაზე",
@@ -70,7 +86,11 @@ window.PRIMSERV_PDF_I18N = {
       "summary": "კანდიდატის მონაცემები",
       "generated": "შექმნილია ამ მოწყობილობაზე",
       "remove": "წაშლა",
-      "empty": "გადახედვისთვის შეიყვანეთ მონაცემები ან დაამატეთ ფოტოები."
+      "empty": "გადახედვისთვის შეიყვანეთ მონაცემები ან დაამატეთ ფოტოები.",
+      "checkingPhotos": "ფოტოების შემოწმება…",
+      "imageNotAdded": "ფაილი არ დაემატა",
+      "imageTooLarge": "ფაილის მაქსიმალური ზომაა 20 მბ.",
+      "imageUnreadable": "სურათის გახსნა ვერ მოხერხდა. აირჩიეთ სხვა JPG, PNG ან WEBP ფოტო."
     },
     "az": {
       "localOnly": "PDF · Yalnız bu cihazda",
@@ -83,7 +103,11 @@ window.PRIMSERV_PDF_I18N = {
       "summary": "Namizəd məlumatları",
       "generated": "Bu cihazda yaradılıb",
       "remove": "Sil",
-      "empty": "Önbaxış üçün məlumat daxil edin və ya şəkil əlavə edin."
+      "empty": "Önbaxış üçün məlumat daxil edin və ya şəkil əlavə edin.",
+      "checkingPhotos": "Şəkillər yoxlanılır…",
+      "imageNotAdded": "Fayl əlavə edilmədi",
+      "imageTooLarge": "Faylın maksimum ölçüsü 20 MB-dır.",
+      "imageUnreadable": "Bu şəkli açmaq mümkün olmadı. Başqa JPG, PNG və ya WEBP şəkli seçin."
     },
     "hy": {
       "localOnly": "PDF · Միայն այս սարքում",
@@ -96,7 +120,11 @@ window.PRIMSERV_PDF_I18N = {
       "summary": "Թեկնածուի տվյալներ",
       "generated": "Ստեղծվել է այս սարքում",
       "remove": "Հեռացնել",
-      "empty": "Նախադիտման համար մուտքագրեք տվյալներ կամ ավելացրեք լուսանկարներ։"
+      "empty": "Նախադիտման համար մուտքագրեք տվյալներ կամ ավելացրեք լուսանկարներ։",
+      "checkingPhotos": "Լուսանկարները ստուգվում են…",
+      "imageNotAdded": "Ֆայլը չի ավելացվել",
+      "imageTooLarge": "Ֆայլի առավելագույն չափը 20 ՄԲ է։",
+      "imageUnreadable": "Չհաջողվեց բացել պատկերը։ Ընտրեք այլ JPG, PNG կամ WEBP լուսանկար։"
     },
     "tr": {
       "localOnly": "PDF · Yalnızca bu cihazda",
@@ -109,7 +137,11 @@ window.PRIMSERV_PDF_I18N = {
       "summary": "Aday bilgileri",
       "generated": "Bu cihazda oluşturuldu",
       "remove": "Kaldır",
-      "empty": "Önizleme için bilgi girin veya fotoğraf ekleyin."
+      "empty": "Önizleme için bilgi girin veya fotoğraf ekleyin.",
+      "checkingPhotos": "Fotoğraflar kontrol ediliyor…",
+      "imageNotAdded": "Dosya eklenmedi",
+      "imageTooLarge": "En büyük dosya boyutu 20 MB'tır.",
+      "imageUnreadable": "Bu görüntü açılamadı. Başka bir JPG, PNG veya WEBP fotoğrafı seçin."
     },
     "uz": {
       "localOnly": "PDF · Faqat shu qurilmada",
@@ -122,7 +154,11 @@ window.PRIMSERV_PDF_I18N = {
       "summary": "Nomzod ma’lumotlari",
       "generated": "Shu qurilmada yaratildi",
       "remove": "Olib tashlash",
-      "empty": "Ko‘rib chiqish uchun ma’lumot kiriting yoki rasm qo‘shing."
+      "empty": "Ko‘rib chiqish uchun ma’lumot kiriting yoki rasm qo‘shing.",
+      "checkingPhotos": "Rasmlar tekshirilmoqda…",
+      "imageNotAdded": "Fayl qo‘shilmadi",
+      "imageTooLarge": "Faylning eng katta hajmi 20 MB.",
+      "imageUnreadable": "Rasmni ochib bo‘lmadi. Boshqa JPG, PNG yoki WEBP rasmni tanlang."
     },
     "id": {
       "localOnly": "PDF · Hanya di perangkat ini",
@@ -153,7 +189,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "Dibuat di perangkat ini",
       "remove": "Hapus",
       "empty": "Masukkan data atau tambahkan foto untuk melihat pratinjau.",
-      "defaultTitle": "Dokumen kandidat"
+      "defaultTitle": "Dokumen kandidat",
+      "checkingPhotos": "Memeriksa foto…",
+      "imageNotAdded": "Berkas tidak ditambahkan",
+      "imageTooLarge": "Ukuran berkas maksimum adalah 20 MB.",
+      "imageUnreadable": "Gambar ini tidak dapat dibuka. Pilih foto JPG, PNG, atau WEBP lain."
     },
     "fil": {
       "localOnly": "PDF · Sa device na ito lamang",
@@ -184,7 +224,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "Ginawa sa device na ito",
       "remove": "Alisin",
       "empty": "Maglagay ng datos o magdagdag ng larawan para makita ang preview.",
-      "defaultTitle": "Mga dokumento ng aplikante"
+      "defaultTitle": "Mga dokumento ng aplikante",
+      "checkingPhotos": "Sinusuri ang mga larawan…",
+      "imageNotAdded": "Hindi naidagdag ang file",
+      "imageTooLarge": "20 MB ang pinakamalaking laki ng file.",
+      "imageUnreadable": "Hindi mabuksan ang larawang ito. Pumili ng ibang larawang JPG, PNG o WEBP."
     },
     "vi": {
       "localOnly": "PDF · Chỉ trên thiết bị này",
@@ -215,7 +259,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "Được tạo trên thiết bị này",
       "remove": "Xóa",
       "empty": "Nhập thông tin hoặc thêm ảnh để xem trước.",
-      "defaultTitle": "Giấy tờ ứng viên"
+      "defaultTitle": "Giấy tờ ứng viên",
+      "checkingPhotos": "Đang kiểm tra ảnh…",
+      "imageNotAdded": "Chưa thêm tệp",
+      "imageTooLarge": "Kích thước tệp tối đa là 20 MB.",
+      "imageUnreadable": "Không thể mở ảnh này. Hãy chọn ảnh JPG, PNG hoặc WEBP khác."
     },
     "hi": {
       "localOnly": "PDF · केवल इस डिवाइस पर",
@@ -246,7 +294,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "इसी डिवाइस पर बनाया गया",
       "remove": "हटाएँ",
       "empty": "पूर्वावलोकन देखने के लिए जानकारी भरें या फ़ोटो जोड़ें।",
-      "defaultTitle": "उम्मीदवार के दस्तावेज़"
+      "defaultTitle": "उम्मीदवार के दस्तावेज़",
+      "checkingPhotos": "फ़ोटो जाँची जा रही हैं…",
+      "imageNotAdded": "फ़ाइल नहीं जोड़ी गई",
+      "imageTooLarge": "फ़ाइल का अधिकतम आकार 20 MB है।",
+      "imageUnreadable": "यह तस्वीर नहीं खुल सकी। कोई दूसरी JPG, PNG या WEBP फ़ोटो चुनें।"
     },
     "ne": {
       "localOnly": "PDF · यही उपकरणमा मात्र",
@@ -277,7 +329,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "यही उपकरणमा बनाइएको",
       "remove": "हटाउनुहोस्",
       "empty": "पूर्वावलोकन हेर्न विवरण भर्नुहोस् वा फोटो थप्नुहोस्।",
-      "defaultTitle": "उम्मेदवारका कागजातहरू"
+      "defaultTitle": "उम्मेदवारका कागजातहरू",
+      "checkingPhotos": "फोटो जाँच हुँदैछ…",
+      "imageNotAdded": "फाइल थपिएन",
+      "imageTooLarge": "फाइलको अधिकतम आकार 20 MB हो।",
+      "imageUnreadable": "यो तस्बिर खोल्न सकिएन। अर्को JPG, PNG वा WEBP फोटो छान्नुहोस्।"
     },
     "ky": {
       "localOnly": "PDF · Ушул түзмөктө гана",
@@ -308,7 +364,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "Ушул түзмөктө түзүлдү",
       "remove": "Алып салуу",
       "empty": "Алдын ала көрүү үчүн маалымат киргизиңиз же сүрөт кошуңуз.",
-      "defaultTitle": "Талапкердин документтери"
+      "defaultTitle": "Талапкердин документтери",
+      "checkingPhotos": "Сүрөттөр текшерилүүдө…",
+      "imageNotAdded": "Файл кошулган жок",
+      "imageTooLarge": "Файлдын эң чоң өлчөмү — 20 МБ.",
+      "imageUnreadable": "Бул сүрөттү ачуу мүмкүн болгон жок. Башка JPG, PNG же WEBP сүрөтүн тандаңыз."
     },
     "tg": {
       "localOnly": "PDF · Танҳо дар ҳамин дастгоҳ",
@@ -339,7 +399,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "Дар ҳамин дастгоҳ сохта шуд",
       "remove": "Хориҷ кардан",
       "empty": "Барои пешнамоиш маълумот ворид кунед ё акс илова кунед.",
-      "defaultTitle": "Ҳуҷҷатҳои номзад"
+      "defaultTitle": "Ҳуҷҷатҳои номзад",
+      "checkingPhotos": "Аксҳо санҷида мешаванд…",
+      "imageNotAdded": "Файл илова нашуд",
+      "imageTooLarge": "Ҳаҷми калонтарини файл 20 МБ аст.",
+      "imageUnreadable": "Ин тасвир кушода нашуд. Акси дигари JPG, PNG ё WEBP-ро интихоб кунед."
     },
     "kk": {
       "localOnly": "PDF · Тек осы құрылғыда",
@@ -370,7 +434,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "Осы құрылғыда жасалды",
       "remove": "Алып тастау",
       "empty": "Алдын ала қарау үшін мәліметтер енгізіңіз немесе фото қосыңыз.",
-      "defaultTitle": "Үміткердің құжаттары"
+      "defaultTitle": "Үміткердің құжаттары",
+      "checkingPhotos": "Фотосуреттер тексерілуде…",
+      "imageNotAdded": "Файл қосылмады",
+      "imageTooLarge": "Файлдың ең үлкен өлшемі — 20 МБ.",
+      "imageUnreadable": "Бұл суретті ашу мүмкін болмады. Басқа JPG, PNG немесе WEBP суретін таңдаңыз."
     },
     "bn": {
       "localOnly": "PDF · শুধু এই ডিভাইসে",
@@ -401,7 +469,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "এই ডিভাইসে তৈরি",
       "remove": "সরান",
       "empty": "পূর্বরূপ দেখতে তথ্য লিখুন বা ছবি যোগ করুন।",
-      "defaultTitle": "প্রার্থীর নথি"
+      "defaultTitle": "প্রার্থীর নথি",
+      "checkingPhotos": "ছবি পরীক্ষা করা হচ্ছে…",
+      "imageNotAdded": "ফাইল যোগ হয়নি",
+      "imageTooLarge": "ফাইলের সর্বোচ্চ আকার 20 MB।",
+      "imageUnreadable": "এই ছবিটি খোলা যায়নি। অন্য JPG, PNG বা WEBP ছবি বেছে নিন।"
     },
     "ur": {
       "localOnly": "PDF · صرف اسی ڈیوائس پر",
@@ -432,7 +504,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "اسی ڈیوائس پر بنایا گیا",
       "remove": "ہٹائیں",
       "empty": "پیش منظر دیکھنے کے لیے معلومات درج کریں یا تصاویر شامل کریں۔",
-      "defaultTitle": "امیدوار کی دستاویزات"
+      "defaultTitle": "امیدوار کی دستاویزات",
+      "checkingPhotos": "تصاویر کی جانچ ہو رہی ہے…",
+      "imageNotAdded": "فائل شامل نہیں ہوئی",
+      "imageTooLarge": "فائل کا زیادہ سے زیادہ سائز 20 MB ہے۔",
+      "imageUnreadable": "یہ تصویر نہیں کھل سکی۔ کوئی دوسری JPG، PNG یا WEBP تصویر منتخب کریں۔"
     },
     "si": {
       "localOnly": "PDF · මෙම උපාංගයේ පමණි",
@@ -463,7 +539,11 @@ window.PRIMSERV_PDF_I18N = {
       "generated": "මෙම උපාංගයේ සාදන ලදී",
       "remove": "ඉවත් කරන්න",
       "empty": "පෙරදසුන බැලීමට තොරතුරු ඇතුළත් කරන්න හෝ ඡායාරූප එක් කරන්න.",
-      "defaultTitle": "අයදුම්කරුගේ ලේඛන"
+      "defaultTitle": "අයදුම්කරුගේ ලේඛන",
+      "checkingPhotos": "ඡායාරූප පරීක්ෂා කරමින්…",
+      "imageNotAdded": "ගොනුව එක් නොකෙරිණි",
+      "imageTooLarge": "ගොනුවක උපරිම ප්‍රමාණය 20 MB වේ.",
+      "imageUnreadable": "මෙම රූපය විවෘත කළ නොහැකි විය. වෙනත් JPG, PNG හෝ WEBP ඡායාරූපයක් තෝරන්න."
     }
   }
 };

@@ -6,6 +6,7 @@ export const PDF_ALL_LANGUAGES=['pl','uk','ru','en','ka','az','hy','tr','uz','id
 export function pdfCopy(){
   const scope=vm.createContext({window:{},document:{getElementById:()=>({})},URL,location:{href:'https://fixture.invalid/apply/pdf/'},localStorage:{getItem:()=>null}});
   vm.runInContext(readFileSync('apply/pdf/translations.js','utf8'),scope);
+  vm.runInContext(readFileSync('apply/pdf/images.js','utf8'),scope);
   const app=readFileSync('apply/pdf/app.js','utf8');
   vm.runInContext(app.replace('render();})();','window.__PDF_COPY={L,B,T,S,t,pageWord};})();'),scope);
   const {L,B,T,S,t,pageWord}=scope.window.__PDF_COPY;
@@ -14,12 +15,12 @@ export function pdfCopy(){
 }
 export function assertPdfCopy(data){
   assert.deepEqual(Object.keys(data.languages).sort(),[...PDF_ALL_LANGUAGES].sort());
-  const keys=Object.keys(data.base).sort();assert.equal(keys.length,29);
+  const keys=Object.keys(data.base).sort();assert.equal(keys.length,33);
   for(const lang of PDF_ALL_LANGUAGES){
     const own=lang==='en'?{...data.base,...data.explicit.en}:data.explicit[lang];
     assert.deepEqual(Object.keys(own).sort(),keys,'Explicit copy without fallback: '+lang);
     for(const k of keys)assert.ok(typeof own[k]==='string'&&own[k].trim(),lang+':'+k);
-    if(lang!=='en')for(const k of ['localOnly','documentTitle','photosHint','saveHint','summary','generated','remove','empty'])assert.notEqual(own[k],data.base[k],lang+':'+k+':English fallback');
+    if(lang!=='en')for(const k of ['localOnly','documentTitle','photosHint','saveHint','summary','generated','remove','empty','checkingPhotos','imageNotAdded','imageTooLarge','imageUnreadable'])assert.notEqual(own[k],data.base[k],lang+':'+k+':English fallback');
   }
 }
 export function assertEmptyGeometry(g){

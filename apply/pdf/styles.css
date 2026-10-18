@@ -129,3 +129,11 @@ img{max-width:100%}
 /* Keep phone/email readable in RTL, without changing the entered value. */
 [dir="rtl"] .pdf-brand span{text-align:left}
 [dir="rtl"] .pdf-note{border-left:0;border-right:4px solid var(--gold)}
+
+.photo-status{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.45}
+.photo-errors{margin-top:10px;padding:10px 12px;border:1px solid var(--danger);border-radius:12px;background:#fff3f1;color:#8e1c13;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.photo-errors p{margin:0}
+.photo-errors p+p{margin-top:9px}
+.photo-status:empty,.photo-errors:empty{display:none}
+.button:disabled,.upload-box input:disabled{cursor:progress}
+.button:disabled{opacity:.6}

@@ -43,6 +43,6 @@ test('invalid language values cannot inject additional URL parameters',()=>{
 });
 
 import {assertPdfRows,PDF_LANGUAGES} from './apply-pdf.mjs';
-const rows=()=>[320,1280].flatMap(width=>PDF_LANGUAGES.map(lang=>({width,lang,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true})));
+const rows=()=>[320,1280].flatMap(width=>PDF_LANGUAGES.map(lang=>({width,lang,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true,uploadAccessible:true,badPhotoRejected:true,decodedPhoto:true,mixedPhotoCount:true})));
 test('PDF acceptance rejects missing or duplicate language-width cases',()=>{assert.doesNotThrow(()=>assertPdfRows(rows()));assert.throws(()=>assertPdfRows(rows().slice(1)));const a=rows();a[1]=a[0];assert.throws(()=>assertPdfRows(a));});
-test('PDF acceptance rejects lost draft, route, language, review, layout or privacy proof',()=>{for(const key of ['passed','footer','review','language','returnRoute','draft','fits','noCandidateURL','copy','preview','direction','numericLTR','photoPreserved','print']){const a=rows();a[0][key]=false;assert.throws(()=>assertPdfRows(a));}});
+test('PDF acceptance rejects lost draft, route, language, review, layout or privacy proof',()=>{for(const key of ['passed','footer','review','language','returnRoute','draft','fits','noCandidateURL','copy','preview','direction','numericLTR','photoPreserved','print','uploadAccessible','badPhotoRejected','decodedPhoto','mixedPhotoCount']){const a=rows();a[0][key]=false;assert.throws(()=>assertPdfRows(a));}});

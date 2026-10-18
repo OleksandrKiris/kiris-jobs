@@ -1,3 +1,4 @@
+import {photoOldRed,rejectBrokenPhoto,addMixedPhotos,photoRaceAndSize} from './pdf-photo-acceptance.mjs';
 import {PDF_ALL_LANGUAGES,pdfCopy,assertPdfCopy,assertEmptyGeometry,emptyGeometry,visiblePdfCopy} from './pdf-copy.mjs';
 // Personal acceptance on isolated GitHub Actions contexts; no external delivery.
 import assert from 'node:assert/strict';
@@ -19,7 +20,7 @@ const OLD='3fb5e53647a4fc025ad8fb8621308ce7f1a6e11a';
 const draftKey='citronex_screening_application_v17';
 export function assertPdfRows(rows){
   assert.deepEqual(rows?.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>PDF_LANGUAGES.map(l=>w+':'+l)).sort());
-  for(const r of rows)for(const k of ['passed','footer','review','language','returnRoute','draft','fits','noCandidateURL','copy','preview','direction','numericLTR','photoPreserved','print'])assert.equal(r[k],true,`${r.lang}:${r.width}:${k}`);
+  for(const r of rows)for(const k of ['passed','footer','review','language','returnRoute','draft','fits','noCandidateURL','copy','preview','direction','numericLTR','photoPreserved','print','uploadAccessible','badPhotoRejected','decodedPhoto','mixedPhotoCount'])assert.equal(r[k],true,`${r.lang}:${r.width}:${k}`);
 }
 
 export async function runPdfAcceptance(){
@@ -82,6 +83,7 @@ export async function runPdfAcceptance(){
       else{observed=await page.locator('html').getAttribute('lang');assert.equal(observed,'en');assert.equal(await page.locator('#language option[value="ur"]').count(),0);}
       await shot(page,'copy-old-'+kind+'-320');report.copyOldRed.push({kind,lang,ref:copyRef,width:320,observed,status:'expected-failure'});await close(ctx,'copy-old-'+kind);
     }
+    await photoOldRed({context,base,shot,close,report,setActive:p=>{active=p}});
     for(const width of [320,1280])for(const lang of PDF_LANGUAGES){
       const ctx=await context(width),page=await ctx.newPage();active=page;
       const appURL=base+'apply/?lang='+lang+'&recruiter=yana&location=any&src=fixture&campaign=sample&vacancy=tomatoes';
@@ -98,8 +100,9 @@ export async function runPdfAcceptance(){
       assert.equal(await page.locator('html').getAttribute('dir'),lang==='ur'?'rtl':'ltr');
       assert.equal((await page.locator('.page-count').textContent()).trim(),'1 '+copyData.pageWord(lang,1));
       await shot(page,`pdf-${lang}-${width}`);
+      const rejectedPhoto=await rejectBrokenPhoto(page,copy);await fits(page);await shot(page,`image-rejected-${lang}-${width}`);
       await page.locator('#name').fill('QA_PDF_FIXTURE <b>literal</b>');await page.locator('#phone').fill('+99912345678');await page.locator('#email').fill('fixture@example.invalid');await page.locator('#note').fill('QA · '+copy.empty);for(const field of ['citizenship','location','job'])await page.locator('#'+field).fill('QA FIXTURE');
-      await page.locator('#photos').setInputFiles({name:'fixture-logo.png',mimeType:'image/png',buffer:await readFile('assets/icon-192.png')});
+      const acceptedPhoto=await addMixedPhotos(page,copy);
       assert.equal(await page.locator('.remove-file').getAttribute('aria-label'),copy.remove+': fixture-logo.png');
       assert.equal((await page.locator('.page-count').textContent()).trim(),'2 '+copyData.pageWord(lang,2));
       const number=await page.locator('.pdf-data dd').filter({hasText:'+99912345678'}).evaluate(n=>{const r=document.createRange(),last=document.createRange(),t=n.firstChild;r.setStart(t,0);r.setEnd(t,1);last.setStart(t,t.length-1);last.setEnd(t,t.length);return {text:n.textContent,direction:getComputedStyle(n).direction,plusX:r.getBoundingClientRect().x,lastX:last.getBoundingClientRect().x}});
@@ -127,7 +130,7 @@ export async function runPdfAcceptance(){
       const popupPromise=page.waitForEvent('popup');await page.locator('.pdf-card').click();const popup=await popupPromise;
       await popup.locator('#language').waitFor();assert.equal(await popup.locator('#language').inputValue(),lang);assert.equal(await popup.locator('h1').innerText(),titles[lang]);await popup.close();
       await fits(page);await shot(page,`review-return-${lang}-${width}`);
-      report.rows.push({lang,width,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true,printScope:width===320?'A4-generated':'narrow-print-covered',geometry,filledGeometry,number});await close(ctx,`${lang}-${width}`);
+      report.rows.push({lang,width,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true,...rejectedPhoto,...acceptedPhoto,printScope:width===320?'A4-generated':'narrow-print-covered',geometry,filledGeometry,number});await close(ctx,`${lang}-${width}`);
     }
     // Standalone URL priority, preference, denied storage, safe return, and local preview/print.
     for(const mode of ['saved','url-priority','denied','hostile-return']){
@@ -137,6 +140,7 @@ export async function runPdfAcceptance(){
       await page.goto(base+'apply/pdf/'+suffix);const expected=mode==='saved'?'ru':mode==='url-priority'?'en':mode==='hostile-return'?'uk':'pl';
       assert.equal(await page.locator('#language').inputValue(),expected);await page.locator('#name').fill('QA_PDF_FIXTURE <b>literal</b>');
       await page.locator('#photos').setInputFiles({name:'fixture-logo.png',mimeType:'image/png',buffer:await readFile('assets/icon-192.png')});
+      await page.locator('.photo-sheet img').waitFor({state:'visible'});
       await page.locator('#language').selectOption('en');assert.equal(await page.locator('#name').inputValue(),'QA_PDF_FIXTURE <b>literal</b>');
       assert.equal(await page.locator('.photo-sheet img').count(),1);assert.equal(await page.locator('.pdf-data dd').innerText(),'QA_PDF_FIXTURE <b>literal</b>');assert.equal(await page.locator('.pdf-data b').count(),0);
       const back=new URL(await page.locator('#backLink').getAttribute('href'));assert.equal(back.origin,new URL(base).origin);assert.equal(back.pathname,'/kiris-jobs/apply/');
@@ -145,9 +149,11 @@ export async function runPdfAcceptance(){
       await page.locator('#clearButton').click();assert.equal(await page.locator('#name').inputValue(),'');assert.equal(await page.locator('.photo-sheet img').count(),0);
       report.edgeCases.push({mode,passed:true,language:expected,localPreview:true,languageSwitchPreservesDataAndFixtureImage:true,clear:true,safeReturn:true});await close(ctx,'edge-'+mode);
     }
+    await photoRaceAndSize({context,base,shot,close,report,setActive:p=>{active=p},copyData});
     assertPdfRows(report.rows);assert.equal(report.copyOldRed.length,3);assert.equal(report.oldRed.length,2);assert.equal(report.edgeCases.length,4);
     assert.deepEqual(report.mutations,[]);assert.deepEqual(report.external,[]);
     assert.equal(captureStagedPublication(process.cwd(),artifact,checkout).sha256,publication.sha256);
+    assert.equal(report.imageOldRed.length,2);assert.equal(report.imageRaceCases.length,2);assert.equal(report.imageSizeCases.length,2);
     report.status='passed';
   }catch(error){report.status='failed';report.error=String(error.stack||error);if(active)await active.screenshot({path:join(out,'failure.png'),fullPage:true}).catch(()=>{});throw error;
   }finally{report.finished=new Date().toISOString();await writeFile(join(out,'acceptance.json'),JSON.stringify(report,null,2));await browser?.close();await origin.stop();}

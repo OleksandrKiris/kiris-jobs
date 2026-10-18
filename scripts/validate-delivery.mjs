@@ -9,6 +9,7 @@ const mainApp = read('apply/app.js');
 const pdfIndex = read('apply/pdf/index.html');
 const pdfCss = read('apply/pdf/styles.css');
 const pdfApp = read('apply/pdf/app.js');
+const pdfImages = read('apply/pdf/images.js');
 const pdfCopy = read('apply/pdf/translations.js');
 const pdfNavigation = read('apply/pdf/navigation.js');
 const redirect = read('apply/offline.html');
@@ -23,9 +24,10 @@ assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), '
 assert(!/\bcsv\b/i.test(`${mainIndex}\n${mainApp}`), 'main form still contains CSV workflow.');
 
 for (const marker of [
-  'styles.css?v=1.1.4',
-  'app.js?v=1.1.4',
-  'translations.js?v=1.0.0',
+  'styles.css?v=1.1.5',
+  'app.js?v=1.1.5',
+  'translations.js?v=1.0.1',
+  'images.js?v=1.0.0',
   'id="pdfApp"',
   '../../assets/primserv-avatar.jpg',
   "connect-src 'none'"
@@ -38,7 +40,6 @@ for (const marker of [
   'function renderPreview()',
   'function pageWord(n)',
   'renderPreview()});',
-  'URL.createObjectURL',
   'type="file"',
   'image/jpeg,image/png,image/webp,image/heic,image/heif',
   "const L={",
@@ -56,11 +57,12 @@ for (const marker of [
   '.photo-sheet'
 ]) assert(pdfCss.includes(marker), `PDF styles are missing ${marker}.`);
 
+assert(pdfImages.includes('URL.createObjectURL') && pdfImages.includes('URL.revokeObjectURL'), 'local image URL lifecycle is missing.');
 assert(!pdfCss.includes('position:sticky'), 'PDF generator must not use sticky positioning.');
 assert(!pdfCss.includes('position:fixed'), 'PDF generator must not use fixed positioning.');
 assert(!pdfCss.includes('min-max('), 'PDF generator contains invalid min-max() CSS.');
 
-const pdfCombined = `${pdfIndex}\n${pdfCss}\n${pdfApp}\n${pdfNavigation}\n${pdfCopy}`;
+const pdfCombined = `${pdfIndex}\n${pdfCss}\n${pdfApp}\n${pdfNavigation}\n${pdfCopy}\n${pdfImages}`;
 for (const forbidden of [
   /\bcsv\b/i, /\bxlsx\b/i, /\btsv\b/i, /\bzip\b/i,
   /navigator\.share/, /mailto:/i, /wa\.me/i, /viber:\/\//i,
@@ -74,8 +76,8 @@ for (const marker of [
   'styles.css?v=17.2.2',
   'translations.js?v=17.0.6',
   'app.js?v=17.2.5',
-  'styles.css?v=1.1.4',
-  'app.js?v=1.1.4',
+  'styles.css?v=1.1.5',
+  'app.js?v=1.1.5',
   'CFG.excelColumns.length'
 ]) assert(workflow.includes(marker), `GitHub Pages workflow is missing current marker: ${marker}`);
 
