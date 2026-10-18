@@ -175,6 +175,10 @@
     savedDraft = null;
   }
 
+  function pdfGeneratorUrl() {
+    return window.PRIMSERV_PDF_NAVIGATION.toPdf(window.location.href, CFG.pdfGeneratorUrl, state.language || 'en');
+  }
+
   function updateDocument() {
     const code = state.language || 'en';
     const metadata = I18N.languages[code] || I18N.languages.en;
@@ -184,6 +188,7 @@
     document.getElementById('headerSubtitle').textContent = t('rowOnlyTitle');
     document.getElementById('headerNote').textContent = t('firstContact');
     document.getElementById('footerPdf').textContent = t('pdfOpen');
+    document.getElementById('footerPdf').href = pdfGeneratorUrl();
     document.getElementById('footerNotice').textContent = t('footerNotice');
     document.getElementById('footerPrivacy').textContent = t('footerPrivacyLabel');
     document.getElementById('formBrand').setAttribute('aria-label', `${CFG.brand} — ${t('rowOnlyTitle')}`);
@@ -574,7 +579,7 @@
           <button type="button" class="button secondary copy-button" data-action="copy">${escapeHtml(t('copyRow'))}</button>
           <div id="sendResult" class="send-result hidden" aria-live="polite"></div>
         </div>
-        <a class="pdf-card" href="${attr(CFG.pdfGeneratorUrl)}" target="_blank" rel="noopener noreferrer">
+        <a class="pdf-card" href="${attr(pdfGeneratorUrl())}" target="_blank" rel="noopener noreferrer">
           <span class="pdf-icon" aria-hidden="true">PDF</span><span><strong>${escapeHtml(t('pdfTitle'))}</strong><small>${escapeHtml(t('pdfLead'))}</small></span><b>${escapeHtml(t('pdfOpen'))} →</b>
         </a>
         <div class="review-actions"><button type="button" class="button secondary" data-action="edit">← ${escapeHtml(t('edit'))}</button><button type="button" class="text-button" data-action="new">${escapeHtml(t('newApplication'))}</button></div>
