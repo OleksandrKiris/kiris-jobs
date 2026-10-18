@@ -849,7 +849,7 @@ Object.assign(screening, {
     "citizenshipHint": "देशको नाम वा छोटो कोड लेख्न सक्नुहुन्छ, जस्तै UKR, GEO वा AZE।",
     "citizenshipPlaceholder": "उदाहरण: NPL",
     "gender": "लिङ्ग",
-    "stayDuration": "तपाईं कति समय बस्ने योजना बनाउनुभएको छ?",
+    "stayDuration": "तपाईं कति समय बस्ने योजनामा हुनुहुन्छ?",
     "physicalWork": "के तपाईंले पहिले शारीरिक काम गर्नुभएको छ?",
     "physicalDetails": "कहाँ र कति समय काम गर्नुभयो?",
     "physicalDetailsHint": "कार्यस्थल, जिम्मेवारी र काम गरेको अनुमानित अवधि छोटकरीमा लेख्नुहोस्।",
