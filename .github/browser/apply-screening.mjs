@@ -26,6 +26,7 @@ export function assertScreeningCopy(i18n) {
       for(const [key,value] of Object.entries(locale.options[group]))assert.notEqual(value,i18n.locales.en.options[group][key],lang+':'+group+':'+key);
     }
     assert.notEqual(locale.options.locations.any,i18n.locales.en.options.locations.any);
+    if(['ky','tg','kk'].includes(lang))for(const key of ['phoneHint','locationHint']){assert.ok(locale[key]?.trim());assert.notEqual(locale[key],i18n.locales.en[key],lang+':'+key);}
   }
   assert.equal(Object.keys(i18n.locales).length,20);
   for(const [lang,locale] of Object.entries(i18n.locales)) {
@@ -141,6 +142,7 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
         await checkScreen(page,l,1,reportDir,`apply-screening-${lang}-${width}-step1`);
         assert.ok((await page.locator('#candidateForm').innerText()).includes(l.gender));
         assert.equal(await page.locator('#citizenship').getAttribute('placeholder'),l.citizenshipPlaceholder);
+        assert.ok((await page.locator('#phone').locator('..').innerText()).includes(l.phoneHint));
         const gender=await page.locator('[name="gender"]').evaluateAll(nodes=>nodes.map(n=>n.parentElement.querySelector('span:not([class])')?.textContent));
         assert.deepEqual(gender,Object.values(l.options.gender));
         await page.locator('#firstName').fill('QA');await page.locator('#lastName').fill('FIXTURE');await page.locator('#phone').fill('+99912345678');
