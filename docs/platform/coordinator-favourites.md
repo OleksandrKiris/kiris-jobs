@@ -46,3 +46,9 @@ Scope is only the six coordinator model/app/index/style/test/browser files and
 this document. Shared harness/workflows, published tools, rootdocs, contracts,
 backend, dependencies, SW and audio are unchanged. Source/runtime acceptance and
 release remain separate; root alone merges/publishes.
+
+Before Pin or Remove, the store rereads and validates the actual favourites key.
+Sequential stale instances adopt valid current items, preserving an already
+persisted requested language. Newly invalid/future/stale records remain intact;
+read failures and failed writes remain page-only. Explicit Clear is recovery.
+This is not an atomic or transactional multi-tab localStorage guarantee.

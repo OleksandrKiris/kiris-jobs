@@ -611,7 +611,7 @@ test('favourites pin is explicit, exact and idempotent without language overwrit
  assert.deepEqual(f.snapshot().items,[]);assert.deepEqual(s.calls,[['get',M.FAVOURITES_KEY]]);
  assert.equal(f.pin('site-cleaning-summary-ru','ua'),true);const raw=s.data.get(M.FAVOURITES_KEY),calls=s.calls.length;
  assert.deepEqual(JSON.parse(raw),{version:1,items:[{material_id:'site-cleaning-summary-ru',requested_language:'ua'}]});assert.ok(new TextEncoder().encode(raw).length<=2048);
- assert.equal(f.pin('site-cleaning-summary-ru','pl'),true);assert.equal(s.calls.length,calls);assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);
+ assert.equal(f.pin('site-cleaning-summary-ru','pl'),true);assert.deepEqual(s.calls.slice(calls),[['get',M.FAVOURITES_KEY]]);assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);
  assert.equal(M.materialFavourites(s).snapshot().items[0].requested_language,'ua');assert.equal(Object.isFrozen(f.snapshot().items[0]),true);assert.throws(()=>f.snapshot().items.push({}),TypeError);
  let coerced=false;assert.equal(f.pin({toString(){coerced=true;return 'site-cleaning-summary-ru';}},'ru'),false);assert.equal(coerced,false);assert.equal(f.pin('https://private.example/','ru'),false);assert.equal(f.pin('site-cleaning-summary-ru','RU'),false);
 });
@@ -649,4 +649,20 @@ test('pin Open/Remove preserve a non-null last record byte-for-byte and task res
 test('favourites UI corrupt/denied key offers only own recovery and never renders unknown content',()=>{
  for(const raw of ['{broken',JSON.stringify({version:1,items:[{material_id:'deleted',requested_language:'ru'}]})]){const h=ui({store:storage([[M.FAVOURITES_KEY,raw]])});assert.equal(h.$('favouritesList').children.length,0);assert.equal(h.$('materialReading').hidden,true);assert.equal(h.$('favouritesClear').hidden,false);assert.match(h.$('favouritesNotice').textContent,/damaged|unavailable material/);h.click('favouritesClear');assert.equal(h.store.data.has(M.FAVOURITES_KEY),false);}
  const s=storage(),get=s.getItem;s.getItem=k=>{if(k===M.FAVOURITES_KEY)throw new DOMException('denied','SecurityError');return get(k);};const h=ui({store:s});h.click('pin-site-cleaning-summary-ru');assert.match(h.$('favouritesNotice').textContent,/only on this page/);assert.equal(h.$('favouritesList').children.length,1);assert.equal(s.data.has(M.FAVOURITES_KEY),false);
+});
+test('favourites sequential stale instances preserve persisted language and observe removal',()=>{
+ const s=storage(),a=M.materialFavourites(s),b=M.materialFavourites(s),id='site-cleaning-summary-ru';
+ a.pin(id,'ua');const raw=s.data.get(M.FAVOURITES_KEY);b.pin(id,'pl');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(b.snapshot().items[0].requested_language,'ua');
+ a.remove(id);b.pin(id,'pl');assert.equal(JSON.parse(s.data.get(M.FAVOURITES_KEY)).items[0].requested_language,'pl');a.remove(id);assert.equal(s.data.has(M.FAVOURITES_KEY),false);
+});
+test('favourites mutations preserve newly invalid backing records until explicit clear',()=>{
+ const id='site-cleaning-summary-ru';
+ for(const raw of ['{broken',JSON.stringify({version:2,items:[]}),JSON.stringify({version:1,items:[{material_id:'unknown',requested_language:'ua'}]}),' '.repeat(2049)]){
+  for(const op of ['pin','remove']){const s=storage(),f=M.materialFavourites(s);f.pin(id,'ua');s.data.set(M.FAVOURITES_KEY,raw);f[op](id,'pl');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.match(f.snapshot().persistence,/invalid|stale/);assert.equal(f.clear(),true);assert.equal(s.data.has(M.FAVOURITES_KEY),false);}
+ }
+});
+
+test('favourites mutation read failure after initialization never writes over backing state',()=>{
+ const id='site-cleaning-summary-ru',s=storage(),f=M.materialFavourites(s);f.pin(id,'ua');const raw=s.data.get(M.FAVOURITES_KEY);s.getItem=()=>{throw new Error('denied');};
+ f.remove(id);assert.equal(f.snapshot().persistence,'blocked');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);f.pin(id,'pl');assert.equal(f.snapshot().persistence,'blocked');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);
 });
