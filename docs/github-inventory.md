@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; проход04:08, 2026-10-18T04:15:09.005603+00:00; Dragon14 опубликован, kiris-jobs main0986cc9ff47b6eae6d28814d38c17494e6b36bac после96 сохранён. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; проход05:03, локальные source-статусы на2026-10-18T04:59:51.682132+00:00; опубликованный kiris main92dc после99 и Dragon0b035 сохранены. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,13 +12,25 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `0986cc9ff47b6eae6d28814d38c17494e6b36bac` | [#96](https://github.com/OleksandrKiris/kiris-jobs/pull/96)10e899d3 merged/published; #62 frozen/draft | [Pages39095191175](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39095191175) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `92dc5b64477de83a1d174ecba154c03bdb29922f` | [#99](https://github.com/OleksandrKiris/kiris-jobs/pull/99)774550 merged/published; #62 frozen/draft | [Pages39097972392](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39097972392) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b04fc7302612affa0c2eec71ac66ebbc13912e46` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) published; [#15](https://github.com/OleksandrKiris/citronex-hydra-project/pull/15)7ae Copy route TEXT implemented,191unit/106browser/currentCI SUCCESS, late runtime4 bounded CLEAR; formal source-report write rejected by policy, draft/unpublished | [39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `0b03581a621c8ec55ee8e073152fc2ac5daeb144` | [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)a573/basef088 merged/published; copy MEMO TEXT/manual fallback/async stale guards; accepted exact-head413unit/59browser reused | [Pages39096400094](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39096400094) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
+
+Локальная очередь05:03 по exact saved packet04:59:9cd8/14_4fef/12_96d2/15_a045 — все source CLEAR. Frontend13author+13independentQA и contract только6 новых peer tests — VM/pure-mock; native browser нового среза NOTRUN. Backend12 author21new+69old, без независимогоHTTP-runtime; CI15 author21/39, без hostednewCI. Все компоненты unpushed/unpublished; общий head/PR/counts ещё неизвестны.
+Guard05:03=0. Следующий ordinary union остаётся у существующего владельца9 с exact source-preservation и новой текущей приёмкой. Локальные2rootdocs от92e19 не опубликованы; опубликованный99 остаётся92dc/35HTTP/311projection/276Gitothers. Backend local/onlineAIoff; ограничения и отказы2/13 сохранены.
+
+### История прохода04:35 — snapshot 18.10.2026 04:56 UTC
+
+В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/) опубликована readonly-сводка всех3 вымышленных задач: ID, текущие статусы и общий прогресс на EN/RU/UK/PL. Фильтр/поиск не сужают сводку; edit/reset/подтверждённый restore обновляют её. Явное выделение readonly-текста не копирует, не отправляет, не сохраняет файл и не создаёт новые записи. При недоступном storage видна оговорка о работе только в текущей вкладке; реального рабочего отчёта/данных работников нет.
+Единственный guarded merge04:35: tested `77455024168f59d6a766992acae5a784016734fc` → main `92dc5b64477de83a1d174ecba154c03bdb29922f`, tree `d50443d1af3c2a3add3df6d95d7d6fa361ea8070`, orderedparents[0986,774550]. Pages39097972392/Backend39097972375 terminalSUCCESS attempt1; 35 выбранных HTTP-файлов exact size/SHA256/Gitblob, main до/после совпал. Full projection311: остальные276 только Gitidentity, не311HTTP. Source431/net7 сохранил4feature source/test files, новый journal и2rootdocs bdbed; backend локальный, online-adapter/AIoff.
+Текущий runtime: core16, worker N/A unchanged, main19, prototypes16+8; Native6 jobs по127 TAP, browser16+8 в каждом; Backend10/87/33; early-security19. Две новые summary-проверки находятся внутри прежних16, не18. Языки/reset/storage проверены текущими VM fixtures; browser320/1280 и native selection приняты в ограниченном CI-сценарии. Это не physical-device/OS clipboard/save или полная браузерная матрица4языков.
+Один guard04:35 использован; второго merge в этом проходе нет. Эти2docs после выпуска — следующий локальный неопубликованный компонент.
+
+### История прохода04:08 — snapshot 18.10.2026 04:20 UTC
 
 В [Dragon guide](https://oleksandrkiris.github.io/citronex-dragon-guide/) опубликовано копирование готовой публичной памятки: PR14 tested `a57306ac862d3986748a7164e272745ed72e3868` → main `0b03581a621c8ec55ee8e073152fc2ac5daeb144`, tree `7d7b05cb1f69ae2f9db1fd5ea522fcc6bf659ff4`. Pages39096400094 terminalSUCCESS; 8 выбранных HTTP-файлов совпали с Git по размеру/SHA256/blob; 40 source entries сохранены, остальные32 проверены только по Gitidentity. Копирование запускается явным действием; успех показывается после fulfilled Promise. Denied/unavailable/syncThrow дают честный readonly manual fallback. Устаревшие callbacks после смены языка/места, очистки или другого copy/action не меняют текущий status/focus; уже начатая OS-запись не объявляется отменённой. Принятые exact-head413unit/59browser и peer8GREEN переиспользованы без нового прогона. OS clipboard/physical-device/full12browser гарантии не заявлены. Один guard04:08 использован; второго merge в этом проходе нет.
 
