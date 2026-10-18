@@ -532,6 +532,7 @@ try {
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
       // Explicit task→material linkage, independent of all pre-existing keys.
       const taskLinkKey='primserv:coordinator:task-material-links:v1';
+      const summaryKeysBefore=await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
       assert.equal(await page.locator('#task-link-open-demo-03').isDisabled(),true);
       await page.locator('#task-link-choice-demo-03').selectOption(bananaID);
@@ -539,6 +540,15 @@ try {
       await keyClick(page,'task-link-save-demo-03');
       const taskLinkRaw=await page.evaluate(key=>localStorage.getItem(key),taskLinkKey);
       assert.deepEqual(JSON.parse(taskLinkRaw),{version:1,links:[{task_id:'demo-03',material_id:bananaID,requested_language:'pl'}]});
+      const summaryAfterLinkSave=await page.locator('#progressSummary').inputValue();
+      assert.ok(summaryAfterLinkSave.includes('Powiązanie DEMO z materiałem: '+bananaID+' · Żądany język: pl'));
+      assert.equal((summaryAfterLinkSave.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(summaryAfterLinkSave,/2 \/ 3/);
+      assert.doesNotMatch(summaryAfterLinkSave,/no matching second material|effective_language|read confirmed|→ ru/);
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]),summaryKeysBefore);
+      await page.locator('#progressSummary').scrollIntoViewIfNeeded();
+      await page.locator('#progressSummary').evaluate(node=>{node.scrollTop=node.scrollHeight;});
+      await page.locator('#progressSummary').screenshot({path:join(reportDir,`${name}-summary-task-material-save.png`)});
       const linkedURL=page.url();
       await keyClick(page,'task-link-open-demo-03');
       assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
@@ -548,6 +558,10 @@ try {
       await page.locator('#filter').selectOption('done');
       await page.locator('#materialsSource').selectOption('snapshot');
       await page.locator('#materialQuery').fill('changed during linked reading');
+      const summaryDuringOtherContext=await page.locator('#progressSummary').inputValue();
+      assert.ok(summaryDuringOtherContext.includes('DEMO material link: '+bananaID+' · Requested language: pl'));
+      assert.equal((summaryDuringOtherContext.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(summaryDuringOtherContext,/2 \/ 3/);
       await keyClick(page,'taskMaterialBack');
       assert.equal(page.url(),linkedURL);
       assert.equal(await page.locator('#language').inputValue(),'pl');
@@ -560,11 +574,20 @@ try {
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
       const pinsAfterLink=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
       assert.deepEqual(JSON.parse(pinsAfterLink).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);
+      const summaryAfterLinkBack=await page.locator('#progressSummary').inputValue();
+      assert.equal(summaryAfterLinkBack,summaryAfterLinkSave);
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]),summaryKeysBefore);
+      await page.locator('#progressSummary').scrollIntoViewIfNeeded();
+      await page.locator('#progressSummary').evaluate(node=>{node.scrollTop=node.scrollHeight;});
+      await page.locator('#progressSummary').screenshot({path:join(reportDir,`${name}-summary-task-material-back.png`)});
       await fits(page);await page.screenshot({path:join(reportDir,`${name}-task-material-back.png`),fullPage:true});
       await page.reload();await ready(page);
       assert.equal(await page.locator('#materialReading').isHidden(),true);
       assert.equal(await page.locator('#task-link-open-demo-03').isDisabled(),false);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),taskLinkRaw);
+      const summaryAfterLinkReload=await page.locator('#progressSummary').inputValue();
+      assert.equal(summaryAfterLinkReload,summaryAfterLinkSave);
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]),summaryKeysBefore);
       await keyClick(page,'task-link-open-demo-03');
       await page.locator('#demo-03').selectOption('done');
       const intentionallyEditedTask=await page.evaluate(key=>localStorage.getItem(key),KEY);
@@ -573,7 +596,16 @@ try {
       assert.equal(await page.locator('.task').count(),0);
       assert.equal(await page.evaluate(()=>document.activeElement.id),'filter');
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),intentionallyEditedTask);
+      const summaryBeforeLinkClear=await page.locator('#progressSummary').inputValue();
+      assert.ok(summaryBeforeLinkClear.includes('Powiązanie DEMO z materiałem: '+bananaID+' · Żądany język: pl'));
+      assert.match(summaryBeforeLinkClear,/3 \/ 3/);
       await keyClick(page,'taskLinksClear');
+      const summaryAfterLinkClear=await page.locator('#progressSummary').inputValue();
+      assert.equal(summaryAfterLinkClear,summaryBeforeLinkClear.split('\n').filter(line=>!line.includes('Powiązanie DEMO z materiałem:')).join('\n'));
+      assert.doesNotMatch(summaryAfterLinkClear,/banana-warehouse-poland-summary-ru|Powiązanie DEMO z materiałem:/);
+      assert.equal((summaryAfterLinkClear.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(summaryAfterLinkClear,/3 \/ 3/);
+      const summaryTaskMaterialProof={task:'demo-03',materialID:bananaID,requestedLanguage:'pl',afterSave:summaryAfterLinkSave,duringOtherContext:summaryDuringOtherContext,afterBack:summaryAfterLinkBack,afterReload:summaryAfterLinkReload,afterClear:summaryAfterLinkClear};
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),intentionallyEditedTask);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
@@ -581,8 +613,8 @@ try {
       await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
       report.scenarios.push({ name, viewport, status: 'passed', offline: true,
-        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort', 'second source material search/read/last/two independent pins across reload and modes', 'explicit task material link/Open/Back restores context and focus; filtered task fallback and own clear'],
-        results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort', 'second source material search/read/last/two independent pins across reload and modes', 'explicit task material link/Open/Back restores context and focus; filtered task fallback and own clear', 'readonly summary exact linked ID/requested language after Save/Back/reload; Clear retains all3 task statuses/progress'],
+        results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false, summaryTaskMaterialProof } });
     } catch (error) {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
     } finally {
