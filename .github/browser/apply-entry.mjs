@@ -75,7 +75,10 @@ export async function acceptApplyEntry({context,base,reportDir,report,active}) {
       await input.fill(lang); const matched=await page.locator(`[data-language="${lang}"]`).isVisible();
       await page.locator(`[data-language="${lang}"]`).click();
       await page.locator('[data-recruiter="yana"]').click(); await page.locator('[data-action="next"]').click();
-      await page.waitForFunction(()=>document.activeElement.id==='firstName');
+      await page.waitForFunction(()=>{
+        const field=document.getElementById('firstName'); const rect=field?.getBoundingClientRect();
+        return document.activeElement===field && rect.top>=0 && rect.bottom<=innerHeight;
+      });
       assert.equal(await page.locator('.field-error').count(),7);
       const associated=await page.evaluate(()=>[...document.querySelectorAll('.invalid,input[aria-invalid="true"]')].every(n=>n.getAttribute('aria-invalid')==='true' && document.getElementById(n.getAttribute('aria-describedby'))?.textContent));
       await page.screenshot({path:join(reportDir,`apply-required-${lang}-${width}.png`)});
