@@ -1,4 +1,4 @@
-import {fieldVisual,correctFieldVisual,acceptFieldStatusProof} from './catalogue-field-status.mjs';
+import {fieldVisual,correctFieldVisual,acceptFieldStatusProof,settledForm} from './catalogue-field-status.mjs';
 // CI-only isolated anonymous fixtures. No submissions or external services.
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
@@ -64,7 +64,7 @@ export const FORM_VACANCY_IDS=["greenhouse-tomatoes", "greenhouse-renewal", "tom
 export const FORM_ERROR_CASES=['missing','latin','phone'];
 export function assertFormErrors(rows){
  assert.equal(rows?.length,66);assert.deepEqual(rows.map(r=>`${r.width}:${r.lang}:${r.kind}`).sort(),[320,1280].flatMap(width=>Object.keys(FORM_ERROR_LABELS).flatMap(lang=>FORM_ERROR_CASES.map(kind=>`${width}:${lang}:${kind}`))).sort());
- for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.error,FORM_ERROR_LABELS[r.lang][r.kind]);for(const k of ['roundTrip','preserved','associated','fits','notSubmitted','iconClear','invalidVisual'])assert.equal(r[k],true,`${r.lang}:${r.kind}:${k}`);}
+ for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.error,FORM_ERROR_LABELS[r.lang][r.kind]);for(const k of ['roundTrip','preserved','associated','fits','notSubmitted','iconClear','invalidVisual','painted'])assert.equal(r[k],true,`${r.lang}:${r.kind}:${k}`);}
 }
 export function assertFormUpgrades(rows,workerChanged=true){
  if(!workerChanged){assert.deepEqual(rows,[]);return;}
@@ -78,7 +78,7 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
  const oldRef='01cc8c7f30ac5c54587da9431a7cfd382353e9e4';const oldApp=execFileSync('git',['show',oldRef+':assets/application-form.js']);const oldStyle=execFileSync('git',['show',oldRef+':assets/clean.css']);
  for(const width of [320,1280]){
   const oldCtx=await context({width,height:900});await oldCtx.route('**/application-form.js?*',r=>r.fulfill({status:200,contentType:'text/javascript',body:oldApp}));await oldCtx.route('**/clean.css?*',r=>r.fulfill({status:200,contentType:'text/css',body:oldStyle}));const old=await oldCtx.newPage();active(old);
-  await old.goto(base+'vacancies/banana-warehouse-poland/?lang=ru&apply=1');await old.locator('#application-form').waitFor();await old.locator('#application-form button[type="submit"]').click();assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);await locale(old,'ka');assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);assert.notEqual(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ka.missing);assert.equal(await iconClear(old),false,'Pinned original CSS must reproduce icon overlapping text');await old.screenshot({path:join(reportDir,`form-error-old-red-${width}.png`)});report.formErrorOldRed.push({width,ref:oldRef,status:'expected-failure',from:'ru',to:'ka',error:FORM_ERROR_LABELS.ru.missing,iconClear:false});await oldCtx.close();
+  await old.goto(base+'vacancies/banana-warehouse-poland/?lang=ru&apply=1');await old.locator('#application-form').waitFor();await old.locator('#application-form button[type="submit"]').click();assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);await locale(old,'ka');assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);assert.notEqual(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ka.missing);assert.equal(await iconClear(old),false,'Pinned original CSS must reproduce icon overlapping text');await settledForm(old);await old.screenshot({path:join(reportDir,`form-error-old-red-${width}.png`)});report.formErrorOldRed.push({width,ref:oldRef,status:'expected-failure',from:'ru',to:'ka',error:FORM_ERROR_LABELS.ru.missing,iconClear:false});await oldCtx.close();
  }
  // Every case retains a fresh isolated context. Two independent workers avoid
  // serial UI animation waits exhausting the existing full-runner deadline.
@@ -91,7 +91,7 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
    await locale(page,lang);const error=await page.locator('#application-error').innerText();assert.equal(error,FORM_ERROR_LABELS[lang][kind]);const preserved=JSON.stringify(before)===JSON.stringify(await values(page));
    const associated=await page.evaluate(()=>{const field=document.querySelector('.application-field.is-invalid');return Boolean(field&&field.querySelector('.application-field-error')?.textContent===document.querySelector('#application-error').textContent);});
    await locale(page,from);const roundTrip=await page.locator('#application-error').innerText()===FORM_ERROR_LABELS[from][kind];await locale(page,lang);
-   const dom=await page.evaluate(()=>({fits:document.documentElement.scrollWidth<=innerWidth+1,notSubmitted:document.querySelector('#application-form')!==null&&!document.querySelector('.application-success')}));
+   await settledForm(page);const dom=await page.evaluate(()=>({painted:Number(getComputedStyle(document.querySelector('.application-step')).opacity)>=.99,fits:document.documentElement.scrollWidth<=innerWidth+1,notSubmitted:document.querySelector('#application-form')!==null&&!document.querySelector('.application-success')}));
    await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-${width}-${lang}-${kind}.png`)});
    report.formErrors.push({width,lang,kind,status:'passed',error,preserved,associated,roundTrip,iconClear:await iconClear(page),invalidVisual:correctFieldVisual(await fieldVisual(page)),...dom});assert.deepEqual(errors,[]);await ctx.close();
  }
@@ -103,5 +103,5 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
 export async function cachedFormHash(page,cacheName,url){return page.evaluate(async({cacheName,url})=>{const response=await(await caches.open(cacheName)).match(url);if(!response)return null;const bytes=await response.arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');},{cacheName,url});}
 export async function acceptOfflineFormErrors({page,base,width,reportDir}){
  await page.goto(base+'vacancies/banana-warehouse-poland/?lang=uk&apply=1');await page.locator('#application-form').waitFor();await page.locator('#application-form button[type="submit"]').click();assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.uk.missing);
- await locale(page,'pl');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.pl.missing);await locale(page,'uk');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.uk.missing);assert.equal(await iconClear(page),true,'Offline cached style must keep error wording clear of its icon');await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-upgrade-offline-${width}.png`)});return ['pl','uk'];
+ await locale(page,'pl');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.pl.missing);await locale(page,'uk');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.uk.missing);assert.equal(await iconClear(page),true,'Offline cached style must keep error wording clear of its icon');await settledForm(page);await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-upgrade-offline-${width}.png`)});return ['pl','uk'];
 }

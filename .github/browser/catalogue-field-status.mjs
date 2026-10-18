@@ -2,7 +2,11 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {join} from 'node:path';
+export async function settledForm(page) {
+ await page.waitForFunction(()=>{const step=document.querySelector('.application-step');return step&&Number(getComputedStyle(step).opacity)>=.99&&step.getBoundingClientRect().width>0;});
+}
 export async function fieldVisual(page) {
+ await settledForm(page);
  return page.evaluate(()=>[...document.querySelectorAll('.application-field.is-invalid')].map(field=>{
   const control=field.querySelector('input,select,textarea'),error=field.querySelector('.application-field-error'),pseudo=getComputedStyle(field,'::after');
   return {name:control?.name,greenVisible:!['none','normal','""'].includes(pseudo.content)&&pseudo.display!=='none',border:control?getComputedStyle(control).borderTopColor:null,errorColor:error?getComputedStyle(error).color:null,focused:control===document.activeElement,shadow:control?getComputedStyle(control).boxShadow:null};
@@ -16,7 +20,7 @@ export function assertFieldStatusProof(report) {
  for(const r of report.formFieldStatusOldRed){assert.equal(r.ref,'f9df539cee3033cd444b21a9d55dbc2c363a3675');assert.equal(r.status,'expected-failure');assert.equal(r.greenVisible,true);assert.equal(r.borderMismatch,true);assert.equal(r.inlineColorMismatch,true);}
  const rows=report.formFieldLifecycle;assert.equal(rows?.length,4);
  assert.deepEqual(rows.map(r=>`${r.width}:${r.kind}`).sort(),[320,1280].flatMap(w=>['latin','phone'].map(k=>`${w}:${k}`)).sort());
- for(const r of rows){assert.equal(r.status,'passed');for(const key of ['focusedErrorRed','clearedOnEdit','restoredOnRevalidate','sameStep','notSubmitted'])assert.equal(r[key],true);}
+ for(const r of rows){assert.equal(r.status,'passed');for(const key of ['focusedErrorRed','clearedOnEdit','restoredOnRevalidate','sameStep','notSubmitted','painted'])assert.equal(r[key],true);}
 }
 async function fixture(page,base,kind){
  await page.goto(base+'vacancies/banana-warehouse-poland/?lang=en&apply=1');await page.locator('#application-form').waitFor();
@@ -34,7 +38,7 @@ export async function acceptFieldStatusProof({context,base,reportDir,report,acti
    await page.locator(`[name="${name}"]`).fill(good);const clearedOnEdit=await page.evaluate(()=>!document.querySelector('.application-field.is-invalid')&&document.querySelector('#application-error').hidden);
    await page.locator(`[name="${name}"]`).fill(bad);await page.locator('#application-form button[type="submit"]').click();const restoredOnRevalidate=correctFieldVisual(await fieldVisual(page));
    const dom=await page.evaluate(()=>({sameStep:document.querySelector('.application-header').dataset.stage==='1',notSubmitted:!document.querySelector('.application-success')}));
-   await page.screenshot({path:join(reportDir,`field-status-cycle-${width}-${kind}.png`)});report.formFieldLifecycle.push({width,kind,status:'passed',focusedErrorRed,clearedOnEdit,restoredOnRevalidate,...dom});await ctx.close();
+   await page.locator('.application-field.is-invalid').first().scrollIntoViewIfNeeded();const painted=await page.locator('.application-step').evaluate(el=>Number(getComputedStyle(el).opacity)>=.99);await page.screenshot({path:join(reportDir,`field-status-cycle-${width}-${kind}.png`)});report.formFieldLifecycle.push({width,kind,status:'passed',focusedErrorRed,clearedOnEdit,restoredOnRevalidate,painted,...dom});await ctx.close();
   }
  }
  assertFieldStatusProof(report);
