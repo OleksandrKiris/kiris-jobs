@@ -35,11 +35,14 @@ export function assertScreeningCopy(i18n) {
     if(lang!=='en')assert.notEqual(locale.footerNotice,i18n.locales.en.footerNotice);
   }
 }
-const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','noDelivery'];
+const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','iconsOneLine','noDelivery'];
 export function assertScreeningRows(rows) {
   assert.equal(rows?.length,10);
   assert.deepEqual(rows.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>SCREENING_LANGS.map(l=>w+':'+l)).sort());
   for(const row of rows){assert.equal(row.status,'passed');for(const key of flags)assert.equal(row[key],true,`${row.lang}:${row.width}:${key}`);}
+}
+async function iconLines(page) {
+  return page.locator('#candidateForm .choice-icon').evaluateAll(nodes=>nodes.map(n=>{const r=document.createRange();r.selectNodeContents(n);return r.getClientRects().length;}));
 }
 async function checkScreen(page,locale,step,reportDir,name) {
   assert.equal(await page.locator('h1').innerText(),locale['step'+step+'Title']);
@@ -55,9 +58,21 @@ async function checkScreen(page,locale,step,reportDir,name) {
 }
 export async function acceptApplyScreening({context,base,reportDir,report,active}) {
   assert.equal(process.env.GITHUB_ACTIONS,'true');
-  const i18n=applyLocales();assertScreeningCopy(i18n);report.applyScreening=[];report.applyScreeningOldRed=[];
+  const i18n=applyLocales();assertScreeningCopy(i18n);report.applyScreening=[];report.applyScreeningOldRed=[];report.applyScreeningIconOldRed=[];
   const old={};for(const f of ['index.html','app.js','translations.js'])old[f]=execFileSync('git',['show',SCREENING_BASE+':apply/'+f]);
   report.applyScreeningRegression={base:SCREENING_BASE,files:Object.fromEntries(Object.entries(old).map(([f,b])=>[f,createHash('sha256').update(b).digest('hex')]))};
+  // Personally reviewed green bec PNGs exposed split EVET/HAYIR badge words.
+  const iconRef='bec10b74cd3da01962b4aef2b86532a08357f18b';
+  const oldIconCtx=await context({width:320,height:900});const oldIconPage=await oldIconCtx.newPage();active(oldIconPage);
+  for(const f of ['index.html','app.js','translations.js']) {
+    const body=execFileSync('git',['show',iconRef+':apply/'+f]);
+    await oldIconCtx.route(f==='index.html'?'**/apply/':'**/apply/'+f+'?*',r=>r.fulfill({status:200,contentType:f==='index.html'?'text/html':'text/javascript',body}));
+  }
+  await oldIconPage.goto(base+'apply/');await oldIconPage.locator('[data-language="tr"]').click();await oldIconPage.locator('[data-recruiter="yana"]').click();
+  for(const [field,value]of [['firstName','QA'],['lastName','FIXTURE'],['phone','+99912345678'],['citizenship','FIXTURE'],['age','30']])await oldIconPage.locator('#'+field).fill(value);
+  await oldIconPage.locator('#messenger').selectOption('telegram');await oldIconPage.locator('[name="gender"][value="undisclosed"]').locator('..').click();await oldIconPage.locator('[data-action="next"]').click();
+  const oldIconLines=await iconLines(oldIconPage);assert.ok(oldIconLines.some(n=>n>1),'Actual old Turkish icon words must wrap');
+  await oldIconPage.screenshot({path:join(reportDir,'apply-screening-old-icons-320.png'),fullPage:true});report.applyScreeningIconOldRed.push({width:320,lang:'tr',ref:iconRef,lines:oldIconLines,status:'expected-failure'});await oldIconCtx.close();
   for(const width of [320,1280]) {
     const before=await context({width,height:900});const previous=await before.newPage();active(previous);
     await before.route('**/apply/',r=>r.fulfill({status:200,contentType:'text/html',body:old['index.html']}));
@@ -88,6 +103,7 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
         await page.locator('[name="physicalWork"][value="yes"]').locator('..').click();assert.ok(await page.locator('#physicalDetails').isVisible());
         await page.locator('[data-action="next"]').click();assert.equal(await page.locator('#physicalDetails-error').innerText(),l.required);
         await page.locator('#physicalDetails').fill('QA FIXTURE');
+        assert.ok((await iconLines(page)).every(n=>n===1));
         await checkScreen(page,l,2,reportDir,`apply-screening-${lang}-${width}-step2`);
         await page.locator('[data-action="next"]').click();await page.locator('[data-action="next"]').click();assert.equal(await page.locator('.field-error').count(),6);
         for(const [field,key] of [['performanceMetrics','performanceMetrics'],['fastPace','fastPace'],['watchedVideos','watchedVideos'],['understandsRole','understandsRole'],['longHours','longHours']]) {
@@ -98,7 +114,7 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
           assert.ok(await page.locator(`[name="${field}"][value="no"]`).isChecked());
         }
         // Anonymous fixture only: this checkbox remains local. The send/copy actions are never used.
-        await page.locator('#consent').check();await checkScreen(page,l,3,reportDir,`apply-screening-${lang}-${width}-step3`);
+        await page.locator('#consent').check();assert.ok((await iconLines(page)).every(n=>n===1));await checkScreen(page,l,3,reportDir,`apply-screening-${lang}-${width}-step3`);
         await page.locator('[data-action="next"]').click();assert.equal(await page.locator('h1').innerText(),l.reviewTitle);
         assert.deepEqual(await page.locator('.review-section h2').allTextContents(),[l.sectionCandidate,l.sectionContact,l.sectionAvailability,l.sectionExperience,l.sectionExpectations]);
         assert.equal(await page.locator('[data-action="copy"]').innerText(),l.copyRow);
