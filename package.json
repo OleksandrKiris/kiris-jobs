@@ -5,7 +5,7 @@
   "description": "Публичная анкета Citronex / PPO Siechnice и отдельный необязательный генератор PDF",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "check:js": "node --check assets/bootstrap.js && node --check assets/privacy-bootstrap.js && node --check assets/candidate.js && node --check assets/i18n.js && node --check assets/application-form.js && node --check assets/privacy.js && node --check apply/config.js && node --check apply/i18n-core.js && node --check apply/i18n-caucasus-central.js && node --check apply/i18n-asia.js && node --check apply/i18n-extra.js && node --check apply/i18n-mobile.js && node --check apply/translations.js && node --check apply/app.js && node --check apply/pdf/navigation.js && node --check apply/pdf/app.js && node --check sw.js && node --check data/content.js && node --check assets/application-loader.js",
+    "check:js": "node --check assets/bootstrap.js && node --check assets/privacy-bootstrap.js && node --check assets/candidate.js && node --check assets/i18n.js && node --check assets/application-form.js && node --check assets/privacy.js && node --check apply/config.js && node --check apply/i18n-core.js && node --check apply/i18n-caucasus-central.js && node --check apply/i18n-asia.js && node --check apply/i18n-extra.js && node --check apply/i18n-mobile.js && node --check apply/translations.js && node --check apply/app.js && node --check apply/pdf/navigation.js && node --check apply/pdf/translations.js && node --check apply/pdf/app.js && node --check sw.js && node --check data/content.js && node --check assets/application-loader.js",
     "check:content": "node scripts/validate-content.mjs",
     "check:locales": "node scripts/validate-locales.mjs",
     "check:ui": "node scripts/validate-ui.mjs",
@@ -25,7 +25,7 @@
     "check:application-loader": "node --test scripts/application-loader.test.mjs scripts/application-error-language.test.mjs",
     "check:service-worker": "node --test scripts/service-worker.test.mjs",
     "check:language-loader": "node --test scripts/language-loader.test.mjs",
-    "check:browser-fixtures": "node --test .github/browser/static-origin.test.mjs .github/browser/coordinator-sources.test.mjs .github/browser/catalogue-contrast.test.mjs .github/browser/catalogue-housing.test.mjs .github/browser/apply-entry.test.mjs .github/browser/pdf-navigation.test.mjs .github/browser/apply-screening.test.mjs .github/browser/catalogue-form-errors.test.mjs .github/browser/catalogue-field-status.test.mjs"
+    "check:browser-fixtures": "node --test .github/browser/static-origin.test.mjs .github/browser/coordinator-sources.test.mjs .github/browser/catalogue-contrast.test.mjs .github/browser/catalogue-housing.test.mjs .github/browser/apply-entry.test.mjs .github/browser/pdf-navigation.test.mjs .github/browser/pdf-copy.test.mjs .github/browser/screening-phase.test.mjs .github/browser/apply-screening.test.mjs .github/browser/catalogue-form-errors.test.mjs .github/browser/catalogue-field-status.test.mjs"
   },
   "engines": {
     "node": ">=20"
