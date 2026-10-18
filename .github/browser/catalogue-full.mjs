@@ -96,6 +96,60 @@ try {
     await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: false });
   }
 
+  const actionContrast = locator => locator.evaluateAll(elements => {
+    const luminance = color => color.match(/[\d.]+/g).slice(0,3).map(Number)
+      .map(x => x/255).map(x => x <= 0.04045 ? x/12.92 : ((x+0.055)/1.055)**2.4)
+      .reduce((sum,x,index) => sum+x*[0.2126,0.7152,0.0722][index],0);
+    return elements.map(el => {
+      const style=getComputedStyle(el), fg=luminance(style.color), bg=luminance(style.backgroundColor);
+      return {text:el.textContent.trim(),color:style.color,background:style.backgroundColor,
+        ratio:(Math.max(fg,bg)+0.05)/(Math.min(fg,bg)+0.05)};
+    });
+  });
+  const buttonKinds = [
+    {kind:'secondary',job:'greenhouse-tomatoes',selector:'.job-card-body > .primary-button'},
+    {kind:'primary',job:'banana-warehouse-poland',selector:'.job-card-body > .primary-button'},
+    {kind:'hrappka',job:'greenhouse-tomatoes',selector:'[data-hrappka-link]'}
+  ];
+  report.cardContrastOldRed = [];
+  const oldHomepage = execFileSync('git',['show',report.base+':assets/homepage.css']);
+  for(const width of [1280,320]) {
+    const ctx=await context({width,height:900});const page=activePage=await ctx.newPage();
+    // Explicit historical fixture, isolated from the actual staged-head checks.
+    await ctx.route('**/assets/homepage.css?*',route=>route.fulfill({status:200,contentType:'text/css',body:oldHomepage}));
+    await page.goto(base+'?lang=ru');await ready(page);
+    const old=await actionContrast(page.locator('[data-job-id="greenhouse-tomatoes"] .job-card-body > .primary-button'));
+    assert.equal(old.length,1);assert.ok(old[0].ratio<4.5,'The exact published stylesheet must expose the regression');
+    report.cardContrastOldRed.push({width,base:report.base,stylesheetSHA256:sha256(oldHomepage),status:'expected-failure-observed',button:old[0]});
+    await ctx.close();activePage=null;
+  }
+  report.cardActionContrast = [];
+  for(const width of [1280,320]) {
+    const ctx=await context({width,height:900});const page=activePage=await ctx.newPage();
+    await page.goto(base+'?lang=pl');await ready(page);
+    for(const lang of ['pl','ru','uk','en','az','ka','id','es','fil','ne','hy']) {
+      if(lang!=='pl')await locale(page,lang);
+      await page.mouse.move(0,0);
+      const normal=await actionContrast(page.locator('#job-grid .primary-button'));
+      assert.equal(normal.length,17);assert.ok(normal.every(x=>x.ratio>=4.5),JSON.stringify(normal));
+      const states=[];
+      for(const item of buttonKinds) {
+        const card=page.locator(`[data-job-id="${item.job}"]`),button=card.locator(item.selector);
+        const focusTarget=item.kind==='hrappka'?button:card.locator('.job-card-link');
+        await button.hover();
+        const hover=await actionContrast(button);assert.equal(hover.length,1);assert.ok(hover[0].ratio>=4.5,JSON.stringify(hover));
+        await page.mouse.move(0,0);await page.keyboard.press('Tab');await focusTarget.focus();
+        assert.equal(await focusTarget.evaluate(el=>el===document.activeElement&&el.matches(':focus-visible')),true);
+        const focus=await actionContrast(button);assert.ok(focus[0].ratio>=4.5,JSON.stringify(focus));
+        states.push({kind:item.kind,hover:hover[0],focus:focus[0]});
+        if(lang==='ru'&&item.kind==='secondary')await shot(page,`card-contrast-focus-${width}`);
+      }
+      await fits(page);
+      report.cardActionContrast.push({width,lang,status:'passed',normal,states});
+    }
+    await ctx.close();activePage=null;
+  }
+
   // A delayed font response can move a translated mobile footer after focus.
   report.shortcutFonts = [];
   for (const width of [1280,320]) {

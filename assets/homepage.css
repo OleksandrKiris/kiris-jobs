@@ -973,7 +973,7 @@
   padding: 0 20px 20px;
 }
 .vacancy-first:not(.direct-vacancy-page):not(.standalone-application-page) .job-card:has(.job-card-apply) .job-card-body > .primary-button {
-  color: #1c2e3e;
+  color: #1c2e3e !important;
   background: #f4f6f8;
   border-color: #b9c7d4;
 }
