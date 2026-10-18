@@ -125,7 +125,11 @@ try {
   await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
   await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
-    '8fd4f2a8d34259b18dcbf23e18afcaad0e6ce036', 'This composite requires reviewed SW80 code plus the card-contrast shell revision');
+    '5ac7f551dde89a367bc305836491c745d451fe69', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
+  const workerSource=(await readFile(join(artifact,'sw.js'))).toString();
+  assert.equal((workerSource.match(/formErrorLocale=1/g)||[]).length,3);
+  const oldAlgorithm=workerSource.replace('kiris-jobs-v220-form-error-locale-2026-10-18-1','kiris-jobs-v220-card-contrast-2026-10-18-1').replaceAll('&formErrorLocale=1','');
+  assert.equal(execFileSync('git',['hash-object','--stdin'],{input:oldAlgorithm,encoding:'utf8'}).trim(),'8fd4f2a8d34259b18dcbf23e18afcaad0e6ce036','Only the reviewed cache key and three import queries may differ from the accepted worker');
 
   if (reuse.requireFullCurrentCatalogue) {
     const fullDir = join(reportDir, 'full-current');
@@ -182,7 +186,7 @@ try {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
     currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
-      workerBlob: '8fd4f2a8d34259b18dcbf23e18afcaad0e6ce036', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
+      workerBlob: '5ac7f551dde89a367bc305836491c745d451fe69', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
     candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',
       stagedPath: 'tools/coordinator/', hashes: targetHashes, actualStagedHead: mode === 'actual-staged-head' },
     publishedOld5: { sourceHead: transition.published.ref, hashes: transition.published.hashes },

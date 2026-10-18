@@ -534,6 +534,7 @@ try {
   // Download the actual base runtime, then update only from the catalogue.
   // There must be no online tool visit/refresh after activation of the head SW.
   const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js', 'assets/application-form.js', 'assets/application-loader.js'];
+  upgradeFiles.push(...execFileSync('git',['diff','--name-only',report.base,report.checkout],{encoding:'utf8'}).trim().split('\n').filter(path=>path.startsWith('vacancies/')&&path.endsWith('/index.html')));
   const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
   const headTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
