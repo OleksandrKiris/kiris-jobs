@@ -461,7 +461,7 @@
         </div>
         ${selectedRecruiterHtml()}
         <div class="progress-box">
-          <div class="progress-meta"><strong>${state.step} / ${TOTAL_STEPS}</strong><span>${escapeHtml(titles[state.step - 1])}</span></div>
+          <div class="progress-meta"><strong dir="ltr">${state.step} / ${TOTAL_STEPS}</strong><span>${escapeHtml(titles[state.step - 1])}</span></div>
           <div class="progress-track"><span class="progress-fill progress-${state.step}"></span></div>
         </div>
         <div class="step-heading"><span class="step-number">${state.step}</span><div><h1>${escapeHtml(titles[state.step - 1])}</h1><p>${escapeHtml(leads[state.step - 1])}</p></div></div>
@@ -545,14 +545,14 @@
   }
 
   function reviewSection(title, items) {
-    return `<section class="review-section"><h2>${escapeHtml(title)}</h2><div class="review-grid">${items.map(([label, value]) => `<div class="review-item"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value || t('noValue'))}</strong></div>`).join('')}</div></section>`;
+    return `<section class="review-section"><h2>${escapeHtml(title)}</h2><div class="review-grid">${items.map(([label, value, direction]) => `<div class="review-item"><small>${escapeHtml(label)}</small><strong${direction === 'ltr' ? ' dir="ltr" class="ltr"' : ''}>${escapeHtml(value || t('noValue'))}</strong></div>`).join('')}</div></section>`;
   }
 
   function renderReview() {
     const person = recruiter();
     if (!person) { view = 'recruiter'; render(); return; }
     const candidate = [[t('firstName'), state.data.firstName], [t('lastName'), state.data.lastName], [t('citizenship'), state.data.citizenship], [t('gender'), display('gender')], [t('age'), state.data.age]];
-    const contact = [[t('phone'), state.data.phone], [t('messenger'), display('messenger')]];
+    const contact = [[t('phone'), state.data.phone, 'ltr'], [t('messenger'), display('messenger')]];
     const availability = [[t('location'), display('location')], [t('stayDuration'), display('stayDuration')]];
     const experience = [[t('physicalWork'), display('physicalWork')], [t('physicalDetails'), state.data.physicalDetails || t('noValue')]];
     const expectations = [[t('performanceMetrics'), display('performanceMetrics')], [t('fastPace'), display('fastPace')], [t('watchedVideos'), display('watchedVideos')], [t('understandsRole'), display('understandsRole')], [t('longHours'), display('longHours')]];

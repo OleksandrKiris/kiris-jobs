@@ -15,7 +15,7 @@ const packageJson = JSON.parse(read('package.json'));
 
 assert(mainIndex.includes('href="pdf/"'), 'main page does not link to the separate PDF generator.');
 assert(mainIndex.includes('styles.css?v=17.2.2'), 'main form does not load the current interface styles.');
-assert(mainIndex.includes('app.js?v=17.2.3'), 'main form does not load the current interface logic.');
+assert(mainIndex.includes('app.js?v=17.2.4'), 'main form does not load the current interface logic.');
 assert(!mainIndex.includes('type="file"'), 'main form still contains a file input.');
 assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), 'main form still creates or shares files.');
 assert(!/\bcsv\b/i.test(`${mainIndex}\n${mainApp}`), 'main form still contains CSV workflow.');
@@ -68,8 +68,8 @@ assert(packageJson.scripts['check:js'].includes('apply/pdf/app.js'), 'package.js
 
 for (const marker of [
   'styles.css?v=17.2.2',
-  'translations.js?v=17.0.5',
-  'app.js?v=17.2.3',
+  'translations.js?v=17.0.6',
+  'app.js?v=17.2.4',
   'styles.css?v=1.1.2',
   'app.js?v=1.1.2',
   'CFG.excelColumns.length'
