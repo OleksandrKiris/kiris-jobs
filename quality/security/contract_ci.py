@@ -43,17 +43,21 @@ def collect(path, minimum):
     return suite
 
 
-def main(root=None):
+def run_suites(root):
+    """Collect/run fixed suites; synthetic discovery fixtures need only stdlib."""
+    suite = unittest.TestSuite(collect(root / path, minimum)
+                               for path, minimum in required_suites(root))
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    return 0 if passed(result) else 1
+
+
+def main():
     from jsonschema import FormatChecker
     # Fail rather than silently ignoring the schema's required date format.
     checker = FormatChecker()
     if not checker.conforms('2026-10-17', 'date') or checker.conforms('2026-02-30', 'date'):
         raise ValueError('Required JSON Schema date format checker unavailable')
-    root = Path(__file__).resolve().parents[2] if root is None else Path(root)
-    suite = unittest.TestSuite(collect(root / path, minimum)
-                               for path, minimum in required_suites(root))
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
-    return 0 if passed(result) else 1
+    return run_suites(Path(__file__).resolve().parents[2])
 
 
 def passed(result):
