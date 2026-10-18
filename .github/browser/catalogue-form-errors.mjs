@@ -59,6 +59,7 @@ export const FORM_ERROR_LABELS = {
     "phone": "Մուտքագրեք համարը միջազգային ձևաչափով՝ + և 8–15 թվանշան։"
   }
 };
+export const FORM_VACANCY_IDS=["greenhouse-tomatoes", "greenhouse-renewal", "tomato-sorting", "banana-warehouse-poland", "plant-protection", "site-cleaning", "forklift-udt", "team-leader", "greenhouse-agronomist", "truck-mechanic", "driver-ce-poland", "driver-ce-relief", "banana-warehouse-hungary", "banana-warehouse-belgium"];
 export const FORM_ERROR_CASES=['missing','latin','phone'];
 export function assertFormErrors(rows){
  assert.equal(rows?.length,66);assert.deepEqual(rows.map(r=>`${r.width}:${r.lang}:${r.kind}`).sort(),[320,1280].flatMap(width=>Object.keys(FORM_ERROR_LABELS).flatMap(lang=>FORM_ERROR_CASES.map(kind=>`${width}:${lang}:${kind}`))).sort());

@@ -37,7 +37,21 @@ const CORE_SHELL = [
   "./assets/icon-192.png?v=220",
   "./assets/icon-512.png?v=220",
   "./assets/share-card.svg",
-  "./assets/share-card.png?v=220"
+  "./assets/share-card.png?v=220",
+  "./vacancies/greenhouse-tomatoes/",
+  "./vacancies/greenhouse-renewal/",
+  "./vacancies/tomato-sorting/",
+  "./vacancies/banana-warehouse-poland/",
+  "./vacancies/plant-protection/",
+  "./vacancies/site-cleaning/",
+  "./vacancies/forklift-udt/",
+  "./vacancies/team-leader/",
+  "./vacancies/greenhouse-agronomist/",
+  "./vacancies/truck-mechanic/",
+  "./vacancies/driver-ce-poland/",
+  "./vacancies/driver-ce-relief/",
+  "./vacancies/banana-warehouse-hungary/",
+  "./vacancies/banana-warehouse-belgium/"
 ];
 
 self.addEventListener("install", (event) => {
@@ -230,6 +244,7 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(async () => (
           await caches.match(event.request)
+          || await caches.match(requestUrl.origin + requestUrl.pathname)
           || await caches.match("./index.html")
           || Response.error()
         ))
