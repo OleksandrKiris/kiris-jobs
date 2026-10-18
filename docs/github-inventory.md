@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; проход02:29, 2026-10-18 02:51 UTC, kiris-jobs main2e80ab8 после95, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; проход03:07, 2026-10-18 03:10 UTC, kiris-jobs main2e80ab8 после95, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -21,6 +21,17 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
 
 PR95be901 → `2e80ab811fa3573fc13ac7dd6ee65279865cc58b`: Pages39091485504/Backend39091485527 SUCCESS,33criticalHTTPexact; tree9cfb иparents[6faa,be901]. Fullprojection309/276otherGitidentity. Source428/21net включает92d9f и backup954daf; current16core+workerN/A/main19/proto16+8/native96+48, Backend10/87/29 иearly18. Backendlocal/onlineAIoff. Новый2rootdocs после публикации остаётся локальным следующим компонентом, не второй выпуск.
+
+03:07 fresh7main metadata unchanged; kiris openPR только62, HYDRA15draft и Dragon14Ready
+сохранены. Второй материал локальный: contract14eb95+frontend4e+CI15_593b+root548
+составляют независимый exact430union904/net14, все component source receipts CLEAR.
+Frontend author107unit/24parity и contract13+9+11 — локальные прогоны; новый hosted
+CI/browser пока NOTRUN. Backend12 actual48+5 fixture checks и24 test-client ответа
+с независимым bounded receipt подтверждают NO_BACKEND_CHANGE, без сервера/production.
+Default/max20 и explicitlimit1, Zgorzelec filter/schema остаются прежними. Tiny408
+исправляет только OpenAPI one-item prose. Новые root2docs и408 будут включены перед
+одним combinedpush, затем новый whole-head/currentCI/runtime/Ready/guard проверяются
+отдельно. В03:07 guard0, публикация второго материала ещё не выполнена.
 
 История PR94 опубликован6faa: Pages39088679663/Backend39088679636 SUCCESS,32criticalHTTP
 exact, tested/merged tree65616 и orderedparents[8abf,EA]. Приёмка currentEA:
