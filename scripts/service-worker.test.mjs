@@ -79,6 +79,7 @@ function harness(storage = new Map()) {
       await dispatch('message', { data: { type: 'CACHE_COORDINATOR' }, ports: [{ postMessage: value => { reply = value; } }] });
       return reply.ready;
     },
+    navigate: path => dispatch('fetch',{request:{method:'GET',mode:'navigate',url:new URL(path,base).href}}),
     post: () => dispatch('fetch', { request: { method: 'POST', url: base + 'tools/coordinator/' } })
   };
 }
@@ -222,4 +223,14 @@ test('install does not prefetch the tool; unknown paths and submissions are not 
   assert.equal(await h.post(), undefined);
   assert.equal(h.requests.length, 1);
   assert.ok(![...h.storage.values()].some(entries => [...entries.keys()].some(url => url.includes('/tools/coordinator/'))));
+});
+
+
+test('offline vacancy queries use their own canonical HTML shell instead of the root page', async()=>{
+ const h=harness();await h.install();const cache=await h.caches.open(shell);
+ const ids=[...source.matchAll(/"\.\/vacancies\/([^/]+)\/"/g)].map(m=>m[1]);assert.equal(ids.length,14);assert.equal(new Set(ids).size,14);
+ for(const id of ids){const url=base+'vacancies/'+id+'/';assert.ok(await cache.match(url),'Route is installed');await cache.put(url,new Response('fixture-vacancy:'+id));assert.equal(await(await h.navigate('vacancies/'+id+'/?lang=uk&apply=1')).text(),'fixture-vacancy:'+id);}
+});
+test('offline navigation still prefers an exact cached response before the canonical vacancy shell',async()=>{
+ const h=harness();await h.install();const cache=await h.caches.open(shell);await cache.put(base+'vacancies/banana-warehouse-poland/?lang=ru',new Response('exact-fixture'));assert.equal(await(await h.navigate('vacancies/banana-warehouse-poland/?lang=ru')).text(),'exact-fixture');assert.equal(await(await h.navigate('?lang=uk')).text(),'shell');assert.equal(await h.navigate('https://foreign.invalid/vacancies/banana-warehouse-poland/?apply=1'),undefined);
 });

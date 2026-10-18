@@ -5608,7 +5608,7 @@ body.candidate-site {
 
 #application-dialog-content .application-error:not([hidden]) {
   margin: 16px 28px 0;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 48px;
   color: #7f2b27;
   background: #fff0ef;
   border: 1px solid #e6c3c0;

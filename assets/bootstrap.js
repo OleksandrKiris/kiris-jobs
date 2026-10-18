@@ -47,7 +47,7 @@
   await import(`./vacancy-overrides.js?v=${window.PORTAL_ASSET_VERSION}`);
   await window.PORTAL_VACANCY_OVERRIDES_READY;
   await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}&localeRecovery=1`);
-  await import(`./application-loader.js?v=${window.PORTAL_ASSET_VERSION}`);
+  await import(`./application-loader.js?v=${window.PORTAL_ASSET_VERSION}&formErrorLocale=1`);
   await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}&shortcuts=1&coordinator=1&earlySearch=1`);
 })().catch((error) => {
   console.error("[kiris-jobs] unable to start", error);

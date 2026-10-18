@@ -1,3 +1,4 @@
+import {acceptFormErrors,cachedFormHash,acceptOfflineFormErrors} from './catalogue-form-errors.mjs';
 // Runs only in the user-authorized GitHub Actions browser environment.
 // No submissions: only local GET/HEAD, with external requests blocked.
 import assert from 'node:assert/strict';
@@ -532,7 +533,8 @@ try {
 
   // Download the actual base runtime, then update only from the catalogue.
   // There must be no online tool visit/refresh after activation of the head SW.
-  const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js'];
+  const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js', 'assets/application-form.js', 'assets/application-loader.js', 'assets/clean.css'];
+  upgradeFiles.push(...execFileSync('git',['diff','--name-only',report.base,report.checkout],{encoding:'utf8'}).trim().split('\n').filter(path=>path.startsWith('vacancies/')&&path.endsWith('/index.html')));
   const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
   const headTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
@@ -557,6 +559,7 @@ try {
       return result.sort((a,b)=>a.url.localeCompare(b.url));
     });
   }
+  report.formUpgrades=[];
   for(const width of upgradeWidths) {
     const ctx = await context({ width, height: 900 });
     const page = activePage = await ctx.newPage();
@@ -584,6 +587,9 @@ try {
       assert.equal(before.length,5);assert(before.every(item=>!new URL(item.url).search));
       for (const item of before) assert.equal(item.sha256, baseToolHashes[item.url], 'Base phase must use actual base tool bytes');
       assert.ok((await page.evaluate(()=>caches.keys())).includes(baseCache));
+      const oldFormSha=sha256(execFileSync('git',['show',`${report.base}:assets/application-form.js`]));
+      const baseFormExact=await cachedFormHash(page,baseCache,new URL('assets/application-form.js?v=220',base).href)===oldFormSha;
+      assert.equal(baseFormExact,true,'Base worker must cache actual old form bytes');
       await page.evaluate(async () => {
         localStorage.setItem('shortcut-unrelated', 'keep');
         await caches.open('unrelated-shortcut-cache');
@@ -613,6 +619,10 @@ try {
       assert.deepEqual(after,before,'Migration must preserve the exact complete old runtime');
       assert.deepEqual(onlineToolRequests,[],'No online tool visit or refresh may hide a broken migration');
       ctx.off('request',observe);
+      const headFormExact=await cachedFormHash(page,headCache,new URL('assets/application-form.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-form.js'));
+      const headLoaderExact=await cachedFormHash(page,headCache,new URL('assets/application-loader.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-loader.js'));
+      const headErrorStyleExact=await cachedFormHash(page,headCache,new URL('assets/clean.css?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/clean.css'));
+      assert.ok(headFormExact&&headLoaderExact&&headErrorStyleExact,'New worker must cache the exact new import/style chain');
       await stopServer();originStopped=true;await ctx.setOffline(true);
       await page.locator('[data-primserv-service="coordinator"]').click();
       await page.locator('#offline[data-offline-state="ready"]').waitFor();
@@ -636,6 +646,8 @@ try {
       assert.equal(await page.locator('#demo-02').inputValue(),'done');
       await page.locator('#offline[data-offline-state="ready"]').waitFor();
       assert.deepEqual(await toolSnapshot(page),before);
+      const offlineLanguages=await acceptOfflineFormErrors({page,base,width,reportDir});
+      report.formUpgrades.push({width,status:'passed',originStopped:true,baseFormExact,headFormExact,headLoaderExact,headErrorStyleExact,offlineLanguages});
       assert.deepEqual(errors,[]);
       report.results.push({scenario:'actual base complete tool → head shell → origin stopped/offline first tool entry, reload, languages, return and saved fictional statuses',
         width,status:'passed',baseCache,headCache,baseToolHashes,before,after,onlineToolRequests});
@@ -662,8 +674,15 @@ try {
 
   }
 
-  await acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}});
-  await acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}});
+  // These use separate anonymous contexts after all server/SW mutations finish.
+  // Keep the existing deadline and every scenario; overlap independent UI waits.
+  await Promise.all([
+    acceptFormErrors({context,base,reportDir,report,active:page=>{activePage=page;}}),
+    (async()=>{
+      await acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}});
+      await acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}});
+    })()
+  ]);
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
     // Use a separate request context so the existing navigation SW fallback

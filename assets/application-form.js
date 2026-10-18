@@ -322,6 +322,17 @@
     pendingDraft: null
   };
 
+  // Keep a resolver only in memory: a locale change must translate the current
+  // message without running validation again or rewriting candidate answers.
+  let errorResolver = null;
+  function setError(message) {
+    errorResolver = typeof message === "function" ? message : null;
+    state.error = errorResolver ? errorResolver() : String(message || "");
+  }
+  function refreshErrorLanguage() {
+    if (errorResolver && state.error) state.error = errorResolver();
+  }
+
   const escapeHTML = (value = "") => String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -1631,7 +1642,7 @@
     });
     container.querySelector("[data-match-back]")?.addEventListener("click", () => {
       collectMatchValues();
-      state.error = "";
+      setError("");
       state.matchStep = Math.max(0, state.matchStep - 1);
       renderMatcher(true);
     });
@@ -1700,7 +1711,7 @@
         // Starting over still works if storage is unavailable.
       }
       state.step = 0;
-      state.error = "";
+      setError("");
       state.invalidFields = [];
       state.hasDraft = false;
       state.pendingDraft = null;
@@ -1751,7 +1762,7 @@
     if (isPhysicalJob()) required.push("precheckPhysical");
     const missing = required.filter((name) => !state.values[name]);
     if (missing.length) {
-      setValidationError(t("form.missingRequired"), missing);
+      setValidationError(() => t("form.missingRequired"), missing);
     } else if (
       state.values.precheckAdult !== "yes"
       || state.values.precheckWorkRight === "no"
@@ -1764,9 +1775,9 @@
         state.values.precheckConditions !== "yes" && "precheckConditions",
         isPhysicalJob() && state.values.precheckPhysical !== "yes" && "precheckPhysical"
       ].filter(Boolean);
-      setValidationError(t("form.precheckNotSuitable"), unsuitable);
+      setValidationError(() => t("form.precheckNotSuitable"), unsuitable);
     } else {
-      state.error = "";
+      setError("");
       state.invalidFields = [];
       state.values.precheckComplete = "yes";
       state.values.adult = true;
@@ -1894,7 +1905,7 @@
     container.querySelector("[name='birthDate']")?.addEventListener("change", collectAndRender);
     container.querySelector("[data-application-back]")?.addEventListener("click", () => {
       collectValues();
-      state.error = "";
+      setError("");
       state.invalidFields = [];
       state.step = Math.max(0, state.step - 1);
       saveDraft();
@@ -1904,7 +1915,7 @@
     container.querySelectorAll("[data-edit-application-step]").forEach((button) => {
       button.addEventListener("click", () => {
         collectValues();
-        state.error = "";
+        setError("");
         state.invalidFields = [];
         state.step = Number(button.dataset.editApplicationStep) || 0;
         saveDraft();
@@ -1963,7 +1974,7 @@
     group?.querySelectorAll(".matcher-choice").forEach((choice) => {
       choice.classList.toggle("is-selected", choice.contains(event.target));
     });
-    state.error = "";
+    setError("");
     if (event.target.name !== "qualificationType") return;
     clearQualificationAnswersExcept(event.target.value);
     const selectedValue = event.target.value;
@@ -1976,7 +1987,7 @@
   }
 
   function validateMatchStep(step = state.matchStep) {
-    state.error = "";
+    setError("");
     const requiredByStep = [
       ["preferredDestination"],
       ["preferredArea"],
@@ -1984,7 +1995,7 @@
       ["qualificationType"]
     ];
     if ((requiredByStep[step] || []).some((name) => !state.values[name])) {
-      state.error = t("form.missingRequired");
+      setError(() => t("form.missingRequired"));
       return false;
     }
     if (step !== MATCH_STEP_COUNT - 1) return true;
@@ -2000,9 +2011,9 @@
               ? ["specialistEducation"]
               : [];
     if (qualificationRequired.some((name) => !state.values[name])) {
-      state.error = t("form.missingRequired");
+      setError(() => t("form.missingRequired"));
     } else if (!validateLatin(state.values.udtCategory)) {
-      state.error = t("form.latinError");
+      setError(() => t("form.latinError"));
     }
     return !state.error;
   }
@@ -2017,13 +2028,13 @@
     }
     if (state.matchStep < MATCH_STEP_COUNT - 1) {
       state.matchStep += 1;
-      state.error = "";
+      setError("");
       renderMatcher(true);
       return;
     }
     state.recommendations = recommendJobs();
     state.matchStep = MATCH_RESULTS_STEP;
-    state.error = "";
+    setError("");
     renderMatcher(true);
   }
 
@@ -2033,7 +2044,7 @@
     state.mode = "application";
     state.jobId = job.id;
     state.step = 0;
-    state.error = "";
+    setError("");
     state.invalidFields = [];
     state.values = {
       ...state.values,
@@ -2073,7 +2084,7 @@
     wrapper?.classList.remove("is-invalid");
     wrapper?.querySelector(".application-field-error")?.remove();
     if (!state.invalidFields.length) {
-      state.error = "";
+      setError("");
       const alert = document.getElementById("application-error");
       if (alert) alert.hidden = true;
     }
@@ -2091,7 +2102,7 @@
   }
 
   function setValidationError(message, fields = []) {
-    state.error = message;
+    setError(message);
     state.invalidFields = fields.filter(Boolean);
   }
 
@@ -2115,20 +2126,20 @@
   }
 
   function validateStep() {
-    state.error = "";
+    setError("");
     state.invalidFields = [];
     if (state.step === 0) {
       const required = ["jobId", "preferredLanguage", "firstName", "lastName", "phone"];
       const missing = required.filter((name) => !(name === "jobId" ? state.jobId : state.values[name]));
       const invalidNames = ["firstName", "lastName"].filter((name) => state.values[name] && !LATIN_NAME.test(state.values[name]));
       if (missing.length) {
-        setValidationError(t("form.missingRequired"), missing);
+        setValidationError(() => t("form.missingRequired"), missing);
       } else if (invalidNames.length) {
-        setValidationError(t("form.latinError"), invalidNames);
+        setValidationError(() => t("form.latinError"), invalidNames);
       } else if (!PHONE.test(state.values.phone.replace(/[\s()-]/g, ""))) {
-        setValidationError(t("form.phoneError"), ["phone"]);
+        setValidationError(() => t("form.phoneError"), ["phone"]);
       } else if (state.values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.values.email)) {
-        setValidationError(t("form.missingRequired"), ["email"]);
+        setValidationError(() => t("form.missingRequired"), ["email"]);
       }
     } else if (state.step === 1) {
       const required = [
@@ -2183,17 +2194,17 @@
       const invalidLatin = latinFields.filter((name) => state.values[name] && !validateLatin(state.values[name], true));
       const age = calculateAge(state.values.birthDate);
       if (missing.length) {
-        setValidationError(t("form.missingRequired"), missing);
+        setValidationError(() => t("form.missingRequired"), missing);
       } else if (age == null || age < 18) {
-        setValidationError(candidateEngineCopy().underage, ["birthDate"]);
+        setValidationError(() => candidateEngineCopy().underage, ["birthDate"]);
       } else if (invalidLatin.length) {
-        setValidationError(t("form.latinError"), invalidLatin);
+        setValidationError(() => t("form.latinError"), invalidLatin);
       } else if (
         state.values.passportExpiry < today()
         || (state.values.documentExpiry && state.values.documentExpiry < today())
         || state.values.readyDate < today()
       ) {
-        setValidationError(t("form.dateError"), [
+        setValidationError(() => t("form.dateError"), [
           state.values.passportExpiry < today()
             ? "passportExpiry"
             : state.values.documentExpiry && state.values.documentExpiry < today()
@@ -2204,12 +2215,12 @@
         state.values.travellingWith !== "alone"
         && !/^[A-Z0-9-]{4,20}$/.test(state.values.groupCode || "")
       ) {
-        setValidationError(t("form.groupCodeError"), ["groupCode"]);
+        setValidationError(() => t("form.groupCodeError"), ["groupCode"]);
       } else if (!validateLatin(state.values.udtCategory)) {
-        setValidationError(t("form.latinError"), ["udtCategory"]);
+        setValidationError(() => t("form.latinError"), ["udtCategory"]);
       }
     } else if (!state.values.consent) {
-      setValidationError(t("form.consentError"), ["consent"]);
+      setValidationError(() => t("form.consentError"), ["consent"]);
     }
     return !state.error;
   }
@@ -2718,7 +2729,7 @@
       // Clearing the visible form still works if storage access is blocked.
     }
     state.step = 0;
-    state.error = "";
+    setError("");
     state.invalidFields = [];
     state.hasDraft = false;
     state.pendingDraft = null;
@@ -2746,13 +2757,13 @@
     const message = buildMessage();
     const record = buildApplicationRecord();
     if (!navigator.onLine) {
-      state.error = t("form.unavailableOffline");
+      setError(() => t("form.unavailableOffline"));
       render();
       return;
     }
     if (!turnstileToken) {
       const messageText = t("form.botCheckError");
-      state.error = messageText;
+      setError(() => t("form.botCheckError"));
       const alert = document.getElementById("application-error");
       if (alert) {
         alert.textContent = messageText;
@@ -2787,7 +2798,8 @@
       window.dispatchEvent(new CustomEvent("portal:toast", { detail: { message: confirmation } }));
     } catch (error) {
       const messageText = submissionErrorMessage(error?.code);
-      state.error = messageText;
+      const errorCode = error?.code;
+      setError(() => submissionErrorMessage(errorCode));
       const alert = document.getElementById("application-error");
       if (alert) {
         alert.textContent = messageText;
@@ -2827,7 +2839,7 @@
     state.matchStep = 0;
     state.recommendations = [];
     state.jobId = hasSelectedJob ? jobId : "";
-    state.error = "";
+    setError("");
     state.invalidFields = [];
     state.submitting = false;
     state.submitted = false;
@@ -2895,6 +2907,7 @@
     if (document.getElementById("application-dialog")?.open) {
       collectValues();
       state.values.preferredLanguage = i18n.locale;
+      refreshErrorLanguage();
       saveDraft();
       render();
     }
