@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18T03:56:50.365056+00:00, второй материал96 опубликован). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18T04:15:09.005603+00:00, Dragon14 опубликован; kiris96 сохранён). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -67,6 +67,12 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 отделены от текущей сверки метаданных.
 
 ## Актуальное состояние после исправлений — 18.10.2026
+
+В [Dragon guide](https://oleksandrkiris.github.io/citronex-dragon-guide/) опубликовано копирование готовой публичной памятки: PR14 tested `a57306ac862d3986748a7164e272745ed72e3868` → main `0b03581a621c8ec55ee8e073152fc2ac5daeb144`, tree `7d7b05cb1f69ae2f9db1fd5ea522fcc6bf659ff4`. Pages39096400094 terminalSUCCESS; 8 выбранных HTTP-файлов совпали с Git по размеру/SHA256/blob; 40 source entries сохранены, остальные32 проверены только по Gitidentity. Копирование запускается явным действием; успех показывается после fulfilled Promise. Denied/unavailable/syncThrow дают честный readonly manual fallback. Устаревшие callbacks после смены языка/места, очистки или другого copy/action не меняют текущий status/focus; уже начатая OS-запись не объявляется отменённой. Принятые exact-head413unit/59browser и peer8GREEN переиспользованы без нового прогона. OS clipboard/physical-device/full12browser гарантии не заявлены. Один guard04:08 использован; второго merge в этом проходе нет.
+
+Следующая локальная работа роли9 (не опубликована): Человекочитаемая readonly-сводка всех3 вымышленных задач и их статусов на EN/RU/UK/PL реализована в source57d470457f1fead1097e315d417385ad890e283d/base0986. Фильтр и поиск не сужают сводку; изменения, сброс и подтверждённый импорт обновляют её. Авторские6 и независимые QA6 адресных тестов PASS; exactbase без функции дал0/6. Это VM/DOM fixtures, native browser ещё не принят. Выделение текста не добавляет хранение или отправку. Published96 и его backend/материалы сохранены; общий head и обычный функциональный CI принимаются отдельно.
+
+### Состояние kiris96 и очередь — сохранённый snapshot 18.10.2026 03:56 UTC
 
 Последняя сверка main: `0986cc9ff47b6eae6d28814d38c17494e6b36bac`, после PR96.
 В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/) опубликован второй подтверждённый материал `banana-warehouse-poland-summary-ru`. Поиск, чтение, last и избранное работают с обоими ID; source refs остаются per-item. Default/max20 и explicit limit1, Zgorzelec filter/schema сохранены. Это существующие публичные title/summary, не новая проверка вакансии или перевод.
@@ -760,13 +766,13 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 1 | Новый AS_PATCH c63598:4 shared browser files принят и доставлен96; прежний own59/source94 history сохранён | Patch заморожен; actual current runtime4 принят, дополнительные probes/CI в этом проходе не назначать |
 | 2 | HYDRA14 опубликованb04f; новый Copy route TEXT15@7ae реализован,191unit/106browser и actual late runtime4 bounded CLEAR. Source peer CLEAR и5primary files сохранены | Draft15: конкретный отказ записи финального source-report сохранён дословно; эту операцию не повторять. Новая публикация/формальная приёмка не объявлены. Dragon14 peer history отдельно |
 | 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
-| 4 | Memo13 опубликованf088/8exact assets. Copy MEMO TEXT14@a573/basef088 source/runtime/peer CLEAR, actualready; correctedCI39084077900:413unit/59browser, старыйd000 P2 сохранён | Новый14 не merged/published. Root freshhead/base/CI/reviews и отдельный будущий guarded release; без повторных ZIP/CI/нового WIP. OS clipboard/save/physical/full12browser гарантии не заявлены |
+| 4 | Copy MEMO TEXT14@a573 опубликован`0b03581a621c8ec55ee8e073152fc2ac5daeb144`; Pages39096400094 SUCCESS,8HTTPexact; source/runtime/peer приняты на неизменном head | Сохранить выпущенный source. Readonly manual fallback и async stale-UI guards; OS clipboard/physical/full12browser гарантии не заявлены. Нового WIP/CI здесь нет |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Второй материал96@10e899d3 опубликован0986cc9f,34HTTPexact; exact current source/runtime приняты | Сохранить выпущенный source; новой функции/CI/merge в этом проходе не назначать |
-| 10 | Единственный guard03:07 выпустил96→0986cc9f, Pages/Backend SUCCESS,34HTTPexact; delivered5eab сохранён | Эти2docs — локальный следующий компонент; свежий Dragon14 guard только следующему проходу, backend локальный |
+| 9 | Второй материал96@10e899d3 опубликован0986cc9f,34HTTPexact; exact current source/runtime приняты | Сохранить выпущенный source96; следующая локальная работа (не опубликована): Новый source57 summary3tasks/4locale реализован; author6/independentQA6 PASS, старыйbase0/6 показывает отсутствие функции. Exact общий head и браузерная приёмка отдельно; прежний published96 immutable. Функция summary пока не опубликована. |
+| 10 | Один guard04:08 выпустил Dragon14→`0b03581a621c8ec55ee8e073152fc2ac5daeb144`, Pages39096400094/8HTTPexact; kiris96 main0986/34HTTP и delivered5eab сохранены | Эти2docs — локальный неопубликованный компонент после adc7; второй merge не выполнен. Backend локальный, online-adapter/AIoff |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
 | 12 | NO_BACKEND_CHANGE fixture2 proof48+5 на eb95 сохранён; exact current aggregate Backend counts указаны выше | Django не deployed; online/AIoff. Не объявлять локальные fixtures полной production-проверкой |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
