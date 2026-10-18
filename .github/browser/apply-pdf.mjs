@@ -1,4 +1,5 @@
 import {photoOldRed,rejectBrokenPhoto,addMixedPhotos,photoRaceAndSize} from './pdf-photo-acceptance.mjs';
+import {scrollbarOldRed,scrollbarCurrent} from './pdf-width.mjs';
 import {PDF_ALL_LANGUAGES,pdfCopy,assertPdfCopy,assertEmptyGeometry,emptyGeometry,visiblePdfCopy} from './pdf-copy.mjs';
 // Personal acceptance on isolated GitHub Actions contexts; no external delivery.
 import assert from 'node:assert/strict';
@@ -84,6 +85,7 @@ export async function runPdfAcceptance(){
       await shot(page,'copy-old-'+kind+'-320');report.copyOldRed.push({kind,lang,ref:copyRef,width:320,observed,status:'expected-failure'});await close(ctx,'copy-old-'+kind);
     }
     await photoOldRed({context,base,shot,close,report,setActive:p=>{active=p}});
+    await scrollbarOldRed({context,base,shot,close,report,setActive:p=>{active=p}});
     for(const width of [320,1280])for(const lang of PDF_LANGUAGES){
       const ctx=await context(width),page=await ctx.newPage();active=page;
       const appURL=base+'apply/?lang='+lang+'&recruiter=yana&location=any&src=fixture&campaign=sample&vacancy=tomatoes';
@@ -132,6 +134,7 @@ export async function runPdfAcceptance(){
       await fits(page);await shot(page,`review-return-${lang}-${width}`);
       report.rows.push({lang,width,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true,...rejectedPhoto,...acceptedPhoto,printScope:width===320?'A4-generated':'narrow-print-covered',geometry,filledGeometry,number});await close(ctx,`${lang}-${width}`);
     }
+    await scrollbarCurrent({context,base,shot,close,report,setActive:p=>{active=p},copyData});
     // Standalone URL priority, preference, denied storage, safe return, and local preview/print.
     for(const mode of ['saved','url-priority','denied','hostile-return']){
       const ctx=await context(320,mode==='denied'),page=await ctx.newPage();active=page;
@@ -154,6 +157,7 @@ export async function runPdfAcceptance(){
     assert.deepEqual(report.mutations,[]);assert.deepEqual(report.external,[]);
     assert.equal(captureStagedPublication(process.cwd(),artifact,checkout).sha256,publication.sha256);
     assert.equal(report.imageOldRed.length,2);assert.equal(report.imageRaceCases.length,2);assert.equal(report.imageSizeCases.length,2);
+    assert.equal(report.scrollbarOldRed.length,2);assert.equal(report.scrollbarRows.length,20);
     report.status='passed';
   }catch(error){report.status='failed';report.error=String(error.stack||error);if(active)await active.screenshot({path:join(out,'failure.png'),fullPage:true}).catch(()=>{});throw error;
   }finally{report.finished=new Date().toISOString();await writeFile(join(out,'acceptance.json'),JSON.stringify(report,null,2));await browser?.close();await origin.stop();}

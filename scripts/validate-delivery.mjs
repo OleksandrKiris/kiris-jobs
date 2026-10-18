@@ -24,7 +24,7 @@ assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), '
 assert(!/\bcsv\b/i.test(`${mainIndex}\n${mainApp}`), 'main form still contains CSV workflow.');
 
 for (const marker of [
-  'styles.css?v=1.1.5',
+  'styles.css?v=1.1.6',
   'app.js?v=1.1.5',
   'translations.js?v=1.0.1',
   'images.js?v=1.0.0',
@@ -76,7 +76,7 @@ for (const marker of [
   'styles.css?v=17.2.2',
   'translations.js?v=17.0.6',
   'app.js?v=17.2.5',
-  'styles.css?v=1.1.5',
+  'styles.css?v=1.1.6',
   'app.js?v=1.1.5',
   'CFG.excelColumns.length'
 ]) assert(workflow.includes(marker), `GitHub Pages workflow is missing current marker: ${marker}`);
