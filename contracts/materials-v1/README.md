@@ -10,7 +10,7 @@ from source content. This future GET route is not installed by this proposal.
 Single-page slice: optional `location_id=zgorzelec`, `language=en` default,
 `limit=1..20` default20, empty/missing cursor. Nonempty cursor, duplicate/unknown
 parameters and invalid filters fail400. No cross-location fallback. Responses are
-at most32768 UTF-8 bytes, at most20 items; current fixture contains one item.
+at most32768 UTF-8 bytes, at most20 items; current fixture contains two items.
 `next_cursor:null` means end. New pagination requires explicit compatible design.
 No auth for this public non-personal summary; no private-material support.
 405 for writes; generic stable error code/request_id, no request echo/traceback.
@@ -37,3 +37,30 @@ Stable job ID `site-cleaning` is retained. New material ID
 `site-cleaning-summary-ru` and location mapping `Zgorzelec→zgorzelec` are explicit;
 no existing location ID is renamed. Employer/legal entity are separate future
 concepts, not derived from location. See integration handoff for owners.
+
+
+## Second verified repository summary
+
+The second item is `banana-warehouse-poland-summary-ru`, taken verbatim from
+`jobs[id=banana-warehouse-poland]` in `data/content.js` at
+`2e80ab811fa3573fc13ac7dd6ee65279865cc58b`. Its explicit location string is
+`Pruszcz Gdański · Zgorzelec`; this single-location v1 slice includes only the
+Zgorzelec context, without claiming housing there. No housing, salary, status,
+conditions or translations are exported. Source updated date remains2026-07-23;
+repository verification date is2026-10-18, not a fresh employment confirmation.
+
+The original site-cleaning item including its source ref/dates is unchanged and
+remains first; limit1 therefore preserves its legacy result. Envelope content
+version identifies this revised snapshot source pin; each item retains its own
+source ref. Limit2/default20 return both Russian summaries, requested language
+retained with explicit RU fallback. Cursor behavior/max20 remain unchanged.
+Capabilities has no item count: its max_limit20 is a request bound, so its
+fixture/schema are unchanged. Four additional tests protect both items, legacy
+item digest, unique identities, stale source/content detection and isolation.
+These identity/provenance checks protect the maintained fixture; they do not
+claim the unchanged JSON Schema rejects every semantically stale external body.
+
+`greenhouse-tomatoes` was deliberately excluded: its explicit locations are
+Siechnice/Ryczywół/Bogatynia, incompatible with strict v1 Zgorzelec. This was a
+source-selection boundary, not a product defect or justification to weaken the
+location schema/filter. Existing provider/schema/OpenAPI/error negatives remain.

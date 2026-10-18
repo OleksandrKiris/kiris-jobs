@@ -1,5 +1,7 @@
 import copy
+import hashlib
 import json
+import re
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -12,6 +14,73 @@ V=Draft202012Validator(json.loads((P/'response.schema.json').read_text()),format
 E=Draft202012Validator(json.loads((P/'error.schema.json').read_text()),format_checker=FormatChecker())
 
 class MaterialContractTests(unittest.TestCase):
+    def assert_two_item_fixture(self, data):
+        # Test-only fixture/source integrity, not another runtime validator.
+        V.validate(data)
+        self.assertEqual([i['id'] for i in data['items']],
+                         ['site-cleaning-summary-ru', 'banana-warehouse-poland-summary-ru'])
+        self.assertEqual(len({i['id'] for i in data['items']}), len(data['items']))
+        self.assertEqual(data['content_version'], '2e80ab811fa3573fc13ac7dd6ee65279865cc58b')
+        second = data['items'][1]
+        self.assertEqual(second['job_id'], 'banana-warehouse-poland')
+        self.assertEqual(second['location_id'], 'zgorzelec')
+        self.assertEqual(second['source']['ref'], data['content_version'])
+        self.assertEqual(second['source']['selector'], 'jobs[id=banana-warehouse-poland]')
+        self.assertEqual(second['source']['verified_on'], '2026-10-18')
+        source = (P.parents[1]/'data/content.js').read_text(encoding='utf-8')
+        start = source.index('id: "banana-warehouse-poland"')
+        block = source[start:source.index('\n    },', start)]
+        def field(name):
+            return re.search(r'\b' + name + r': "([^"\n]*)"', block).group(1)
+        self.assertEqual(second['title'], field('title'))
+        self.assertEqual(second['text'], field('summary'))
+        self.assertIn('Zgorzelec', field('location').split(' · '))
+        self.assertEqual(second['source']['source_updated_on'], field('updatedAt'))
+
+    def test_two_items_preserve_exact_legacy_item_and_source_parity(self):
+        self.assert_two_item_fixture(S)
+        legacy = json.dumps(S['items'][0], ensure_ascii=False, sort_keys=True,
+                            separators=(',', ':')).encode('utf-8')
+        self.assertEqual(hashlib.sha256(legacy).hexdigest(),
+                         '815ee5ba8ab77c7f80026d401ffbc97d632c281941696a937464de535f9f420f')
+
+    def test_two_item_limits_fallback_and_input_isolation(self):
+        original = copy.deepcopy(S)
+        with patch('socket.socket', side_effect=AssertionError('network forbidden')):
+            for limit, count in [('1', 1), ('2', 2), ('20', 2)]:
+                for language in ['ru', 'ua', 'uk', 'en', 'pl', 'ka', 'tr', 'hy']:
+                    with self.subTest(limit=limit, language=language):
+                        status, body = mock_api([('limit', limit), ('language', language)])
+                        self.assertEqual(status, 200)
+                        self.assertEqual(body['items'], S['items'][:count])
+                        self.assertIsNone(body['next_cursor'])
+                        self.assertEqual(body['requested_language'], language)
+                        self.assertEqual(body['effective_language'], 'ru')
+                        self.assertEqual(body['fallback'], language != 'ru')
+                        V.validate(body)
+            status, body = read_snapshot({'limit': '2'}, S)
+            self.assertEqual(status, 200)
+            body['items'][1]['source']['selector'] = 'synthetic-mutation'
+        self.assertEqual(S, original)
+
+    def test_duplicate_material_identity_is_not_an_accepted_fixture(self):
+        data = copy.deepcopy(S)
+        data['items'][1]['id'] = data['items'][0]['id']
+        with self.assertRaises(AssertionError):
+            self.assert_two_item_fixture(data)
+
+    def test_stale_second_source_or_content_is_not_an_accepted_fixture(self):
+        for target, key, value in [('source', 'ref', '0'*40),
+                                   ('source', 'selector', 'jobs[id=site-cleaning]'),
+                                   ('source', 'source_updated_on', '2026-07-22'),
+                                   ('source', 'verified_on', '2026-10-17'),
+                                   ('item', 'text', 'synthetic stale summary')]:
+            data = copy.deepcopy(S)
+            item = data['items'][1]
+            (item['source'] if target == 'source' else item)[key] = value
+            with self.subTest(key=key), self.assertRaises(AssertionError):
+                self.assert_two_item_fixture(data)
+
     def test_schema_and_fixture(self):
         V.check_schema(V.schema); E.check_schema(E.schema); V.validate(S)
     def test_same_scenario_both_sources_no_network(self):
