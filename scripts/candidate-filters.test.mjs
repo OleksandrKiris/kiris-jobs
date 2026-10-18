@@ -5,7 +5,7 @@ import vm from "node:vm";
 
 const root = new URL("../", import.meta.url);
 const locales = ["ru", "uk", "pl", "en", "az", "ka", "id", "es", "fil", "ne", "hy"];
-const source = await fs.readFile(new URL("assets/candidate.js", root), "utf8");
+const source = await fs.readFile(process.env.CANDIDATE_SOURCE_FILE || new URL("assets/candidate.js", root), "utf8");
 const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.filterTest = { bind, renderCountryFilter, renderFeatureFilter, resetFilters, restoreCatalogContext, visibleJobs, state };\n})();");
 assert.notEqual(instrumented, source, "Replace startup only; never run analytics or candidate submissions");
 const scripts = await Promise.all(["data/content.js", ...locales.map(l => `data/locales/${l}.js`), "assets/i18n.js"].map(async path => fs.readFile(new URL(path, root), "utf8")));
@@ -59,6 +59,7 @@ function catalog(locale = "pl", options = {}) {
   }
   for (const id of ["country-filter", "feature-filter", "job-search", "reset-filters", "job-grid", "other-job-grid", "other-job-count", "other-jobs", "result-count", "empty-state", "job-total"]) elements.set(id, element(id));
   if (options.earlyQuery !== undefined) elements.get("job-search").value = options.earlyQuery;
+  if (options.earlyEdited) elements.get("job-search").dataset = { pendingInput: "true" };
   const context = vm.createContext({ window, document, location, URL, Intl, Date,
     navigator: { language: locale, languages: [locale] }, localStorage: { getItem: () => null },
     fetch() { throw Error("Network forbidden in filter tests"); }
@@ -191,7 +192,7 @@ for (const locale of locales) {
         assert.equal(c.api.state.country, "PL");
         assert.equal(c.api.state.feature, "housing");
       }
-      assert.equal(storage.get(contextKey), before, "Reading context does not rewrite saved bytes");
+      assert.deepEqual(JSON.parse(storage.get(contextKey)), { query: earlyQuery, country: saved?.country || "", feature: saved?.feature || "" }, "Early user input updates only the catalogue context");
       assert.equal(JSON.stringify(c.window.PORTAL_CONTENT), facts);
     }
   });
@@ -200,4 +201,13 @@ test("early search remains usable when session storage cannot be read or written
   const c = catalog("ru", { earlyQuery: "томат", blockRead: true, blockWrite: true });
   assert.equal(c.api.state.query, "томат");
   assert.equal(c.api.visibleJobs().length, 2);
+});
+
+test("clearing a search before startup overrides an older saved query", () => {
+  const storage = new Map([[contextKey, JSON.stringify({query:"no-such-old-query",country:"PL",feature:"housing"})]]);
+  const c = catalog("ru", { earlyQuery: "", earlyEdited: true, storage });
+  assert.equal(c.api.state.query, "");
+  assert.equal(c.elements.get("job-search").value, "");
+  assert.ok(c.api.visibleJobs().some(job => job.id === "greenhouse-tomatoes"));
+  assert.equal(JSON.parse(storage.get(contextKey)).query, "");
 });

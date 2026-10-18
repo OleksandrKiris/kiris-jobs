@@ -96,6 +96,41 @@ try {
     await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: false });
   }
 
+  // Real user input while the content module is still loading. This belongs
+  // to the catalogue route acceptance, not historical scenario totals.
+  report.earlyInput = [];
+  for (const width of [1280,320]) for (const clear of [false,true]) {
+    const ctx = await context({width,height:900});
+    const page = activePage = await ctx.newPage();
+    let releaseImport, enteredImport;
+    const pending = new Promise(resolve => {releaseImport=resolve;});
+    const entered = new Promise(resolve => {enteredImport=resolve;});
+    await ctx.addInitScript(() => {if(!sessionStorage.getItem('early-input-seeded')){sessionStorage.setItem('kiris-jobs:catalog-context:v1',JSON.stringify({query:'no-such-old-query',country:'PL',feature:'housing'}));sessionStorage.setItem('early-input-seeded','1');}});
+    await ctx.route('**/data/content.js?v=220', async route => { enteredImport();await pending;await route.continue(); });
+    await ctx.tracing.start({screenshots:true,snapshots:true,sources:false});
+    try {
+      await page.goto(base+'?lang=ru',{waitUntil:'domcontentloaded'});
+      await entered;
+      await page.locator('#job-search').fill('томат');
+      if(clear)await page.locator('#job-search').fill('');
+      releaseImport();await ready(page);
+      const expected=clear?'':'томат';
+      assert.equal(await page.locator('#job-search').inputValue(),expected);
+      assert.equal(await page.locator('[data-country-filter="PL"]').getAttribute('aria-pressed'),'true');
+      assert.equal(await page.locator('[data-feature-filter="housing"]').getAttribute('aria-pressed'),'true');
+      const count=await page.locator('#job-grid .job-card').count();
+      if(clear)assert.ok(count>2);else assert.equal(count,2);
+      await fits(page);await shot(page,`early-input-${clear?'clear':'typed'}-${width}`);
+      // Persisted new user input must win when the document is reloaded.
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#job-search').inputValue(),expected);
+      assert.equal(await page.locator('#job-grid .job-card').count(),count);
+      report.earlyInput.push({width,clear,status:'passed',firstPaintCards:count,reload:true});
+    } finally {
+      releaseImport();await ctx.tracing.stop({path:join(reportDir,`early-input-${clear?'clear':'typed'}-${width}.zip`)});await ctx.close();activePage=null;
+    }
+  }
+
   // Regression #57: an uncached locale must not take down the cached catalogue.
   for (const width of [1280, 320]) {
     const ctx = await context({ width, height: 900 });

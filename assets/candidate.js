@@ -465,6 +465,10 @@
     const searchInput = $("job-search");
     // Imports can finish after someone has already typed in the visible field.
     const earlyQuery = searchInput.value;
+    const editedBeforeStartup = searchInput.dataset?.pendingInput === "true";
+    window.PORTAL_STOP_PENDING_SEARCH?.();
+    delete window.PORTAL_STOP_PENDING_SEARCH;
+    if (searchInput.dataset) delete searchInput.dataset.pendingInput;
     try {
       const saved = JSON.parse(window.sessionStorage.getItem(CATALOG_CONTEXT_KEY) || "null");
       if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
@@ -474,7 +478,10 @@
     } catch {
       // Tab-local context is optional; never block the catalogue.
     } finally {
-      if (earlyQuery) state.query = earlyQuery;
+      if (editedBeforeStartup || earlyQuery) {
+        state.query = earlyQuery;
+        saveCatalogContext();
+      }
       searchInput.value = state.query;
     }
   }
