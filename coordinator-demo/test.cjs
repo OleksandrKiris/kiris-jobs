@@ -605,3 +605,48 @@ test('last-material blocked notice never claims persistence or removal; task res
  const h=ui({store:storage([],'set')});h.click('read-site-cleaning-summary-ru');assert.match(h.$('lastMaterialNotice').textContent,/only on this page/);
  const s=storage(),good=ui({store:s});good.click('read-site-cleaning-summary-ru');const raw=s.data.get(M.LAST_MATERIAL_KEY);good.click('reset');good.click('confirm');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),raw);
 });
+
+test('favourites pin is explicit, exact and idempotent without language overwrite or recent import',()=>{
+ const last=JSON.stringify({version:1,material_id:'site-cleaning-summary-ru',requested_language:'pl'}),s=storage([[M.LAST_MATERIAL_KEY,last]]),f=M.materialFavourites(s);
+ assert.deepEqual(f.snapshot().items,[]);assert.deepEqual(s.calls,[['get',M.FAVOURITES_KEY]]);
+ assert.equal(f.pin('site-cleaning-summary-ru','ua'),true);const raw=s.data.get(M.FAVOURITES_KEY),calls=s.calls.length;
+ assert.deepEqual(JSON.parse(raw),{version:1,items:[{material_id:'site-cleaning-summary-ru',requested_language:'ua'}]});assert.ok(new TextEncoder().encode(raw).length<=2048);
+ assert.equal(f.pin('site-cleaning-summary-ru','pl'),true);assert.equal(s.calls.length,calls);assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);
+ assert.equal(M.materialFavourites(s).snapshot().items[0].requested_language,'ua');assert.equal(Object.isFrozen(f.snapshot().items[0]),true);assert.throws(()=>f.snapshot().items.push({}),TypeError);
+ let coerced=false;assert.equal(f.pin({toString(){coerced=true;return 'site-cleaning-summary-ru';}},'ru'),false);assert.equal(coerced,false);assert.equal(f.pin('https://private.example/','ru'),false);assert.equal(f.pin('site-cleaning-summary-ru','RU'),false);
+});
+test('favourites strict parser rejects malformed/version/extra/duplicate/cap records without adopting or overwriting',()=>{
+ const item={material_id:'site-cleaning-summary-ru',requested_language:'ru'};
+ const records=['{bad','null','[]',JSON.stringify({version:2,items:[item]}),JSON.stringify({version:'1',items:[]}),JSON.stringify({version:1,items:null}),JSON.stringify({version:1,items:[null]}),JSON.stringify({version:1,items:[item,item]}),JSON.stringify({version:1,items:Array(6).fill(item)}),JSON.stringify({version:1,items:[{...item,title:'not allowed'}]}),JSON.stringify({version:1,items:[{...item,requested_language:'unknown'}]}),JSON.stringify({version:1,items:[],query:'private'}),' '.repeat(2049),JSON.stringify({version:1,items:[{material_id:'界'.repeat(1000),requested_language:'ru'}]})];
+ for(const raw of records){const s=storage([[M.FAVOURITES_KEY,raw]]),f=M.materialFavourites(s);assert.equal(f.snapshot().persistence,'invalid');assert.equal(f.snapshot().items.length,0);f.pin(item.material_id,'pl');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(s.calls.some(([op])=>op==='set'),false);}
+ const raw=JSON.stringify({version:1,items:[item]}),s=storage([[M.FAVOURITES_KEY,raw+' '.repeat(2048-raw.length)]]);assert.equal(M.materialFavourites(s).snapshot().items.length,1);assert.equal(s.calls.length,1);
+});
+test('favourites removed ID is stale with no target and recovery clears only its own key',()=>{
+ const stale=JSON.stringify({version:1,items:[{material_id:'removed',requested_language:'ru'}]}),s=storage([[M.FAVOURITES_KEY,stale],[M.KEY,'task bytes'],[M.LAST_MATERIAL_KEY,'last bytes'],['other','keep']]),f=M.materialFavourites(s);
+ assert.deepEqual(f.snapshot(),{items:[],persistence:'stale'});f.pin('site-cleaning-summary-ru','ru');f.remove('site-cleaning-summary-ru');assert.equal(s.data.get(M.FAVOURITES_KEY),stale);assert.equal(f.clear(),true);assert.equal(s.data.has(M.FAVOURITES_KEY),false);assert.equal(s.data.get(M.KEY),'task bytes');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),'last bytes');assert.equal(s.data.get('other'),'keep');
+});
+test('favourites denied read/write/quota/removal has honest page-only state and preserves persisted raw',()=>{
+ const raw=JSON.stringify({version:1,items:[{material_id:'site-cleaning-summary-ru',requested_language:'uk'}]});
+ const readDenied=storage([[M.FAVOURITES_KEY,raw]],'get'),f=M.materialFavourites(readDenied);f.pin('site-cleaning-summary-ru','pl');assert.equal(f.snapshot().persistence,'blocked');assert.equal(readDenied.data.get(M.FAVOURITES_KEY),raw);assert.equal(readDenied.calls.some(([op])=>op==='set'),false);
+ for(const quota of [false,true]){const s=storage();s.setItem=()=>{throw quota?new DOMException('quota','QuotaExceededError'):new DOMException('denied','SecurityError');};const m=M.materialFavourites(s);assert.equal(m.pin('site-cleaning-summary-ru','ru'),true);assert.equal(m.snapshot().persistence,'blocked');assert.equal(m.snapshot().items.length,1);assert.equal(s.data.has(M.FAVOURITES_KEY),false);}
+ const s=storage([[M.FAVOURITES_KEY,raw]],'remove'),m=M.materialFavourites(s);assert.equal(m.remove('site-cleaning-summary-ru'),true);assert.equal(m.snapshot().items.length,0);assert.equal(m.snapshot().persistence,'blocked');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(m.clear(),false);
+});
+test('favourites and recent/task mutations never cross storage keys',()=>{
+ const task=JSON.stringify({version:1,statuses:{...M.initial(),'demo-01':'doing'}}),last=JSON.stringify({version:1,material_id:'site-cleaning-summary-ru',requested_language:'pl'}),s=storage([[M.KEY,task],[M.LAST_MATERIAL_KEY,last]]),f=M.materialFavourites(s);
+ f.pin('site-cleaning-summary-ru','uk');assert.equal(s.data.get(M.KEY),task);assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);const pinned=s.data.get(M.FAVOURITES_KEY);M.materialMemory(s).remember('site-cleaning-summary-ru','en');assert.equal(s.data.get(M.FAVOURITES_KEY),pinned);M.materialMemory(s).clear();assert.equal(s.data.get(M.FAVOURITES_KEY),pinned);M.create(s).reset(true);assert.equal(s.data.get(M.FAVOURITES_KEY),pinned);
+ f.remove('site-cleaning-summary-ru');assert.equal(s.data.has(M.FAVOURITES_KEY),false);assert.equal(s.data.has(M.KEY),false);assert.equal(s.data.has(M.LAST_MATERIAL_KEY),false);
+});
+test('favourites explicit UI pin survives other-language Read and lastClear/reload; Open preserves context and keys',()=>{
+ const h=ui({lang:'UA'});h.change('demo-01','doing');h.change('filter','doing');const task=h.store.data.get(M.KEY);h.click('pin-site-cleaning-summary-ru');const pinned=h.store.data.get(M.FAVOURITES_KEY);assert.equal(JSON.parse(pinned).items[0].requested_language,'ua');assert.equal(h.$('pin-site-cleaning-summary-ru').disabled,true);assert.equal(h.$('materialReading').hidden,true);
+ h.change('language','pl');h.click('read-site-cleaning-summary-ru');assert.equal(h.store.data.get(M.FAVOURITES_KEY),pinned);h.click('lastMaterialClear');assert.equal(h.store.data.get(M.FAVOURITES_KEY),pinned);
+ const reload=ui({href:h.location.href,store:h.store});assert.equal(reload.$('favouritesList').children.length,1);assert.equal(reload.$('materialReading').hidden,true);reload.change('materialsSource','mock');reload.$('materialQuery').value='no matching material';reload.$('materialQuery').handlers.input();const url=reload.location.pathname;
+ reload.click('pin-open-site-cleaning-summary-ru');assert.equal(reload.$('materialQuery').value,'no matching material');assert.equal(reload.$('materialsSource').value,'mock');assert.equal(reload.$('filter').value,'doing');assert.equal(reload.$('reading-title').lang,'ru');assert.equal(reload.document.documentElement.lang,'uk');assert.equal(reload.store.data.has(M.LAST_MATERIAL_KEY),false);assert.equal(reload.store.data.get(M.KEY),task);assert.equal(reload.location.pathname,url);assert.equal(reload.store.data.get(M.FAVOURITES_KEY),pinned);
+ reload.click('pin-remove-site-cleaning-summary-ru');assert.equal(reload.$('favouritesList').children.length,0);assert.equal(reload.$('materialQuery').value,'no matching material');assert.equal(reload.store.data.has(M.LAST_MATERIAL_KEY),false);assert.equal(reload.store.data.get(M.KEY),task);
+});
+test('pin Open/Remove preserve a non-null last record byte-for-byte and task reset does not erase pins',()=>{
+ const s=storage(),h=ui({store:s});h.click('read-site-cleaning-summary-ru');h.click('pin-site-cleaning-summary-ru');const last=s.data.get(M.LAST_MATERIAL_KEY),pinned=s.data.get(M.FAVOURITES_KEY);h.click('pin-open-site-cleaning-summary-ru');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);h.click('reset');h.click('confirm');assert.equal(s.data.get(M.FAVOURITES_KEY),pinned);h.click('pin-remove-site-cleaning-summary-ru');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);
+});
+test('favourites UI corrupt/denied key offers only own recovery and never renders unknown content',()=>{
+ for(const raw of ['{broken',JSON.stringify({version:1,items:[{material_id:'deleted',requested_language:'ru'}]})]){const h=ui({store:storage([[M.FAVOURITES_KEY,raw]])});assert.equal(h.$('favouritesList').children.length,0);assert.equal(h.$('materialReading').hidden,true);assert.equal(h.$('favouritesClear').hidden,false);assert.match(h.$('favouritesNotice').textContent,/damaged|unavailable material/);h.click('favouritesClear');assert.equal(h.store.data.has(M.FAVOURITES_KEY),false);}
+ const s=storage(),get=s.getItem;s.getItem=k=>{if(k===M.FAVOURITES_KEY)throw new DOMException('denied','SecurityError');return get(k);};const h=ui({store:s});h.click('pin-site-cleaning-summary-ru');assert.match(h.$('favouritesNotice').textContent,/only on this page/);assert.equal(h.$('favouritesList').children.length,1);assert.equal(s.data.has(M.FAVOURITES_KEY),false);
+});
