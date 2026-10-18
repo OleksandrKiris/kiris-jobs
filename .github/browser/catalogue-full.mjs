@@ -1,3 +1,4 @@
+import {acceptApplyScreening} from './apply-screening.mjs';
 import {acceptFormErrors,cachedFormHash,acceptOfflineFormErrors} from './catalogue-form-errors.mjs';
 // Runs only in the user-authorized GitHub Actions browser environment.
 // No submissions: only local GET/HEAD, with external requests blocked.
@@ -679,7 +680,8 @@ try {
   await Promise.all([
     acceptFormErrors({context,base,reportDir,report,active:page=>{activePage=page;}}),
     acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}}),
-    acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}})
+    acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}}),
+    acceptApplyScreening({context,base,reportDir,report,active:page=>{activePage=page;}})
   ]);
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {

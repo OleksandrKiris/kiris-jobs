@@ -1,3 +1,4 @@
+import {applyLocales} from './apply-screening.mjs';
 // Runs only inside the authorized Actions browser; fresh isolated contexts and no sends.
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
@@ -36,6 +37,7 @@ export function assertApplyEntry(rows) {
 }
 export async function acceptApplyEntry({context,base,reportDir,report,active}) {
   assert.equal(process.env.GITHUB_ACTIONS,'true');
+  const locales=applyLocales().locales;
   report.applyEntry=[]; report.applyOldRed=[];
   // Pin the observed faulty implementation; the moving PR base is not evidence.
   const oldRef='3a0faf0419ad76efbe189771f4cf62d4303550fe';
@@ -87,6 +89,8 @@ export async function acceptApplyEntry({context,base,reportDir,report,active}) {
       await page.locator('#firstName').fill(''); await page.locator('[data-action="next"]').click();
       const revalidated=await page.locator('#firstName-error').count()===1;
       const dom=await page.evaluate(()=>({actualLang:document.documentElement.lang, fits:document.documentElement.scrollWidth<=innerWidth+1, noSend:!document.querySelector('[data-action="send"]')}));
+      assert.equal(await page.locator('#footerNotice').innerText(),locales[lang].footerNotice);
+      assert.equal(await page.locator('#footerPrivacy').innerText(),locales[lang].footerPrivacyLabel);
       report.applyEntry.push({lang,width,status:'passed',empty,typing,cleared,matched,focusedCorrection:true,associated,edited,revalidated,...dom});
       await ctx.close();
     }
