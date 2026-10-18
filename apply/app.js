@@ -207,6 +207,16 @@
     return entries.filter(([code]) => I18N.priority.includes(code));
   }
 
+  function languageCards(entries) {
+    if (!entries.length) return `<p role="status">${escapeHtml(t('noLanguages'))}</p>`;
+    return entries.map(([code, meta]) => `
+            <button type="button" class="language-card ${code === suggestedLanguage ? 'suggested-card' : ''}" data-language="${code}">
+              <span class="language-flag" aria-hidden="true">${meta.flag}</span>
+              <span class="language-name"><strong>${escapeHtml(meta.native)}</strong><small>${escapeHtml(meta.english)}</small></span>
+              <span class="language-code">${code.toUpperCase()}</span>
+            </button>`).join('');
+  }
+
   function renderLanguage(search = '') {
     const entries = languageList(search);
     app.innerHTML = `
@@ -233,28 +243,26 @@
         <label class="sr-only" for="languageSearch">${escapeHtml(t('languageSearch'))}</label>
         <input id="languageSearch" class="search-input" type="search" autocomplete="off" enterkeyhint="search" placeholder="${attr(t('languageSearch'))}" value="${attr(search)}">
         <div class="language-grid">
-          ${entries.map(([code, meta]) => `
-            <button type="button" class="language-card ${code === suggestedLanguage ? 'suggested-card' : ''}" data-language="${code}">
-              <span class="language-flag" aria-hidden="true">${meta.flag}</span>
-              <span class="language-name"><strong>${escapeHtml(meta.native)}</strong><small>${escapeHtml(meta.english)}</small></span>
-              <span class="language-code">${code.toUpperCase()}</span>
-            </button>`).join('')}
+          ${languageCards(entries)}
         </div>
         ${!search ? `<button type="button" class="more-button" data-action="toggle-languages">${escapeHtml(showAllLanguages ? t('lessLanguages') : t('moreLanguages'))}</button>` : ''}
       </section>`;
 
-    document.getElementById('languageSearch').addEventListener('input', (event) => renderLanguage(event.target.value));
+    // Keep the active search control mounted: replacing the panel on input
+    // drops focus (and the phone keyboard) after the first character.
+    const languageGrid = app.querySelector('.language-grid');
+    const moreButton = app.querySelector('[data-action="toggle-languages"]');
+    document.getElementById('languageSearch').addEventListener('input', (event) => {
+      const matches = languageList(event.target.value);
+      languageGrid.innerHTML = languageCards(matches);
+      moreButton.hidden = Boolean(event.target.value);
+      bindLanguageChoices();
+    });
     app.querySelector('[data-action="toggle-languages"]')?.addEventListener('click', () => {
       showAllLanguages = !showAllLanguages;
       renderLanguage();
     });
-    app.querySelectorAll('[data-language]').forEach((button) => button.addEventListener('click', () => {
-      state.language = validLanguage(button.dataset.language) || 'en';
-      errors = {};
-      view = 'recruiter';
-      saveDraft();
-      render();
-    }));
+    bindLanguageChoices();
     app.querySelector('[data-action="resume"]')?.addEventListener('click', () => {
       state = savedDraft;
       view = state.language && state.recruiterId ? 'form' : state.language ? 'recruiter' : 'language';
@@ -265,6 +273,16 @@
       state = createState();
       render();
     });
+  }
+
+  function bindLanguageChoices() {
+    app.querySelectorAll('[data-language]').forEach((button) => button.addEventListener('click', () => {
+      state.language = validLanguage(button.dataset.language) || 'en';
+      errors = {};
+      view = 'recruiter';
+      saveDraft();
+      render();
+    }));
   }
 
   function renderRecruiter() {
@@ -316,7 +334,7 @@
     return `
       <div class="field ${full ? 'full' : ''}">
         <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ` <span class="optional">(${escapeHtml(t('optional'))})</span>`}</label>
-        <input id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''} ${id === 'phone' ? 'ltr' : ''}" type="${type}" value="${attr(state.data[id])}" maxlength="${max}" enterkeyhint="next" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
+        <input id="${id}" data-field="${id}" ${errorAttributes(id)} class="${errors[id] ? 'invalid' : ''} ${id === 'phone' ? 'ltr' : ''}" type="${type}" value="${attr(state.data[id])}" maxlength="${max}" enterkeyhint="next" ${autocomplete ? `autocomplete="${autocomplete}"` : ''} ${inputmode ? `inputmode="${inputmode}"` : ''} ${placeholder ? `placeholder="${attr(placeholder)}"` : ''} ${min !== '' ? `min="${min}"` : ''} ${maxValue !== '' ? `max="${maxValue}"` : ''}>
         ${hint ? `<small class="field-hint">${escapeHtml(hint)}</small>` : ''}
         ${errorHtml(id)}
       </div>`;
@@ -326,7 +344,7 @@
     return `
       <div class="field full">
         <label for="${id}">${escapeHtml(label)}${required ? ' <span class="required">*</span>' : ` <span class="optional">(${escapeHtml(t('optional'))})</span>`}</label>
-        <textarea id="${id}" data-field="${id}" maxlength="${max}" class="${errors[id] ? 'invalid' : ''}">${escapeHtml(state.data[id])}</textarea>
+        <textarea id="${id}" data-field="${id}" ${errorAttributes(id)} maxlength="${max}" class="${errors[id] ? 'invalid' : ''}">${escapeHtml(state.data[id])}</textarea>
         ${hint ? `<small class="field-hint">${escapeHtml(hint)}</small>` : ''}
         ${errorHtml(id)}
       </div>`;
@@ -337,7 +355,7 @@
     return `
       <div class="field ${full ? 'full' : ''}">
         <label for="${id}">${escapeHtml(label)} <span class="required">*</span></label>
-        <select id="${id}" data-field="${id}" class="${errors[id] ? 'invalid' : ''}">
+        <select id="${id}" data-field="${id}" ${errorAttributes(id)} class="${errors[id] ? 'invalid' : ''}">
           <option value="">${escapeHtml(t('selectOption'))}</option>
           ${Object.entries(options).map(([value, labelText]) => `<option value="${attr(value)}" ${state.data[id] === value ? 'selected' : ''}>${escapeHtml(labelText)}</option>`).join('')}
         </select>
@@ -350,7 +368,7 @@
       <div class="choice-grid ${columns}">
         ${Object.entries(options).map(([value, label]) => `
           <label class="choice-card ${state.data[field] === value ? 'selected' : ''}">
-            <input type="radio" name="${field}" data-field="${field}" value="${attr(value)}" ${state.data[field] === value ? 'checked' : ''}>
+            <input type="radio" name="${field}" data-field="${field}" ${errorAttributes(field)} value="${attr(value)}" ${state.data[field] === value ? 'checked' : ''}>
             <span class="choice-icon" aria-hidden="true">${escapeHtml(icons[value] || '•')}</span>
             <span>${escapeHtml(label)}</span>
             <span class="choice-check" aria-hidden="true">✓</span>
@@ -378,8 +396,12 @@
       </section>`;
   }
 
+  function errorAttributes(id) {
+    return errors[id] ? `aria-invalid="true" aria-describedby="${id}-error"` : '';
+  }
+
   function errorHtml(id) {
-    return errors[id] ? `<div class="field-error" role="alert">${escapeHtml(errors[id])}</div>` : '';
+    return errors[id] ? `<div class="field-error" id="${id}-error" role="alert">${escapeHtml(errors[id])}</div>` : '';
   }
 
   function stepContent() {
@@ -416,7 +438,7 @@
       </div>
       <div class="field consent-field">
         <label class="consent-box ${state.data.consent ? 'selected' : ''}" for="consent">
-          <input id="consent" data-field="consent" type="checkbox" ${state.data.consent ? 'checked' : ''}>
+          <input id="consent" data-field="consent" ${errorAttributes('consent')} type="checkbox" ${state.data.consent ? 'checked' : ''}>
           <span>${escapeHtml(t('consent'))} <a href="${attr(CFG.privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('privacyLink'))}</a>. <span class="required">*</span></span>
         </label>
         ${errorHtml('consent')}
@@ -463,6 +485,12 @@
         syncChoiceState(element);
         if (field === 'physicalWork' && state.data.physicalWork === 'no') state.data.physicalDetails = '';
         delete errors[field];
+        app.querySelectorAll(`[data-field="${field}"]`).forEach((input) => {
+          input.removeAttribute('aria-invalid');
+          input.removeAttribute('aria-describedby');
+          input.classList.remove('invalid');
+        });
+        document.getElementById(`${field}-error`)?.remove();
         saveDraft();
         if (field === 'physicalWork') renderForm();
       });
@@ -493,7 +521,9 @@
     if (Object.keys(errors).length) {
       renderForm();
       const first = Object.keys(errors)[0];
-      app.querySelector(`[data-field="${first}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const correction = app.querySelector(`[data-field="${first}"]`);
+      correction?.focus({ preventScroll: true });
+      correction?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return false;
     }
     saveDraft();
