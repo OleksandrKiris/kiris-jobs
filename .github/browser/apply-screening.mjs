@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-export const SCREENING_LANGS=['ka','az','hy','tr','uz','id','fil','vi','hi','ne'];
+export const SCREENING_LANGS=['ka','az','hy','tr','uz','id','fil','vi','hi','ne','ky','tg','kk'];
 export const SCREENING_BASE='f89ba98f32c998e3b4b4261b455a03651837974a';
 export const SCREENING_KEYS=['draftFound','resumeDraft','discardDraft','trustLabel','trustShort','trustNoCv','trustControl','languageLead','recruiterLead','step1Title','step1Lead','step2Title','step2Lead','step3Title','step3Lead','citizenshipHint','citizenshipPlaceholder','gender','stayDuration','physicalWork','physicalDetails','physicalDetailsHint','workNoteTitle','workNote','performanceMetrics','performanceMetricsHint','fastPace','watchedVideos','understandsRole','longHours','longHoursHint','yesShort','noShort','copyRow','rowCopied','copyFailed','sectionAvailability','sectionExperience','sectionExpectations'];
 export const USER_CUSTOM_KEYS=['moreLanguages','lessLanguages','optional','rowOnlyTitle','rowOnlyLead','reviewLead','sendRow','sendHint','pdfTitle','pdfLead','pdfOpen','formSaved','emailOpened','sectionSubmission','sectionCandidate','sectionContact','sectionWork','noValue','statusNew','firstContact','chooseOneRecruiter'];
@@ -26,6 +26,7 @@ export function assertScreeningCopy(i18n) {
       for(const [key,value] of Object.entries(locale.options[group]))assert.notEqual(value,i18n.locales.en.options[group][key],lang+':'+group+':'+key);
     }
     assert.notEqual(locale.options.locations.any,i18n.locales.en.options.locations.any);
+    if(['ky','tg','kk'].includes(lang))for(const key of ['phoneHint','locationHint']){assert.ok(locale[key]?.trim());assert.notEqual(locale[key],i18n.locales.en[key],lang+':'+key);}
   }
   assert.equal(Object.keys(i18n.locales).length,20);
   for(const [lang,locale] of Object.entries(i18n.locales)) {
@@ -38,7 +39,7 @@ export function assertScreeningCopy(i18n) {
 }
 const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','iconsOneLine','progressOneLine','noDelivery'];
 export function assertScreeningRows(rows) {
-  assert.equal(rows?.length,20);
+  assert.equal(rows?.length,26);
   assert.deepEqual(rows.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>SCREENING_LANGS.map(l=>w+':'+l)).sort());
   for(const row of rows){assert.equal(row.status,'passed');for(const key of flags)assert.equal(row[key],true,`${row.lang}:${row.width}:${key}`);}
 }
@@ -108,6 +109,16 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
     assert.equal(await page.locator('html').getAttribute('lang'),lang);assert.equal(await page.locator('h1').innerText(),'Contact details');
     await page.screenshot({path:join(reportDir,'apply-hine-old-'+lang+'-320.png'),fullPage:true});report.applyHiNeOldRed.push({lang,width:320,ref:hiNeRef,heading:'Contact details',status:'expected-failure'});await ctx.close();
   }
+  const centralRef='b974b534b8c378de1f82e63ec6334cefe33b90ce';report.applyCentralOldRed=[];
+  const centralFiles=Object.fromEntries(['index.html','app.js','translations.js','styles.css'].map(f=>[f,execFileSync('git',['show',centralRef+':apply/'+f])]));
+  report.applyCentralRegressionSource={ref:centralRef,files:Object.fromEntries(Object.entries(centralFiles).map(([f,b])=>[f,createHash('sha256').update(b).digest('hex')]))};
+  for(const lang of ['ky','tg','kk']) {
+    const ctx=await context({width:320,height:900});const page=await ctx.newPage();active(page);
+    for(const [f,body]of Object.entries(centralFiles))await ctx.route(f==='index.html'?'**/apply/':'**/apply/'+f+'?*',r=>r.fulfill({status:200,contentType:f==='index.html'?'text/html':f.endsWith('.css')?'text/css':'text/javascript',body}));
+    await page.goto(base+'apply/');await page.locator('#languageSearch').fill(lang);await page.locator('[data-language="'+lang+'"]').click();await page.locator('[data-recruiter="yana"]').click();
+    assert.equal(await page.locator('html').getAttribute('lang'),lang);assert.equal(await page.locator('h1').innerText(),'Contact details');
+    await page.screenshot({path:join(reportDir,'apply-central-old-'+lang+'-320.png'),fullPage:true});report.applyCentralOldRed.push({lang,width:320,ref:centralRef,heading:'Contact details',status:'expected-failure'});await ctx.close();
+  }
   for(const width of [320,1280]) {
     const before=await context({width,height:900});const previous=await before.newPage();active(previous);
     await before.route('**/apply/',r=>r.fulfill({status:200,contentType:'text/html',body:old['index.html']}));
@@ -118,7 +129,7 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
     await previous.screenshot({path:join(reportDir,`apply-screening-old-${width}.png`),fullPage:true});
     report.applyScreeningOldRed.push({width,lang:'ka',status:'expected-failure',heading:'Contact details',base:SCREENING_BASE});await before.close();
   }
-  // Three bounded isolated workers preserve all20 cases, PNG and traces under the same timeout.
+  // Four bounded isolated workers preserve all26 cases, PNG and traces under the same timeout.
   const cases=[320,1280].flatMap(width=>SCREENING_LANGS.map(lang=>({width,lang})));
   let cursor=0;
   async function currentCase({width,lang}) {
@@ -131,6 +142,7 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
         await checkScreen(page,l,1,reportDir,`apply-screening-${lang}-${width}-step1`);
         assert.ok((await page.locator('#candidateForm').innerText()).includes(l.gender));
         assert.equal(await page.locator('#citizenship').getAttribute('placeholder'),l.citizenshipPlaceholder);
+        assert.ok((await page.locator('#phone').locator('..').innerText()).includes(l.phoneHint));
         const gender=await page.locator('[name="gender"]').evaluateAll(nodes=>nodes.map(n=>n.parentElement.querySelector('span:not([class])')?.textContent));
         assert.deepEqual(gender,Object.values(l.options.gender));
         await page.locator('#firstName').fill('QA');await page.locator('#lastName').fill('FIXTURE');await page.locator('#phone').fill('+99912345678');
@@ -172,6 +184,6 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
       } finally {await ctx.tracing.stop({path:join(reportDir,`apply-screening-${lang}-${width}.zip`)});await ctx.close();}
   }
   async function worker(){while(cursor<cases.length)await currentCase(cases[cursor++]);}
-  await Promise.all([worker(),worker(),worker()]);
+  await Promise.all([worker(),worker(),worker(),worker()]);
   assertScreeningRows(report.applyScreening);
 }
