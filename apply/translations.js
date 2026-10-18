@@ -526,6 +526,28 @@ const footerNotices = {
   "id": "Formulir ini tidak menyimpan data di GitHub.",
   "vi": "Biểu mẫu không lưu dữ liệu trên GitHub."
 };
+const footerPrivacyLabels = {
+  "pl": "Informacje o prywatności",
+  "uk": "Інформація про конфіденційність",
+  "ru": "Информация о конфиденциальности",
+  "en": "Privacy information",
+  "ka": "კონფიდენციალურობის ინფორმაცია",
+  "az": "Məxfilik məlumatı",
+  "hy": "Գաղտնիության մասին տեղեկություն",
+  "tr": "Gizlilik bilgileri",
+  "uz": "Maxfiylik ma’lumotlari",
+  "ky": "Купуялуулук тууралуу маалымат",
+  "tg": "Маълумот дар бораи махфият",
+  "kk": "Құпиялық туралы ақпарат",
+  "hi": "गोपनीयता की जानकारी",
+  "bn": "গোপনীয়তার তথ্য",
+  "ne": "गोपनीयतासम्बन्धी जानकारी",
+  "ur": "رازداری کی معلومات",
+  "si": "රහස්‍යතා තොරතුරු",
+  "fil": "Impormasyon sa pagkapribado",
+  "id": "Informasi privasi",
+  "vi": "Thông tin về quyền riêng tư"
+};
 const enCustom = custom.en;
 const locales = {};
 for (const [code, meta] of Object.entries(I.languages)) {
@@ -540,6 +562,7 @@ for (const [code, meta] of Object.entries(I.languages)) {
     languageSearch: core.languageSearch || I.locales.en.languageSearch,
     noLanguages: noLanguages[code],
     footerNotice: footerNotices[code],
+    footerPrivacyLabel: footerPrivacyLabels[code],
     moreLanguages: c.moreLanguages,
     lessLanguages: c.lessLanguages,
     chooseRecruiter: core.recruiterTitle || I.locales.en.recruiterTitle,

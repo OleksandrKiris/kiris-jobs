@@ -185,7 +185,7 @@
     document.getElementById('headerNote').textContent = t('firstContact');
     document.getElementById('footerPdf').textContent = t('pdfOpen');
     document.getElementById('footerNotice').textContent = t('footerNotice');
-    document.getElementById('footerPrivacy').textContent = t('privacyLink');
+    document.getElementById('footerPrivacy').textContent = t('footerPrivacyLabel');
     document.getElementById('formBrand').setAttribute('aria-label', `${CFG.brand} — ${t('rowOnlyTitle')}`);
   }
 

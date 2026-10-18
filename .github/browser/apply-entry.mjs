@@ -90,7 +90,7 @@ export async function acceptApplyEntry({context,base,reportDir,report,active}) {
       const revalidated=await page.locator('#firstName-error').count()===1;
       const dom=await page.evaluate(()=>({actualLang:document.documentElement.lang, fits:document.documentElement.scrollWidth<=innerWidth+1, noSend:!document.querySelector('[data-action="send"]')}));
       assert.equal(await page.locator('#footerNotice').innerText(),locales[lang].footerNotice);
-      assert.equal(await page.locator('#footerPrivacy').innerText(),locales[lang].privacyLink);
+      assert.equal(await page.locator('#footerPrivacy').innerText(),locales[lang].footerPrivacyLabel);
       report.applyEntry.push({lang,width,status:'passed',empty,typing,cleared,matched,focusedCorrection:true,associated,edited,revalidated,...dom});
       await ctx.close();
     }

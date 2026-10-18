@@ -29,6 +29,8 @@ export function assertScreeningCopy(i18n) {
   assert.equal(Object.keys(i18n.locales).length,20);
   for(const [lang,locale] of Object.entries(i18n.locales)) {
     assert.ok(locale.footerNotice?.includes('GitHub'),lang+':footer missing');
+    assert.ok(locale.footerPrivacyLabel?.trim(),lang+':privacy label');
+    if(lang!=='en')assert.notEqual(locale.footerPrivacyLabel,i18n.locales.en.footerPrivacyLabel);
     if(lang!=='pl')assert.notEqual(locale.footerNotice,i18n.locales.pl.footerNotice);
     if(lang!=='en')assert.notEqual(locale.footerNotice,i18n.locales.en.footerNotice);
   }
@@ -43,7 +45,7 @@ async function checkScreen(page,locale,step,reportDir,name) {
   assert.equal(await page.locator('h1').innerText(),locale['step'+step+'Title']);
   assert.equal(await page.locator('.step-heading p').innerText(),locale['step'+step+'Lead']);
   assert.equal(await page.locator('#footerNotice').innerText(),locale.footerNotice);
-  assert.equal(await page.locator('#footerPrivacy').innerText(),locale.privacyLink);
+  assert.equal(await page.locator('#footerPrivacy').innerText(),locale.footerPrivacyLabel);
   const state=await page.evaluate(()=>{
     const panel=document.querySelector('.form-panel');const rect=panel.getBoundingClientRect();
     return {fits:document.documentElement.scrollWidth<=innerWidth+1,painted:rect.width>0&&getComputedStyle(panel).opacity==='1'};
