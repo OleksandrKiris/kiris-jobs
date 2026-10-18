@@ -68,7 +68,7 @@ assert(packageJson.scripts['check:js'].includes('apply/pdf/app.js'), 'package.js
 
 for (const marker of [
   'styles.css?v=17.2.2',
-  'translations.js?v=17.0.3',
+  'translations.js?v=17.0.4',
   'app.js?v=17.2.3',
   'styles.css?v=1.1.2',
   'app.js?v=1.1.2',

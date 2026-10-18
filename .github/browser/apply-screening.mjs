@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-export const SCREENING_LANGS=['ka','az','hy','tr','uz','id','fil','vi'];
+export const SCREENING_LANGS=['ka','az','hy','tr','uz','id','fil','vi','hi','ne'];
 export const SCREENING_BASE='f89ba98f32c998e3b4b4261b455a03651837974a';
 export const SCREENING_KEYS=['draftFound','resumeDraft','discardDraft','trustLabel','trustShort','trustNoCv','trustControl','languageLead','recruiterLead','step1Title','step1Lead','step2Title','step2Lead','step3Title','step3Lead','citizenshipHint','citizenshipPlaceholder','gender','stayDuration','physicalWork','physicalDetails','physicalDetailsHint','workNoteTitle','workNote','performanceMetrics','performanceMetricsHint','fastPace','watchedVideos','understandsRole','longHours','longHoursHint','yesShort','noShort','copyRow','rowCopied','copyFailed','sectionAvailability','sectionExperience','sectionExpectations'];
 export const USER_CUSTOM_KEYS=['moreLanguages','lessLanguages','optional','rowOnlyTitle','rowOnlyLead','reviewLead','sendRow','sendHint','pdfTitle','pdfLead','pdfOpen','formSaved','emailOpened','sectionSubmission','sectionCandidate','sectionContact','sectionWork','noValue','statusNew','firstContact','chooseOneRecruiter'];
@@ -38,7 +38,7 @@ export function assertScreeningCopy(i18n) {
 }
 const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','iconsOneLine','progressOneLine','noDelivery'];
 export function assertScreeningRows(rows) {
-  assert.equal(rows?.length,16);
+  assert.equal(rows?.length,20);
   assert.deepEqual(rows.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>SCREENING_LANGS.map(l=>w+':'+l)).sort());
   for(const row of rows){assert.equal(row.status,'passed');for(const key of flags)assert.equal(row[key],true,`${row.lang}:${row.width}:${key}`);}
 }
@@ -98,6 +98,16 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
   await progressPage.goto(base+'apply/');await progressPage.locator('#languageSearch').fill('fil');await progressPage.locator('[data-language="fil"]').click();await progressPage.locator('[data-recruiter="yana"]').click();
   const oldProgressLines=await progressLines(progressPage);assert.ok(oldProgressLines>1,'Actual old FIL counter must split');
   await progressPage.screenshot({path:join(reportDir,'apply-progress-old-fil-320.png'),fullPage:true});report.applyProgressOldRed.push({lang:'fil',width:320,ref:progressRef,lines:oldProgressLines,status:'expected-failure'});await progressCtx.close();
+  const hiNeRef='6bc7550941e078eb7c95b3ea5feea2eb90619b48';report.applyHiNeOldRed=[];
+  const hiNeFiles=Object.fromEntries(['index.html','app.js','translations.js','styles.css'].map(f=>[f,execFileSync('git',['show',hiNeRef+':apply/'+f])]));
+  report.applyHiNeRegressionSource={ref:hiNeRef,files:Object.fromEntries(Object.entries(hiNeFiles).map(([f,b])=>[f,createHash('sha256').update(b).digest('hex')]))};
+  for(const lang of ['hi','ne']) {
+    const ctx=await context({width:320,height:900});const page=await ctx.newPage();active(page);
+    for(const [f,body]of Object.entries(hiNeFiles))await ctx.route(f==='index.html'?'**/apply/':'**/apply/'+f+'?*',r=>r.fulfill({status:200,contentType:f==='index.html'?'text/html':f.endsWith('.css')?'text/css':'text/javascript',body}));
+    await page.goto(base+'apply/');await page.locator('#languageSearch').fill(lang);await page.locator('[data-language="'+lang+'"]').click();await page.locator('[data-recruiter="yana"]').click();
+    assert.equal(await page.locator('html').getAttribute('lang'),lang);assert.equal(await page.locator('h1').innerText(),'Contact details');
+    await page.screenshot({path:join(reportDir,'apply-hine-old-'+lang+'-320.png'),fullPage:true});report.applyHiNeOldRed.push({lang,width:320,ref:hiNeRef,heading:'Contact details',status:'expected-failure'});await ctx.close();
+  }
   for(const width of [320,1280]) {
     const before=await context({width,height:900});const previous=await before.newPage();active(previous);
     await before.route('**/apply/',r=>r.fulfill({status:200,contentType:'text/html',body:old['index.html']}));
@@ -108,7 +118,7 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
     await previous.screenshot({path:join(reportDir,`apply-screening-old-${width}.png`),fullPage:true});
     report.applyScreeningOldRed.push({width,lang:'ka',status:'expected-failure',heading:'Contact details',base:SCREENING_BASE});await before.close();
   }
-  // Preserve every case, PNG and trace under the same timeout. Contexts are isolated.
+  // Three bounded isolated workers preserve all20 cases, PNG and traces under the same timeout.
   const cases=[320,1280].flatMap(width=>SCREENING_LANGS.map(lang=>({width,lang})));
   let cursor=0;
   async function currentCase({width,lang}) {
@@ -162,6 +172,6 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
       } finally {await ctx.tracing.stop({path:join(reportDir,`apply-screening-${lang}-${width}.zip`)});await ctx.close();}
   }
   async function worker(){while(cursor<cases.length)await currentCase(cases[cursor++]);}
-  await Promise.all([worker(),worker()]);
+  await Promise.all([worker(),worker(),worker()]);
   assertScreeningRows(report.applyScreening);
 }
