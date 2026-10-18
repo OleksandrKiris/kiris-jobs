@@ -1,3 +1,4 @@
+import {combineScreening} from './screening-phase.mjs';
 import {assertScreeningRows} from './apply-screening.mjs';
 import {assertFieldStatusProof} from './catalogue-field-status.mjs';
 import {assertFormErrors,assertFormUpgrades,FORM_VACANCY_IDS} from './catalogue-form-errors.mjs';
@@ -142,7 +143,7 @@ try {
     let failure;
     try {
       execFileSync(process.execPath, [new URL('./catalogue-full.mjs', import.meta.url).pathname, '--current-only'],
-        { env: { ...process.env, BROWSER_REPORT: fullDir }, timeout: 300000, maxBuffer: 8 * 1024 * 1024 });
+        { env: { ...process.env, BROWSER_REPORT: fullDir, SEPARATE_SCREENING:'1' }, timeout: 300000, maxBuffer: 8 * 1024 * 1024 });
     } catch (error) { failure = error; }
     if (failure) {
       report.fullCurrentCatalogue = { status: 'process-failed', processSucceeded: false,
@@ -150,7 +151,15 @@ try {
       // Reject BEFORE reading any possibly stale passed JSON.
       assertFullCurrentResult(failure, undefined);
     }
-    const full = JSON.parse(await readFile(join(fullDir, 'acceptance.json'), 'utf8'));
+    const rawFull = JSON.parse(await readFile(join(fullDir, 'acceptance.json'), 'utf8'));
+    const screeningDir=join(fullDir,'screening');let screeningFailure;
+    try {execFileSync(process.execPath,[new URL('./screening-runner.mjs',import.meta.url).pathname],
+      {env:{...process.env,BROWSER_REPORT:screeningDir},timeout:300000,maxBuffer:8*1024*1024});}
+    catch(error){screeningFailure=error;}
+    if(screeningFailure)combineScreening(rawFull,undefined,screeningFailure,{});
+    const screening=JSON.parse(await readFile(join(screeningDir,'acceptance.json'),'utf8'));
+    const full=combineScreening(rawFull,screening,null,{head:report.head,base:report.base,checkout:report.checkout,publicationSHA256:staged.sha256});
+    await writeFile(join(fullDir,'aggregate-acceptance.json'),JSON.stringify(full,null,2));
     assert.deepEqual(full.earlyInput?.map(x=>`${x.width}:${x.clear}`).sort(), ['1280:false','1280:true','320:false','320:true']);
     assert.ok(full.earlyInput.every(x=>x.status==='passed' && x.reload), 'Early-input typing/clear and persisted reload must all pass');
     assert.deepEqual(full.shortcutFonts?.map(x=>x.width).sort((a,b)=>a-b), [320,1280]);
@@ -177,7 +186,7 @@ try {
     assertHousingControls(full.housingControls);
     assert.deepEqual(full.housingGroups?.map(r=>`${r.width}:${r.cases}:${r.status}`).sort(),['1280:33:passed','320:33:passed']);
     report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
-      checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
+      checkout: full.checkout, scope: full.scope, report: 'full-current/aggregate-acceptance.json', rawCoreReport:'full-current/acceptance.json', screeningExecution:full.screeningExecution,
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,

@@ -27,6 +27,7 @@ const report = {
   head: process.env.TESTED_HEAD, base: process.env.TESTED_BASE,
   checkout: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   started: new Date().toISOString(), browser: '', results: [], files: {},
+  screeningExecutionMode: process.env.SEPARATE_SCREENING==='1'?'separate-required':'in-process',
   scope: process.argv.includes('--current-only') ? 'full-current-catalogue-core; historical tool overlays excluded' : 'historical full runner',
   limits: ['Desktop Chromium; narrow viewport is not a physical phone.',
     'External services are blocked; HRappka delivery and Telegram are not tested.',
@@ -681,7 +682,7 @@ try {
     acceptFormErrors({context,base,reportDir,report,active:page=>{activePage=page;}}),
     acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}}),
     acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}}),
-    acceptApplyScreening({context,base,reportDir,report,active:page=>{activePage=page;}})
+    process.env.SEPARATE_SCREENING==='1'?Promise.resolve():acceptApplyScreening({context,base,reportDir,report,active:page=>{activePage=page;}})
   ]);
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {
