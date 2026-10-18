@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; проход03:07, 2026-10-18 03:10 UTC, kiris-jobs main2e80ab8 после95, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; проход03:07, 2026-10-18T03:56:50.365056+00:00, kiris-jobs main0986cc9ff47b6eae6d28814d38c17494e6b36bac после96. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,13 +12,18 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `2e80ab811fa3573fc13ac7dd6ee65279865cc58b` | [#95](https://github.com/OleksandrKiris/kiris-jobs/pull/95)be901 merged/published; source92d9f included by ancestry; #62 frozen/draft. Exact PR92 closure is separate actual metadata | [39091485504](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39091485504) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `0986cc9ff47b6eae6d28814d38c17494e6b36bac` | [#96](https://github.com/OleksandrKiris/kiris-jobs/pull/96)10e899d3 merged/published; #62 frozen/draft | [Pages39095191175](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39095191175) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b04fc7302612affa0c2eec71ac66ebbc13912e46` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) published; [#15](https://github.com/OleksandrKiris/citronex-hydra-project/pull/15)7ae Copy route TEXT implemented,191unit/106browser/currentCI SUCCESS, late runtime4 bounded CLEAR; formal source-report write rejected by policy, draft/unpublished | [39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `f0883032674a5dc9c2034fb144c04286a5617598` | [#13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13) published; [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)a573/basef088 copy MEMO TEXT source/runtime/peer accepted, actualready/unpublished; CI39084077900 SUCCESS | [39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
+
+PR96 `10e899d351613799152cb0fbce2b42620e676d08` → `0986cc9ff47b6eae6d28814d38c17494e6b36bac`: Pages39095191175/Backend39095191167 SUCCESS;34HTTPexact/310projection/276otherGitidentity. Backendlocal/onlineAIoff; один guard03:07 использован.
+Текущие проверки CI: Catalogue: core16, worker N/A, main19, prototypes16/8; Native: 6 jobs по121 tests, browser16/8 в каждом; Backend:10/87/33; early-security19. Три material-target fixture tests входят в текущую TAP-группу30. Группы исполнения учитываются отдельно. Issue97 actualclosed 2026-10-18T03:55:08Z после postBackend39095191167; это отдельный actual close action. Issue98 actualclosed 2026-10-18T03:55:10Z после того же postBackend39095191167; исправлена старая проверка одной карточки в общем browser-helper.
+
+### История PR95 и локальной подготовки PR96 — 03:10 UTC
 
 PR95be901 → `2e80ab811fa3573fc13ac7dd6ee65279865cc58b`: Pages39091485504/Backend39091485527 SUCCESS,33criticalHTTPexact; tree9cfb иparents[6faa,be901]. Fullprojection309/276otherGitidentity. Source428/21net включает92d9f и backup954daf; current16core+workerN/A/main19/proto16+8/native96+48, Backend10/87/29 иearly18. Backendlocal/onlineAIoff. Новый2rootdocs после публикации остаётся локальным следующим компонентом, не второй выпуск.
 
