@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; проход04:35, 2026-10-18T04:42:53.551884+00:00; kiris-jobs main92dc5b64477de83a1d174ecba154c03bdb29922f после99, Dragon14 main0b035 сохранён. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; проход05:03, локальные source-статусы на2026-10-18T04:59:51.682132+00:00; опубликованный kiris main92dc после99 и Dragon0b035 сохранены. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -19,6 +19,11 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
+
+Локальная очередь05:03 по exact saved packet04:59:9cd8/14_4fef/12_96d2/15_a045 — все source CLEAR. Frontend13author+13independentQA и contract только6 новых peer tests — VM/pure-mock; native browser нового среза NOTRUN. Backend12 author21new+69old, без независимогоHTTP-runtime; CI15 author21/39, без hostednewCI. Все компоненты unpushed/unpublished; общий head/PR/counts ещё неизвестны.
+Guard05:03=0. Следующий ordinary union остаётся у существующего владельца9 с exact source-preservation и новой текущей приёмкой. Локальные2rootdocs от92e19 не опубликованы; опубликованный99 остаётся92dc/35HTTP/311projection/276Gitothers. Backend local/onlineAIoff; ограничения и отказы2/13 сохранены.
+
+### История прохода04:35 — snapshot 18.10.2026 04:56 UTC
 
 В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/) опубликована readonly-сводка всех3 вымышленных задач: ID, текущие статусы и общий прогресс на EN/RU/UK/PL. Фильтр/поиск не сужают сводку; edit/reset/подтверждённый restore обновляют её. Явное выделение readonly-текста не копирует, не отправляет, не сохраняет файл и не создаёт новые записи. При недоступном storage видна оговорка о работе только в текущей вкладке; реального рабочего отчёта/данных работников нет.
 Единственный guarded merge04:35: tested `77455024168f59d6a766992acae5a784016734fc` → main `92dc5b64477de83a1d174ecba154c03bdb29922f`, tree `d50443d1af3c2a3add3df6d95d7d6fa361ea8070`, orderedparents[0986,774550]. Pages39097972392/Backend39097972375 terminalSUCCESS attempt1; 35 выбранных HTTP-файлов exact size/SHA256/Gitblob, main до/после совпал. Full projection311: остальные276 только Gitidentity, не311HTTP. Source431/net7 сохранил4feature source/test files, новый journal и2rootdocs bdbed; backend локальный, online-adapter/AIoff.
