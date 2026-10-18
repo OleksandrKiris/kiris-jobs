@@ -273,8 +273,10 @@ The accepted84 publication introduced a new legitimate five-resource generation.
 Its successor PR89 changes four resources again. Historical c896 hashes describe
 historical evidence, not a version allowlist: eligibility now comes from the
 exact current Git HEAD's publisher projection. Before browser execution,
-`captureCurrentToolTarget` requires TESTED_HEAD to equal the real checkout HEAD
-and binds all five captured buffers, source paths, Git blobs, sizes and SHA256
+`captureCurrentToolTarget` requires either a direct TESTED_HEAD checkout or the
+CI merge checkout with exactly the ordered TESTED_BASE/TESTED_HEAD parents.
+The real checkout commit is always the resource source ref; PR head/event base
+remain separate provenance fields. It binds all five captured buffers, source paths, Git blobs, sizes and SHA256
 hashes to that single commit and the verified publication fingerprint. Mixed
 captures, reduced inventories and forged head/hash/source mappings fail closed.
 A whole newly committed generation is eligible for testing, not preaccepted.
@@ -298,4 +300,10 @@ run. Addressed fictional-Git regression tests cover the next complete head,
 mixed buffers, wrong head, forged hash/blob/size/mapping, reduced/duplicate/failed
 reports and missing tool evidence. Only ordinary exact-head CI supplies browser
 acceptance; PR89 is not rerun or declared ready by these isolated checks.
+
+The first PR91 candidate1b4e exposed an author harness error: it required direct
+PR-head checkout although Actions uses synthetic merge0e348842 (parents c032,
+1b4e; identical tested tree). That red attempt is preserved, not rerun. The
+follow-up verifies exact merge ancestry and binds the target ref to the actual
+checkout; a regression rejects swapped/wrong parents and confirms source ref.
 

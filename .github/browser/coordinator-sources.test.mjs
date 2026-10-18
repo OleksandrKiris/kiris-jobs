@@ -232,7 +232,27 @@ test('the next complete Git HEAD outside both historical tuples uses actual capt
 test('current tuple rejects a syntactically valid but wrong source HEAD and a malformed HEAD', t => {
   const f = nextHeadFixture(t);
   for (const head of [f.oldHead, 'f'.repeat(40), 'main'])
-    assert.throws(() => captureCurrentToolTarget(f.source, head, f.staged, f.files), /head|HEAD/);
+    assert.throws(() => captureCurrentToolTarget(f.source, head, f.staged, f.files), /head|HEAD|base|merge/);
+});
+
+test('CI merge checkout binds actual source to the exact ordered event-base/PR-head parents', t => {
+  const f = nextHeadFixture(t), prHead = f.head, base = f.oldHead;
+  const tree = f.git(['rev-parse', prHead + '^{tree}']);
+  const merge = f.git(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+    'commit-tree', tree, '-p', base, '-p', prHead, '-m', 'Fictional CI synthetic merge']);
+  f.git(['update-ref', 'HEAD', merge]);
+  writeFileSync(join(f.source, '.git/shallow'), merge + '\n');
+  assert.equal(f.git(['show', '-s', '--format=%P', merge]), '', 'Shallow revision view really hides the parents');
+  const { staged } = f.capture();
+  const current = captureCurrentToolTarget(f.source, prHead, staged, f.files, base);
+  assert.equal(current.sourceHead, merge); assert.equal(current.testedHead, prHead);
+  assert.equal(current.checkout, merge); assert.deepEqual(current.checkoutParents, [base, prHead]);
+  const transition = transitionForTarget(JOINT_TOOL_TRANSITION, { head: current.sourceHead,
+    base, hashes: current.hashes, mode: 'actual-staged-head' });
+  assert.equal(transition.target.ref, merge, 'The source ref must name the actual captured tree');
+  assert.equal(transition.eventBase, base);
+  for (const [badHead, badBase] of [[base, prHead], ['f'.repeat(40), base], [prHead, 'f'.repeat(40)]])
+    assert.throws(() => captureCurrentToolTarget(f.source, badHead, staged, f.files, badBase), /exact event base and tested PR head/);
 });
 
 test('current tuple rejects any mixed captured body and any missing or extra buffer', t => {

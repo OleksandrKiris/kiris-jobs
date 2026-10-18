@@ -108,8 +108,9 @@ try {
   originalTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
   const actualHashes = Object.fromEntries([...originalTools].map(([name, bytes]) => [name, sha256(bytes)]));
-  const currentTarget = captureCurrentToolTarget(checkout, report.head, staged, originalTools);
-  report.currentStagedHead = { sourceHead: report.head, checkout: report.checkout,
+  const currentTarget = captureCurrentToolTarget(checkout, report.head, staged, originalTools, report.base);
+  report.currentStagedHead = { sourceHead: currentTarget.sourceHead, testedHead: report.head, checkout: report.checkout,
+    eventBase: report.base, checkoutParents: currentTarget.checkoutParents,
     inventorySHA256: staged.sha256, files: staged.files.length, actualToolHashes: actualHashes,
     expectedCurrentTools: currentTarget.resources };
   const mode = selectToolTarget(actualHashes, oldHashes, currentTarget.hashes);
@@ -150,7 +151,7 @@ try {
   const candidate = toolInput(mode, currentTarget.files, () => publishedToolBytes(JOINT_TOOL_TRANSITION.target, false));
   const targetHashes = Object.fromEntries([...candidate.files].map(([name, bytes]) => [name, sha256(bytes)]));
   const transition = transitionForTarget(JOINT_TOOL_TRANSITION,
-    { head: report.head, base: report.base, hashes: targetHashes, mode });
+    { head: currentTarget.sourceHead, base: report.base, hashes: targetHashes, mode });
   report.compositeReceipt = {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
     currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,

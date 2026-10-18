@@ -79,13 +79,21 @@ export function captureStagedPublication(checkout, artifact, checkoutRef) {
 // Bind the five captured buffers to ONE real checkout commit, rather than a
 // list of previously accepted versions. A new complete head is eligible;
 // eligibility is not browser acceptance of its behaviour.
-export function captureCurrentToolTarget(checkout, head, staged, files) {
+export function captureCurrentToolTarget(checkout, head, staged, files, base) {
   assert.match(head, /^[0-9a-f]{40}$/, 'Exact current tool source head');
   const actualHead = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: checkout,
     encoding: 'utf8', timeout: 60000 }).trim();
-  assert.equal(head, actualHead, 'Tool source head must equal the real checkout HEAD');
+  // Read immutable commit headers: revision formatting hides parents at a
+  // shallow boundary and must not substitute a different ancestry policy.
+  const header = execFileSync('git', ['cat-file', '-p', actualHead], {
+    cwd: checkout, encoding: 'utf8', timeout: 60000 }).split('\n\n', 1)[0];
+  const parents = [...header.matchAll(/^parent ([0-9a-f]{40})$/gm)].map(match => match[1]);
+  if (head !== actualHead) {
+    assert.match(base, /^[0-9a-f]{40}$/, 'Exact event base for a CI merge checkout');
+    assert.deepEqual(parents, [base, head], 'CI checkout must merge the exact event base and tested PR head');
+  }
   assert.equal(staged.sha256, digest('sha256', JSON.stringify(staged.files)), 'Captured publication fingerprint');
-  const expected = gitPublication(checkout, head).filter(x => toolPath(x.path));
+  const expected = gitPublication(checkout, actualHead).filter(x => toolPath(x.path));
   const records = staged.files.filter(x => toolPath(x.path));
   const names = [...coordinatorRuntime].sort();
   assert.deepEqual([...files.keys()].sort(), names, 'Exactly five captured current buffers');
@@ -104,7 +112,8 @@ export function captureCurrentToolTarget(checkout, head, staged, files) {
     hashes[name] = record.sha256;
     resources[name] = { sourcePath: source.sourcePath, blob: source.blob, bytes: record.bytes, sha256: record.sha256 };
   }
-  return { sourceHead: head, checkout: actualHead, inventorySHA256: staged.sha256, hashes, resources, files };
+  return { sourceHead: actualHead, testedHead: head, eventBase: base, checkout: actualHead,
+    checkoutParents: parents, inventorySHA256: staged.sha256, hashes, resources, files };
 }
 
 export function selectToolTarget(actual, oldHashes, expectedCurrentHashes) {
