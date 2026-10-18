@@ -5,7 +5,7 @@ import vm from "node:vm";
 
 const root = new URL("../", import.meta.url);
 const locales = ["ru", "uk", "pl", "en", "az", "ka", "id", "es", "fil", "ne", "hy"];
-const source = await fs.readFile(new URL("assets/candidate.js", root), "utf8");
+const source = await fs.readFile(process.env.CANDIDATE_SOURCE_FILE || new URL("assets/candidate.js", root), "utf8");
 const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.accessibilityTest = { detail, updateSkipLink };\n})();");
 assert.notEqual(instrumented, source);
 const scripts = await Promise.all(["data/content.js", ...locales.map(l => `data/locales/${l}.js`), "assets/i18n.js"].map(p => fs.readFile(new URL(p, root), "utf8")));
@@ -44,6 +44,42 @@ test("installed shortcuts focus existing targets, preserve URLs/context, and lea
   assert.deepEqual(manifest.shortcuts.map(s => s.url), ['./#job-search', './#footer-whatsapp']);
   assert.match(source, /addEventListener\("hashchange", focusCatalogShortcut\)/);
 });
+
+for (const action of ["settled", "visible", "focus", "hash", "wheel"]) {
+  test(`late font layout / ${action}: shortcut visibility recovers without stealing interaction`, async () => {
+    const routed = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.shortcutTest = { focusCatalogShortcut };\n})();");
+    const location = new URL("https://example.test/?lang=ka#profile");
+    let finishFonts;
+    const ready = new Promise(resolve => { finishFonts = resolve; });
+    const calls = [];
+    const listeners = new Map();
+    const document = { body: { dataset: {} }, fonts: { ready }, querySelector: () => null,
+      getElementById: id => id === "footer-whatsapp" ? target : null };
+    const target = {
+      focus() { document.activeElement = target; },
+      scrollIntoView() { calls.push("scroll"); },
+      getBoundingClientRect() { return action === "visible" ? {top: 400,bottom: 440} : {top: 950,bottom: 990}; }
+    };
+    const window = {location,innerHeight:900,
+      addEventListener: (event,listener) => listeners.set(event,listener),
+      removeEventListener: (event,listener) => { if (listeners.get(event) === listener) listeners.delete(event); } };
+    const context = vm.createContext({window,document,location,URL,Intl,Date,
+      navigator:{language:"ka",languages:["ka"]},localStorage:{getItem:()=>null},
+      fetch(){throw Error("No network or submissions");}});
+    scripts.forEach(script => vm.runInContext(script,context));
+    vm.runInContext(routed,context);
+    window.shortcutTest.focusCatalogShortcut();
+    assert.equal(calls.length,1,"The target is focused and scrolled immediately");
+    if(action === "focus") document.activeElement = {};
+    if(action === "hash") location.hash = "#jobs";
+    if(action === "wheel") listeners.get("wheel")?.();
+    finishFonts();
+    await ready; await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    assert.equal(calls.length,action === "settled" ? 2 : 1);
+    assert.equal(listeners.size,0,"Pending interaction listeners are removed after font settlement");
+    assert.equal(location.search,"?lang=ka");
+  });
+}
 
 for (const locale of locales) {
   test(`${locale}: footer landmark follows the chosen language without a Polish fallback`, async () => {

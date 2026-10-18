@@ -96,6 +96,28 @@ try {
     await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: false });
   }
 
+  // A delayed font response can move a translated mobile footer after focus.
+  report.shortcutFonts = [];
+  for (const width of [1280,320]) {
+    const ctx = await context({width,height:900}, 'denied');
+    const page = activePage = await ctx.newPage();
+    let releaseFonts, enteredFonts;
+    const pending = new Promise(resolve => {releaseFonts=resolve;});
+    const entered = new Promise(resolve => {enteredFonts=resolve;});
+    await ctx.route('**/assets/fonts/*.woff2', async route => {enteredFonts();await pending;await route.continue();});
+    await page.goto(base+'?lang=ka#profile',{waitUntil:'domcontentloaded'});await ready(page);
+    await page.waitForFunction(()=>document.activeElement?.id==='footer-whatsapp');
+    await entered;
+    const before = await page.locator('#footer-whatsapp').boundingBox();
+    releaseFonts();
+    await page.evaluate(()=>document.fonts.ready);
+    await page.waitForFunction(()=>{const r=document.getElementById('footer-whatsapp').getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;});
+    assert.equal(await page.evaluate(()=>document.activeElement?.id),'footer-whatsapp');
+    await fits(page);await shot(page,`shortcuts-fonts-${width}`);
+    report.shortcutFonts.push({width,status:'passed',before,after:await page.locator('#footer-whatsapp').boundingBox()});
+    await ctx.close();activePage=null;
+  }
+
   // Real user input while the content module is still loading. This belongs
   // to the catalogue route acceptance, not historical scenario totals.
   report.earlyInput = [];
@@ -322,6 +344,7 @@ try {
         await page.waitForFunction(id => document.activeElement?.id === id, id);
         assert.equal(await page.locator('html').getAttribute('lang'), 'ka');
         assert.equal(new URL(page.url()).hash, '#' + hash);
+        await page.evaluate(() => document.fonts.ready);
         const visible = await page.locator('#' + id).evaluate(el => {
           const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight;
         });

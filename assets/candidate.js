@@ -1069,6 +1069,25 @@
     if (!target) return;
     target.focus({ preventScroll: true });
     target.scrollIntoView({ block: "center", behavior: "instant" });
+    // Font swapping can move the footer after the initial scroll, especially
+    // on narrow translated pages. Keep this shortcut visible once fonts settle,
+    // unless the user has already started another interaction.
+    if (document.fonts?.ready) {
+      const hash = location.hash;
+      let interrupted = false;
+      const cancel = () => { interrupted = true; };
+      const events = ["pointerdown", "keydown", "wheel", "touchstart"];
+      events.forEach((event) => window.addEventListener(event, cancel, { once: true, passive: true }));
+      document.fonts.ready.then(() => {
+        if (interrupted || location.hash !== hash || document.activeElement !== target) return;
+        const bounds = target.getBoundingClientRect();
+        if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) {
+          target.scrollIntoView({ block: "center", behavior: "instant" });
+        }
+      }).catch(() => {}).finally(() => {
+        events.forEach((event) => window.removeEventListener(event, cancel));
+      });
+    }
   }
 
   function openDeepLink() {

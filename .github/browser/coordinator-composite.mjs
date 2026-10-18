@@ -139,10 +139,13 @@ try {
     const full = JSON.parse(await readFile(join(fullDir, 'acceptance.json'), 'utf8'));
     assert.deepEqual(full.earlyInput?.map(x=>`${x.width}:${x.clear}`).sort(), ['1280:false','1280:true','320:false','320:true']);
     assert.ok(full.earlyInput.every(x=>x.status==='passed' && x.reload), 'Early-input typing/clear and persisted reload must all pass');
+    assert.deepEqual(full.shortcutFonts?.map(x=>x.width).sort((a,b)=>a-b), [320,1280]);
+    assert.ok(full.shortcutFonts.every(x=>x.status==='passed'), 'Delayed-font shortcuts must remain visible with denied storage');
     report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
       checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
       passed: full.results.filter(x => x.status === 'passed').length,
-      notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput, error: full.error || null };
+      notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
+      shortcutFonts: full.shortcutFonts, error: full.error || null };
     assertFullCurrentResult(failure, full, { head: report.head, base: report.base, checkout: report.checkout,
       tools: currentTarget.resources, workerChanged: execFileSync('git', ['show', report.base + ':sw.js']).toString()
         !== (await readFile(join(artifact, 'sw.js'))).toString() });
