@@ -6,12 +6,19 @@ import unittest
 
 
 SUITES = [('contracts/materials-v1/test_materials.py', 13),
+          ('contracts/materials-v1/test_material_detail.py', 6),
           ('docs/integration/test_ownership.py', 11)]
+MATERIAL_DETAIL_FILES = ('contracts/materials-v1/detail-response.schema.json',
+                         'contracts/materials-v1/test_material_detail.py')
 CAPABILITIES = Path('contracts/capabilities-v1')
 CAPABILITIES_FILES = ('response.schema.json', 'snapshot.json', 'test_capabilities.py')
 
 
 def required_suites(root):
+    for name in MATERIAL_DETAIL_FILES:
+        path = root / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f'Incomplete material detail contract: {name} must be a real file')
     suites = list(SUITES)
     directory = root / CAPABILITIES
     if not directory.exists() and not directory.is_symlink():
