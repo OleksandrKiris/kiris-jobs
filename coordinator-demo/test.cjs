@@ -739,9 +739,17 @@ test('backup export requests a local JSON download or honestly falls back when c
 const bananaID='banana-warehouse-poland-summary-ru',cleaningID='site-cleaning-summary-ru';
 test('two-material snapshot exactly matches accepted14 fixture; legacy first item and pinned source provenance survive',()=>{
  const fixture=JSON.parse(read('../contracts/materials-v1/snapshot.json'));assert.deepEqual(M.materialSnapshot({language:'ru'}),fixture);
- const previous=JSON.parse(spawnSync('git',['show','2e80ab811fa3573fc13ac7dd6ee65279865cc58b:contracts/materials-v1/snapshot.json'],{encoding:'utf8'}).stdout);assert.deepEqual(fixture.items[0],previous.items[0]);
+ // Pins measured from accepted Git blobs before this test-only change. No commit history is required.
+ const {createHash}=require('node:crypto');
+ const sorted=value=>value&&typeof value==='object'?Array.isArray(value)?value.map(sorted):Object.fromEntries(Object.keys(value).sort().map(key=>[key,sorted(value[key])])):value;
+ assert.equal(createHash('sha256').update(JSON.stringify(sorted(fixture.items[0]))).digest('hex'),'815ee5ba8ab77c7f80026d401ffbc97d632c281941696a937464de535f9f420f');
+ const refs={[cleaningID]:'fc672d805fb884eb1d09bdc8ca342ba530ad83f4',[bananaID]:'2e80ab811fa3573fc13ac7dd6ee65279865cc58b'};
+ const bytes=fs.readFileSync(path.join(__dirname,'../data/content.js'));
+ // Both pinned revisions contain this exact blob; .gitattributes checks it out with LF.
+ assert.equal(createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex'),'66e468af5d7d20db7f6d74c92773c0bf2f4e94a9');
+ assert.equal(createHash('sha256').update(bytes).digest('hex'),'30d88f947f5647a44a7446e2b4335c6cbb0ea5126b3a9684511339910c5b3c58');
  assert.deepEqual(fixture.items.map(x=>x.id),[cleaningID,bananaID]);
- for(const item of fixture.items){const result=spawnSync('git',['show',item.source.ref+':'+item.source.path],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);const realm={window:{}};vm.runInNewContext(result.stdout,realm);const job=realm.window.PORTAL_CONTENT.jobs.find(x=>x.id===item.job_id);assert.equal(item.title,job.title);assert.equal(item.text,job.summary);assert.ok(job.location.split(' · ').includes('Zgorzelec'));assert.equal(item.source.source_updated_on,job.updatedAt);assert.equal(item.synthetic,false);}
+ for(const item of fixture.items){assert.equal(item.source.ref,refs[item.id]);assert.equal(item.source.path,'data/content.js');assert.equal(item.source.repo,'OleksandrKiris/kiris-jobs');const realm={window:{}};vm.runInNewContext(bytes.toString('utf8'),realm);const job=realm.window.PORTAL_CONTENT.jobs.find(x=>x.id===item.job_id);assert.equal(item.title,job.title);assert.equal(item.text,job.summary);assert.ok(job.location.split(' · ').includes('Zgorzelec'));assert.equal(item.source.source_updated_on,job.updatedAt);assert.equal(item.synthetic,false);}
 });
 test('two-material default/max/explicit one and eight requested languages retain exact order and null cursor',()=>{
  for(const language of ['ru','ua','uk','en','pl','ka','tr','hy'])for(const mode of ['snapshot','mock']){const r=M.materialReader({mode,mock:q=>JSON.stringify(M.materialSnapshot(q))});
