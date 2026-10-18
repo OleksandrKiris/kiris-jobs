@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 02:34 UTC, выпуски PR94, HYDRA14 и Dragon13; объединение принятых частей92/95 назначено). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 02:51 UTC, выпуски PR95, HYDRA14 и Dragon13). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -68,7 +68,27 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 
 ## Актуальное состояние после исправлений — 18.10.2026
 
-Последняя сверка main: `6faaea9e2d109bc808ff0ca4eac863c4a2d65e3d`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60/84/89/94.
+Последняя сверка main: `2e80ab811fa3573fc13ac7dd6ee65279865cc58b`, после PR53/55/56/59/66/64/70/67/72/61/73/76/78/83/85/77/60/84/89/94/95.
+Выпущено **резервное копирование и подтверждённое восстановление демо-прогресса**
+в [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/).
+Экспорт содержит только статусы3 вымышленных задач. Импорт проверяет strictJSON/2048B,
+показывает до/после и применяет запись один раз после явного подтверждения;
+изменившиеся, повреждённые и недоступные данные не перезаписываются. OS-save и
+атомарное изменение нескольких вкладок не заявлены.
+Единственный guarded merge прохода02:29: tested `be90179caf98a877fc485be5c36832c74563d2b5` → main `2e80ab811fa3573fc13ac7dd6ee65279865cc58b`,
+tree `9cfb6d73dd19f95b36859447ab5fe03822a15abe`, orderedparents[6faa,be901].
+[Pages39091485504](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39091485504) и
+[Backend39091485527](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39091485527) SUCCESS;
+33 выбранных HTTP-файла совпали с Git по размеру/SHA256/blob, main до/после неизменен.
+Full publication projection309: остальные276 — только Gitidentity, не309HTTP.
+Общий428entry/21path union сохранил backup954daf, API92d9f и rootdocs5c.
+Точный current runtime: core16+workerN/A/main19/proto16+8, Native6×(16coordinator+8calculator),
+109 combined TAP в каждом native job отдельно от Catalogue86 и прежних author95.
+Backend10runner/87backend/29contracts и early18 выполнены на общем head.
+Локальный API capabilities и обязательная CI/schema-проверка вошли в source main;
+это не публикация Django. Frontend работает самостоятельно, online-adapter/AIoff.
+Предыдущий выпуск94 и датированные pre95-поручения ниже сохранены как история.
+
 Выпущено явное **избранное материалов**: Pin сохраняет requested language, Open
 использует текущий snapshot/mock reader, Remove удаляет только pin. После reload
 список остаётся видимым без autoopen; задачи, поиск, источник и last-pointer сохранены.
@@ -706,13 +726,13 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Избранное94 опубликовано6faa/32HTTPexact; backup95@4daf отдельно принят source/runtime, actualReady02:23:27,7paths/420entries. Только3demo statuses, strict preview/confirm/cancel, raw/crosskey preservation | Root назначил ordinary merge accepted92@d9f INTO existing95 плюс новый2rootdocs перед одним push. Draft95 до новой exact-head whole-union/CI/runtime приёмки; прежняя4dafReady — история компонента |
-| 10 | Единственный guard01:57 выпустил94→6faa;92d9f и954daf приняты отдельно, HYDRA b04f/Dragon f088 сохранены | В проходе02:29 один guard ещё свободен. Владелец root2docs/интеграции/сайтов; принять новый общий95, затем post-merge/Pages и точные активы. Backend локальный |
+| 9 | Backup95@be901 опубликован2e80ab8; source428union/runtime4 CLEAR, Pages/Backend SUCCESS,33HTTPexact; API92 source включён | Следующий согласованный срез: второй подтверждённый материал из существующего data/content.js. Владелец9 интегрирует frontend после contract-компонента14; один новый WIP, без повторного выпуска95 |
+| 10 | Единственный guard02:29 выпустил95→2e80ab8,33HTTPexact; backend локальный. Delivered rootdocs5c сохранён | Эта новая запись2rootdocs — локальный следующий компонент от actualmain95, без отдельного push/CI/второго merge. Приёмка нового материала и сайтов остаётся у root |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | Current92@d9f/base6faa tree99d28/427union/net14 принят source/runtime; Backend39089216166/Catalogue39089216182 SUCCESS и actualReady02:19:03.10runner/87backend/29contracts раздельно от browser core16/main19/proto16+8 | Компонент заморожен; owner9 объединяет92 INTO95. Не создавать вторую ветку/CI. Закрытие92 и issue93 возможно только после фактического source ancestry в main и post-check; backend не deployed |
+| 12 | API92d9f source доставлен через95, standalone10runner/87backend/29contracts сохранены отдельно от current aggregate; Django не развёрнут | После contract14 проверить совместимость локального materials/capabilities reader с двумя материалами и fixtures; изменения только своих backend paths при необходимости, online/AIoff |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Authored contract9c:5paths сохранены в accepted92@d9f/427union; current29PASS=9caps+9materials+11ownership, прежний5f snapshot — история | Canonical shape frozen; следующая проверка только общего95 после ordinary92 union, без отдельной ветки/CI. SQLite fixtures не production multi-tenancy |
-| 15 | CI21 сохранён в accepted92@d9f; current early18/10runner/87+29/core16/main19/proto16+8 приняты; issue87closed/93open | Только main/head/CI delta общего95, без rerun неизменённых проектов.93 закрывать после фактического source-release21 и post-check; aborted fixture POST16full/20main не доставка |
+| 14 | Authored9c schema и current29 включены в source95; старые authored pins и standalone d9f proofs сохранены | Следующий срез: контракт/fixtures двух материалов, второй только по точному существующему source/ref/selector. Форму API не выдумывать; frontend владеет9, backend12; отдельной конкурирующей ветки/PR не создавать |
+| 15 | CI21 source доставлен через95; current Backend/early18/schema gates SUCCESS, lightweight7repo delta сохранён | Issue93 закрывать/считать закрытым только по actual close action после postBackend95. Дальше только новые причины/изменённые head, без повторного аудита неизменённых проектов |
 
 Предыдущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
 принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
