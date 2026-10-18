@@ -1,3 +1,4 @@
+import {PDF_ALL_LANGUAGES,pdfCopy,assertPdfCopy,assertEmptyGeometry,emptyGeometry,visiblePdfCopy} from './pdf-copy.mjs';
 // Personal acceptance on isolated GitHub Actions contexts; no external delivery.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
@@ -9,13 +10,16 @@ import {join,resolve} from 'node:path';
 import {staticOrigin} from './static-origin.mjs';
 import {captureStagedPublication} from './catalogue-scope.mjs';
 
-export const PDF_LANGUAGES=['pl','uk','ru','en','ka','az','hy','tr','uz'];
-const titles={pl:'Utwórz PDF',uk:'Створити PDF',ru:'Создать PDF',en:'Create PDF',ka:'PDF-ის შექმნა',az:'PDF yaradın',hy:'Ստեղծել PDF',tr:'PDF oluştur',uz:'PDF yaratish'};
+export const PDF_LANGUAGES=PDF_ALL_LANGUAGES;
+const existingTitles={pl:'Utwórz PDF',uk:'Створити PDF',ru:'Создать PDF',en:'Create PDF',ka:'PDF-ის შექმნა',az:'PDF yaradın',hy:'Ստեղծել PDF',tr:'PDF oluştur',uz:'PDF yaratish'};
+const copyData=pdfCopy();assertPdfCopy(copyData);
+const titles=Object.fromEntries(PDF_LANGUAGES.map(l=>[l,copyData.locales[l].title]));
+assert.deepEqual(Object.fromEntries(Object.keys(existingTitles).map(l=>[l,titles[l]])),existingTitles);
 const OLD='3fb5e53647a4fc025ad8fb8621308ce7f1a6e11a';
 const draftKey='citronex_screening_application_v17';
 export function assertPdfRows(rows){
   assert.deepEqual(rows?.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>PDF_LANGUAGES.map(l=>w+':'+l)).sort());
-  for(const r of rows)for(const k of ['passed','footer','review','language','returnRoute','draft','fits','noCandidateURL'])assert.equal(r[k],true,`${r.lang}:${r.width}:${k}`);
+  for(const r of rows)for(const k of ['passed','footer','review','language','returnRoute','draft','fits','noCandidateURL','copy','preview','direction','numericLTR','photoPreserved','print'])assert.equal(r[k],true,`${r.lang}:${r.width}:${k}`);
 }
 
 export async function runPdfAcceptance(){
@@ -62,10 +66,26 @@ export async function runPdfAcceptance(){
       assert.equal(new URL(await page.locator('#backLink').getAttribute('href'),page.url()).search,'');
       await shot(page,'old-'+lang+'-to-pl-320');report.oldRed.push({lang,actual:'pl',width:320,ref:OLD,status:'expected-failure'});await close(ctx,'old-'+lang);
     }
+    const copyRef='3aa1f00163de5342d2c67c2af0adf92da909cd5f';
+    const copyOldFiles=Object.fromEntries(['apply/pdf/index.html','apply/pdf/app.js','apply/pdf/styles.css','apply/pdf/navigation.js'].map(f=>[f,execFileSync('git',['show',copyRef+':'+f])]));
+    report.copyRegressionSource={ref:copyRef,files:Object.fromEntries(Object.entries(copyOldFiles).map(([f,b])=>[f,{bytes:b.length,sha256:createHash('sha256').update(b).digest('hex')}]))};report.copyOldRed=[];
+    for(const kind of ['empty','partial','unsupported']){
+      const ctx=await context(320),page=await ctx.newPage();active=page;
+      for(const [file,bytes]of Object.entries(copyOldFiles)){
+        const suffix=file.endsWith('index.html')?file.slice(0,-10):file;
+        await ctx.route(new RegExp('/kiris-jobs/'+suffix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\?.*)?$'),r=>r.fulfill({status:200,contentType:file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'text/javascript',body:bytes}));
+      }
+      const lang={empty:'en',partial:'ka',unsupported:'ur'}[kind];await page.goto(base+'apply/pdf/?lang='+lang);
+      let observed;
+      if(kind==='empty'){observed=await emptyGeometry(page);assert.ok(observed.emptyBottom>observed.coverBottom+50);assert.ok(observed.footerBottom>observed.coverBottom+50);}
+      else if(kind==='partial'){observed=await page.locator('label[for="title"]').textContent();assert.equal(observed,'PDF title');}
+      else{observed=await page.locator('html').getAttribute('lang');assert.equal(observed,'en');assert.equal(await page.locator('#language option[value="ur"]').count(),0);}
+      await shot(page,'copy-old-'+kind+'-320');report.copyOldRed.push({kind,lang,ref:copyRef,width:320,observed,status:'expected-failure'});await close(ctx,'copy-old-'+kind);
+    }
     for(const width of [320,1280])for(const lang of PDF_LANGUAGES){
       const ctx=await context(width),page=await ctx.newPage();active=page;
       const appURL=base+'apply/?lang='+lang+'&recruiter=yana&location=any&src=fixture&campaign=sample&vacancy=tomatoes';
-      await page.goto(appURL);await page.locator(`[data-language="${lang}"]`).click();
+      await page.goto(appURL);await page.locator('#languageSearch').fill(lang);await page.locator(`[data-language="${lang}"]`).click();
       await page.locator('[data-recruiter="yana"]').click();
       await page.locator('#firstName').fill('QA_PDF_FIXTURE');await page.locator('#lastName').fill('NO_REAL_PERSON');
       await page.locator('#phone').fill('+99912345678');
@@ -73,12 +93,25 @@ export async function runPdfAcceptance(){
       const footer=await page.locator('#footerPdf').getAttribute('href');
       assert.equal(new URL(footer).searchParams.get('lang'),lang);assert.ok(!footer.includes('QA_PDF_FIXTURE')&&!footer.includes('99912345678'));
       await page.locator('#footerPdf').click();assert.equal(await page.locator('#language').inputValue(),lang);
-      assert.equal(await page.locator('h1').innerText(),titles[lang]);await fits(page);await shot(page,`pdf-${lang}-${width}`);
+      assert.equal(await page.locator('h1').innerText(),titles[lang]);await fits(page);
+      const copy=copyData.locales[lang];await visiblePdfCopy(page,copy);const geometry=await emptyGeometry(page);assertEmptyGeometry(geometry);
+      assert.equal(await page.locator('html').getAttribute('dir'),lang==='ur'?'rtl':'ltr');
+      assert.equal((await page.locator('.page-count').textContent()).trim(),'1 '+copyData.pageWord(lang,1));
+      await shot(page,`pdf-${lang}-${width}`);
+      await page.locator('#name').fill('QA_PDF_FIXTURE <b>literal</b>');await page.locator('#phone').fill('+99912345678');await page.locator('#email').fill('fixture@example.invalid');await page.locator('#note').fill('QA · '+copy.empty);for(const field of ['citizenship','location','job'])await page.locator('#'+field).fill('QA FIXTURE');
+      await page.locator('#photos').setInputFiles({name:'fixture-logo.png',mimeType:'image/png',buffer:await readFile('assets/icon-192.png')});
+      assert.equal(await page.locator('.remove-file').getAttribute('aria-label'),copy.remove+': fixture-logo.png');
+      assert.equal((await page.locator('.page-count').textContent()).trim(),'2 '+copyData.pageWord(lang,2));
+      const number=await page.locator('.pdf-data dd').filter({hasText:'+99912345678'}).evaluate(n=>{const r=document.createRange(),last=document.createRange(),t=n.firstChild;r.setStart(t,0);r.setEnd(t,1);last.setStart(t,t.length-1);last.setEnd(t,t.length);return {text:n.textContent,direction:getComputedStyle(n).direction,plusX:r.getBoundingClientRect().x,lastX:last.getBoundingClientRect().x}});
+      assert.equal(number.text,'+99912345678');assert.equal(number.direction,'ltr');assert.ok(number.plusX<number.lastX);
+      assert.equal(await page.locator('.pdf-data b').count(),0);const filledGeometry=await page.evaluate(()=>{const rect=s=>document.querySelector(s).getBoundingClientRect();return {coverBottom:rect('.pdf-cover').bottom,footerTop:rect('.pdf-footer').top,footerBottom:rect('.pdf-footer').bottom,noteBottom:rect('.pdf-note').bottom}});assert.ok(filledGeometry.footerBottom<=filledGeometry.coverBottom+1&&filledGeometry.noteBottom<=filledGeometry.footerTop+1,JSON.stringify(filledGeometry));await fits(page);await shot(page,`pdf-filled-${lang}-${width}`);
+      if(width===320)await page.pdf({path:join(out,'print-'+lang+'.pdf'),format:'A4',printBackground:true});
       const back=new URL(await page.locator('#backLink').getAttribute('href'));assert.equal(back.searchParams.get('lang'),lang);
       for(const [key,value]of [['recruiter','yana'],['location','any'],['src','fixture'],['campaign','sample'],['vacancy','tomatoes']])assert.equal(back.searchParams.get(key),value);
       assert.equal(await page.locator('#applicationBrand').getAttribute('href'),back.href);
       // A separate PDF-language preference must not change the originating application's language.
       await page.locator('#language').selectOption(lang==='en'?'pl':'en');
+      assert.equal(await page.locator('#name').inputValue(),'QA_PDF_FIXTURE <b>literal</b>');assert.equal(await page.locator('#phone').inputValue(),'+99912345678');assert.equal(await page.locator('.photo-sheet img').count(),1);await page.locator('.remove-file').click();assert.equal(await page.locator('.photo-sheet img').count(),0);
       assert.equal(await page.locator('#backLink').getAttribute('href'),back.href);
       await page.locator('#backLink').click();
       await page.locator('[data-action="resume"]').click();
@@ -94,7 +127,7 @@ export async function runPdfAcceptance(){
       const popupPromise=page.waitForEvent('popup');await page.locator('.pdf-card').click();const popup=await popupPromise;
       await popup.locator('#language').waitFor();assert.equal(await popup.locator('#language').inputValue(),lang);assert.equal(await popup.locator('h1').innerText(),titles[lang]);await popup.close();
       await fits(page);await shot(page,`review-return-${lang}-${width}`);
-      report.rows.push({lang,width,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true});await close(ctx,`${lang}-${width}`);
+      report.rows.push({lang,width,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true,printScope:width===320?'A4-generated':'narrow-print-covered',geometry,filledGeometry,number});await close(ctx,`${lang}-${width}`);
     }
     // Standalone URL priority, preference, denied storage, safe return, and local preview/print.
     for(const mode of ['saved','url-priority','denied','hostile-return']){
@@ -112,7 +145,7 @@ export async function runPdfAcceptance(){
       await page.locator('#clearButton').click();assert.equal(await page.locator('#name').inputValue(),'');assert.equal(await page.locator('.photo-sheet img').count(),0);
       report.edgeCases.push({mode,passed:true,language:expected,localPreview:true,languageSwitchPreservesDataAndFixtureImage:true,clear:true,safeReturn:true});await close(ctx,'edge-'+mode);
     }
-    assertPdfRows(report.rows);assert.equal(report.oldRed.length,2);assert.equal(report.edgeCases.length,4);
+    assertPdfRows(report.rows);assert.equal(report.copyOldRed.length,3);assert.equal(report.oldRed.length,2);assert.equal(report.edgeCases.length,4);
     assert.deepEqual(report.mutations,[]);assert.deepEqual(report.external,[]);
     assert.equal(captureStagedPublication(process.cwd(),artifact,checkout).sha256,publication.sha256);
     report.status='passed';

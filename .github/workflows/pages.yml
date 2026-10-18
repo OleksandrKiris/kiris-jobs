@@ -64,8 +64,8 @@ jobs:
           test -s apply/pdf/index.html
           test -s apply/pdf/styles.css
           test -s apply/pdf/app.js
-          grep -q 'styles.css?v=1.1.2' apply/pdf/index.html
-          grep -q 'app.js?v=1.1.3' apply/pdf/index.html
+          grep -q 'styles.css?v=1.1.3' apply/pdf/index.html
+          grep -q 'app.js?v=1.1.4' apply/pdf/index.html
           grep -q 'window.print()' apply/pdf/app.js
           grep -q 'URL.createObjectURL' apply/pdf/app.js
           grep -q 'minmax(0,420px)' apply/pdf/styles.css
