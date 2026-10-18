@@ -193,6 +193,28 @@ const screening = {
     locationOptions:{ siechnice:'Siechnice', ryczywol:'Ryczywół', bogatynia:'Bogatynia', any:'Узгодити з рекрутером' }
   }
 };
+const noLanguages = {
+  "pl": "Nie znaleziono języka.",
+  "uk": "Мову не знайдено.",
+  "ru": "Язык не найден.",
+  "en": "No matching language was found.",
+  "ka": "ენა ვერ მოიძებნა.",
+  "az": "Dil tapılmadı.",
+  "hy": "Լեզուն չի գտնվել։",
+  "tr": "Dil bulunamadı.",
+  "uz": "Til topilmadi.",
+  "bn": "কোনো ভাষা পাওয়া যায়নি।",
+  "fil": "Walang nahanap na wika.",
+  "hi": "कोई भाषा नहीं मिली।",
+  "id": "Bahasa tidak ditemukan.",
+  "kk": "Тіл табылмады.",
+  "ky": "Тил табылган жок.",
+  "ne": "भाषा फेला परेन।",
+  "si": "භාෂාවක් හමු නොවීය.",
+  "tg": "Забон ёфт нашуд.",
+  "ur": "کوئی زبان نہیں ملی۔",
+  "vi": "Không tìm thấy ngôn ngữ."
+};
 const enCustom = custom.en;
 const locales = {};
 for (const [code, meta] of Object.entries(I.languages)) {
@@ -205,6 +227,7 @@ for (const [code, meta] of Object.entries(I.languages)) {
     chooseLanguage: core.languageTitle || I.locales.en.languageTitle,
     languageLead: extra.languageIntro || core.languageSubtitle || I.locales.en.languageSubtitle,
     languageSearch: core.languageSearch || I.locales.en.languageSearch,
+    noLanguages: noLanguages[code],
     moreLanguages: c.moreLanguages,
     lessLanguages: c.lessLanguages,
     chooseRecruiter: core.recruiterTitle || I.locales.en.recruiterTitle,

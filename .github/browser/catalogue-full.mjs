@@ -8,6 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
+import { acceptApplyEntry } from './apply-entry.mjs';
 import { acceptHousingControls } from './catalogue-housing.mjs';
 import { contrastRegressionStylesheet } from './catalogue-contrast.mjs';
 import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, TOOL_FILES } from './coordinator-refresh.mjs';
@@ -661,6 +662,7 @@ try {
 
   }
 
+  await acceptApplyEntry({context,base,reportDir,report,active:page=>{activePage=page;}});
   await acceptHousingControls({context,base,reportDir,report,active:page=>{activePage=page;}});
 
   for (const path of ['coordinator-demo/', 'offline-tools/', 'backend/core/views.py', 'tools/coordinator/test.cjs', 'tools/coordinator/browser-acceptance.mjs']) {

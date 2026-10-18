@@ -1,3 +1,4 @@
+import { assertApplyEntry } from './apply-entry.mjs';
 import { assertHousingControls } from './catalogue-housing.mjs';
 // Runs only in the user-authorized GitHub Actions browser environment.
 // No submissions: only local GET/HEAD, with external requests blocked.
@@ -148,6 +149,9 @@ try {
       [320,1280].flatMap(width=>contrastLocales.map(lang=>`${width}:${lang}`)).sort());
     assert.ok(full.cardActionContrast.every(x=>x.status==='passed'&&x.normal.length===17&&x.states.length===3));
     assertContrastRegressionRows(full.cardContrastOldRed,report.base);
+    assertApplyEntry(full.applyEntry);
+    assert.deepEqual(full.applyOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);
+    assert.ok(full.applyOldRed.every(r=>r.status==='expected-failure'));
     assertHousingControls(full.housingControls);
     assert.deepEqual(full.housingGroups?.map(r=>`${r.width}:${r.cases}:${r.status}`).sort(),['1280:33:passed','320:33:passed']);
     report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
@@ -155,6 +159,7 @@ try {
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,
+      applyEntry:full.applyEntry, applyOldRed:full.applyOldRed, applyRegressionSource:full.applyRegressionSource,
       housingControls:full.housingControls, housingReturns:full.housingReturns, housingGroups:full.housingGroups,
       cardActionContrast:full.cardActionContrast.map(x=>({width:x.width,lang:x.lang,status:x.status})),
       cardContrastOldRed:full.cardContrastOldRed, error: full.error || null };
