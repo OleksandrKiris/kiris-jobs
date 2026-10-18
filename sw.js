@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v220-locale-recovery-2026-10-17-1";
+const CACHE_VERSION = "kiris-jobs-v220-early-search-2026-10-18-1";
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -7,7 +7,7 @@ const CORE_SHELL = [
   "./manifest.webmanifest",
   "./data/content.js?v=220",
   "./data/locales/pl.js?v=220",
-  "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1&localeRecovery=1",
+  "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1&localeRecovery=1&earlySearch=1",
   "./assets/privacy-bootstrap.js?v=220&localeRecovery=1",
   "./assets/candidate-base.css?v=220",
   "./assets/clean.css?v=220",
@@ -17,7 +17,7 @@ const CORE_SHELL = [
   "./assets/application-form.js?v=220",
   "./assets/application-loader.js?v=220",
   "./assets/vacancy-overrides.js?v=220",
-  "./assets/candidate.js?v=220&shortcuts=1&coordinator=1",
+  "./assets/candidate.js?v=220&shortcuts=1&coordinator=1&earlySearch=1",
   "./assets/privacy.js?v=220",
   "./assets/icons.svg",
   "./assets/mobility-map.svg?v=10",

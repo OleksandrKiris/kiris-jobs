@@ -121,7 +121,7 @@ try {
   await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
   await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
-    '50ef25e6f86f4d95897e94bb391896d8d22141c6', 'This composite requires the real SW80 fix');
+    'd002fbd4b0e7712b436c31610e718fa73430e228', 'This composite requires reviewed SW80 code plus the early-search shell revision');
 
   if (reuse.requireFullCurrentCatalogue) {
     const fullDir = join(reportDir, 'full-current');
@@ -137,10 +137,15 @@ try {
       assertFullCurrentResult(failure, undefined);
     }
     const full = JSON.parse(await readFile(join(fullDir, 'acceptance.json'), 'utf8'));
+    assert.deepEqual(full.earlyInput?.map(x=>`${x.width}:${x.clear}`).sort(), ['1280:false','1280:true','320:false','320:true']);
+    assert.ok(full.earlyInput.every(x=>x.status==='passed' && x.reload), 'Early-input typing/clear and persisted reload must all pass');
+    assert.deepEqual(full.shortcutFonts?.map(x=>x.width).sort((a,b)=>a-b), [320,1280]);
+    assert.ok(full.shortcutFonts.every(x=>x.status==='passed'), 'Delayed-font shortcuts must remain visible with denied storage');
     report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
       checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
       passed: full.results.filter(x => x.status === 'passed').length,
-      notApplicable: full.results.filter(x => x.status === 'not-applicable'), error: full.error || null };
+      notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
+      shortcutFonts: full.shortcutFonts, error: full.error || null };
     assertFullCurrentResult(failure, full, { head: report.head, base: report.base, checkout: report.checkout,
       tools: currentTarget.resources, workerChanged: execFileSync('git', ['show', report.base + ':sw.js']).toString()
         !== (await readFile(join(artifact, 'sw.js'))).toString() });
@@ -156,7 +161,7 @@ try {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
     currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
-      workerBlob: '50ef25e6f86f4d95897e94bb391896d8d22141c6', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
+      workerBlob: 'd002fbd4b0e7712b436c31610e718fa73430e228', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
     candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',
       stagedPath: 'tools/coordinator/', hashes: targetHashes, actualStagedHead: mode === 'actual-staged-head' },
     publishedOld5: { sourceHead: transition.published.ref, hashes: transition.published.hashes },
