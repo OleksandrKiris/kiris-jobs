@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 export const PUBLISHED_TOOL_BASE = 'ace6655eff143e674dc93e07a3a8709e45d5d14c';
 export const TOOL_FILES = ['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg'];
@@ -99,20 +100,60 @@ function interruption(origin, pathname) {
   return proof;
 }
 
-export async function verifyMaterialOffline(page, { id, fits, shot }) {
+// Read expectations from the very model body in the verified target five-pack,
+// not from the visible page or an unrelated historical candidate.
+export function materialItems(modelBytes) {
+  assert.ok(Buffer.isBuffer(modelBytes), 'Captured target model body is required');
+  const items = JSON.parse(runInNewContext(modelBytes.toString('utf8') +
+    '\nJSON.stringify(module.exports.materialSnapshot({language:"uk"}).items)',
+    { module: { exports: {} }, TextEncoder }, { timeout: 1000 }));
+  assert.ok(Array.isArray(items) && items.length > 0, 'Target materials are required');
+  assert.equal(new Set(items.map(item => item.id)).size, items.length, 'Distinct material IDs');
+  for (const item of items) {
+    assert.match(item.id, /^[a-z0-9-]+$/);
+    for (const field of ['title', 'text', 'language', 'location_id']) assert.ok(typeof item[field] === 'string' && item[field]);
+    assert.equal(item.synthetic, false);
+    assert.equal(item.source.repo, 'OleksandrKiris/kiris-jobs');
+    assert.equal(item.source.path, 'data/content.js');
+    assert.ok(typeof item.source.selector === 'string' && item.source.selector);
+    assert.match(item.source.ref, /^[0-9a-f]{40}$/);
+    for (const field of ['source_updated_on', 'verified_on']) assert.match(item.source[field], /^\d{4}-\d{2}-\d{2}$/);
+  }
+  return items;
+}
+
+export async function verifyMaterialOffline(page, { id, fits, shot, expectedMaterials }) {
+    assert.ok(expectedMaterials?.length, 'Explicit target-model material expectations are required');
     assert.equal(await page.evaluate(() => navigator.onLine), false, 'Material proof runs with browser offline');
     await page.locator('#materialQuery').waitFor();
-    assert.equal(await page.locator('#materials article').count(), 1);
-    assert.equal(await page.locator('#materials h3').innerText(), 'Уборка территории');
-    assert.equal(await page.locator('#materials h3').getAttribute('lang'), 'ru');
     assert.match(await page.locator('#materialsStatus').innerText(), /ru/);
     const notice = await page.locator('#materialsNotice').innerText();
-    assert.match(notice, /2026-07-23/); assert.match(notice, /2026-10-17/);
-    const source = await page.locator('#materials a').getAttribute('href');
-    assert.equal(source, 'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');
-    const snapshot = await page.locator('#materials article').innerText();
+    // Provenance IDs exist in the historical one-card UI too; Read buttons do not.
+    const articleFor = item => page.locator('#materials article').filter({ hasText: ' · ' + item.id + ' · ' });
+    const verifyCards = async () => {
+      assert.equal(await page.locator('#materials article').count(), expectedMaterials.length);
+      const texts = [];
+      for (const item of expectedMaterials) {
+        const article = articleFor(item);
+        assert.equal(await article.count(), 1, 'Exactly one card for ' + item.id);
+        assert.equal(await article.locator('h3').innerText(), item.title);
+        assert.equal(await article.locator('h3').getAttribute('lang'), item.language);
+        assert.equal(await article.locator('p:not(.muted)').innerText(), item.text);
+        assert.equal(await article.locator('a').getAttribute('href'),
+          `https://github.com/${item.source.repo}/blob/${item.source.ref}/${item.source.path}`);
+        const provenance = await article.locator('p.muted').innerText();
+        for (const value of [item.id, item.location_id, item.source.selector, item.source.ref.slice(0, 8)]) assert.ok(provenance.includes(value), value);
+        // The pinned one-card slice predates card dates. Multiple sources must
+        // identify each card's own dates, not borrow another card's/header date.
+        const dates = expectedMaterials.length === 1 ? notice : provenance;
+        for (const field of ['source_updated_on', 'verified_on']) assert.ok(dates.includes(item.source[field]), item.id + ': ' + field);
+        texts.push(await article.innerText());
+      }
+      return texts;
+    };
+    const snapshot = await verifyCards();
     await page.locator('#materialsSource').selectOption('mock');
-    assert.equal(await page.locator('#materials article').innerText(), snapshot);
+    assert.deepEqual(await verifyCards(), snapshot);
     await page.locator('#materialQuery').focus();
     assert.equal(await page.locator('#materialQuery').evaluate(node => node === document.activeElement), true);
     await page.locator('#materialQuery').fill('joint-no-such-material');
@@ -120,12 +161,16 @@ export async function verifyMaterialOffline(page, { id, fits, shot }) {
     assert.ok((await page.locator('#materialsStatus').innerText()).length > 0);
     await page.locator('#materialQuery').fill('территории');
     assert.equal(await page.locator('#materials article').count(), 1);
+    assert.equal(await articleFor(expectedMaterials[0]).innerText(), snapshot[0], 'First material search must be restored');
     await page.locator('#materialQuery').fill('');
     await page.locator('#materialsSource').selectOption('snapshot');
+    assert.deepEqual(await verifyCards(), snapshot);
     await page.locator('#materialsTitle').scrollIntoViewIfNeeded();
     await fits(page); await shot(page, id + '-materials-offline');
-    return { title: 'Уборка территории', language: 'ru', source, snapshotMockEqual: true,
-      emptySearch: true, restoredSearch: true, sourceDate: '2026-07-23', verifiedDate: '2026-10-17' };
+    const items = expectedMaterials.map(item => ({ id: item.id, title: item.title, language: item.language,
+      source: `https://github.com/${item.source.repo}/blob/${item.source.ref}/${item.source.path}`,
+      sourceDate: item.source.source_updated_on, verifiedDate: item.source.verified_on }));
+    return { ...items[0], items, snapshotMockEqual: true, emptySearch: true, restoredSearch: true };
   }
 
 export async function acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin,
@@ -171,7 +216,8 @@ export async function acceptCoordinatorRefresh({ artifact, reportDir, report, ba
     assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
   };
 
-  const materialProof = (page, id) => transition ? verifyMaterialOffline(page, { id, fits, shot }) : null;
+  const expectedMaterials = transition ? materialItems(currentFiles.get('model.js')) : null;
+  const materialProof = (page, id) => transition ? verifyMaterialOffline(page, { id, fits, shot, expectedMaterials }) : null;
 
   try {
   for (const width of [1280, 320]) for (const failedFile of TOOL_FILES) {

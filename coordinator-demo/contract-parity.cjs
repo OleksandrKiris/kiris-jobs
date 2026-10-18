@@ -11,10 +11,15 @@ sys.path.insert(0,sys.argv[1])
 from local_mock import mock_api
 rows=[]
 for language in ['ru','ua','uk','en','pl','ka','tr','hy']:
- for limit in [1,20]:
-  status,data=mock_api([('location_id','zgorzelec'),('language',language),('limit',str(limit))])
+ for limit in [1,20,None]:
+  pairs=[('location_id','zgorzelec'),('language',language)]
+  query={'location_id':'zgorzelec','language':language}
+  if limit is not None:
+   pairs.append(('limit',str(limit)))
+   query['limit']=limit
+  status,data=mock_api(pairs)
   assert status==200
-  rows.append({'query':{'location_id':'zgorzelec','language':language,'limit':limit},'response':data})
+  rows.append({'query':query,'response':data})
 print(json.dumps(rows,ensure_ascii=False))`;
 const result=spawnSync('python',['-B','-c',code,dir],{encoding:'utf8',env:{...process.env,PYTHONIOENCODING:'utf-8'}});
 assert.equal(result.status,0,result.stderr);

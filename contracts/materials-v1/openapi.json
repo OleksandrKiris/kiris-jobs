@@ -48,7 +48,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Maximum items. This bounded slice has one item.",
+            "description": "Maximum items. This bounded slice contains two source-backed items.",
             "schema": {
               "type": "integer",
               "minimum": 1,

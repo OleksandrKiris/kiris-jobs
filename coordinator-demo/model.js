@@ -88,16 +88,48 @@
       }
     };
   }
-  const CONTENT_VERSION = 'fc672d805fb884eb1d09bdc8ca342ba530ad83f4';
-  const material = {
-    id:'site-cleaning-summary-ru', type:'job-summary', job_id:'site-cleaning',
-    location_id:'zgorzelec', language:'ru', title:'Уборка территории',
-    text:'Уборка территории предприятия, сбор отходов и простые хозяйственные работы внутри технических зон и на улице.',
-    source:{repo:'OleksandrKiris/kiris-jobs',path:'data/content.js',ref:CONTENT_VERSION,
-      selector:'jobs[id=site-cleaning]',source_updated_on:'2026-07-23',
-      verified_on:'2026-10-17',verification_status:'verified-against-repository'},
-    synthetic:false
-  };
+  const CONTENT_VERSION = '2e80ab811fa3573fc13ac7dd6ee65279865cc58b';
+  const materials = [
+  {
+    "id": "site-cleaning-summary-ru",
+    "type": "job-summary",
+    "job_id": "site-cleaning",
+    "location_id": "zgorzelec",
+    "language": "ru",
+    "title": "Уборка территории",
+    "text": "Уборка территории предприятия, сбор отходов и простые хозяйственные работы внутри технических зон и на улице.",
+    "source": {
+      "repo": "OleksandrKiris/kiris-jobs",
+      "path": "data/content.js",
+      "ref": "fc672d805fb884eb1d09bdc8ca342ba530ad83f4",
+      "selector": "jobs[id=site-cleaning]",
+      "source_updated_on": "2026-07-23",
+      "verified_on": "2026-10-17",
+      "verification_status": "verified-against-repository"
+    },
+    "synthetic": false
+  },
+  {
+    "id": "banana-warehouse-poland-summary-ru",
+    "type": "job-summary",
+    "job_id": "banana-warehouse-poland",
+    "location_id": "zgorzelec",
+    "language": "ru",
+    "title": "Работник склада бананов — Польша",
+    "text": "Приём, перемещение, сортировка, переупаковка и подготовка бананов к отгрузке в центрах дозревания.",
+    "source": {
+      "repo": "OleksandrKiris/kiris-jobs",
+      "path": "data/content.js",
+      "ref": "2e80ab811fa3573fc13ac7dd6ee65279865cc58b",
+      "selector": "jobs[id=banana-warehouse-poland]",
+      "source_updated_on": "2026-07-23",
+      "verified_on": "2026-10-18",
+      "verification_status": "verified-against-repository"
+    },
+    "synthetic": false
+  }
+];
+  const materialIDs=Object.freeze(materials.map(item=>item.id));
   const clone = value => JSON.parse(JSON.stringify(value));
   function materialRequest(request={}) {
     if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['location_id','language','limit','cursor'].includes(k)))throw Error('invalid_request');
@@ -111,7 +143,7 @@
     const q=materialRequest(request), canonical=q.language==='ua'?'uk':q.language;
     return {api_version:'v1',schema_version:'1.0.0',content_version:CONTENT_VERSION,
       requested_language:q.language,effective_language:'ru',fallback:canonical!=='ru',
-      items:[clone(material)],next_cursor:null};
+      items:clone(materials.slice(0,q.limit)),next_cursor:null};
   }
   // Deliberately synchronous and local: mock is a JSON transport, never a URL.
   // Both sources must return this exact pinned, reviewed slice; no online mode.
@@ -152,14 +184,14 @@
       if(raw!==null) {
         if(typeof raw!=='string'||raw.length>256)throw Error('invalid');
         const value=JSON.parse(raw);if(!valid(value))throw Error('invalid');
-        if(value.material_id!==material.id){persistence='stale';canWrite=false;}
+        if(!materialIDs.includes(value.material_id)){persistence='stale';canWrite=false;}
         else entry={...value};
       }
     } catch(error){persistence=error.message==='invalid'||error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
     return Object.freeze({
       snapshot(){return {entry:entry?{...entry}:null,persistence};},
       remember(id,requestedLanguage) {
-        if(id!==material.id||!MATERIAL_LANGS.includes(requestedLanguage))return false;
+        if(!materialIDs.includes(id)||!MATERIAL_LANGS.includes(requestedLanguage))return false;
         entry={version:1,material_id:id,requested_language:requestedLanguage};
         if(canWrite)try {storage.setItem(LAST_MATERIAL_KEY,JSON.stringify(entry));persistence='saved';}
         catch {persistence='blocked';canWrite=false;}
@@ -186,7 +218,7 @@
         if(!keys(record,'items,version')||record.version!==1||!Array.isArray(record.items)||record.items.length>5||
           !record.items.every(x=>keys(x,'material_id,requested_language')&&typeof x.material_id==='string'&&x.material_id.length<=100&&MATERIAL_LANGS.includes(x.requested_language))||
           new Set(record.items.map(x=>x.material_id)).size!==record.items.length)throw Error('invalid');
-        if(record.items.some(x=>x.material_id!==material.id))throw Error('stale');
+        if(record.items.some(x=>!materialIDs.includes(x.material_id)))throw Error('stale');
         latest=record.items.map(x=>({...x}));
       }
       items=latest;canWrite=true;persistence='ready';
@@ -208,14 +240,14 @@
     return Object.freeze({
       snapshot(){return Object.freeze({items:Object.freeze(items.map(x=>Object.freeze({...x}))),persistence});},
       pin(id,requestedLanguage) {
-        if(id!==material.id||!MATERIAL_LANGS.includes(requestedLanguage))return false;
+        if(!materialIDs.includes(id)||!MATERIAL_LANGS.includes(requestedLanguage))return false;
         refresh();
         if(items.some(x=>x.material_id===id))return true;
         if(items.length>=5)return false;
         items=[...items,{material_id:id,requested_language:requestedLanguage}];save();return true;
       },
       remove(id) {
-        if(id!==material.id)return false;
+        if(!materialIDs.includes(id))return false;
         refresh();
         if(!items.some(x=>x.material_id===id))return false;
         items=items.filter(x=>x.material_id!==id);save();return true;

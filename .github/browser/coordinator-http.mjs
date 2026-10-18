@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
-import { verifyMaterialOffline } from './coordinator-refresh.mjs';
+import { materialItems, verifyMaterialOffline } from './coordinator-refresh.mjs';
 const KEY = 'primserv:coordinator-demo:v1';
 
 export async function acceptCoordinatorHTTP({ report, reportDir, base, context, ready, fits, shot,
-  active, startServer, stopServer }) {
+  active, startServer, stopServer, targetFiles }) {
+  const expectedMaterials = materialItems(targetFiles.get('model.js'));
   const toolReady = page => page.locator('#offline[data-offline-state="ready"]').waitFor();
   const statuses = async (page, raw) => {
     assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
@@ -46,7 +47,7 @@ export async function acceptCoordinatorHTTP({ report, reportDir, base, context, 
       await page.locator('#language').selectOption('uk');
       await stopServer(); stopped = true; await ctx.setOffline(true);
       await page.reload(); await toolReady(page); await statuses(page, raw);
-      const material = await verifyMaterialOffline(page, { id, fits, shot });
+      const material = await verifyMaterialOffline(page, { id, fits, shot, expectedMaterials });
       await page.locator('#catalogue-return').click(); await ready(page);
       assert.equal(await page.locator('#job-search').inputValue(), 'Siechnice');
       assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
@@ -85,7 +86,7 @@ export async function acceptCoordinatorHTTP({ report, reportDir, base, context, 
       assert.equal(await page.locator('#demo-01').inputValue(), 'todo', 'Protected/denied storage must not promise durable tab edits');
       assert.match(await page.locator('#storage').innerText(), mode === 'corrupt' ? /preserved/ : /unavailable/);
       if (mode === 'corrupt') assert.equal(await page.evaluate(key => localStorage.getItem(key), KEY), '{broken');
-      const material = await verifyMaterialOffline(page, { id, fits, shot });
+      const material = await verifyMaterialOffline(page, { id, fits, shot, expectedMaterials });
       assert.equal(await page.locator('#demo-01').inputValue(), 'todo');
       assert.ok((await page.locator('#catalogue-return').getAttribute('href')).endsWith('?lang=uk'));
       await page.locator('#catalogue-return').click(); await ready(page);

@@ -5,7 +5,7 @@ import sys
 import unittest
 
 
-SUITES = [('contracts/materials-v1/test_materials.py', 9),
+SUITES = [('contracts/materials-v1/test_materials.py', 13),
           ('docs/integration/test_ownership.py', 11)]
 CAPABILITIES = Path('contracts/capabilities-v1')
 CAPABILITIES_FILES = ('response.schema.json', 'snapshot.json', 'test_capabilities.py')

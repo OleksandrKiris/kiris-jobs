@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; проход02:29, 2026-10-18 02:34 UTC, kiris-jobs main6faa после94, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; проход03:07, 2026-10-18 03:10 UTC, kiris-jobs main2e80ab8 после95, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,7 +12,7 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `6faaea9e2d109bc808ff0ca4eac863c4a2d65e3d` | [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)d9f accepted Ready; [#95](https://github.com/OleksandrKiris/kiris-jobs/pull/95)4daf accepted component, returned draft for ordinary92 union+root2docs; новый общий head ещё не принят; #94 published; #62 frozen/draft | [39088679663](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39088679663) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `2e80ab811fa3573fc13ac7dd6ee65279865cc58b` | [#95](https://github.com/OleksandrKiris/kiris-jobs/pull/95)be901 merged/published; source92d9f included by ancestry; #62 frozen/draft. Exact PR92 closure is separate actual metadata | [39091485504](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39091485504) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b04fc7302612affa0c2eec71ac66ebbc13912e46` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) published; [#15](https://github.com/OleksandrKiris/citronex-hydra-project/pull/15)7ae Copy route TEXT implemented,191unit/106browser/currentCI SUCCESS, late runtime4 bounded CLEAR; formal source-report write rejected by policy, draft/unpublished | [39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `f0883032674a5dc9c2034fb144c04286a5617598` | [#13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13) published; [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)a573/basef088 copy MEMO TEXT source/runtime/peer accepted, actualready/unpublished; CI39084077900 SUCCESS | [39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804) |
@@ -20,7 +20,20 @@ recruitmentbot. Остальной аккаунт не объявляется о
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
 
-PR94 опубликован6faa: Pages39088679663/Backend39088679636 SUCCESS,32criticalHTTP
+PR95be901 → `2e80ab811fa3573fc13ac7dd6ee65279865cc58b`: Pages39091485504/Backend39091485527 SUCCESS,33criticalHTTPexact; tree9cfb иparents[6faa,be901]. Fullprojection309/276otherGitidentity. Source428/21net включает92d9f и backup954daf; current16core+workerN/A/main19/proto16+8/native96+48, Backend10/87/29 иearly18. Backendlocal/onlineAIoff. Новый2rootdocs после публикации остаётся локальным следующим компонентом, не второй выпуск.
+
+03:07 fresh7main metadata unchanged; kiris openPR только62, HYDRA15draft и Dragon14Ready
+сохранены. Второй материал локальный: contract14eb95+frontend4e+CI15_593b+root548
+составляют независимый exact430union904/net14, все component source receipts CLEAR.
+Frontend author107unit/24parity и contract13+9+11 — локальные прогоны; новый hosted
+CI/browser пока NOTRUN. Backend12 actual48+5 fixture checks и24 test-client ответа
+с независимым bounded receipt подтверждают NO_BACKEND_CHANGE, без сервера/production.
+Default/max20 и explicitlimit1, Zgorzelec filter/schema остаются прежними. Tiny408
+исправляет только OpenAPI one-item prose. Новые root2docs и408 будут включены перед
+одним combinedpush, затем новый whole-head/currentCI/runtime/Ready/guard проверяются
+отдельно. В03:07 guard0, публикация второго материала ещё не выполнена.
+
+История PR94 опубликован6faa: Pages39088679663/Backend39088679636 SUCCESS,32criticalHTTP
 exact, tested/merged tree65616 и orderedparents[8abf,EA]. Приёмка currentEA:
 independent source1 дваGREEN/419union, Native96+48 (Pin12 внутри16),
 Catalogue core16+workerN/A/main19/proto16+8 (Pin2 внутри16); local82/parity16

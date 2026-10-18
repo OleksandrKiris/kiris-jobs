@@ -134,9 +134,9 @@ try {
       const originalFileSearch = new URL(page.url()).search;
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('.task').count(), 3);
-      assert.equal(await page.locator('#materials article').count(),1);
+      assert.equal(await page.locator('#materials article').count(),2);
       assert.match(await page.locator('#materialsStatus').innerText(),/en.*ru/);
-      assert.equal(await page.locator('#materials h3').getAttribute('lang'),'ru');
+      assert.deepEqual(await page.locator('#materials h3').evaluateAll(nodes=>nodes.map(x=>x.lang)),['ru','ru']);
       const snapshotText=await page.locator('#materials').innerText();
       await page.locator('#materialsSource').selectOption('mock');
       assert.equal(await page.locator('#materials').innerText(),snapshotText);
@@ -145,7 +145,7 @@ try {
       assert.equal(await page.locator('#materials article').count(),0);
       assert.match(await page.locator('#materialsStatus').innerText(),/No confirmed material/);
       await page.locator('#materialQuery').fill('zgorzelec');
-      assert.equal(await page.locator('#materials article').count(),1);
+      assert.equal(await page.locator('#materials article').count(),2);
       await page.locator('#materialQuery').fill('');
       await fits(page);
       if (scenario.mode === 'empty') {
@@ -303,7 +303,7 @@ try {
       await page.locator('#materialsSource').selectOption('mock');
       assert.equal(await page.locator('#materials').innerText(),savedMaterialText);
       await page.locator('#materialQuery').fill('zgorzelec');
-      assert.equal(await page.locator('#materials article').count(),1);
+      assert.equal(await page.locator('#materials article').count(),2);
       assert.equal(await page.locator('#materialReading').isHidden(),true);
       await page.locator('#read-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
       assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
@@ -478,10 +478,50 @@ try {
       assert.equal(await page.locator('#backupInput').inputValue(),'');
       assert.equal(await page.locator('#backupOutput').inputValue(),'');
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      // Second accepted source material: both pins coexist; saved languages stay independent.
+      const bananaID='banana-warehouse-poland-summary-ru';
+      await page.locator('#language').selectOption('pl');
+      await keyClick(page,'pin-'+bananaID);
+      const twoPins=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
+      assert.deepEqual(JSON.parse(twoPins).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'},{material_id:bananaID,requested_language:'pl'}]);
+      await page.locator('#materialQuery').fill('бананов');
+      assert.equal(await page.locator('#materials article').count(),1);
+      const bananaText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),bananaText);
+      await keyClick(page,'read-'+bananaID);
+      assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
+      const bananaLast=await page.evaluate(key=>localStorage.getItem(key),lastKey);
+      assert.deepEqual(JSON.parse(bananaLast),{version:1,material_id:bananaID,requested_language:'pl'});
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#favouritesList article').count(),2);
+      await page.locator('#language').selectOption('uk');
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#materialQuery').fill('no matching second material');
+      await keyClick(page,'lastMaterialReturn');
+      assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
+      assert.equal(await page.locator('#language').inputValue(),'pl');
+      await keyClick(page,'pin-open-site-cleaning-summary-ru');
+      assert.equal(await page.locator('#language').inputValue(),'en');
+      await keyClick(page,'pin-open-'+bananaID);
+      assert.equal(await page.locator('#language').inputValue(),'pl');
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching second material');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),twoPins);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      await fits(page);await page.screenshot({path:join(reportDir,`${name}-second-material.png`),fullPage:true});
+      await keyClick(page,'pin-remove-'+bananaID);
+      assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),favouriteKey)).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
       await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
       report.scenarios.push({ name, viewport, status: 'passed', offline: true,
-        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort'],
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort', 'second source material search/read/last/two independent pins across reload and modes'],
         results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
     } catch (error) {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { assertToolManifest, JOINT_TOOL_TRANSITION, publishedToolBytes, TOOL_FILES } from './coordinator-refresh.mjs';
+import { assertToolManifest, JOINT_TOOL_TRANSITION, materialItems, publishedToolBytes, TOOL_FILES, verifyMaterialOffline } from './coordinator-refresh.mjs';
 
 test('all five pinned bodies are required; each truncated/mixed body is rejected', () => {
   const files = new Map(TOOL_FILES.map(name => [name, Buffer.from('complete source ' + name)]));
@@ -333,4 +333,78 @@ test('a changed worker needs both fresh viewport upgrade cases, not a not-applic
   assert.doesNotThrow(() => assertFullCurrentResult(undefined, report, expected));
   report.results.pop();
   assert.throws(() => assertFullCurrentResult(undefined, report, expected));
+});
+
+// Source-level strict-locator fixtures, not real browser/offline evidence.
+const materialFixture = () => [
+  { id: 'fixture-first', title: 'Fictional территории', text: 'Fictional first text', language: 'ru', location_id: 'zgorzelec', synthetic: false,
+    source: { repo: 'OleksandrKiris/kiris-jobs', path: 'data/content.js', ref: 'a'.repeat(40), selector: 'jobs[id=fictional-first]', source_updated_on: '2026-07-23', verified_on: '2026-10-17' } },
+  { id: 'fixture-second', title: 'Fictional second', text: 'Fictional second text', language: 'ru', location_id: 'zgorzelec', synthetic: false,
+    source: { repo: 'OleksandrKiris/kiris-jobs', path: 'data/content.js', ref: 'b'.repeat(40), selector: 'jobs[id=fictional-second]', source_updated_on: '2026-07-23', verified_on: '2026-10-18' } }
+];
+const materialModel = items => Buffer.from('module.exports={materialSnapshot:()=>(' + JSON.stringify({ items }) + ')};');
+function materialPage(items, mockFault = false) {
+  let query = '', mode = 'snapshot';
+  const visible = () => items.filter(item => (item.title + ' ' + item.text).toLowerCase().includes(query.toLowerCase()))
+    .map(item => mode === 'mock' && mockFault ? { ...item, title: 'Wrong mock title' } : item);
+  const single = rows => { assert.equal(rows.length, 1, 'strict locator'); return rows[0]; };
+  const card = rows => ({ count: async () => rows().length,
+    filter: ({ hasText }) => card(() => rows().filter(item => hasText === ' · ' + item.id + ' · ')),
+    innerText: async () => JSON.stringify(single(rows())),
+    locator: selector => ({ innerText: async () => {
+      const item = single(rows());
+      if (selector === 'h3') return item.title;
+      if (selector === 'p:not(.muted)') return item.text;
+      assert.equal(selector, 'p.muted');
+      return [item.id, item.location_id, item.source.selector, item.source.ref.slice(0, 8),
+        ...(items.length > 1 ? [item.source.source_updated_on, item.source.verified_on] : [])].join(' · ');
+    }, getAttribute: async name => {
+      const item = single(rows());
+      if (selector === 'h3' && name === 'lang') return item.language;
+      assert.equal(selector, 'a'); assert.equal(name, 'href');
+      return `https://github.com/${item.source.repo}/blob/${item.source.ref}/${item.source.path}`;
+    } }) });
+  return { evaluate: async () => false, locator(selector) {
+    if (selector === '#materials article') return card(visible);
+    if (selector === '#materialQuery') return { waitFor: async () => {}, focus: async () => {}, evaluate: async () => true, fill: async value => { query = value; } };
+    if (selector === '#materialsSource') return { selectOption: async value => { mode = value; } };
+    if (selector === '#materialsStatus') return { innerText: async () => visible().length ? 'uk → ru' : 'No confirmed material matches' };
+    if (selector === '#materialsNotice') return { innerText: async () => items.length === 1 ? '2026-07-23 · 2026-10-17' : 'Checks: 2026-10-17/18; dates on cards' };
+    if (selector === '#materialsTitle') return { scrollIntoViewIfNeeded: async () => {} };
+    throw Error('Unexpected/unscoped locator: ' + selector);
+  } };
+}
+const verifyFixtureMaterials = (items, expectedMaterials, mockFault) => verifyMaterialOffline(materialPage(items, mockFault),
+  { id: 'fictional-source-fixture', fits: async () => {}, shot: async () => {}, expectedMaterials });
+
+test('material target: captured model defines one historical or two current sources; malformed targets fail', () => {
+  for (const count of [1, 2]) {
+    const items = materialFixture().slice(0, count);
+    assert.deepEqual(materialItems(materialModel(items)), items);
+  }
+  assert.throws(() => materialItems(undefined));
+  assert.throws(() => materialItems(materialModel([])));
+  const duplicate = materialFixture(); duplicate[1].id = duplicate[0].id;
+  assert.throws(() => materialItems(materialModel(duplicate)), /Distinct/);
+});
+
+test('material target: strict one/two-card flows preserve snapshot/mock, empty and restored first search', async () => {
+  for (const count of [1, 2]) {
+    const items = materialFixture().slice(0, count), expected = materialItems(materialModel(items));
+    const proof = await verifyFixtureMaterials(items, expected);
+    assert.equal(proof.items.length, count); assert.equal(proof.items[0].id, items[0].id);
+    assert.equal(proof.snapshotMockEqual && proof.emptySearch && proof.restoredSearch, true);
+  }
+  await assert.rejects(() => verifyFixtureMaterials(materialFixture(), materialFixture().slice(0, 1)));
+  await assert.rejects(() => verifyFixtureMaterials(materialFixture().slice(0, 1), materialFixture()));
+  await assert.rejects(() => verifyFixtureMaterials(materialFixture(), materialFixture(), true));
+});
+
+test('material target: a wrong second ID/title/text/language/ref/date is rejected, not hidden by first()', async () => {
+  for (const field of ['id', 'title', 'text', 'language', 'ref', 'source_updated_on', 'verified_on']) {
+    const expected = materialFixture(), actual = structuredClone(expected);
+    if (['ref', 'source_updated_on', 'verified_on'].includes(field)) actual[1].source[field] = 'wrong';
+    else actual[1][field] = 'wrong';
+    await assert.rejects(() => verifyFixtureMaterials(actual, expected), undefined, field);
+  }
 });

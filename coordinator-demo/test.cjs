@@ -299,7 +299,7 @@ test('material snapshot reproduces accepted source text and historical source da
   assert.equal(item.title,source.title);assert.equal(item.text,source.summary);
   assert.equal(item.source.source_updated_on,source.updatedAt);
   assert.equal(source.location,'Zgorzelec');assert.equal(item.location_id,'zgorzelec');
-  assert.equal(item.source.ref,M.CONTENT_VERSION);assert.equal(item.synthetic,false);
+  assert.equal(item.source.ref,'fc672d805fb884eb1d09bdc8ca342ba530ad83f4');assert.equal(item.synthetic,false);
   assert.equal(item.source.verification_status,'verified-against-repository');
   assert.equal(item.source.verified_on,'2026-10-17');
 });
@@ -468,13 +468,13 @@ test('URL language case is normalized for material request without losing ua ali
 test('source UI searches locally with honest fallback, no answer, and pinned safe link',()=>{
   const h=ui({lang:'ua'});
   assert.match(h.$('materialsStatus').textContent,/ua.*ru/);
-  assert.equal(h.$('materials').children.length,1);
+  assert.equal(h.$('materials').children.length,2);
   const article=h.$('materials').children[0];
   h.change('materialsSource','mock');
   assert.equal(h.$('materialsSource').value,'mock');
   assert.equal(h.$('materials').children[0].children[1].textContent,article.children[1].textContent);
   assert.equal(article.children[0].lang,'ru');
-  assert.equal(article.children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/'+M.CONTENT_VERSION+'/data/content.js');
+  assert.equal(article.children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');
   assert.equal(article.children[3].rel,'noopener noreferrer');
   h.$('materialQuery').value='bogatynia';h.$('materialQuery').handlers.input();
   assert.equal(h.$('materials').children.length,0);assert.match(h.$('materialsStatus').textContent,/не знайдено/);
@@ -552,7 +552,7 @@ test('materials honor file fragment alias while preserving query and restoring t
   assert.equal(reload.$('demo-01').value,'done');assert.equal(reload.$('filter').value,'done');
   assert.match(reload.$('materialsStatus').textContent,/pl.*ru/);
   assert.equal(reload.$('materialsSource').value,'snapshot');
-  assert.equal(reload.$('materials').children.length,1);
+  assert.equal(reload.$('materials').children.length,2);
 });
 
 test('published demo returns to same-origin catalogue and reports unavailable offline storage honestly',()=>{
@@ -734,4 +734,49 @@ test('backup UI new input/context/reset cancels pending confirmation; key change
 
 test('backup export requests a local JSON download or honestly falls back when clicking throws',()=>{
  for(const download of ['success','throw']){const h=ui({download});h.change('demo-03','done');const before=[...h.store.data];h.click('backupExport');assert.deepEqual([...h.store.data],before);assert.equal(h.downloadCalls[0][0],'blob');assert.equal(h.downloadCalls[0][2],'application/json');assert.equal(h.downloadCalls[0][1][0],h.$('backupOutput').value);assert.equal(h.downloadCalls[1][1],'primserv-demo-progress.json');assert.equal(h.downloadCalls.at(-1)[0],'revoke');assert.match(h.$('backupNotice').textContent,download==='success'?/Download requested.*not confirmed/:/manual copying.*no file save is confirmed/);}
+});
+
+const bananaID='banana-warehouse-poland-summary-ru',cleaningID='site-cleaning-summary-ru';
+test('two-material snapshot exactly matches accepted14 fixture; legacy first item and pinned source provenance survive',()=>{
+ const fixture=JSON.parse(read('../contracts/materials-v1/snapshot.json'));assert.deepEqual(M.materialSnapshot({language:'ru'}),fixture);
+ // Pins measured from accepted Git blobs before this test-only change. No commit history is required.
+ const {createHash}=require('node:crypto');
+ const sorted=value=>value&&typeof value==='object'?Array.isArray(value)?value.map(sorted):Object.fromEntries(Object.keys(value).sort().map(key=>[key,sorted(value[key])])):value;
+ assert.equal(createHash('sha256').update(JSON.stringify(sorted(fixture.items[0]))).digest('hex'),'815ee5ba8ab77c7f80026d401ffbc97d632c281941696a937464de535f9f420f');
+ const refs={[cleaningID]:'fc672d805fb884eb1d09bdc8ca342ba530ad83f4',[bananaID]:'2e80ab811fa3573fc13ac7dd6ee65279865cc58b'};
+ const bytes=fs.readFileSync(path.join(__dirname,'../data/content.js'));
+ // Both pinned revisions contain this exact blob; .gitattributes checks it out with LF.
+ assert.equal(createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex'),'66e468af5d7d20db7f6d74c92773c0bf2f4e94a9');
+ assert.equal(createHash('sha256').update(bytes).digest('hex'),'30d88f947f5647a44a7446e2b4335c6cbb0ea5126b3a9684511339910c5b3c58');
+ assert.deepEqual(fixture.items.map(x=>x.id),[cleaningID,bananaID]);
+ for(const item of fixture.items){assert.equal(item.source.ref,refs[item.id]);assert.equal(item.source.path,'data/content.js');assert.equal(item.source.repo,'OleksandrKiris/kiris-jobs');const realm={window:{}};vm.runInNewContext(bytes.toString('utf8'),realm);const job=realm.window.PORTAL_CONTENT.jobs.find(x=>x.id===item.job_id);assert.equal(item.title,job.title);assert.equal(item.text,job.summary);assert.ok(job.location.split(' · ').includes('Zgorzelec'));assert.equal(item.source.source_updated_on,job.updatedAt);assert.equal(item.synthetic,false);}
+});
+test('two-material default/max/explicit one and eight requested languages retain exact order and null cursor',()=>{
+ for(const language of ['ru','ua','uk','en','pl','ka','tr','hy'])for(const mode of ['snapshot','mock']){const r=M.materialReader({mode,mock:q=>JSON.stringify(M.materialSnapshot(q))});
+  for(const limit of [undefined,1,20]){const q={language,...(limit===undefined?{}:{limit})},response=r.read(q);assert.deepEqual(response.items.map(x=>x.id),limit===1?[cleaningID]:[cleaningID,bananaID]);assert.equal(response.next_cursor,null);assert.equal(response.requested_language,language);assert.equal(response.effective_language,'ru');assert.equal(response.fallback,language!=='ru');}
+ }
+ const r=M.materialSnapshot();r.items[1].text='mutated';assert.notEqual(M.materialSnapshot().items[1].text,'mutated');assert.deepEqual(M.searchMaterials(M.materialSnapshot(),' ПРИЁМ   бананов ').map(x=>x.id),[bananaID]);assert.deepEqual(M.searchMaterials(M.materialSnapshot(),'zgorzelec').map(x=>x.id),[cleaningID,bananaID]);
+});
+test('mock rejects missing/reordered/unverified/tampered second material without relaxing old validation',()=>{
+ for(const mutate of [x=>x.items.pop(),x=>x.items.reverse(),x=>x.items[1].text='invented',x=>x.items[1].id='unknown',x=>x.items[1].location_id='pruszcz',x=>x.items[1].source.ref='a'.repeat(40),x=>x.items[1].source.verified_on='2026-01-01',x=>x.items[1].synthetic=true]){const response=M.materialSnapshot();mutate(response);assert.throws(()=>M.materialReader({mode:'mock',mock:()=>JSON.stringify(response)}).read(),/invalid_response/);}
+});
+test('both IDs support last pointer and two concurrent pins without language overwrite or lost other pin',()=>{
+ const s=storage([[M.KEY,'task raw']]),a=M.materialFavourites(s),b=M.materialFavourites(s),recent=M.materialMemory(s);
+ a.pin(cleaningID,'ua');b.pin(bananaID,'pl');assert.deepEqual(b.snapshot().items,[{material_id:cleaningID,requested_language:'ua'},{material_id:bananaID,requested_language:'pl'}]);
+ const raw=s.data.get(M.FAVOURITES_KEY);a.pin(bananaID,'ru');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(a.snapshot().items[1].requested_language,'pl');
+ recent.remember(bananaID,'ka');assert.equal(M.materialMemory(s).snapshot().entry.material_id,bananaID);assert.equal(s.data.get(M.FAVOURITES_KEY),raw);const last=s.data.get(M.LAST_MATERIAL_KEY);
+ b.remove(cleaningID);assert.deepEqual(b.snapshot().items,[{material_id:bananaID,requested_language:'pl'}]);a.pin(cleaningID,'en');assert.deepEqual(M.materialFavourites(s).snapshot().items,[{material_id:bananaID,requested_language:'pl'},{material_id:cleaningID,requested_language:'en'}]);a.remove(bananaID);assert.equal(s.data.get(M.LAST_MATERIAL_KEY),last);assert.equal(s.data.get(M.KEY),'task raw');
+});
+test('new ID never repairs invalid/future/stale pin or last records; own recovery remains explicit',()=>{
+ for(const raw of ['{bad',JSON.stringify({version:2,items:[]}),JSON.stringify({version:1,items:[{material_id:'unknown',requested_language:'ru'}]})]){const s=storage([[M.FAVOURITES_KEY,raw]]),f=M.materialFavourites(s);f.pin(cleaningID,'ua');f.pin(bananaID,'pl');f.remove(bananaID);assert.equal(s.data.get(M.FAVOURITES_KEY),raw);assert.equal(f.clear(),true);f.pin(bananaID,'pl');assert.equal(JSON.parse(s.data.get(M.FAVOURITES_KEY)).items[0].material_id,bananaID);}
+ for(const raw of ['{bad',JSON.stringify({version:2}),JSON.stringify({version:1,material_id:'unknown',requested_language:'ru'})]){const s=storage([[M.LAST_MATERIAL_KEY,raw]]),r=M.materialMemory(s);r.remember(bananaID,'ua');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),raw);}
+});
+for(const lang of [...M.LANGS,'ua','ka'])test(lang+': two materials search/read/last/two pins work through both local modes and preserve tasks/backup',()=>{
+ const h=ui({lang});h.change('demo-01','doing');const tasks=h.store.data.get(M.KEY);h.click('backupExport');const backup=h.$('backupOutput').value;h.click('pin-'+cleaningID);h.change('language','pl');h.click('pin-'+bananaID);h.click('read-'+bananaID);const pins=h.store.data.get(M.FAVOURITES_KEY),last=h.store.data.get(M.LAST_MATERIAL_KEY);assert.equal(JSON.parse(last).material_id,bananaID);assert.equal(JSON.parse(last).requested_language,'pl');
+ const re=ui({href:h.location.href,store:h.store});assert.equal(re.$('materialReading').hidden,true);assert.equal(re.$('favouritesList').children.length,2);re.change('materialsSource','mock');re.$('materialQuery').value='бананов';re.$('materialQuery').handlers.input();assert.equal(re.$('materials').children.length,1);assert.match(re.$('materials').children[0].children[0].textContent,/бананов/);re.change('materialsSource','snapshot');assert.equal(re.$('materials').children.length,1);re.change('materialsSource','mock');re.change('filter','doing');re.$('materialQuery').value='no matching source';re.$('materialQuery').handlers.input();const url=re.location.pathname;re.click('lastMaterialReturn');assert.equal(re.$('materialReading').children[0].textContent,'Работник склада бананов — Польша');assert.equal(re.$('language').value,'pl');assert.equal(re.$('materialQuery').value,'no matching source');assert.equal(re.$('materialsSource').value,'mock');assert.equal(re.location.pathname,url);
+ re.click('pin-open-'+cleaningID);re.click('pin-open-'+bananaID);assert.equal(re.$('materialReading').children[0].textContent,'Работник склада бананов — Польша');assert.equal(re.$('language').value,'pl');assert.equal(re.store.data.get(M.LAST_MATERIAL_KEY),last);assert.equal(re.store.data.get(M.FAVOURITES_KEY),pins);re.click('backupExport');assert.equal(re.$('backupOutput').value,backup);assert.equal(re.store.data.get(M.KEY),tasks);re.click('pin-remove-'+bananaID);assert.equal(re.$('favouritesList').children.length,1);assert.equal(JSON.parse(re.store.data.get(M.FAVOURITES_KEY)).items[0].material_id,cleaningID);assert.equal(re.store.data.get(M.LAST_MATERIAL_KEY),last);
+});
+
+test('source dates remain individual: historical source update and repository verification are distinct',()=>{
+ for(const lang of M.LANGS){const h=ui({lang});const cards=h.$('materials').children;assert.match(cards[0].children[2].textContent,/2026-07-23.*2026-10-17/);assert.match(cards[1].children[2].textContent,/2026-07-23.*2026-10-18/);assert.equal(cards[0].children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/fc672d805fb884eb1d09bdc8ca342ba530ad83f4/data/content.js');assert.equal(cards[1].children[3].href,'https://github.com/OleksandrKiris/kiris-jobs/blob/2e80ab811fa3573fc13ac7dd6ee65279865cc58b/data/content.js');}
 });
