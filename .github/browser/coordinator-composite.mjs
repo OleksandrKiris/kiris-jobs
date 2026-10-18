@@ -126,10 +126,10 @@ try {
   await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
   await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
-    'b2957797f24ddc70dbd57279d9f298b4f930b07b', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
+    '891539399d857f40a4fb3637ba11075517c6bf65', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
   const workerSource=(await readFile(join(artifact,'sw.js'))).toString();
   assert.equal((workerSource.match(/formErrorLocale=1/g)||[]).length,4);
-  const accepted108=workerSource.replace('kiris-jobs-v220-field-status-2026-10-18-1','kiris-jobs-v220-form-error-locale-2026-10-18-1').replaceAll('&fieldStatus=1','');
+  const accepted108=workerSource.replace('kiris-jobs-v220-field-status-2026-10-18-2','kiris-jobs-v220-form-error-locale-2026-10-18-1').replaceAll('&fieldStatus=2','');
   assert.equal(execFileSync('git',['hash-object','--stdin'],{input:accepted108,encoding:'utf8'}).trim(),'725e9cc83e4492bb2e11bc525afce92e441a253c','Only the cache generation and reviewed error-state CSS query may differ from accepted PR108 worker');
   let oldAlgorithm=accepted108.replace('kiris-jobs-v220-form-error-locale-2026-10-18-1','kiris-jobs-v220-card-contrast-2026-10-18-1').replaceAll('&formErrorLocale=1','');
   for(const id of FORM_VACANCY_IDS)oldAlgorithm=oldAlgorithm.replace(',\n  "./vacancies/'+id+'/"','');
@@ -191,7 +191,7 @@ try {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
     currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
-      workerBlob: 'b2957797f24ddc70dbd57279d9f298b4f930b07b', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
+      workerBlob: '891539399d857f40a4fb3637ba11075517c6bf65', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
     candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',
       stagedPath: 'tools/coordinator/', hashes: targetHashes, actualStagedHead: mode === 'actual-staged-head' },
     publishedOld5: { sourceHead: transition.published.ref, hashes: transition.published.hashes },

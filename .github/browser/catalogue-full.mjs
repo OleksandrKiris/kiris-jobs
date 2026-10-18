@@ -621,7 +621,7 @@ try {
       ctx.off('request',observe);
       const headFormExact=await cachedFormHash(page,headCache,new URL('assets/application-form.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-form.js'));
       const headLoaderExact=await cachedFormHash(page,headCache,new URL('assets/application-loader.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-loader.js'));
-      const headErrorStyleExact=await cachedFormHash(page,headCache,new URL('assets/clean.css?v=220&formErrorLocale=1&fieldStatus=1',base).href)===sha256(headFiles.get('assets/clean.css'));
+      const headErrorStyleExact=await cachedFormHash(page,headCache,new URL('assets/clean.css?v=220&formErrorLocale=1&fieldStatus=2',base).href)===sha256(headFiles.get('assets/clean.css'));
       assert.ok(headFormExact&&headLoaderExact&&headErrorStyleExact,'New worker must cache the exact new import/style chain');
       await stopServer();originStopped=true;await ctx.setOffline(true);
       await page.locator('[data-primserv-service="coordinator"]').click();
