@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 02:51 UTC, выпуски PR95, HYDRA14 и Dragon13). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 03:10 UTC, выпуски PR95, HYDRA14 и Dragon13; второй материал принят по исходникам, общий CI ещё не запускался). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -87,6 +87,33 @@ Full publication projection309: остальные276 — только Gitidenti
 Backend10runner/87backend/29contracts и early18 выполнены на общем head.
 Локальный API capabilities и обязательная CI/schema-проверка вошли в source main;
 это не публикация Django. Frontend работает самостоятельно, online-adapter/AIoff.
+Следующий срез реализован локально: второй материал
+`banana-warehouse-poland-summary-ru` из существующего `jobs[id=banana-warehouse-poland]`.
+Его title/summary/ref/дата подтверждены точным `data/content.js`; Zgorzelec явно
+присутствует в source location. Схема/filter Zgorzelec сохранены; прежний материал
+site-cleaning побайтно неизменён. Неподходящий greenhouse-кандидат исключён до правок.
+Canonical default/max20, explicit limit1 возвращает первый материал; max_limit
+capabilities — граница запроса, а не количество материалов.
+Contract14 `eb95f8bbe3c1893b2bd009e058a589e78fa41790` SOURCE_ONLY CLEAR, авторские
+13materials (9 прежних+4 новых)+9capabilities+11ownership. Отдельный doc-компонент
+`40852827abf3322e1b784524fc8615c020889aae` исправляет только устаревшее описание
+OpenAPI «один материал»; форма/числа/данные не меняются, тесты не повторялись.
+Frontend9 `4e4cb703307e5ff0361582bf70f33ee6ed614a86` SOURCE_ONLY CLEAR:
+оба ID доступны для поиска/чтения/last/избранного, per-item source refs честны,
+ключи/границы storage и task/backup prefix сохранены. Авторские107unit/24parity
+отдельны от ещё не запущенного browser/CI. Четыре unit и четыре browser assertion
+заменены для двух items/per-item ref, остальные старые assertions сохранены.
+Backend12 на exact14 дал48 targeted+5 внешних fixture checks, independent receipt
+CLEAR; 24 test-client ответа для8языков×limit1/2/20 и три malformed second-item
+проверки отвергают весь ответ даже с DEBUG. NO_BACKEND_CHANGE; без сервера/БД/сети.
+CI15 `593b0dffd27b418a60c0912c06dba86cc353c8a4` SOURCE_ONLY CLEAR: minimum
+materials13, 12 отвергается/13 проходит; авторские19stdlib и33real schema(13+9+11).
+Прежние strict/partial/skip/expectedFailure/jsonschema guards сохранены; issue93
+остаётся закрытым после95. Это плановое усиление покрытия новой функции.
+Local union904 tree6a833/430entries/net14 независимо принят по исходникам.
+До одного combinedpush владелец9 добавит exact408 OpenAPI description и этот
+компонент2rootdocs; новый whole-tree/head и текущий CI/runtime проверяются заново.
+В проходе03:07 guarded merge ещё не выполнен; второй материал пока не опубликован.
 Предыдущий выпуск94 и датированные pre95-поручения ниже сохранены как история.
 
 Выпущено явное **избранное материалов**: Pin сохраняет requested language, Open
@@ -726,13 +753,13 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Backup95@be901 опубликован2e80ab8; source428union/runtime4 CLEAR, Pages/Backend SUCCESS,33HTTPexact; API92 source включён | Следующий согласованный срез: второй подтверждённый материал из существующего data/content.js. Владелец9 интегрирует frontend после contract-компонента14; один новый WIP, без повторного выпуска95 |
-| 10 | Единственный guard02:29 выпустил95→2e80ab8,33HTTPexact; backend локальный. Delivered rootdocs5c сохранён | Эта новая запись2rootdocs — локальный следующий компонент от actualmain95, без отдельного push/CI/второго merge. Приёмка нового материала и сайтов остаётся у root |
+| 9 | Published95/2e80/33HTTPexact; новыйfrontend4e source CLEAR, author107unit/24parity; localunion904/430entries/net14 source CLEAR | Включить только408 OpenAPI prose+новые root2docs перед одним push. Затем точный общий CI/runtime; source CLEAR не означает browser-приёмку или публикацию |
+| 10 | Guard02:29 выпустил95→2e80, новые source14/9/15 и backend12 receipts приняты в своей области; root548 уже в904 | В03:07 один guard свободен. Единственный владелец root2docs/приёмки/выпуска; новый общий head проверить до Ready/guard и post-merge/Pages/точных активов. Django локальный |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | API92d9f source доставлен через95, standalone10runner/87backend/29contracts сохранены отдельно от current aggregate; Django не развёрнут | После contract14 проверить совместимость локального materials/capabilities reader с двумя материалами и fixtures; изменения только своих backend paths при необходимости, online/AIoff |
+| 12 | API92d9f доставлен95; fixture2 exacteb95 совместим без backend patch: actual48targeted+5checks, independent bounded receipt CLEAR | NO_BACKEND_CHANGE source bridge сохранить; actual HTTP test-client не означает сервер/production. Свежий Backend CI общего head отдельно, online/AIoff |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Authored9c schema и current29 включены в source95; старые authored pins и standalone d9f proofs сохранены | Следующий срез: контракт/fixtures двух материалов, второй только по точному существующему source/ref/selector. Форму API не выдумывать; frontend владеет9, backend12; отдельной конкурирующей ветки/PR не создавать |
-| 15 | CI21 source доставлен через95; current Backend/early18/schema gates SUCCESS, lightweight7repo delta сохранён | Issue93 закрывать/считать закрытым только по actual close action после postBackend95. Дальше только новые причины/изменённые head, без повторного аудита неизменённых проектов |
+| 14 | Schema9c delivered95; новый2material fixtureeb95 source CLEAR, author13/9/11; firstitem неизменён, actualbanana source включаетZgorzelec | Tiny408 меняет только OpenAPI description, без смены формы/лимитов/provider/capabilities. Передать9 exactкомпонент, старые eb95 тесты не считать новым прогоном408 |
+| 15 | CI21 delivered95/issue93actualclosed; новый593b minimum13 source CLEAR, author19stdlib/33real schema | Только совместный import с13materialtests, один будущий CI integrator9; plannedcoverage не новая bug-причина. Проверять новые причины/head delta, без повторного аудита неизменённых проектов |
 
 Предыдущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
 принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
