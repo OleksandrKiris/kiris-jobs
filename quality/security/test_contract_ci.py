@@ -47,14 +47,14 @@ class ContractDiscoveryTests(unittest.TestCase):
                 self.fixture_root(root)
                 self.assertEqual(self.run_fixture(root)[0], 0)
 
-    def test_legacy_absence_is_explicit_and_runs_only_existing_twenty(self):
+    def test_legacy_capabilities_absence_runs_twenty_four_required_tests(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             self.fixture_root(root, capabilities=False)
             code, output, errors = self.run_fixture(root)
             self.assertEqual(code, 0)
             self.assertIn('not applicable', output)
-            self.assertIn('Ran 20 tests', errors)
+            self.assertIn('Ran 24 tests', errors)
 
     def test_present_capabilities_are_actually_executed_and_failure_propagates(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -63,12 +63,26 @@ class ContractDiscoveryTests(unittest.TestCase):
             code, output, errors = self.run_fixture(root)
             self.assertEqual(code, 0)
             self.assertIn('test_capabilities.py: discovered 9', output)
-            self.assertIn('Ran 29 tests', errors)
+            self.assertIn('Ran 33 tests', errors)
             path = root / CAPABILITIES / 'test_capabilities.py'
             self.fixture_suite(path, 9, 'self.fail("capability regression")')
             code, _, errors = self.run_fixture(root)
             self.assertEqual(code, 1)
             self.assertIn('failures=9', errors)
+
+    def test_materials_twelve_are_insufficient_and_thirteen_execute(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture_root(root)
+            path = root / 'contracts/materials-v1/test_materials.py'
+            self.fixture_suite(path, 12)
+            with self.assertRaisesRegex(ValueError, 'discovered 12, expected at least 13'):
+                self.run_fixture(root)
+            self.fixture_suite(path, 13)
+            code, output, errors = self.run_fixture(root)
+            self.assertEqual(code, 0)
+            self.assertIn('test_materials.py: discovered 13 (minimum 13)', output)
+            self.assertIn('Ran 33 tests', errors)
 
     def test_each_partial_capabilities_file_and_non_directory_are_rejected(self):
         for name in CAPABILITIES_FILES:
