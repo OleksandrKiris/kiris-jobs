@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; проход01:57, 2026-10-18 02:06 UTC, kiris-jobs main6faa после94, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; проход02:29, 2026-10-18 02:34 UTC, kiris-jobs main6faa после94, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,8 +12,8 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `6faaea9e2d109bc808ff0ca4eac863c4a2d65e3d` | [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)old5f12 draft: ordinary newmain+rootdocs integration/newhead CI pending; #94 published; #62 frozen/draft | [39088679663](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39088679663) |
-| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b04fc7302612affa0c2eec71ac66ebbc13912e46` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14)efbb/base533 merged/published; новый Copy route TEXT назначен; implementation/PR/приёмка ещё не доказаны | [39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `6faaea9e2d109bc808ff0ca4eac863c4a2d65e3d` | [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)d9f accepted Ready; [#95](https://github.com/OleksandrKiris/kiris-jobs/pull/95)4daf accepted component, returned draft for ordinary92 union+root2docs; новый общий head ещё не принят; #94 published; #62 frozen/draft | [39088679663](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39088679663) |
+| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b04fc7302612affa0c2eec71ac66ebbc13912e46` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) published; [#15](https://github.com/OleksandrKiris/citronex-hydra-project/pull/15)7ae Copy route TEXT implemented,191unit/106browser/currentCI SUCCESS, late runtime4 bounded CLEAR; formal source-report write rejected by policy, draft/unpublished | [39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `f0883032674a5dc9c2034fb144c04286a5617598` | [#13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13) published; [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)a573/basef088 copy MEMO TEXT source/runtime/peer accepted, actualready/unpublished; CI39084077900 SUCCESS | [39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
@@ -26,8 +26,19 @@ independent source1 дваGREEN/419union, Native96+48 (Pin12 внутри16),
 Catalogue core16+workerN/A/main19/proto16+8 (Pin2 внутри16); local82/parity16
 и literalCatalogue73 раздельны.31 прежний путь+новый favourites journal;
 fullprojection308, остальные276 толькоGitidentity. ОдинmaterialID, max5bound.
-Root92actualdraft после сменыmain: old5f12/base8abf accepted history,
-новаяintegration/точнаяприёмка отдельны. Source API остаётся локальным.
+Root92actualdraft после сменыmain — история. Новый92d9f/base6faa/root1990
+принят whole427union и current runtime, actualReady02:19:03. Backend39089216166 и
+Catalogue39089216182 SUCCESS:10runner/87backend/29contract; core16+workerN/A,
+main19/proto16+8, Native не планировался. PR95backup4daf/base6faa/treef980 отдельно
+принят source1/runtime4, actualReady02:23:27; автор95unit/16parity, Catalogue86unit,
+Native109unit и browser96coordinator+48calculator — раздельные факты. В02:33 root
+actualdraft95 для назначенного ordinary92 INTO95 с2rootdocs перед одним combinedpush.
+Новый head требует отдельной приёмки; оба компонента пока не merged. API локальный,
+online-adapter/AIoff; issue93 пока OPEN до фактической публикации source21 и post-check.
+HYDRA15current7ae, CI39088860365 SUCCESS:191unit/106browser, late actualruntime4
+bounded CLEAR. Peer source CLEAR/primary5 сохранены, но конкретная финальная запись
+source-report получила `Rejected: blocked by policy` без более точной причины.
+Дословная операция сохранена, не повторяется; draft15 и mainb04f остаются раздельны.
 
 История предыдущего выпуска: PR89 опубликован8abf: Pages39085391777/Backend39085391776 SUCCESS,
 31public bytes exact, tested/merged tree67a0 и orderedparents[c032,0811].
