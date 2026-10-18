@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (проход05:03; локальные source-статусы на 2026-10-18T04:59:51.682132+00:00, опубликованный99 сохранён). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18T05:23:50.436355+00:00, task-material links100 опубликованы). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -67,6 +67,15 @@ HTTP 200 и DOM-тесты не заменяют полный пользоват
 отделены от текущей сверки метаданных.
 
 ## Актуальное состояние после исправлений — 18.10.2026
+
+В [кабинете координатора](https://oleksandrkiris.github.io/kiris-jobs/tools/coordinator/) опубликован явный путь DEMO-задача → выбранный публичный материал → возврат к задаче. Save/Clear действуют только на отдельную связь; requested language, источник, контекст и фокус сохраняются. Оба существующих материала, три DEMO-задачи, summary, backup, pins и last сохранены; новых условий работы и реальных данных нет.
+Единственный guard05:03: tested `0dfdde9b117294a083c99ec1ff84fbeb3b77a565` → main `95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`, tree `ba6b6001f50618825827a6a119510e0ca43c062d`, orderedparents[92dc,0df]. Pages39100294800/Backend39100294791 terminalSUCCESS attempt1;36HTTPexact size/SHA256/Gitblob,312projection/276otherGitidentity, main до/после совпал. Sourcec111 доставлен100; эти2docs — новый локальный неопубликованный компонент после actualmain.
+Actual runtime: Native6 jobs по140 TAP с browser16+8 в каждом; CatalogueTAP groups[11,30,7,26,36,14,13,24,16,25,15,117,23,50]; core16/worker N/A unchanged/main19/prototypes16+8; Backend10/108/39; earlysecurity21. New journeys: tasklink additive inside2 existingrestart journeys, total16 unchanged; это не новые18/26case totals. ControlledCI/3201280, не physical/OS/full-language certification.
+В source100 доставлены local detail GET backend12@96d2, contract14@4fef и обязательный CI15@a045 (39contracts). Django не deployed; frontend snapshot/mock самостоятельный, online-adapter/AIoff. Один guard использован; второго merge в этом проходе нет.
+
+Следующее поручение9 назначено, только ASSIGNED_ONLY: расширить readonly-сводку3задач явно привязанной инструкцией — stableID/requested language,4локали и честный fallback. Не выдумывать effective language, факт прочтения/отправки или новые записи. Нового head/реализации/тестов/CI пока не подтверждаем.
+
+### История подготовки100 — snapshot до публикации, проход05:03
 
 Проход05:03: guard0. Последний опубликованный kiris main — `92dc5b64477de83a1d174ecba154c03bdb29922f` после99; 35HTTPexact/311projection/276otherGitidentity относятся к этому выпуску. Следующие компоненты локальны, не push/PR/Ready/публикация; новый общий head, PR и counts ещё не определены.
 
@@ -788,18 +797,18 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 | 1 | Новый AS_PATCH c63598:4 shared browser files принят и доставлен96; прежний own59/source94 history сохранён | Patch заморожен; actual current runtime4 принят, дополнительные probes/CI в этом проходе не назначать |
 | 2 | HYDRA14 опубликованb04f; новый Copy route TEXT15@7ae реализован,191unit/106browser и actual late runtime4 bounded CLEAR. Source peer CLEAR и5primary files сохранены | Draft15: конкретный отказ записи финального source-report сохранён дословно; эту операцию не повторять. Новая публикация/формальная приёмка не объявлены. Dragon14 peer history отдельно |
 | 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
-| 4 | Copy MEMO TEXT14@a573 опубликован`0b03581a621c8ec55ee8e073152fc2ac5daeb144`; Pages39096400094 SUCCESS,8HTTPexact; source/runtime/peer приняты на неизменном head | Сохранить выпущенный source. Readonly manual fallback и async stale-UI guards; OS clipboard/physical/full12browser гарантии не заявлены. Нового WIP/CI здесь нет; отдельная QA99: Current99@774550 source/runtime CLEAR и опубликован92dc; собственная Dragon14-история сохранена. Две новые summary journeys входят в прежние16, не18. |
+| 4 | Copy MEMO TEXT14@a573 опубликован`0b03581a621c8ec55ee8e073152fc2ac5daeb144`; Pages39096400094 SUCCESS,8HTTPexact; source/runtime/peer приняты на неизменном head | Own Dragon14 source/publication сохранены; отдельный current100 runtime accepted/published. ControlledCI limits сохранены; старые ZIP/CI/browser не повторять. |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Сводка99@774550 опубликована`92dc5b64477de83a1d174ecba154c03bdb29922f`,35HTTPexact/311projection; current source/runtime приняты, прежний96 сохранён | Локальный cd8a11f source CLEAR; author13/independentQA13 VM PASS. Browser/новый CI NOTRUN. Следующий ordinary union с exact14/12/15/rootdocs — отдельная приёмка; общего head/PR/counts пока нет. |
-| 10 | Единственный guard04:35 выпустил99→`92dc5b64477de83a1d174ecba154c03bdb29922f`, Pages39097972392/Backend39097972375 SUCCESS,35HTTPexact | Проход05:03 guard0. Эти2docs — локальный draft от92e19, не push/CI/публикация. Датированные99/0408/96/95 сохранены; новый aggregate будет определён по фактическому union. |
+| 9 | Featurecd8 доставлен100→`95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`,36HTTPexact; old99 сохранён | Следующее поручение9 назначено, только ASSIGNED_ONLY: расширить readonly-сводку3задач явно привязанной инструкцией — stableID/requested language,4локали и честный fallback. Не выдумывать effective language, факт прочтения/отправки или новые записи. Нового head/реализации/тестов/CI пока не подтверждаем. |
+| 10 | Единственный guard05:03 выпустил100→`95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`, Pages39100294800/Backend39100294791 SUCCESS | Эти2docs — следующий локальный неопубликованный компонент; второго merge нет. Sourcec111 уже доставлен100; backend локальный/AIoff. |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | NO_BACKEND_CHANGE fixture2 proof48+5 на eb95 сохранён; exact current aggregate Backend counts указаны выше | Локальный96d2 detail GET source peer CLEAR,8own paths;14 импортирован отдельно. Author21new(12HTTP+9guards)+69old PASS; независимыйHTTP-runtime NOTRUN. Backend локальный/onlineAIoff. |
+| 12 | API96d2 local detail GET source доставлен100; это не backend deployment | Сохранить exact доставленный backend/source. Current aggregate counts указаны выше; старые авторские21new+69old остаются отдельным локальным proof. |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Contracteb95 и description408 source доставлены96; прежние13/9/11 относятся eb95 | Локальный4fef detail-contract source CLEAR, peer только6 новых pure-mock PASS. Передан12; CI15a045 source CLEAR отдельно. HostedHTTP/browser/newCI не приняты. |
-| 15 | CI593 minimum13 доставлен96; actual current gates/postBackend39095191167 SUCCESS | Issue97 actualclosed 2026-10-18T03:55:08Z после postBackend39095191167; это отдельный actual close action. Новые CI/merge только при отдельной причине/следующем проходе Issue98 actualclosed 2026-10-18T03:55:10Z после того же postBackend39095191167; исправлена старая проверка одной карточки в общем browser-helper. Следующий локальныйa045 CI-компонент source CLEAR; author21stdlib/39contracts PASS, новый hosted CI NOTRUN; только вместе с exact14 detail. |
+| 14 | Contract4fef material detail source доставлен100; прежний collection/source сохранён | Сохранить exact контракт; прежние6peer pure-mock не выданы за независимыйHTTP-runtime. |
+| 15 | CIa045 обязательное coverage39 доставлено100; current aggregate gates приняты | Current Backend/early counts указаны выше. Старые локальные21/39 не подменяют exact currentCI; новых issue/CI/merge здесь не назначено. |
 
 Предыдущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
 принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
@@ -1570,3 +1579,9 @@ GitHub продолжался. Прежний общий запрет на лю�
 документирована и покрыта доступными тестами без включения сервисов. После
 достижения этих критериев либо необходимости новых прав/бюджета/решения —
 фактический итог и приостановка задачи, не бесконечные косметические правки.
+
+### Предыдущие authored-ячейки12/14/15 — snapshot до100
+
+Роль12: NO_BACKEND_CHANGE fixture2 proof48+5 на eb95 сохранён; exact current aggregate Backend counts указаны выше
+Роль14: Contracteb95 и description408 source доставлены96; прежние13/9/11 относятся eb95
+Роль15: CI593 minimum13 доставлен96; actual current gates/postBackend39095191167 SUCCESS
