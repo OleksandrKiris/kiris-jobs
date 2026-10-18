@@ -449,6 +449,11 @@ try {
       await keyClick(page,'backupApply');
       assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),KEY)),{version:1,statuses:restoredStatuses});
       assert.match(await page.locator('#backupNotice').innerText(),/restored and saved/);
+      const importedSummary=await page.locator('#progressSummary').inputValue();
+      assert.match(importedSummary,/DEMO/);
+      assert.equal((importedSummary.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(importedSummary,/1 \/ 3/);
+      assert.doesNotMatch(importedSummary,/no matching backup source|primserv:|banana-warehouse/);
       assert.equal(await page.locator('#demo-03').inputValue(),'doing');
       assert.equal(page.url(),backupURL);
       assert.equal(await page.locator('#materialQuery').inputValue(),'no matching backup source');
@@ -513,6 +518,13 @@ try {
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),twoPins);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      const fullSummary=await page.locator('#progressSummary').inputValue();
+      assert.equal((fullSummary.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(fullSummary,/2 \/ 3/);
+      assert.equal(await page.locator('#progressSummary').getAttribute('readonly'),'');
+      await keyClick(page,'progressSummarySelect');
+      assert.deepEqual(await page.locator('#progressSummary').evaluate(node=>({start:node.selectionStart,end:node.selectionEnd,focused:node===document.activeElement})),{start:0,end:fullSummary.length,focused:true});
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
       await fits(page);await page.screenshot({path:join(reportDir,`${name}-second-material.png`),fullPage:true});
       await keyClick(page,'pin-remove-'+bananaID);
       assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),favouriteKey)).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);

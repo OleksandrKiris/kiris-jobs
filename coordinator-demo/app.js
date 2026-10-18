@@ -225,6 +225,21 @@
     backupStatus=model.applyProgress();backupPending=false;backupChanges=[];render();$('backupTitle').focus();
   });
   $('backupCancel').addEventListener('click',()=>{cancelBackup();$('backupInput').focus();});
+  const progressSummaryCopy={
+    en:{title:'Demo progress summary',help:'DEMO · All three fictional tasks, regardless of filter or material search. This is not a real work report. No employee records or working conditions.',label:'All three fictional demo tasks (read only)',select:'Select summary text',total:'Done: {done} / {total}',local:'Current statuses in this tab. Saving depends on your browser.',pageOnly:'Saving is not confirmed. Current statuses work in this tab only.'},
+    ru:{title:'Сводка демо-прогресса',help:'DEMO · Все три вымышленные задачи независимо от фильтра и поиска материалов. Это не реальный рабочий отчёт. Без записей работников и условий работы.',label:'Все три вымышленные демо-задачи (только чтение)',select:'Выделить текст сводки',total:'Готово: {done} / {total}',local:'Текущие статусы этой вкладки. Сохранение зависит от браузера.',pageOnly:'Сохранение не подтверждено. Текущие статусы работают только в этой вкладке.'},
+    uk:{title:'Зведення демо-прогресу',help:'DEMO · Усі три вигадані завдання незалежно від фільтра й пошуку матеріалів. Це не справжній робочий звіт. Без записів працівників та умов роботи.',label:'Усі три вигадані демо-завдання (лише читання)',select:'Виділити текст зведення',total:'Готово: {done} / {total}',local:'Поточні статуси цієї вкладки. Збереження залежить від браузера.',pageOnly:'Збереження не підтверджено. Поточні статуси працюють лише в цій вкладці.'},
+    pl:{title:'Podsumowanie postępu demo',help:'DEMO · Wszystkie trzy fikcyjne zadania, niezależnie od filtra i wyszukiwania materiałów. To nie jest rzeczywisty raport pracy. Bez danych pracowników i warunków pracy.',label:'Wszystkie trzy fikcyjne zadania demo (tylko odczyt)',select:'Zaznacz tekst podsumowania',total:'Gotowe: {done} / {total}',local:'Bieżące statusy tej karty. Zapis zależy od przeglądarki.',pageOnly:'Zapis nie jest potwierdzony. Bieżące statusy działają tylko w tej karcie.'}
+  };
+  function renderProgressSummary() {
+    const t=progressSummaryCopy[lang],state=model.snapshot();
+    $('progressSummaryTitle').textContent=t.title;$('progressSummaryHelp').textContent=t.help;
+    $('progressSummaryLabel').textContent=t.label;$('progressSummarySelect').textContent=t.select;
+    const lines=M.IDS.map((id,i)=>id.toUpperCase()+' · '+copy[lang].items[i][1]+' — '+copy[lang][state.statuses[id]]);
+    const total=t.total.replace('{done}',M.IDS.filter(id=>state.statuses[id]==='done').length).replace('{total}',M.IDS.length);
+    $('progressSummary').value=['DEMO · '+t.title,t.help,...lines,total,['blocked','invalid'].includes(state.persistence)?t.pageOnly:t.local].join('\n');
+  }
+  $('progressSummarySelect').addEventListener('click',()=>{$('progressSummary').focus();$('progressSummary').select();});
   function render() {
     if(backupPending){model.cancelProgress();backupPending=false;backupChanges=[];backupStatus='cancelled';}
     const t = copy[lang], state = model.snapshot();
@@ -258,7 +273,7 @@
     const paths=[['company','https://www.primserv.pl/'],['jobs','https://oleksandrkiris.github.io/kiris-jobs/?lang='+lang],['training','https://oleksandrkiris.github.io/citronex-hydra-project/?lang='+(lang==='uk'?'ua':lang)],['bot','https://t.me/KirisWorkPoland_bot']];
     $('links').replaceChildren(...paths.map(([key,url])=>{const a=node('a',t[key]);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}));
     renderPublished();
-    renderMaterials();renderBackup();
+    renderMaterials();renderBackup();renderProgressSummary();
     if (focused && M.IDS.includes(focused)) ($(focused) || $('filter')).focus();
   }
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
