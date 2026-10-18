@@ -8,6 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
+import { contrastRegressionStylesheet } from './catalogue-contrast.mjs';
 import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, TOOL_FILES } from './coordinator-refresh.mjs';
 
 assert.equal(process.env.GITHUB_ACTIONS, 'true', 'Use the authorized CI runner');
@@ -112,15 +113,17 @@ try {
     {kind:'hrappka',job:'greenhouse-tomatoes',selector:'[data-hrappka-link]'}
   ];
   report.cardContrastOldRed = [];
-  const oldHomepage = execFileSync('git',['show',report.base+':assets/homepage.css']);
+  const oldContrast = contrastRegressionStylesheet();
+  const oldHomepage = oldContrast.bytes;
+  report.cardContrastRegressionSource = {ref:oldContrast.ref,sha256:oldContrast.sha256,fetched:oldContrast.fetched,eventBase:report.base};
   for(const width of [1280,320]) {
     const ctx=await context({width,height:900});const page=activePage=await ctx.newPage();
     // Explicit historical fixture, isolated from the actual staged-head checks.
     await ctx.route('**/assets/homepage.css?*',route=>route.fulfill({status:200,contentType:'text/css',body:oldHomepage}));
     await page.goto(base+'?lang=ru');await ready(page);
     const old=await actionContrast(page.locator('[data-job-id="greenhouse-tomatoes"] .job-card-body > .primary-button'));
-    assert.equal(old.length,1);assert.ok(old[0].ratio<4.5,'The exact published stylesheet must expose the regression');
-    report.cardContrastOldRed.push({width,base:report.base,stylesheetSHA256:sha256(oldHomepage),status:'expected-failure-observed',button:old[0]});
+    assert.equal(old.length,1);assert.ok(old[0].ratio<4.5,'The exact witnessed pre-fix stylesheet must expose the regression');
+    report.cardContrastOldRed.push({width,base:report.base,regressionRef:oldContrast.ref,stylesheetSHA256:sha256(oldHomepage),status:'expected-failure-observed',button:old[0]});
     await ctx.close();activePage=null;
   }
   report.cardActionContrast = [];
