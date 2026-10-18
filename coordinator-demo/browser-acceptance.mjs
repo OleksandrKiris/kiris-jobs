@@ -304,6 +304,11 @@ try {
       assert.equal(await page.locator('#materials').innerText(),savedMaterialText);
       await page.locator('#materialQuery').fill('zgorzelec');
       assert.equal(await page.locator('#materials article').count(),1);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      await page.locator('#read-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('primserv:coordinator:last-material:v1'))),
+        {version:1,material_id:'site-cleaning-summary-ru',requested_language:'uk'});
       await context.tracing.stop({ path: join(reportDir, `${name}-before-trace.zip`) }); tracing = false;
       context = await profile.reopen();
       page = await prepare(); tracing = true;
@@ -321,10 +326,33 @@ try {
       assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
       assert.equal(await page.locator('#demo-02').inputValue(), 'done');
       assert.equal(await page.locator('#demo-03').inputValue(), 'todo');
+      // Real native restart restores only the pointer; opening remains explicit.
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#lastMaterialReturn').isEnabled(),true);
+      await page.locator('#language').selectOption('pl');
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#materialQuery').fill('no matching material');
+      assert.equal(await page.locator('#materials article').count(),0);
+      await page.locator('#lastMaterialReturn').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching material');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'all');
+      assert.equal(await page.locator('#materialReading').isVisible(),true);
+      assert.match(await page.locator('#materialReading').innerText(),/uk.*ru/);
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      await page.locator('#lastMaterialClear').click();
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.evaluate(()=>localStorage.getItem('primserv:coordinator:last-material:v1')),null);
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#lastMaterialReturn').isDisabled(),true);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      assert.equal(await page.locator('#demo-02').inputValue(),'done');
       await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
       report.scenarios.push({ name, viewport, status: 'passed', offline: true,
-        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board'],
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset'],
         results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
     } catch (error) {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });

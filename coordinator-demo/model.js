@@ -106,6 +106,38 @@
     const words=query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
     return response.items.filter(item=>words.every(word=>(item.title+' '+item.text+' '+item.location_id).toLocaleLowerCase().includes(word)));
   }
+  const LAST_MATERIAL_KEY='primserv:coordinator:last-material:v1';
+  const MATERIAL_LANGS=Object.freeze(['ru','ua','uk','pl','en','ka','tr','hy']);
+  function materialMemory(storage) {
+    let entry=null,persistence='ready',canWrite=true;
+    const valid=value=>value&&typeof value==='object'&&!Array.isArray(value)&&
+      Object.keys(value).sort().join(',')==='material_id,requested_language,version'&&
+      value.version===1&&typeof value.material_id==='string'&&MATERIAL_LANGS.includes(value.requested_language);
+    try {
+      const raw=storage.getItem(LAST_MATERIAL_KEY);
+      if(raw!==null) {
+        if(typeof raw!=='string'||raw.length>256)throw Error('invalid');
+        const value=JSON.parse(raw);if(!valid(value))throw Error('invalid');
+        if(value.material_id!==material.id){persistence='stale';canWrite=false;}
+        else entry={...value};
+      }
+    } catch(error){persistence=error.message==='invalid'||error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
+    return Object.freeze({
+      snapshot(){return {entry:entry?{...entry}:null,persistence};},
+      remember(id,requestedLanguage) {
+        if(id!==material.id||!MATERIAL_LANGS.includes(requestedLanguage))return false;
+        entry={version:1,material_id:id,requested_language:requestedLanguage};
+        if(canWrite)try {storage.setItem(LAST_MATERIAL_KEY,JSON.stringify(entry));persistence='saved';}
+        catch {persistence='blocked';canWrite=false;}
+        return true;
+      },
+      clear() {
+        entry=null;
+        try {storage.removeItem(LAST_MATERIAL_KEY);persistence='cleared';canWrite=true;return true;}
+        catch {persistence='blocked';canWrite=false;return false;}
+      }
+    });
+  }
   return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create,
-    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials});
+    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory});
 });

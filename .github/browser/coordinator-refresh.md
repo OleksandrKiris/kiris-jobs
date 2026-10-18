@@ -267,3 +267,43 @@ storage internals or certify arbitrary future runtime compatibility.
 Rollback of this test slice is a normal reviewed revert; it removes coverage,
 not production behavior. PR60's separate locale runtime/cache rollback still
 requires a new cache version and release-owner acceptance.
+## Next complete current HEAD (issue87, PR89 consumer)
+
+The accepted84 publication introduced a new legitimate five-resource generation.
+Its successor PR89 changes four resources again. Historical c896 hashes describe
+historical evidence, not a version allowlist: eligibility now comes from the
+exact current Git HEAD's publisher projection. Before browser execution,
+`captureCurrentToolTarget` requires either a direct TESTED_HEAD checkout or the
+CI merge checkout with exactly the ordered TESTED_BASE/TESTED_HEAD parents.
+The real checkout commit is always the resource source ref; PR head/event base
+remain separate provenance fields. It binds all five captured buffers, source paths, Git blobs, sizes and SHA256
+hashes to that single commit and the verified publication fingerprint. Mixed
+captures, reduced inventories and forged head/hash/source mappings fail closed.
+A whole newly committed generation is eligible for testing, not preaccepted.
+
+The immutable historical published62cb ref/body/hash tuple stays unchanged.
+Only an independently verified exact legacy OLD tuple retains the separately
+labelled c896 overlay. Every other current version uses its actual captured
+HEAD5 buffers, with its current source receipt and no historical substitution.
+Any published delta still requires the actual full-current catalogue core and
+mandatory19. The full-current report must contain all sixteen distinct scenario
+and viewport identities, current-five hashes/sizes, exact head/base/checkout,
+and the appropriate two worker-upgrade cases or byte-unchanged N/A. Process
+failure/nonzero/timeout remains fatal before JSON can be read, even if a stale
+report says passed. Historical33/48 are never relabelled as this execution.
+
+Exact red-before: current c032 guard accepts the five actual af5ea148 blobs but
+rejects complete c2edeff4 with Unknown/mixed before scenarios. Their ten source
+copies were validated against exact Git blob identities (nine unique bodies,
+one shared SVG); this is a source-selection reproducer, not another browser
+run. Addressed fictional-Git regression tests cover the next complete head,
+mixed buffers, wrong head, forged hash/blob/size/mapping, reduced/duplicate/failed
+reports and missing tool evidence. Only ordinary exact-head CI supplies browser
+acceptance; PR89 is not rerun or declared ready by these isolated checks.
+
+The first PR91 candidate1b4e exposed an author harness error: it required direct
+PR-head checkout although Actions uses synthetic merge0e348842 (parents c032,
+1b4e; identical tested tree). That red attempt is preserved, not rerun. The
+follow-up verifies exact merge ancestry and binds the target ref to the actual
+checkout; a regression rejects swapped/wrong parents and confirms source ref.
+
