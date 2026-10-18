@@ -349,10 +349,80 @@ try {
       assert.equal(await page.locator('#materialReading').isHidden(),true);
       assert.equal(await page.locator('#demo-01').inputValue(),'doing');
       assert.equal(await page.locator('#demo-02').inputValue(),'done');
+      // Favourites are separate intentional storage, never a recent-pointer import.
+      const favouriteKey='primserv:coordinator:favourites:v1',lastKey='primserv:coordinator:last-material:v1';
+      const taskBytes=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      await page.locator('#pin-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      const pinBytes=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
+      assert.deepEqual(JSON.parse(pinBytes),{version:1,items:[{material_id:'site-cleaning-summary-ru',requested_language:'uk'}]});
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      await page.locator('#language').selectOption('pl');
+      await page.locator('#read-site-cleaning-summary-ru').click();
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),pinBytes);
+      assert.equal(await page.locator('#pin-site-cleaning-summary-ru').isDisabled(),true);
+      await page.locator('#lastMaterialClear').click();
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),pinBytes);
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#favouritesList article').count(),1);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#lastMaterialReturn').isDisabled(),true);
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#filter').selectOption('doing');
+      await page.locator('#materialQuery').fill('no matching pinned source');
+      await page.locator('#pin-open-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      assert.match(await page.locator('#materialReading').innerText(),/uk.*ru/);
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching pinned source');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      await fits(page);
+      await page.screenshot({path:join(reportDir,`${name}-pinned-open.png`),fullPage:true});
+      await page.locator('#pin-remove-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#favouritesList article').count(),0);
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching pinned source');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      // Labelled negative fixture: corrupt only the NEW key after normal journeys.
+      await page.locator('#language').selectOption('en');
+      await page.evaluate(key=>localStorage.setItem(key,'{broken'),favouriteKey);
+      await page.reload();await ready(page);
+      assert.match(await page.locator('#favouritesNotice').innerText(),/damaged/);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),'{broken');
+      assert.equal(await page.locator('#favouritesList article').count(),0);
+      await page.locator('#favouritesClear').click();
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),null);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      // Negative write fixture affects only the NEW key and is always restored.
+      await page.evaluate(key=>{
+        const original=Storage.prototype.setItem;
+        window.__restorePinnedWrite=()=>{Storage.prototype.setItem=original;delete window.__restorePinnedWrite;};
+        Storage.prototype.setItem=function(k,v){if(k===key)throw new DOMException('Pinned fixture denied','SecurityError');return original.call(this,k,v);};
+      },favouriteKey);
+      try {
+        await page.locator('#pin-site-cleaning-summary-ru').click();
+        assert.match(await page.locator('#favouritesNotice').innerText(),/only on this page/);
+        assert.equal(await page.locator('#favouritesList article').count(),1);
+        assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),null);
+        assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+        assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      } finally {await page.evaluate(()=>window.__restorePinnedWrite?.());}
+      await page.locator('#favouritesClear').click();
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#favouritesList article').count(),0);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      await page.locator('#filter').selectOption('all');
       await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
       report.scenarios.push({ name, viewport, status: 'passed', offline: true,
-        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset'],
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery'],
         results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
     } catch (error) {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
