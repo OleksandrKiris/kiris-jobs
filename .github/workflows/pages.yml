@@ -46,7 +46,7 @@ jobs:
           test -s apply/config.js
           test -s apply/translations.js
           test -s apply/app.js
-          grep -q 'styles.css?v=17.2.1' apply/index.html
+          grep -q 'styles.css?v=17.2.2' apply/index.html
           grep -q 'translations.js?v=17.0.3' apply/index.html
           grep -q 'app.js?v=17.2.3' apply/index.html
           grep -q 'href="pdf/"' apply/index.html

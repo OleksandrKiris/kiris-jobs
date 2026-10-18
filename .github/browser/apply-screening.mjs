@@ -36,7 +36,7 @@ export function assertScreeningCopy(i18n) {
     if(lang!=='en')assert.notEqual(locale.footerNotice,i18n.locales.en.footerNotice);
   }
 }
-const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','iconsOneLine','noDelivery'];
+const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','iconsOneLine','progressOneLine','noDelivery'];
 export function assertScreeningRows(rows) {
   assert.equal(rows?.length,16);
   assert.deepEqual(rows.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>SCREENING_LANGS.map(l=>w+':'+l)).sort());
@@ -45,7 +45,12 @@ export function assertScreeningRows(rows) {
 async function iconLines(page) {
   return page.locator('#candidateForm .choice-icon').evaluateAll(nodes=>nodes.map(n=>{const r=document.createRange();r.selectNodeContents(n);return r.getClientRects().length;}));
 }
+async function progressLines(page) {
+  await page.evaluate(()=>document.fonts.ready);
+  return page.locator('.progress-meta strong').evaluate(n=>{const r=document.createRange();r.selectNodeContents(n);return r.getClientRects().length;});
+}
 async function checkScreen(page,locale,step,reportDir,name) {
+  assert.equal(await progressLines(page),1,name+': step counter must remain on one line');
   assert.equal(await page.locator('h1').innerText(),locale['step'+step+'Title']);
   assert.equal(await page.locator('.step-heading p').innerText(),locale['step'+step+'Lead']);
   assert.equal(await page.locator('#footerNotice').innerText(),locale.footerNotice);
@@ -84,6 +89,15 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
     assert.equal(await page.locator('html').getAttribute('lang'),lang);assert.equal(await page.locator('h1').innerText(),'Contact details');
     await page.screenshot({path:join(reportDir,`apply-sea-old-${lang}-320.png`),fullPage:true});report.applySeaOldRed.push({lang,width:320,ref:seaRef,heading:'Contact details',status:'expected-failure'});await ctx.close();
   }
+  // Personally reviewed d1a0bbc FIL PNG exposed a split 1 / 3 counter.
+  const progressRef='d1a0bbc4748b70edc12a88c821b86bc9208048e3';report.applyProgressOldRed=[];
+  const progressFiles=Object.fromEntries(['index.html','app.js','translations.js','styles.css'].map(f=>[f,execFileSync('git',['show',progressRef+':apply/'+f])]));
+  report.applyProgressRegressionSource={ref:progressRef,files:Object.fromEntries(Object.entries(progressFiles).map(([f,b])=>[f,createHash('sha256').update(b).digest('hex')]))};
+  const progressCtx=await context({width:320,height:900});const progressPage=await progressCtx.newPage();active(progressPage);
+  for(const [f,body]of Object.entries(progressFiles))await progressCtx.route(f==='index.html'?'**/apply/':'**/apply/'+f+'?*',r=>r.fulfill({status:200,contentType:f==='index.html'?'text/html':f.endsWith('.css')?'text/css':'text/javascript',body}));
+  await progressPage.goto(base+'apply/');await progressPage.locator('#languageSearch').fill('fil');await progressPage.locator('[data-language="fil"]').click();await progressPage.locator('[data-recruiter="yana"]').click();
+  const oldProgressLines=await progressLines(progressPage);assert.ok(oldProgressLines>1,'Actual old FIL counter must split');
+  await progressPage.screenshot({path:join(reportDir,'apply-progress-old-fil-320.png'),fullPage:true});report.applyProgressOldRed.push({lang:'fil',width:320,ref:progressRef,lines:oldProgressLines,status:'expected-failure'});await progressCtx.close();
   for(const width of [320,1280]) {
     const before=await context({width,height:900});const previous=await before.newPage();active(previous);
     await before.route('**/apply/',r=>r.fulfill({status:200,contentType:'text/html',body:old['index.html']}));

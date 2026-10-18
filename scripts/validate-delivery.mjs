@@ -14,7 +14,7 @@ const workflow = read('.github/workflows/pages.yml');
 const packageJson = JSON.parse(read('package.json'));
 
 assert(mainIndex.includes('href="pdf/"'), 'main page does not link to the separate PDF generator.');
-assert(mainIndex.includes('styles.css?v=17.2.1'), 'main form does not load the current interface styles.');
+assert(mainIndex.includes('styles.css?v=17.2.2'), 'main form does not load the current interface styles.');
 assert(mainIndex.includes('app.js?v=17.2.3'), 'main form does not load the current interface logic.');
 assert(!mainIndex.includes('type="file"'), 'main form still contains a file input.');
 assert(!mainApp.includes('new File(') && !mainApp.includes('navigator.share'), 'main form still creates or shares files.');
@@ -67,7 +67,7 @@ assert(redirect.includes('url=pdf/'), 'legacy offline.html does not redirect to 
 assert(packageJson.scripts['check:js'].includes('apply/pdf/app.js'), 'package.json does not syntax-check the PDF generator.');
 
 for (const marker of [
-  'styles.css?v=17.2.1',
+  'styles.css?v=17.2.2',
   'translations.js?v=17.0.3',
   'app.js?v=17.2.3',
   'styles.css?v=1.1.2',

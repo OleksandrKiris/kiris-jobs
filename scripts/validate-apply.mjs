@@ -54,7 +54,7 @@ for (const code of codes) {
 
 const index = read('apply/index.html');
 for (const marker of [
-  'styles.css?v=17.2.1',
+  'styles.css?v=17.2.2',
   'config.js?v=17.0.1',
   'translations.js?v=17.0.3',
   'app.js?v=17.2.3',
