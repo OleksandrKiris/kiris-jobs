@@ -3,7 +3,8 @@ from contextlib import redirect_stderr, redirect_stdout
 import io
 import tempfile
 import unittest
-from contract_ci import CAPABILITIES, CAPABILITIES_FILES, SUITES, collect, main, passed
+from unittest.mock import patch
+from contract_ci import CAPABILITIES, CAPABILITIES_FILES, SUITES, collect, main, passed, run_suites
 
 
 class ContractDiscoveryTests(unittest.TestCase):
@@ -26,8 +27,25 @@ class ContractDiscoveryTests(unittest.TestCase):
     def run_fixture(self, root):
         output, errors = io.StringIO(), io.StringIO()
         with redirect_stdout(output), redirect_stderr(errors):
-            code = main(root)
+            code = run_suites(root)
         return code, output.getvalue(), errors.getvalue()
+
+    def test_real_entry_requires_jsonschema_even_when_discovery_fixtures_do_not(self):
+        # Explicit absent-dependency fixture, never a substitute schema checker.
+        real_import = __import__
+
+        def without_jsonschema(name, *args, **kwargs):
+            if name == 'jsonschema' or name.startswith('jsonschema.'):
+                raise ModuleNotFoundError("No module named 'jsonschema'")
+            return real_import(name, *args, **kwargs)
+
+        with patch('builtins.__import__', side_effect=without_jsonschema):
+            with self.assertRaisesRegex(ModuleNotFoundError, 'jsonschema'):
+                main()
+            with tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                self.fixture_root(root)
+                self.assertEqual(self.run_fixture(root)[0], 0)
 
     def test_legacy_absence_is_explicit_and_runs_only_existing_twenty(self):
         with tempfile.TemporaryDirectory() as temp:
