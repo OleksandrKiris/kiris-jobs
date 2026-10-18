@@ -67,7 +67,11 @@ export async function acceptApplyEntry({context,base,reportDir,report,active}) {
       await input.press('Backspace'); assert.equal(await input.inputValue(),'n'); await input.press('e');
       assert.equal(await input.inputValue(),'ne');
       await input.fill('zzzzzz'); const empty=await page.locator('.language-grid [role="status"]').innerText();
-      await input.fill(''); const cleared=await page.locator('[data-language]').count()===9 && await page.locator('[data-action="toggle-languages"]').isVisible();
+      await input.fill('');
+      // Clearing restores the user's expanded list, rather than silently collapsing it.
+      const expandedRestored=await page.locator('[data-language]').count()===20 && await page.locator('[data-action="toggle-languages"]').isVisible();
+      await page.locator('[data-action="toggle-languages"]').click();
+      const cleared=expandedRestored && await page.locator('[data-language]').count()===9;
       await input.fill(lang); const matched=await page.locator(`[data-language="${lang}"]`).isVisible();
       await page.locator(`[data-language="${lang}"]`).click();
       await page.locator('[data-recruiter="yana"]').click(); await page.locator('[data-action="next"]').click();
