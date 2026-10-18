@@ -7747,3 +7747,28 @@ body.candidate-site {
     grid-column: 1 / -1;
   }
 }
+
+/* Custom validation is authoritative even when HTML :valid only sees a filled field. */
+#application-dialog-content .application-field.is-invalid::after {
+  content: none;
+  display: none;
+}
+
+#application-dialog-content .application-field.is-invalid input:not([type="radio"]):not([type="checkbox"]),
+#application-dialog-content .application-field.is-invalid select,
+#application-dialog-content .application-field.is-invalid textarea,
+#application-dialog-content .application-field.is-invalid select:hover,
+#application-dialog-content .application-field.is-invalid textarea:hover {
+  border-color: #bd433c;
+}
+
+#application-dialog-content .application-field.is-invalid input:focus,
+#application-dialog-content .application-field.is-invalid select:focus,
+#application-dialog-content .application-field.is-invalid textarea:focus {
+  border-color: #bd433c;
+  box-shadow: 0 0 0 3px rgba(189, 67, 60, .14);
+}
+
+#application-dialog-content .application-field.is-invalid .application-field-error {
+  color: #a6322d;
+}

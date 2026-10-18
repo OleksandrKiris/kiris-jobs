@@ -1,3 +1,4 @@
+import {fieldVisual,correctFieldVisual,acceptFieldStatusProof} from './catalogue-field-status.mjs';
 // CI-only isolated anonymous fixtures. No submissions or external services.
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
@@ -63,7 +64,7 @@ export const FORM_VACANCY_IDS=["greenhouse-tomatoes", "greenhouse-renewal", "tom
 export const FORM_ERROR_CASES=['missing','latin','phone'];
 export function assertFormErrors(rows){
  assert.equal(rows?.length,66);assert.deepEqual(rows.map(r=>`${r.width}:${r.lang}:${r.kind}`).sort(),[320,1280].flatMap(width=>Object.keys(FORM_ERROR_LABELS).flatMap(lang=>FORM_ERROR_CASES.map(kind=>`${width}:${lang}:${kind}`))).sort());
- for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.error,FORM_ERROR_LABELS[r.lang][r.kind]);for(const k of ['roundTrip','preserved','associated','fits','notSubmitted','iconClear'])assert.equal(r[k],true,`${r.lang}:${r.kind}:${k}`);}
+ for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.error,FORM_ERROR_LABELS[r.lang][r.kind]);for(const k of ['roundTrip','preserved','associated','fits','notSubmitted','iconClear','invalidVisual'])assert.equal(r[k],true,`${r.lang}:${r.kind}:${k}`);}
 }
 export function assertFormUpgrades(rows,workerChanged=true){
  if(!workerChanged){assert.deepEqual(rows,[]);return;}
@@ -92,11 +93,12 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
    await locale(page,from);const roundTrip=await page.locator('#application-error').innerText()===FORM_ERROR_LABELS[from][kind];await locale(page,lang);
    const dom=await page.evaluate(()=>({fits:document.documentElement.scrollWidth<=innerWidth+1,notSubmitted:document.querySelector('#application-form')!==null&&!document.querySelector('.application-success')}));
    await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-${width}-${lang}-${kind}.png`)});
-   report.formErrors.push({width,lang,kind,status:'passed',error,preserved,associated,roundTrip,iconClear:await iconClear(page),...dom});assert.deepEqual(errors,[]);await ctx.close();
+   report.formErrors.push({width,lang,kind,status:'passed',error,preserved,associated,roundTrip,iconClear:await iconClear(page),invalidVisual:correctFieldVisual(await fieldVisual(page)),...dom});assert.deepEqual(errors,[]);await ctx.close();
  }
  let nextCase=0;
  await Promise.all(Array.from({length:2},async()=>{while(nextCase<cases.length){const item=cases[nextCase++];await acceptCase(item);}}));
  assertFormErrors(report.formErrors);
+ await acceptFieldStatusProof({context,base,reportDir,report,active});
 }
 export async function cachedFormHash(page,cacheName,url){return page.evaluate(async({cacheName,url})=>{const response=await(await caches.open(cacheName)).match(url);if(!response)return null;const bytes=await response.arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');},{cacheName,url});}
 export async function acceptOfflineFormErrors({page,base,width,reportDir}){

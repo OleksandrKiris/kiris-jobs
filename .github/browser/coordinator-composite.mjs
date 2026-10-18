@@ -1,3 +1,4 @@
+import {assertFieldStatusProof} from './catalogue-field-status.mjs';
 import {assertFormErrors,assertFormUpgrades,FORM_VACANCY_IDS} from './catalogue-form-errors.mjs';
 import { assertApplyEntry } from './apply-entry.mjs';
 import { assertHousingControls } from './catalogue-housing.mjs';
@@ -125,10 +126,12 @@ try {
   await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
   await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
-    '725e9cc83e4492bb2e11bc525afce92e441a253c', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
+    'b2957797f24ddc70dbd57279d9f298b4f930b07b', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
   const workerSource=(await readFile(join(artifact,'sw.js'))).toString();
   assert.equal((workerSource.match(/formErrorLocale=1/g)||[]).length,4);
-  let oldAlgorithm=workerSource.replace('kiris-jobs-v220-form-error-locale-2026-10-18-1','kiris-jobs-v220-card-contrast-2026-10-18-1').replaceAll('&formErrorLocale=1','');
+  const accepted108=workerSource.replace('kiris-jobs-v220-field-status-2026-10-18-1','kiris-jobs-v220-form-error-locale-2026-10-18-1').replaceAll('&fieldStatus=1','');
+  assert.equal(execFileSync('git',['hash-object','--stdin'],{input:accepted108,encoding:'utf8'}).trim(),'725e9cc83e4492bb2e11bc525afce92e441a253c','Only the cache generation and reviewed error-state CSS query may differ from accepted PR108 worker');
+  let oldAlgorithm=accepted108.replace('kiris-jobs-v220-form-error-locale-2026-10-18-1','kiris-jobs-v220-card-contrast-2026-10-18-1').replaceAll('&formErrorLocale=1','');
   for(const id of FORM_VACANCY_IDS)oldAlgorithm=oldAlgorithm.replace(',\n  "./vacancies/'+id+'/"','');
   oldAlgorithm=oldAlgorithm.replace('          || await caches.match(requestUrl.origin + requestUrl.pathname)\n','');
   assert.equal(execFileSync('git',['hash-object','--stdin'],{input:oldAlgorithm,encoding:'utf8'}).trim(),'8fd4f2a8d34259b18dcbf23e18afcaad0e6ce036','Only the reviewed import/cache revision and14 canonical vacancy-navigation entries may differ from the accepted worker');
@@ -156,7 +159,7 @@ try {
       [320,1280].flatMap(width=>contrastLocales.map(lang=>`${width}:${lang}`)).sort());
     assert.ok(full.cardActionContrast.every(x=>x.status==='passed'&&x.normal.length===17&&x.states.length===3));
     assertContrastRegressionRows(full.cardContrastOldRed,report.base);
-    assertFormErrors(full.formErrors);assertFormUpgrades(full.formUpgrades,execFileSync('git',['show',report.base+':sw.js']).toString()!==(await readFile(join(artifact,'sw.js'))).toString());
+    assertFieldStatusProof(full);assertFormErrors(full.formErrors);assertFormUpgrades(full.formUpgrades,execFileSync('git',['show',report.base+':sw.js']).toString()!==(await readFile(join(artifact,'sw.js'))).toString());
     assert.deepEqual(full.formErrorOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);assert.ok(full.formErrorOldRed.every(r=>r.iconClear===false));
     assertApplyEntry(full.applyEntry);
     assert.deepEqual(full.applyOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);
@@ -168,7 +171,7 @@ try {
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,
-      formErrors:full.formErrors,formUpgrades:full.formUpgrades,formErrorOldRed:full.formErrorOldRed,
+      formErrors:full.formErrors,formFieldStatusOldRed:full.formFieldStatusOldRed,formFieldLifecycle:full.formFieldLifecycle,formUpgrades:full.formUpgrades,formErrorOldRed:full.formErrorOldRed,
       applyEntry:full.applyEntry, applyOldRed:full.applyOldRed, applyRegressionSource:full.applyRegressionSource,
       housingControls:full.housingControls, housingReturns:full.housingReturns, housingGroups:full.housingGroups,
       cardActionContrast:full.cardActionContrast.map(x=>({width:x.width,lang:x.lang,status:x.status})),
@@ -188,7 +191,7 @@ try {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
     currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
-      workerBlob: '725e9cc83e4492bb2e11bc525afce92e441a253c', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
+      workerBlob: 'b2957797f24ddc70dbd57279d9f298b4f930b07b', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
     candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',
       stagedPath: 'tools/coordinator/', hashes: targetHashes, actualStagedHead: mode === 'actual-staged-head' },
     publishedOld5: { sourceHead: transition.published.ref, hashes: transition.published.hashes },
