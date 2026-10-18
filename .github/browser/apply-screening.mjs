@@ -8,11 +8,11 @@ import {createHash} from 'node:crypto';
 export const SCREENING_LANGS=['ka','az','hy','tr','uz'];
 export const SCREENING_BASE='f89ba98f32c998e3b4b4261b455a03651837974a';
 export const SCREENING_KEYS=['draftFound','resumeDraft','discardDraft','trustLabel','trustShort','trustNoCv','trustControl','languageLead','recruiterLead','step1Title','step1Lead','step2Title','step2Lead','step3Title','step3Lead','citizenshipHint','citizenshipPlaceholder','gender','stayDuration','physicalWork','physicalDetails','physicalDetailsHint','workNoteTitle','workNote','performanceMetrics','performanceMetricsHint','fastPace','watchedVideos','understandsRole','longHours','longHoursHint','yesShort','noShort','copyRow','rowCopied','copyFailed','sectionAvailability','sectionExperience','sectionExpectations'];
-export function applyLocales(ref='') {
+export function applyLocales() {
   const scope=vm.createContext({window:{},console,URL,Intl,Object});
   for(const file of ['i18n-core','i18n-caucasus-central','i18n-asia','i18n-extra','i18n-mobile','translations']) {
     const path='apply/'+file+'.js';
-    vm.runInContext(ref?execFileSync('git',['show',ref+':'+path]).toString():readFileSync(path,'utf8'),scope,{filename:path});
+    vm.runInContext(readFileSync(path,'utf8'),scope,{filename:path});
   }
   return JSON.parse(JSON.stringify(scope.window.CITRONEX_SIMPLE_I18N));
 }
