@@ -17,7 +17,7 @@ from .views import api_error
 
 logger = logging.getLogger('core.requests')
 ROUTES = {'/api/v1/health/': 'health', '/api/v1/version/': 'version',
-          '/api/v1/materials/': 'materials'}
+          '/api/v1/materials/': 'materials', '/api/v1/capabilities/': 'capabilities'}
 METHODS = {'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'}
 
 

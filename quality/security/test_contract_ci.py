@@ -1,10 +1,111 @@
 from pathlib import Path
+from contextlib import redirect_stderr, redirect_stdout
+import io
 import tempfile
 import unittest
-from contract_ci import collect, passed
+from unittest.mock import patch
+from contract_ci import CAPABILITIES, CAPABILITIES_FILES, SUITES, collect, main, passed, run_suites
 
 
 class ContractDiscoveryTests(unittest.TestCase):
+    def fixture_suite(self, path, count, body='pass'):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        methods = ''.join(f' def test_{i}(self): {body}\n' for i in range(count))
+        path.write_text('import unittest\nclass T(unittest.TestCase):\n' + methods,
+                        encoding='utf-8')
+
+    def fixture_root(self, root, capabilities=True):
+        for path, minimum in SUITES:
+            self.fixture_suite(root / path, minimum)
+        if capabilities:
+            directory = root / CAPABILITIES
+            directory.mkdir(parents=True)
+            for name in CAPABILITIES_FILES:
+                (directory / name).write_text('{}', encoding='utf-8')
+            self.fixture_suite(directory / 'test_capabilities.py', 9)
+
+    def run_fixture(self, root):
+        output, errors = io.StringIO(), io.StringIO()
+        with redirect_stdout(output), redirect_stderr(errors):
+            code = run_suites(root)
+        return code, output.getvalue(), errors.getvalue()
+
+    def test_real_entry_requires_jsonschema_even_when_discovery_fixtures_do_not(self):
+        # Explicit absent-dependency fixture, never a substitute schema checker.
+        real_import = __import__
+
+        def without_jsonschema(name, *args, **kwargs):
+            if name == 'jsonschema' or name.startswith('jsonschema.'):
+                raise ModuleNotFoundError("No module named 'jsonschema'")
+            return real_import(name, *args, **kwargs)
+
+        with patch('builtins.__import__', side_effect=without_jsonschema):
+            with self.assertRaisesRegex(ModuleNotFoundError, 'jsonschema'):
+                main()
+            with tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                self.fixture_root(root)
+                self.assertEqual(self.run_fixture(root)[0], 0)
+
+    def test_legacy_absence_is_explicit_and_runs_only_existing_twenty(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture_root(root, capabilities=False)
+            code, output, errors = self.run_fixture(root)
+            self.assertEqual(code, 0)
+            self.assertIn('not applicable', output)
+            self.assertIn('Ran 20 tests', errors)
+
+    def test_present_capabilities_are_actually_executed_and_failure_propagates(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture_root(root)
+            code, output, errors = self.run_fixture(root)
+            self.assertEqual(code, 0)
+            self.assertIn('test_capabilities.py: discovered 9', output)
+            self.assertIn('Ran 29 tests', errors)
+            path = root / CAPABILITIES / 'test_capabilities.py'
+            self.fixture_suite(path, 9, 'self.fail("capability regression")')
+            code, _, errors = self.run_fixture(root)
+            self.assertEqual(code, 1)
+            self.assertIn('failures=9', errors)
+
+    def test_each_partial_capabilities_file_and_non_directory_are_rejected(self):
+        for name in CAPABILITIES_FILES:
+            with self.subTest(missing=name), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                self.fixture_root(root)
+                (root / CAPABILITIES / name).unlink()
+                with self.assertRaisesRegex(ValueError, 'Incomplete capabilities contract'):
+                    self.run_fixture(root)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture_root(root, capabilities=False)
+            (root / CAPABILITIES).write_text('not a directory', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'real directory'):
+                self.run_fixture(root)
+
+    def test_reduced_skipped_and_expected_failure_capabilities_fail_closed(self):
+        for count, body in [(8, 'pass'), (9, 'self.skipTest("required")')]:
+            with self.subTest(count=count, body=body), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                self.fixture_root(root)
+                path = root / CAPABILITIES / 'test_capabilities.py'
+                self.fixture_suite(path, count, body)
+                if count < 9:
+                    with self.assertRaisesRegex(ValueError, 'discovered 8'):
+                        self.run_fixture(root)
+                else:
+                    self.assertEqual(self.run_fixture(root)[0], 1)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.fixture_root(root)
+            path = root / CAPABILITIES / 'test_capabilities.py'
+            self.fixture_suite(path, 9, 'self.fail("expected")')
+            source = path.read_text(encoding='utf-8').replace(' def test_', ' @unittest.expectedFailure\n def test_')
+            path.write_text(source, encoding='utf-8')
+            self.assertEqual(self.run_fixture(root)[0], 1)
+
     def test_empty_missing_and_reduced_suites_fail(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / 'test_fixture.py'

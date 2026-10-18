@@ -1,0 +1,26 @@
+{
+  "api_version": "1",
+  "service": "primserv-core",
+  "version": "0.1.0",
+  "capabilities": {
+    "materials": {
+      "contract": "materials-v1",
+      "path": "/api/v1/materials/",
+      "methods": [
+        "GET"
+      ],
+      "languages": [
+        "ua",
+        "uk",
+        "ru",
+        "pl",
+        "en",
+        "ka",
+        "tr",
+        "hy"
+      ],
+      "max_limit": 20
+    }
+  },
+  "data_source": "local_mock"
+}
