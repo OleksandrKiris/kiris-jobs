@@ -24,14 +24,20 @@
     <section id="tasks" aria-label="Demo tasks"></section>
     <p id="empty" hidden></p>
     <section aria-labelledby="materialsTitle">
-      <h2 id="materialsTitle">Source materials</h2>
+      <h2 id="materialsTitle" tabindex="-1">Source materials</h2>
       <div class="toolbar">
         <label><span id="materialsSourceLabel">Local source</span><select id="materialsSource"><option value="snapshot">Snapshot</option><option value="mock">Local mock</option></select></label>
         <label><span id="materialsLabel">Search source text</span><input id="materialQuery" type="search" maxlength="120"></label>
       </div>
       <p id="materialsNotice" class="muted"></p>
       <p id="materialsStatus" role="status" aria-live="polite"></p>
+      <div class="toolbar">
+        <button id="lastMaterialReturn" type="button" disabled>Return to last material</button>
+        <button id="lastMaterialClear" type="button" disabled>Clear last material</button>
+      </div>
+      <p id="lastMaterialNotice" role="status" aria-live="polite"></p>
       <div id="materials"></div>
+      <div id="materialReading" hidden></div>
     </section>
     <section class="reset-area">
       <button id="reset" type="button">Reset demo progress</button>

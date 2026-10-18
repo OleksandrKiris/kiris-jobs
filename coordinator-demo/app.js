@@ -26,13 +26,44 @@
     uk:{title:'Матеріали з джерелом',search:'Пошук у тексті джерела',notice:'Локальний знімок лише для читання · онлайн вимкнено. Текст звірено з репозиторієм 2026-10-17; джерело оновлено 2026-07-23. Це не підтвердження поточних умов роботи.',fallback:'Запитана мова: {requested} · Показано: ru. Перекладу цього матеріалу немає.',empty:'Підтверджений матеріал не знайдено. Відповідь не вигадується.',source:'Джерело (потрібен інтернет)'},
     pl:{title:'Materiały ze źródłem',search:'Szukaj w tekście źródłowym',notice:'Lokalna kopia tylko do odczytu · tryb online wyłączony. Tekst sprawdzono w repozytorium 2026-10-17; źródło zaktualizowano 2026-07-23. Nie potwierdza to aktualnych warunków pracy.',fallback:'Wybrany język: {requested} · Wyświetlono: ru. Brak tłumaczenia tego materiału.',empty:'Nie znaleziono potwierdzonego materiału. Odpowiedź nie jest wymyślana.',source:'Źródło (wymaga internetu)'}
   };
-  let materialMode='snapshot', reader=M.materialReader();
+  let materialMode='snapshot', reader=M.materialReader(), selectedMaterial=null;
+  const recentCopy={
+    en:{read:'Read material',back:'Return to last material',clear:'Clear last material',none:'No last material saved.',saved:'Last material saved on this device. Use Return to open it.',blocked:'Last-material storage is unavailable. This choice works only on this page; reload may lose it. Clearing could not be guaranteed.',invalid:'The last-material record is damaged or has an unknown version. It is preserved. New choices work only on this page until you clear it.',stale:'The saved material is no longer available. Choose a current material or clear the saved record. New choices work only on this page until cleared.',cleared:'Last-material choice cleared. Task statuses are unchanged.'},
+    ru:{read:'Читать материал',back:'Вернуться к последнему материалу',clear:'Очистить последний материал',none:'Последний материал не сохранён.',saved:'Последний материал сохранён на этом устройстве. Чтобы открыть его, нажмите «Вернуться».',blocked:'Хранилище последнего материала недоступно. Выбор работает только на этой странице и может потеряться при перезагрузке. Удаление записи не гарантировано.',invalid:'Запись последнего материала повреждена или имеет неизвестную версию. Она сохранена без перезаписи. Новый выбор работает только на этой странице до очистки.',stale:'Сохранённый материал больше недоступен. Выберите текущий материал или очистите запись. Новый выбор работает только на этой странице до очистки.',cleared:'Выбор последнего материала очищен. Статусы задач не изменены.'},
+    uk:{read:'Читати матеріал',back:'Повернутися до останнього матеріалу',clear:'Очистити останній матеріал',none:'Останній матеріал не збережено.',saved:'Останній матеріал збережено на цьому пристрої. Щоб відкрити його, натисніть «Повернутися».',blocked:'Сховище останнього матеріалу недоступне. Вибір працює лише на цій сторінці й може зникнути після перезавантаження. Видалення запису не гарантовано.',invalid:'Запис останнього матеріалу пошкоджено або має невідому версію. Його не перезаписано. Новий вибір працює лише на цій сторінці до очищення.',stale:'Збережений матеріал більше недоступний. Виберіть поточний матеріал або очистіть запис. Новий вибір працює лише на цій сторінці до очищення.',cleared:'Вибір останнього матеріалу очищено. Статуси завдань не змінено.'},
+    pl:{read:'Czytaj materiał',back:'Wróć do ostatniego materiału',clear:'Wyczyść ostatni materiał',none:'Nie zapisano ostatniego materiału.',saved:'Ostatni materiał zapisano na tym urządzeniu. Otwórz go przyciskiem Wróć.',blocked:'Pamięć ostatniego materiału jest niedostępna. Wybór działa tylko na tej stronie i może zniknąć po odświeżeniu. Nie można zagwarantować usunięcia zapisu.',invalid:'Zapis ostatniego materiału jest uszkodzony lub ma nieznaną wersję. Zachowano go bez nadpisania. Nowy wybór działa tylko na tej stronie do wyczyszczenia.',stale:'Zapisany materiał nie jest już dostępny. Wybierz aktualny materiał lub wyczyść zapis. Nowy wybór działa tylko na tej stronie do wyczyszczenia.',cleared:'Wybór ostatniego materiału wyczyszczono. Statusy zadań są niezmienione.'}
+  };
+  function requestedMaterialLanguage() {
+    const code=String(requested).toLowerCase();
+    return ['ru','ua','uk','pl','en','ka','tr','hy'].includes(code)?code:'en';
+  }
+  function openMaterial(id,requestedLanguage,remember=true) {
+    const item=reader.read({language:requestedLanguage}).items.find(x=>x.id===id);
+    if(!item){selectedMaterial=null;renderMaterials();return;}
+    selectedMaterial={id,language:requestedLanguage};
+    if(remember)recent.remember(id,requestedLanguage);
+    renderMaterials();$('reading-title').focus();
+  }
+  function renderRecent() {
+    const state=recent.snapshot(),t=recentCopy[lang];
+    $('lastMaterialReturn').textContent=t.back;$('lastMaterialClear').textContent=t.clear;
+    $('lastMaterialReturn').disabled=!state.entry;
+    $('lastMaterialClear').disabled=!state.entry&&['ready','cleared'].includes(state.persistence);
+    $('lastMaterialNotice').textContent=t[['blocked','invalid','stale','cleared'].includes(state.persistence)?state.persistence:state.entry?'saved':'none'];
+    const reading=$('materialReading');reading.hidden=!selectedMaterial;
+    if(!selectedMaterial){reading.replaceChildren();return;}
+    const response=reader.read({language:selectedMaterial.language}),item=response.items.find(x=>x.id===selectedMaterial.id);
+    if(!item){selectedMaterial=null;reading.hidden=true;reading.replaceChildren();return;}
+    const heading=node('h3',item.title);heading.id='reading-title';heading.tabIndex=-1;heading.lang=item.language;
+    const text=node('p',item.text);text.lang=item.language;
+    const badge=node('p',response.fallback?materialCopy[lang].fallback.replace('{requested}',response.requested_language):'ru · Zgorzelec','muted');
+    reading.replaceChildren(heading,badge,text);
+  }
   const sourceCopy={en:['Local source','Snapshot','Local mock'],ru:['Локальный источник','Снимок','Локальный mock'],uk:['Локальне джерело','Знімок','Локальний mock'],pl:['Lokalne źródło','Kopia','Lokalny mock']};
   function renderMaterials() {
     const t=materialCopy[lang];
     // Unsupported URL language stays visible in provenance; it is not silently relabelled EN.
-    const normalizedLanguage=String(requested).toLowerCase();
-    const requestedLanguage=['ru','ua','uk','pl','en','ka','tr','hy'].includes(normalizedLanguage)?normalizedLanguage:'en';
+    const requestedLanguage=requestedMaterialLanguage();
     const response=reader.read({language:requestedLanguage});
     const items=M.searchMaterials(response,$('materialQuery').value||'');
     $('materialsTitle').textContent=t.title; $('materialsLabel').textContent=t.search;
@@ -46,9 +77,12 @@
       heading.lang=item.language;text.lang=item.language;
       source.href='https://github.com/'+item.source.repo+'/blob/'+item.source.ref+'/'+item.source.path;
       source.target='_blank';source.rel='noopener noreferrer';
-      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector+' · '+item.source.ref.slice(0,8),'muted'),source);
+      const read=node('button',recentCopy[lang].read);read.type='button';read.id='read-'+item.id;
+      read.addEventListener('click',()=>openMaterial(item.id,requestedLanguage));
+      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector+' · '+item.source.ref.slice(0,8),'muted'),source,read);
       return article;
     }));
+    renderRecent();
   }
   const published = /^https?:$/.test(location.protocol) && /\/tools\/coordinator\/(?:index\.html)?$/.test(location.pathname);
   let offlineState = 'loading', offlineAttempt = 0, offlineTimer;
@@ -102,6 +136,7 @@
     removeItem: key => window.localStorage.removeItem(key)
   };
   const model = M.create(storage);
+  const recent = M.materialMemory(storage);
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text) element.textContent = text;
@@ -162,6 +197,12 @@
   }
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
   $('filter').addEventListener('change',()=>{filter=$('filter').value;syncURL();render();});
+  $('lastMaterialReturn').addEventListener('click',()=>{
+    const entry=recent.snapshot().entry;if(!entry)return;
+    requested=entry.requested_language;lang=M.language(requested);syncURL();render();
+    openMaterial(entry.material_id,entry.requested_language,false);
+  });
+  $('lastMaterialClear').addEventListener('click',()=>{recent.clear();selectedMaterial=null;renderMaterials();$('materialsTitle').focus();});
   $('materialQuery').addEventListener('input',renderMaterials);
   $('materialsSource').addEventListener('change',()=>{
     materialMode=$('materialsSource').value;
