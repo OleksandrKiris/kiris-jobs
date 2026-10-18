@@ -462,15 +462,20 @@
 
   function restoreCatalogContext() {
     if (directJobId) return;
+    const searchInput = $("job-search");
+    // Imports can finish after someone has already typed in the visible field.
+    const earlyQuery = searchInput.value;
     try {
       const saved = JSON.parse(window.sessionStorage.getItem(CATALOG_CONTEXT_KEY) || "null");
       if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
       if (typeof saved.query === "string") state.query = saved.query;
       if (jobs.some((job) => countryCode(job) === saved.country)) state.country = saved.country;
       if (["housing", "noExperience", "pairs", "official"].includes(saved.feature)) state.feature = saved.feature;
-      $("job-search").value = state.query;
     } catch {
       // Tab-local context is optional; never block the catalogue.
+    } finally {
+      if (earlyQuery) state.query = earlyQuery;
+      searchInput.value = state.query;
     }
   }
 

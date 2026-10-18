@@ -58,6 +58,7 @@ function catalog(locale = "pl", options = {}) {
     return node;
   }
   for (const id of ["country-filter", "feature-filter", "job-search", "reset-filters", "job-grid", "other-job-grid", "other-job-count", "other-jobs", "result-count", "empty-state", "job-total"]) elements.set(id, element(id));
+  if (options.earlyQuery !== undefined) elements.get("job-search").value = options.earlyQuery;
   const context = vm.createContext({ window, document, location, URL, Intl, Date,
     navigator: { language: locale, languages: [locale] }, localStorage: { getItem: () => null },
     fetch() { throw Error("Network forbidden in filter tests"); }
@@ -170,4 +171,33 @@ test("invalid or unavailable session context never breaks catalogue filters", ()
 
 test("startup restores context before rendering the catalogue", () => {
   assert.match(source, /function init\(\)\s*\{\s*i18n\.init\(\);\s*restoreCatalogContext\(\);/);
+});
+
+for (const locale of locales) {
+  test(`${locale}: text entered before startup survives context restore and filters immediately`, () => {
+    const ready = catalog(locale);
+    const facts = JSON.stringify(ready.window.PORTAL_CONTENT);
+    const job = ready.window.PORTAL_CONTENT.jobs.find(job => job.id === "greenhouse-tomatoes");
+    const earlyQuery = "  " + ready.window.PortalI18n.job(job).title + "  ";
+    for (const saved of [null, { query: "no-such-old-query", country: "PL", feature: "housing" }]) {
+      const storage = new Map(saved ? [[contextKey, JSON.stringify(saved)]] : []);
+      const before = storage.get(contextKey);
+      const c = catalog(locale, { earlyQuery, storage });
+      assert.equal(c.api.state.query, earlyQuery);
+      assert.equal(c.elements.get("job-search").value, earlyQuery);
+      assert.ok(c.api.visibleJobs().some(job => job.id === "greenhouse-tomatoes"));
+      assert.ok(c.api.visibleJobs().length < 14, "Initial render must filter the visible typed text");
+      if (saved) {
+        assert.equal(c.api.state.country, "PL");
+        assert.equal(c.api.state.feature, "housing");
+      }
+      assert.equal(storage.get(contextKey), before, "Reading context does not rewrite saved bytes");
+      assert.equal(JSON.stringify(c.window.PORTAL_CONTENT), facts);
+    }
+  });
+}
+test("early search remains usable when session storage cannot be read or written", () => {
+  const c = catalog("ru", { earlyQuery: "томат", blockRead: true, blockWrite: true });
+  assert.equal(c.api.state.query, "томат");
+  assert.equal(c.api.visibleJobs().length, 2);
 });
