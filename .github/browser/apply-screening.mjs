@@ -94,7 +94,8 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
           const section=page.locator('.screening-question').filter({has:page.locator(`[name="${field}"]`)});
           assert.ok((await section.innerText()).includes(l[key]));
           assert.deepEqual(await section.locator('.choice-icon').allTextContents(),[l.yesShort,l.noShort]);
-          await page.locator(`[name="${field}"][value="no"]`).check();
+          await page.locator(`[name="${field}"][value="no"]`).locator('..').click();
+          assert.ok(await page.locator(`[name="${field}"][value="no"]`).isChecked());
         }
         // Anonymous fixture only: this checkbox remains local. The send/copy actions are never used.
         await page.locator('#consent').check();await checkScreen(page,l,3,reportDir,`apply-screening-${lang}-${width}-step3`);
