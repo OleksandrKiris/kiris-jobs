@@ -30,7 +30,7 @@ export async function acceptFieldStatusProof({context,base,reportDir,report,acti
   for(const kind of ['latin','phone']){
    const ctx=await context({width,height:900}),page=await ctx.newPage();active(page);await fixture(page,base,kind);assert.equal(correctFieldVisual(await fieldVisual(page)),true);
    const name=kind==='latin'?'firstName':'phone',bad=kind==='latin'?'ТЕСТ':'+123',good=kind==='latin'?'QA':'+99912345678';
-   await page.locator(`[name="${name}"]`).click();const focused=await fieldVisual(page);const focusedErrorRed=correctFieldVisual(focused)&&focused[0].focused&&focused[0].shadow.includes('189, 67, 60');
+   await page.locator(`[name="${name}"]`).click();await page.waitForFunction(name=>{const el=document.querySelector(`[name="${name}"]`);return el===document.activeElement&&getComputedStyle(el).boxShadow.includes('189, 67, 60');},name);const focused=await fieldVisual(page);const focusedErrorRed=correctFieldVisual(focused)&&focused[0].focused&&focused[0].shadow.includes('189, 67, 60');
    await page.locator(`[name="${name}"]`).fill(good);const clearedOnEdit=await page.evaluate(()=>!document.querySelector('.application-field.is-invalid')&&document.querySelector('#application-error').hidden);
    await page.locator(`[name="${name}"]`).fill(bad);await page.locator('#application-form button[type="submit"]').click();const restoredOnRevalidate=correctFieldVisual(await fieldVisual(page));
    const dom=await page.evaluate(()=>({sameStep:document.querySelector('.application-header').dataset.stage==='1',notSubmitted:!document.querySelector('.application-success')}));
