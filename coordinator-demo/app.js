@@ -86,6 +86,7 @@
   }
   const sourceCopy={en:['Local source','Snapshot','Local mock'],ru:['Локальный источник','Снимок','Локальный mock'],uk:['Локальне джерело','Знімок','Локальний mock'],pl:['Lokalne źródło','Kopia','Lokalny mock']};
   function renderMaterials() {
+    if(backupPending)cancelBackup();
     const t=materialCopy[lang];
     // Unsupported URL language stays visible in provenance; it is not silently relabelled EN.
     const requestedLanguage=requestedMaterialLanguage();
@@ -189,7 +190,43 @@
       history.replaceState(history.state, '', url);
     } catch { /* Board still works without browser history. */ }
   }
+  const backupCopy={
+    en:{title:'Demo progress backup',help:'Only the three fictional demo task statuses. No people, materials or settings. Paste JSON, review, then explicitly apply. Cancel changes nothing.',export:'Export demo JSON',output:'Current demo JSON (read only)',input:'Paste demo JSON to restore',preview:'Preview restore',review:'Review all three demo statuses (before → after)',apply:'Apply demo statuses',cancel:'Cancel',ready:'No restore is pending.',previewed:'Review before applying. No statuses have been written.',invalid:'Invalid demo backup. Expected only the exact supported format and three allowed statuses (up to 2048 UTF-8 bytes). Nothing changed.',unavailable:'Restore aborted: storage is unavailable or contains an unsupported record. Original saved data and in-tab statuses are unchanged. Reset is separate.',changed:'Restore aborted: demo progress changed after preview. Preview again. Nothing was imported.',saved:'Three demo statuses restored and saved on this device.',cancelled:'Restore cancelled. Nothing was imported.',manual:'JSON is ready below for manual copying. Download is unavailable; no file save is confirmed.',download:'Download requested. File saving is not confirmed. The same JSON is available below for manual copying.'},
+    ru:{title:'Резервная копия демо-прогресса',help:'Только статусы трёх вымышленных демо-задач. Без людей, материалов и настроек. Вставьте JSON, проверьте и явно примените. Отмена ничего не меняет.',export:'Экспорт демо JSON',output:'Текущий демо JSON (только чтение)',input:'Вставьте демо JSON для восстановления',preview:'Предпросмотр восстановления',review:'Проверьте три демо-статуса (до → после)',apply:'Применить демо-статусы',cancel:'Отмена',ready:'Восстановление не ожидается.',previewed:'Проверьте перед применением. Статусы ещё не записаны.',invalid:'Неверная демо-копия. Нужен точный поддерживаемый формат с тремя допустимыми статусами (до 2048 байт UTF-8). Ничего не изменено.',unavailable:'Восстановление отменено: хранилище недоступно или запись не поддерживается. Сохранённые данные и статусы вкладки не изменены. Сброс — отдельное действие.',changed:'Восстановление отменено: после предпросмотра прогресс изменился. Повторите предпросмотр. Ничего не импортировано.',saved:'Три демо-статуса восстановлены и сохранены на этом устройстве.',cancelled:'Восстановление отменено. Ничего не импортировано.',manual:'JSON готов ниже для ручного копирования. Скачивание недоступно; сохранение файла не подтверждено.',download:'Скачивание запрошено. Сохранение файла не подтверждено. Тот же JSON доступен ниже для ручного копирования.'},
+    uk:{title:'Резервна копія демо-прогресу',help:'Лише статуси трьох вигаданих демо-завдань. Без людей, матеріалів і налаштувань. Вставте JSON, перевірте й явно застосуйте. Скасування нічого не змінює.',export:'Експорт демо JSON',output:'Поточний демо JSON (лише читання)',input:'Вставте демо JSON для відновлення',preview:'Перегляд відновлення',review:'Перевірте три демо-статуси (до → після)',apply:'Застосувати демо-статуси',cancel:'Скасувати',ready:'Відновлення не очікується.',previewed:'Перевірте перед застосуванням. Статуси ще не записані.',invalid:'Невірна демо-копія. Потрібен точний формат із трьома дозволеними статусами (до 2048 байтів UTF-8). Нічого не змінено.',unavailable:'Відновлення скасовано: сховище недоступне або запис не підтримується. Збережені дані й статуси вкладки не змінені. Скидання — окрема дія.',changed:'Відновлення скасовано: після перегляду прогрес змінився. Повторіть перегляд. Нічого не імпортовано.',saved:'Три демо-статуси відновлено й збережено на цьому пристрої.',cancelled:'Відновлення скасовано. Нічого не імпортовано.',manual:'JSON готовий нижче для ручного копіювання. Завантаження недоступне; збереження файлу не підтверджено.',download:'Завантаження запитано. Збереження файлу не підтверджено. Той самий JSON доступний нижче для ручного копіювання.'},
+    pl:{title:'Kopia postępu demo',help:'Tylko statusy trzech fikcyjnych zadań demo. Bez osób, materiałów i ustawień. Wklej JSON, sprawdź i jawnie zastosuj. Anulowanie nic nie zmienia.',export:'Eksportuj demo JSON',output:'Bieżący demo JSON (tylko odczyt)',input:'Wklej demo JSON do przywrócenia',preview:'Podgląd przywracania',review:'Sprawdź trzy statusy demo (przed → po)',apply:'Zastosuj statusy demo',cancel:'Anuluj',ready:'Brak oczekującego przywracania.',previewed:'Sprawdź przed zastosowaniem. Statusy nie zostały zapisane.',invalid:'Nieprawidłowa kopia demo. Wymagany dokładny format z trzema dozwolonymi statusami (do 2048 bajtów UTF-8). Nic nie zmieniono.',unavailable:'Przerwano przywracanie: pamięć jest niedostępna lub zapis nieobsługiwany. Zapisane dane i statusy karty nie zmieniły się. Reset jest osobny.',changed:'Przerwano przywracanie: postęp zmienił się po podglądzie. Otwórz podgląd ponownie. Nic nie zaimportowano.',saved:'Trzy statusy demo przywrócono i zapisano na tym urządzeniu.',cancelled:'Przywracanie anulowane. Nic nie zaimportowano.',manual:'JSON jest gotowy poniżej do ręcznego skopiowania. Pobieranie niedostępne; zapis pliku nie jest potwierdzony.',download:'Zażądano pobrania. Zapis pliku nie jest potwierdzony. Ten sam JSON można skopiować poniżej.'}
+  };
+  let backupPending=false,backupStatus='ready',backupChanges=[];
+  function cancelBackup() {model.cancelProgress();backupPending=false;backupChanges=[];backupStatus='cancelled';renderBackup();}
+  function renderBackup() {
+    const t=backupCopy[lang];
+    for(const [id,key] of Object.entries({backupTitle:'title',backupHelp:'help',backupExport:'export',backupOutputLabel:'output',backupInputLabel:'input',backupPreview:'preview',backupReviewTitle:'review',backupApply:'apply',backupCancel:'cancel'}))$(id).textContent=t[key];
+    $('backupReview').hidden=!backupPending;$('backupApply').disabled=!backupPending;
+    $('backupNotice').textContent=t[backupStatus];
+    $('backupChanges').replaceChildren(...backupChanges.map(x=>node('li',x.id+': '+copy[lang][x.from]+' → '+copy[lang][x.to])));
+  }
+  $('backupExport').addEventListener('click',()=>{
+    const raw=model.exportProgress();$('backupOutput').value=raw;
+    backupStatus='manual';let url=null,a=null;
+    try {
+      if(typeof Blob!=='function'||typeof URL.createObjectURL!=='function'||typeof URL.revokeObjectURL!=='function')throw Error('unavailable');
+      a=node('a');if(!('download' in a))throw Error('unavailable');
+      url=URL.createObjectURL(new Blob([raw],{type:'application/json'}));a.href=url;a.download='primserv-demo-progress.json';a.hidden=true;document.body.append(a);a.click();backupStatus='download';
+    } catch {backupStatus='manual';}
+    finally {a?.remove?.();if(url)setTimeout(()=>{try {URL.revokeObjectURL(url);}catch {}},1000);}
+    renderBackup();$('backupOutput').focus();
+  });
+  $('backupInput').addEventListener('input',cancelBackup);
+  $('backupPreview').addEventListener('click',()=>{
+    const result=model.previewProgress($('backupInput').value);backupPending=result.status==='preview';backupChanges=result.changes;backupStatus=backupPending?'previewed':result.status;renderBackup();
+    (backupPending?$('backupReviewTitle'):$('backupNotice')).focus();
+  });
+  $('backupApply').addEventListener('click',()=>{
+    backupStatus=model.applyProgress();backupPending=false;backupChanges=[];render();$('backupTitle').focus();
+  });
+  $('backupCancel').addEventListener('click',()=>{cancelBackup();$('backupInput').focus();});
   function render() {
+    if(backupPending){model.cancelProgress();backupPending=false;backupChanges=[];backupStatus='cancelled';}
     const t = copy[lang], state = model.snapshot();
     const focused = document.activeElement?.id;
     document.documentElement.lang = lang;
@@ -221,7 +258,7 @@
     const paths=[['company','https://www.primserv.pl/'],['jobs','https://oleksandrkiris.github.io/kiris-jobs/?lang='+lang],['training','https://oleksandrkiris.github.io/citronex-hydra-project/?lang='+(lang==='uk'?'ua':lang)],['bot','https://t.me/KirisWorkPoland_bot']];
     $('links').replaceChildren(...paths.map(([key,url])=>{const a=node('a',t[key]);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}));
     renderPublished();
-    renderMaterials();
+    renderMaterials();renderBackup();
     if (focused && M.IDS.includes(focused)) ($(focused) || $('filter')).focus();
   }
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
@@ -239,7 +276,7 @@
     reader=M.materialReader(materialMode==='mock'?{mode:'mock',mock:q=>JSON.stringify(M.materialSnapshot(q))}:{});
     renderMaterials();
   });
-  $('reset').addEventListener('click',()=>{$('resetConfirm').hidden=false;$('cancel').focus();});
+  $('reset').addEventListener('click',()=>{if(backupPending)cancelBackup();$('resetConfirm').hidden=false;$('cancel').focus();});
   $('cancel').addEventListener('click',()=>{$('resetConfirm').hidden=true;$('reset').focus();});
   $('confirm').addEventListener('click',()=>{model.reset(true);$('resetConfirm').hidden=true;render();$('reset').focus();});
   render();

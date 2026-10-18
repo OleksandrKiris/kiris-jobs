@@ -46,6 +46,23 @@
         <button id="favouritesClear" type="button" hidden>Clear pinned-material record</button>
       </section>
     </section>
+    <section id="progressBackup" aria-labelledby="backupTitle">
+      <h2 id="backupTitle" tabindex="-1">Demo progress backup</h2>
+      <p id="backupHelp" class="muted"></p>
+      <button id="backupExport" type="button">Export demo JSON</button>
+      <label for="backupOutput" id="backupOutputLabel">Current demo JSON (read only)</label>
+      <textarea id="backupOutput" rows="7" readonly spellcheck="false"></textarea>
+      <label for="backupInput" id="backupInputLabel">Paste demo JSON to restore</label>
+      <textarea id="backupInput" rows="7" maxlength="2048" spellcheck="false"></textarea>
+      <button id="backupPreview" type="button">Preview restore</button>
+      <p id="backupNotice" tabindex="-1" role="status" aria-live="polite"></p>
+      <div id="backupReview" hidden>
+        <h3 id="backupReviewTitle" tabindex="-1">Review all three demo statuses</h3>
+        <ul id="backupChanges"></ul>
+        <button id="backupApply" type="button">Apply demo statuses</button>
+        <button id="backupCancel" type="button">Cancel</button>
+      </div>
+    </section>
     <section class="reset-area">
       <button id="reset" type="button">Reset demo progress</button>
       <div id="resetConfirm" hidden>

@@ -24,10 +24,20 @@
         IDS.some(id => !STATUSES.includes(statuses[id]))) throw Error('invalid');
     return Object.fromEntries(IDS.map(id => [id, statuses[id]]));
   }
+  const PROGRESS_FORMAT='primserv-coordinator-demo-progress';
+  function parseProgress(raw) {
+    if(typeof raw!=='string'||new TextEncoder().encode(raw).length>2048)throw Error('invalid');
+    const value=JSON.parse(raw);
+    if(!value||typeof value!=='object'||Array.isArray(value)||
+      Object.keys(value).sort().join(',')!=='format,statuses,version'||
+      value.format!==PROGRESS_FORMAT||value.version!==1)throw Error('invalid');
+    return decode(JSON.stringify({version:1,statuses:value.statuses}));
+  }
   function create(storage) {
     let statuses = initial();
     let persistence = 'ready';
     let canWrite = true;
+    let pendingProgress=null;
     try { statuses = decode(storage.getItem(KEY)); }
     catch (error) {
       persistence = error?.message === 'invalid' || error instanceof SyntaxError ? 'invalid' : 'blocked';
@@ -41,13 +51,37 @@
     }
     return {
       snapshot: () => ({statuses:{...statuses}, persistence}),
+      exportProgress() {return JSON.stringify({format:PROGRESS_FORMAT,version:1,statuses:{...statuses}},null,2);},
+      cancelProgress() {pendingProgress=null;},
+      previewProgress(raw) {
+        pendingProgress=null;
+        let target;try {target=parseProgress(raw);}catch {return {status:'invalid',changes:[]};}
+        let actual;try {actual=storage.getItem(KEY);decode(actual);}catch {return {status:'unavailable',changes:[]};}
+        if(!canWrite)return {status:'unavailable',changes:[]};
+        const before={...statuses};pendingProgress={target,actual,before};
+        return {status:'preview',changes:IDS.map(id=>({id,from:before[id],to:target[id]}))};
+      },
+      applyProgress() {
+        const pending=pendingProgress;pendingProgress=null;
+        if(!pending)return 'cancelled';
+        try {
+          const actual=storage.getItem(KEY);
+          if(actual!==pending.actual||IDS.some(id=>statuses[id]!==pending.before[id]))return 'changed';
+          decode(actual);
+          if(!canWrite)return 'unavailable';
+          storage.setItem(KEY,JSON.stringify({version:1,statuses:pending.target}));
+          statuses={...pending.target};persistence='saved';return 'saved';
+        } catch {return 'unavailable';}
+      },
       list(filter = 'all') { return IDS.filter(id => filter === 'all' || statuses[id] === filter); },
       set(id, status) {
         if (!IDS.includes(id) || !STATUSES.includes(status)) return false;
+        pendingProgress=null;
         statuses = {...statuses, [id]:status}; save(); return true;
       },
       reset(confirmed) {
         if (confirmed !== true) return false;
+        pendingProgress=null;
         try { storage.removeItem(KEY); persistence = 'ready'; canWrite = true; }
         catch { persistence = persistence === 'invalid' ? 'invalid' : 'blocked'; }
         statuses = initial(); return true;
@@ -193,6 +227,6 @@
       }
     });
   }
-  return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create,
+  return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create, PROGRESS_FORMAT, parseProgress,
     CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory, FAVOURITES_KEY, materialFavourites});
 });

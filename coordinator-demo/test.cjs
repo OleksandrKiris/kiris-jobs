@@ -410,10 +410,12 @@ test('denied read never overwrites unseen previous data, even if writes would wo
 test('unsupported language and alias have deterministic fallback',()=>{
   assert.equal(M.language('ua'),'uk');assert.equal(M.language('UK'),'uk');assert.equal(M.language('ka'),'en');assert.equal(M.language('<script>'),'en');
 });
-function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true,href}={}) {
-  let document;
+function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl='https://example.test/coordinator-demo/',worker=true,href,download='missing'}={}) {
+  let document;const downloadCalls=[];
   class Node {
-    constructor(tag){this.tagName=tag;this.children=[];this.handlers={};this.hidden=false;this.value='';this.textContent='';this.id='';this.attrs={};this.dataset={};}
+    constructor(tag){this.tagName=tag;this.children=[];this.handlers={};this.hidden=false;this.value='';this.textContent='';this.id='';this.attrs={};this.dataset={};if(tag==='a'&&download!=='missing')this.download='';}
+    click(){downloadCalls.push(['click',this.download]);if(download==='throw')throw Error('download denied');}
+    remove(){downloadCalls.push(['remove']);}
     append(...nodes){this.children.push(...nodes);}
     replaceChildren(...nodes){this.children=nodes;}
     setAttribute(k,v){this.attrs[k]=v;}
@@ -422,13 +424,15 @@ function ui({lang='en',filter='all',store=storage(),historyDenied=false,baseUrl=
   }
   const roots=[...read('index.html').matchAll(/id="([^"]+)"/g)].map(([,id])=>{const n=new Node('fixture');n.id=id;return n;});
   const find=(id,nodes)=>{for(const node of nodes){if(node.id===id)return node;const child=find(id,node.children);if(child)return child;}return null;};
-  document={documentElement:{},activeElement:null,title:'',createElement:t=>new Node(t),getElementById:id=>find(id,roots),querySelector:()=>({prepend(node){roots.unshift(node);}})};
+  document={body:{append(){}},documentElement:{},activeElement:null,title:'',createElement:t=>new Node(t),getElementById:id=>find(id,roots),querySelector:()=>({prepend(node){roots.unshift(node);}})};
   const location=new URL(href||baseUrl+'?lang='+lang+'&status='+filter+'&from=fixture#board');
   const forbidden=()=>{throw Error('External network/operational action forbidden');};
   const window={CoordinatorDemo:M,localStorage:store};const historyCalls=[];
   const history={state:{keep:true},replaceState(s,title,url){if(historyDenied)throw Error('denied');assert.equal(s.keep,true);historyCalls.push(String(url));location.href=String(url);}};
-  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,URLSearchParams,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})}});
-  return {document,location,store,historyCalls,$:id=>document.getElementById(id),change(id,value){const n=this.$(id);n.focus();n.value=value;n.handlers.change();},click(id){this.$(id).handlers.click();}};
+  class TestURL extends URL {static createObjectURL(blob){downloadCalls.push(['blob',blob.parts,blob.type]);return 'blob:fixture';}static revokeObjectURL(url){downloadCalls.push(['revoke',url]);}}
+  const downloadGlobals=download==='missing'?{}:{URL:TestURL,Blob:class {constructor(parts,options){this.parts=parts;this.type=options.type;}},setTimeout:fn=>fn()};
+  vm.runInNewContext(read('app.js'),{window,document,location,history,URL,URLSearchParams,fetch:forbidden,XMLHttpRequest:forbidden,WebSocket:forbidden,navigator:{sendBeacon:forbidden,...(worker?{serviceWorker:{register:forbidden}}:{})},...downloadGlobals});
+  return {document,location,store,historyCalls,downloadCalls,$:id=>document.getElementById(id),change(id,value){const n=this.$(id);n.focus();n.value=value;n.handlers.change();},click(id){this.$(id).handlers.click();}};
 }
 for(const lang of M.LANGS)test(lang+': real UI handlers, filter, focus, language, reload, cancel/reset',()=>{
   const h=ui({lang});assert.equal(h.$('tasks').children.length,3);
@@ -665,4 +669,69 @@ test('favourites mutations preserve newly invalid backing records until explicit
 test('favourites mutation read failure after initialization never writes over backing state',()=>{
  const id='site-cleaning-summary-ru',s=storage(),f=M.materialFavourites(s);f.pin(id,'ua');const raw=s.data.get(M.FAVOURITES_KEY);s.getItem=()=>{throw new Error('denied');};
  f.remove(id);assert.equal(f.snapshot().persistence,'blocked');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);f.pin(id,'pl');assert.equal(f.snapshot().persistence,'blocked');assert.equal(s.data.get(M.FAVOURITES_KEY),raw);
+});
+
+const progressJSON=statuses=>JSON.stringify({format:M.PROGRESS_FORMAT,version:1,statuses});
+test('demo backup roundtrips all27 allowed status combinations through explicit confirmation',()=>{
+ for(const a of M.STATUSES)for(const b of M.STATUSES)for(const c of M.STATUSES){
+  const expected={'demo-01':a,'demo-02':b,'demo-03':c},source=M.create(storage());for(const id of M.IDS)source.set(id,expected[id]);
+  const raw=source.exportProgress();assert.deepEqual(M.parseProgress(raw),expected);assert.deepEqual(Object.keys(JSON.parse(raw)).sort(),['format','statuses','version']);
+  const s=storage(),target=M.create(s);assert.equal(target.previewProgress(raw).status,'preview');assert.equal(s.data.has(M.KEY),false);assert.deepEqual(target.snapshot().statuses,M.initial());
+  assert.equal(target.applyProgress(),'saved');assert.deepEqual(M.create(s).snapshot().statuses,expected);assert.equal(target.applyProgress(),'cancelled');
+ }
+});
+test('demo backup strict UTF8 parser rejects unknown/private/prototype/version/status shapes',()=>{
+ const base={format:M.PROGRESS_FORMAT,version:1,statuses:M.initial()},raw=JSON.stringify(base);
+ const bad=['{broken','null','[]','true','1',JSON.stringify({...base,version:2}),JSON.stringify({...base,format:'other'}),JSON.stringify({...base,notes:'private'}),JSON.stringify({...base,statuses:[]}),JSON.stringify({...base,statuses:null}),JSON.stringify({...base,statuses:{'demo-01':'done'}}),JSON.stringify({...base,statuses:{...M.initial(),worker:'done'}}),JSON.stringify({...base,statuses:{...M.initial(),'demo-01':'approved'}}),JSON.stringify({...base,statuses:{...M.initial(),'demo-01':null}}),raw.replace('"version":1','"__proto__":{},"version":1'),raw.replace('"demo-01":"todo"','"__proto__":{},"demo-01":"todo"'),raw+' '.repeat(2049),JSON.stringify({...base,notes:'界'.repeat(700)})];
+ for(const value of bad){assert.throws(()=>M.parseProgress(value));const s=storage(),m=M.create(s);assert.equal(m.previewProgress(value).status,'invalid');assert.equal(m.applyProgress(),'cancelled');assert.equal(s.calls.some(([op])=>op==='set'),false);}
+ assert.deepEqual(M.parseProgress(raw+' '.repeat(2048-raw.length)),M.initial());assert.throws(()=>M.parseProgress(raw+' '.repeat(2049-raw.length)));
+});
+test('demo restore preview and cancel never write; edited/replayed previews cannot apply',()=>{
+ const s=storage(),m=M.create(s),raw=progressJSON({...M.initial(),'demo-01':'done'});
+ const result=m.previewProgress(raw);assert.deepEqual(result.changes[0],{id:'demo-01',from:'todo',to:'done'});result.changes[0].to='doing';
+ m.cancelProgress();assert.equal(m.applyProgress(),'cancelled');assert.equal(s.data.has(M.KEY),false);
+ m.previewProgress(raw);m.set('demo-03','doing');const saved=s.data.get(M.KEY);assert.equal(m.applyProgress(),'cancelled');assert.equal(s.data.get(M.KEY),saved);
+ m.previewProgress(raw);m.reset(true);assert.equal(m.applyProgress(),'cancelled');assert.equal(s.data.has(M.KEY),false);
+ m.previewProgress(raw);m.previewProgress('{bad');assert.equal(m.applyProgress(),'cancelled');
+});
+test('demo restore confirmation rechecks exact key including concurrent valid and future records',()=>{
+ for(const replacement of [JSON.stringify({version:1,statuses:{...M.initial(),'demo-02':'doing'}}),JSON.stringify({version:2,statuses:{}}),'{broken',' '.repeat(3000)]){
+  const s=storage(),a=M.create(s);assert.equal(a.previewProgress(progressJSON({...M.initial(),'demo-01':'done'})).status,'preview');s.data.set(M.KEY,replacement);
+  assert.equal(a.applyProgress(),'changed');assert.equal(s.data.get(M.KEY),replacement);assert.deepEqual(a.snapshot().statuses,M.initial());assert.equal(s.calls.some(([op])=>op==='set'),false);
+ }
+ const s=storage([[M.KEY,JSON.stringify({version:1,statuses:M.initial()})]]),m=M.create(s);m.previewProgress(progressJSON(M.initial()));s.data.set(M.KEY,s.data.get(M.KEY)+' ');assert.equal(m.applyProgress(),'changed');
+});
+test('demo restore refuses invalid/future/denied/quota storage preserving raw and tab state',()=>{
+ const target=progressJSON({...M.initial(),'demo-03':'done'});
+ for(const raw of ['{bad',JSON.stringify({version:2,statuses:{}})]){const s=storage([[M.KEY,raw]]),m=M.create(s);assert.equal(m.previewProgress(target).status,'unavailable');assert.equal(m.applyProgress(),'cancelled');assert.equal(s.data.get(M.KEY),raw);}
+ const denied=storage([[M.KEY,'unseen']], 'get'),d=M.create(denied);assert.equal(d.previewProgress(target).status,'unavailable');assert.equal(denied.data.get(M.KEY),'unseen');
+ for(const kind of ['read','denied','quota']){const raw=JSON.stringify({version:1,statuses:M.initial()}),s=storage([[M.KEY,raw]]),m=M.create(s);assert.equal(m.previewProgress(target).status,'preview');
+  if(kind==='read')s.getItem=()=>{throw new Error('denied');};else s.setItem=()=>{throw new DOMException(kind,kind==='quota'?'QuotaExceededError':'SecurityError');};
+  assert.equal(m.applyProgress(),'unavailable');assert.equal(s.data.get(M.KEY),raw);assert.deepEqual(m.snapshot().statuses,M.initial());assert.equal(m.applyProgress(),'cancelled');
+ }
+});
+test('demo export reflects current page-only statuses and neither reads nor writes other records',()=>{
+ const s=storage([[M.KEY,'{future'],[M.LAST_MATERIAL_KEY,'last'],[M.FAVOURITES_KEY,'pins'],['other','keep']]),m=M.create(s);m.set('demo-02','done');const before=[...s.data],calls=s.calls.length;
+ assert.equal(M.parseProgress(m.exportProgress())['demo-02'],'done');assert.equal(s.calls.length,calls);assert.deepEqual([...s.data],before);
+});
+for(const lang of [...M.LANGS,'ka'])test(lang+': backup UI manual export/preview/cancel/apply is explicit and context isolated',()=>{
+ const h=ui({lang});h.change('demo-01','doing');h.change('materialsSource','mock');h.$('materialQuery').value='no matching source';h.$('materialQuery').handlers.input();h.change('filter','doing');
+ h.store.data.set(M.LAST_MATERIAL_KEY,'last untouched');h.store.data.set(M.FAVOURITES_KEY,'pins untouched');const url=h.location.href,task=h.store.data.get(M.KEY),before=[...h.store.data];
+ h.click('backupExport');const exported=h.$('backupOutput').value;assert.equal(M.parseProgress(exported)['demo-01'],'doing');assert.deepEqual([...h.store.data],before);assert.equal(h.document.activeElement.id,'backupOutput');
+ if(lang==='en'||lang==='ka')assert.match(h.$('backupNotice').textContent,/manual copying/);
+ const raw=progressJSON({...M.initial(),'demo-02':'done'});h.$('backupInput').value=raw;h.click('backupPreview');assert.equal(h.$('backupReview').hidden,false);assert.equal(h.$('backupChanges').children.length,3);assert.equal(h.document.activeElement.id,'backupReviewTitle');assert.equal(h.store.data.get(M.KEY),task);
+ h.click('backupCancel');assert.deepEqual([...h.store.data],before);assert.equal(h.$('backupReview').hidden,true);assert.equal(h.document.activeElement.id,'backupInput');
+ h.click('backupPreview');h.click('backupApply');assert.deepEqual(JSON.parse(h.store.data.get(M.KEY)).statuses,M.parseProgress(raw));assert.equal(h.location.href,url);assert.equal(h.$('materialQuery').value,'no matching source');assert.equal(h.$('materialsSource').value,'mock');assert.equal(h.$('filter').value,'doing');assert.equal(h.store.data.get(M.LAST_MATERIAL_KEY),'last untouched');assert.equal(h.store.data.get(M.FAVOURITES_KEY),'pins untouched');assert.equal(h.document.activeElement.id,'backupTitle');assert.equal(h.$('tasks').children.length,0);
+});
+test('backup UI new input/context/reset cancels pending confirmation; key changes abort visibly',()=>{
+ for(const action of ['input','filter','language','source','query','reset']){
+  const h=ui();h.$('backupInput').value=progressJSON({...M.initial(),'demo-03':'done'});h.click('backupPreview');
+  if(action==='input')h.$('backupInput').handlers.input();if(action==='filter')h.change('filter','done');if(action==='language')h.change('language','pl');if(action==='source')h.change('materialsSource','mock');if(action==='query')h.$('materialQuery').handlers.input();if(action==='reset')h.click('reset');
+  assert.equal(h.$('backupReview').hidden,true);h.click('backupApply');assert.equal(h.store.data.has(M.KEY),false);
+ }
+ const h=ui();h.$('backupInput').value=progressJSON(M.initial());h.click('backupPreview');h.store.data.set(M.KEY,'{concurrent');h.click('backupApply');assert.match(h.$('backupNotice').textContent,/changed after preview/);assert.equal(h.store.data.get(M.KEY),'{concurrent');
+});
+
+test('backup export requests a local JSON download or honestly falls back when clicking throws',()=>{
+ for(const download of ['success','throw']){const h=ui({download});h.change('demo-03','done');const before=[...h.store.data];h.click('backupExport');assert.deepEqual([...h.store.data],before);assert.equal(h.downloadCalls[0][0],'blob');assert.equal(h.downloadCalls[0][2],'application/json');assert.equal(h.downloadCalls[0][1][0],h.$('backupOutput').value);assert.equal(h.downloadCalls[1][1],'primserv-demo-progress.json');assert.equal(h.downloadCalls.at(-1)[0],'revoke');assert.match(h.$('backupNotice').textContent,download==='success'?/Download requested.*not confirmed/:/manual copying.*no file save is confirmed/);}
 });
