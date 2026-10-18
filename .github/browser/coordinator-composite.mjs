@@ -172,7 +172,7 @@ try {
     for (const [name, bytes] of candidate.files) await writeFile(join(artifact, 'tools/coordinator', name), bytes);
   }
   await acceptCoordinatorHTTP({ report, reportDir, base, context, ready, fits, shot,
-    active: page => { activePage = page; }, startServer, stopServer });
+    active: page => { activePage = page; }, startServer, stopServer, targetFiles: candidate.files });
   await acceptCoordinatorRefresh({ artifact, reportDir, report, base, origin, context,
     ready, fits, shot, active: page => { activePage = page; }, startServer, stopServer,
     transition, targetFiles: candidate.files });
