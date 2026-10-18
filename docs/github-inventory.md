@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; доказательства прохода01:03UTC, сверка 2026-10-18 01:12 UTC, kiris-jobs main8abf после89 и Dragon mainf088 после13. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; доказательства прохода01:28UTC, сверка 2026-10-18 01:35 UTC, kiris-jobs main8abf после89, HYDRA mainb04f после14 и Dragon mainf088 после13. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,8 +12,8 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `8abf8aaf9ad950e193d52b4f56d2a9cc0c011014` | [#89](https://github.com/OleksandrKiris/kiris-jobs/pull/89)0811 merged/published. #62 frozen/draft; existing [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)3807 formerly accepted on basec032; ordinary8abf/rootdocs integration assigned, newhead/CI pending. Contract90/CI21 immutable components; no backend deployment | [39085391777](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39085391777) |
-| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) ready,efbb5a8 | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `8abf8aaf9ad950e193d52b4f56d2a9cc0c011014` | [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)5f12/base8abf actualready/current source-runtime accepted, notmerged/localonly. [#94](https://github.com/OleksandrKiris/kiris-jobs/pull/94)694 draft/sourceP2; localfix6f598e38 waits one rootdocs import/correctedpush/CI. #62 frozen/draft | [39085391777](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39085391777) |
+| [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `b04fc7302612affa0c2eec71ac66ebbc13912e46` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14)efbb/base533 merged/published; new author WIP not yet assigned | [39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
 | [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `f0883032674a5dc9c2034fb144c04286a5617598` | [#13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13) published; [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)a573/basef088 copy MEMO TEXT source/runtime/peer accepted, actualready/unpublished; CI39084077900 SUCCESS | [39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
@@ -41,11 +41,24 @@ main19/prototypes16+8 и6native jobs SUCCESS metadata. Raw144/12Return journeys
 относятся к историческомуc2. 92@3807: current Backend87+29, early18 иCatalogue
 gates PASS; API локальный, native6 не планировался. Docs-only89@0811 сохранил
 11 source paths и прошёл8current checks; новая literal144/12/72 проверка не заявлена.
-Один guard01:03 использован89. Existing92 ещё не merged; разрешена ordinary
-интеграция8abf+новых rootdocs с сохранением12API/schema/CI source paths до одного
-нового push/CI. Issue87 закрыт после main/postproof; issue93 открыт до source
-release CI21. Семь repo не подвергались повторному тяжёлому аудиту; остальные
+Один guard01:03 использован89. Existing92@5f12 после одного combinedpush
+сохранил426entry union/net14 и исходные12API/schema/CI+rootdocs5db. Текущие
+Backend39085885535/Catalogue39085885537 SUCCESS и независимый raw-review подтвердили
+10runner/87backend/29contracts/early18/core16+workerN/A/main19/proto16+8;
+2Return/Clear внутри16, native NOT_SCHEDULED. Actualready01:23:51, неmerged/localonly.
+Issue87closed; issue93 открыт до source-release CI21. Draft94@694 sourceP2:
+устаревший store перезаписывает сохранённый язык/future-format. Local6f598e38:
+82authorunitGREEN/2oldRED/16parity, independent correction acceptance ещё нет.
+Семь repo не подвергались повторному тяжёлому аудиту; остальные
 строки сохраняют прежнюю сверку. Backend deployment/online-adapter/AI выключены.
+
+Единственный guard01:28 выпустил HYDRA14 efbb/base533→b04f, tree d107/parentsexact.
+Pages39086963240 и latestlegacybuildbuiltcommit совпали;3criticalruntime+newjournal
+HTTP200/bytes/fullSHA/Gitblob exact,12unchanged runtime assets поGitidentity безmediafetch.
+Selected-site guide panel сохраняет requestedlang/location/welcome=1 вhref.
+Exactefbb136unit/66browser — принятая hub UI/upgrade/offline/href проверка,
+без новой crosssite Dragon execution/лингвистической/OSclipboard/physical сертификации.
+API92/Dragon14 в этом проходе не сливались.
 
 ## Приёмка и ограничения
 

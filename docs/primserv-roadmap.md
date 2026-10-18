@@ -1,6 +1,6 @@
 # PrimServ — канонический план развития
 
-Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 01:12 UTC, выпуски PR89 и Dragon13). Цель: самостоятельный
+Дата сверки: **18 октября 2026**, Europe/Budapest (сверка 2026-10-18 01:35 UTC, выпуски PR89, HYDRA14 и Dragon13). Цель: самостоятельный
 фронтенд PrimServ и отдельный локальный Django-бэкенд с проверяемыми контрактами,
 подготавливаемый для других компаний без зависимости экранов от его запуска.
 По уточнению пользователя 17.10.2026 работа распределяется
@@ -76,7 +76,7 @@ requested language. Самопроизвольного открытия посл
 и Backend39085391776 SUCCESS,31 активный HTTP-файл совпал с Git по размеру,
 SHA256 и blob; main до/после проверки8abf. Issue87 закрыт после этой публикации.
 Это выпуск автономного фронтенда; Django не развёрнут, online-adapter/AI выключены.
-Отдельными проходами приняты HYDRA11/12/13, main `533360d78af23d61bebaa3607d26b5af5b6cdd70`.
+Отдельными проходами приняты HYDRA11/12/13/14, main `b04fc7302612affa0c2eec71ac66ebbc13912e46`.
 Ранее приняты Dragon9/10/11/12; текущий Dragon main после PR13 — `f0883032674a5dc9c2034fb144c04286a5617598`.
 PR53 подключил demo по `tools/coordinator/`; issue51 закрыт. PR55 сохранил
 полный offline-пакет при обновлении оболочки; issue54 закрыт. Его точный head
@@ -658,21 +658,21 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 
 | Роль | Подтверждено | Один оставшийся результат / зависимость |
 | --- | --- | --- |
-| 1 | Corrected guard59 сохранён в опубликованном89→8abf; accepted418union и current6f runtime CLEAR, current0811 восемь checks SUCCESS | Issue87 закрыт после exactmain/Pages/31HTTP. Компонент frozen; нового harness WIP или повтора прежнего CI нет |
-| 2 | HYDRA14efbb frozen/ready/unpublished; peer Dragon14@a573 CLEAR после воспроизведения старой cross-action race | HYDRA14 остаётся в очереди выпуска. Peer current8GREEN — отдельные VM fixtures, не новые browser/OS clipboard проверки |
+| 1 | Guard59 опубликован89→8abf, issue87 закрыт. Независимое source-ревью94@694 нашло P2 stale-memory write; два адресных source-probes RED | Проверить исправление того же94 на новом combinedhead; не менять frozen59 или browser harness. Старый694 не принимать по одному green CI |
+| 2 | HYDRA14@efbb опубликованb04fc730: Pages39086963240 SUCCESS, tested/merged treed107 и4HTTP bytes exact;12 прежних runtime assets сохранены по Gitidentity | Один runtime-verifier94 сохраняет уже полученные694 proofs как историю P2-head; следующая corrected94 проверка после нового exacthead. Peer Dragon14@a573 accepted отдельно; OS clipboard/crosssite execution не заявлены |
 | 3 | Local58005b9f и прежние proofs сохранены; новая publicHTTPS QA попытка закончилась IAB timeout | Одна30s попытка без page/PNG; training-destination/Back NOTRUN, не дефект сайта. Без повторов до изменения доступности среды |
 | 4 | Memo13 опубликованf088/8exact assets. Copy MEMO TEXT14@a573/basef088 source/runtime/peer CLEAR, actualready; correctedCI39084077900:413unit/59browser, старыйd000 P2 сохранён | Новый14 не merged/published. Root freshhead/base/CI/reviews и отдельный будущий guarded release; без повторных ZIP/CI/нового WIP. OS clipboard/save/physical/full12browser гарантии не заявлены |
 | 5 | Local0c099a6,181unit+author UI; независимое source-ревью6 CLEAR,17runtime hashes | Exact browser приёмка и разрешённая remote передача; source CLEAR не равен выпуску |
 | 6 | Localaf02e06: исправлен R6-LANG-01,182unit PASS; независимое source-ревью7 закрывает P2 | Браузерная приёмка af02; прежние UI-доказательства742 исторические, remote refusal не снят |
 | 7 | Local843c40d,208unit+author UI/upgrade; независимое source-ревью5 CLEAR | Exact browser приёмка; конкретную отказанную IDG6-операцию не повторять |
 | 8 | Consolidated5f5a98c8/runtime92027,476saved PASS;73/73ZIP blobs | Permitted exact UI/offline и canonical26 backup; без mini-fix цепочек |
-| 9 | Return89@0811 опубликован8abf: Pages/Backend SUCCESS,31public exact. Функциональная приёмка6f и docs-only0811 bridge разделены; raw144/12/72 остаётся историейc2 | Разрешён один следующий срез «Закрепить материал»: явные Pin/Open/Remove, независимый strictID/lang storage, сохранение lastpointer/tasks/query/filter. Реальный ID пока один, max5 — только лимит, не пять готовых материалов. Результата новой реализации пока нет |
-| 10 | Единственный guard прохода01:03 использован89→8abf; postPages/Backend/31HTTP и независимое receipt-review CLEAR. Dragon13→f088 остаётся опубликован | Сохранить один2docs-компонент текущего состояния и передать существующему92 до одного нового CI. Следующие release-кандидаты: HYDRA14, локальный92 после интеграции и Dragon14; второго merge в этом проходе нет |
+| 9 | Draft94@694 добавил Pin/Open/Remove; source1 выявил перезапись языка/future-format устаревшим экземпляром. Localfix6f598e38 читает актуальный ownkey перед mutation:82authorunit GREEN,2oldRED,16parity; не pushed | В тот же94 импортировать один root2docs-компонент до единственного corrected push/CI; затем independent source1 P2closure и runtime2. Не ready/published. Реальный materialID один; max5 только bound, без новых переводов/материалов |
+| 10 | Guard01:03 выпустил89→8abf/31exact; единственный guard01:28 выпустилHYDRA14→b04f/4exact,12unchanged Gitidentity. API92@5f12 actualready после source/runtime приёмки | Текущий root2docs-компонент идёт существующему94 вместе с P2fix перед однимCI. Ready92 и Dragon14 ждут следующих fresh guards; второго merge01:28 нет. Backend остаётся локальным |
 | 11 | Local1f087fe:26unit/6runtime exact; независимо проверены14HTTP bytes роли3 | Для3 IAB HTTP timeout и recovery inventory, UI NOTRUN; собственный file-policy отказ11 сохраняет отдельную область |
-| 12 | PR92@3807/basec032 ранее accepted bounded/actualready:87+29 и early18. После89 root разрешил ordinary интеграцию actualmain8abf в тот же92; unique mergebase207,12 API/schema/CI путей не пересекаются с13 путями89 | Новый combinedhead/CI ещё не принят; сохранять новые rootdocs и все исходные627/9c/21 blobs. Не применять обратный89→92 branchdiff. GET capabilities только локальный; никакого deployment/online/AI |
+| 12 | PR92@5f12f76f/base8abf source426union/net14 CLEAR, actual current Backend10runner/87+29 и early18/full16+workerN/A/main19/proto16+8 PASS; root actualready01:23:51 | Freeze5f12 до будущего fresh rootguard/postchecks. API5@627/schema5@9c/CI2@21/rootdocs5db сохранены. Native NOT_SCHEDULED;2Return/Clear внутри16, не дополнительные cases. Backend не merged/deployed; online/AI off |
 | 13 | PR62@177872e3; exact fetch-policy отказ durable | Supported network permission именно этого окружения |
-| 14 | Contract90@9c4d1f6e:5authored paths сохранены в92@3807; source CLEAR, actual hosted29PASS=9caps+9materials+11ownership | Canonical shape frozen. Итоговая root-приёмка92 отдельно; schema/snapshot не доказывают authorization или production multi-tenancy |
-| 15 | Guard issue87 исправлен в опубликованном8abf и закрыт. CI21 accepted/imported в92@3807, прежний early18/Backend87+29/Catalogue PASS | Issue93 остаётся открытым до приёмки fix на main. Два CI-файла frozen; только новая подтверждённая причина требует регрессии, без массовых rerun и повторных аудитов неизменённых репозиториев |
+| 14 | Contract90@9c4d1f6e:5authored paths сохранены в actualready92@5f12; source426union CLEAR, новый hosted29PASS=9caps+9materials+11ownership | Canonical shape frozen. Schema/snapshot и SQLite fixtures не доказывают production authorization/multi-tenancy; root source-release92 впереди |
+| 15 | CI21 сохранён в actualready92@5f12; новые early18/Backend10+87+29 и Catalogue16/19/proto16+8 подтверждены raw. Issue87closed/93open | Freeze CI21, без rerun/повтора текущего ZIP. Issue93 закрывать только после guarded source-release92; POST16full/20main — разные aborted harness records, не zeroattempts/реальная отправка |
 
 Предыдущий выпуск: PR84 с tested head `af5ea148abc1d5a21b8095383d6a42cd6115f8b3`
 принят в `c032359519f1458e56963395bada7e0f711795da`, tested/merged tree702d совпал.
@@ -681,6 +681,18 @@ matrix65unit=42+23. Внешний PR83 merged558e6e75; post-check выше. С�
 30 активных HTTP-файлов совпали по размеру и SHA256. Это публикация
 фронтенд-материалов и приёмка локального API source; Django-сервис
 не развёрнут, online-adapter/AI выключены.
+HYDRA14 accepted head `efbb5a8a6f989586b3f335335f550bed6cbe1d7f`/base533
+принят как `b04fc7302612affa0c2eec71ac66ebbc13912e46`, tested/merged tree
+`d10760fff07e9183cc2ec5364a918a039940eb5a`, orderedparents[533,efbb].
+[Pages39086963240](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39086963240)
+SUCCESS и latest legacy build built от того же merge. Три критических runtime-файла
+index/SW/manifest и новый journal проверены HTTP200/размер/fullSHA256/Gitblob;
+ещё12 неизменённых runtime assets подтверждены Gitidentity без повторного media download.
+Новый блок предлагает прочитать инструкцию выбранного участка и продолжить обучение;
+guide href сохраняет requested lang, location и welcome=1 без приватных query/hash.
+Прежняя exactefbb приёмка136unit/66browser включает hub UI, keyboard, reload/Back,
+offline/upgrade и href contract. Переходы внутри внешнего Dragon, новые переводы,
+физический телефон, аудио или OS clipboard этим выпуском не сертифицируются.
 Memo head `5ded5080976e70fcbebb6395b4f42ab485b34e7a`/basef51,
 parentb6, принят после трёх bounded-проверок и выпущен как
 `f0883032674a5dc9c2034fb144c04286a5617598`: [Pages39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804)
@@ -714,9 +726,16 @@ API combinedhead. Финальный docs-only89@0811 сохранил все11 
 merge в8abf. Новых literal144/12/72 на0811 не заявлено. PostPages39085391777 и
 Backend39085391776 SUCCESS; все31 активный public-файл exact Git bytes/hash/blob,
 tested/merged tree67a0 и orderedparents[c032,0811] совпали. Единственный guard
-прохода01:03 использован89. Existing92 требует ordinary интеграции новогоmain
-с сохранением12 API/schema/CI путей и актуальных rootdocs до одного нового CI;
-его merge/deployment ещё не выполнены. Backend локальный, online-adapter/AI off.
+прохода01:03 использован89. Existing92 после ordinary main8abf+rootdocs5db
+интеграции получил head `5f12f76ff1267b09c4a04afa2b1a91c7a4b1d2a9`/tree460a:
+426 Git entries и net14paths совпали с независимым union, исходные12 API/schema/CI
+blobs не изменились. Его новые Backend39085885535 и Catalogue39085885537 SUCCESS:
+raw10runner/87backend/29contracts, early18, core16+workerN/A, main19 и prototypes16+8.
+Два Return/Clear journeys входят в16; native matrix не планировался. Raw16full и
+20main POST attempts сохранены раздельно как aborted fixtures, не уникальная сумма,
+не zeroattempts и не доставка. Root actualready выполнен01:23:51; PR92 не merged,
+бэкенд не развёрнут и не объявлен production multi-company системой.
+Единственный guard01:28 использованHYDRA14. Online-adapter/AI выключены.
 
 PR85 сохраняет ancestry guard и использует existing exact-base подготовку.
 Независимые5 real-Git fixtures и6×(16+8) browser подтверждены; live fetched=False,
