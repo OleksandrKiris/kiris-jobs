@@ -47,7 +47,7 @@ const readEvidence=()=>({
   fixture:window.__coordinatorEvidence||null,model:window.__coordinatorObservedModel?.snapshot()||null,
   focused:document.activeElement?.id,url:location.href,
   dom:{summary:document.querySelector('#summary')?.textContent,storage:document.querySelector('#storage')?.textContent,
-    filter:document.querySelector('#filter')?.value,tasks:[...document.querySelectorAll('#tasks select')].map(x=>({id:x.id,value:x.value}))}
+    filter:document.querySelector('#filter')?.value,tasks:[...document.querySelectorAll('#tasks select[id^="demo-"]')].map(x=>({id:x.id,value:x.value}))}
 });
 report.storageEvidence=[];
 report.storageIdentity=[];
@@ -260,7 +260,7 @@ try {
           try {storage={raw:localStorage.getItem('primserv:coordinator-demo:v1'),marker:localStorage.getItem('primserv:acceptance:coordinator-seeded')};}
           catch(error){storage={error:error.name};}
           return {storage,url:location.href,summary:document.querySelector('#summary')?.textContent,
-            tasks:[...document.querySelectorAll('#tasks select')].map(x=>({id:x.id,value:x.value}))};
+            tasks:[...document.querySelectorAll('#tasks select[id^="demo-"]')].map(x=>({id:x.id,value:x.value}))};
         }).catch(error=>({captureError:error.message}));
         report.storageEvidence.push({scenario:scenario.name,phase:'control-post-failure-only',...data});
       }
@@ -530,10 +530,58 @@ try {
       assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),favouriteKey)).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
       assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      // Explicit task→material linkage, independent of all pre-existing keys.
+      const taskLinkKey='primserv:coordinator:task-material-links:v1';
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
+      assert.equal(await page.locator('#task-link-open-demo-03').isDisabled(),true);
+      await page.locator('#task-link-choice-demo-03').selectOption(bananaID);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
+      await keyClick(page,'task-link-save-demo-03');
+      const taskLinkRaw=await page.evaluate(key=>localStorage.getItem(key),taskLinkKey);
+      assert.deepEqual(JSON.parse(taskLinkRaw),{version:1,links:[{task_id:'demo-03',material_id:bananaID,requested_language:'pl'}]});
+      const linkedURL=page.url();
+      await keyClick(page,'task-link-open-demo-03');
+      assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
+      assert.equal(await page.locator('#materials article').count(),0);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'reading-title');
+      await page.locator('#language').selectOption('en');
+      await page.locator('#filter').selectOption('done');
+      await page.locator('#materialsSource').selectOption('snapshot');
+      await page.locator('#materialQuery').fill('changed during linked reading');
+      await keyClick(page,'taskMaterialBack');
+      assert.equal(page.url(),linkedURL);
+      assert.equal(await page.locator('#language').inputValue(),'pl');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching second material');
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'demo-03-title');
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      const pinsAfterLink=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
+      assert.deepEqual(JSON.parse(pinsAfterLink).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);
+      await fits(page);await page.screenshot({path:join(reportDir,`${name}-task-material-back.png`),fullPage:true});
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#task-link-open-demo-03').isDisabled(),false);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),taskLinkRaw);
+      await keyClick(page,'task-link-open-demo-03');
+      await page.locator('#demo-03').selectOption('done');
+      const intentionallyEditedTask=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      await keyClick(page,'taskMaterialBack');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.locator('.task').count(),0);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'filter');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),intentionallyEditedTask);
+      await keyClick(page,'taskLinksClear');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),intentionallyEditedTask);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),pinsAfterLink);
       await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
       await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
       report.scenarios.push({ name, viewport, status: 'passed', offline: true,
-        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort', 'second source material search/read/last/two independent pins across reload and modes'],
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort', 'second source material search/read/last/two independent pins across reload and modes', 'explicit task material link/Open/Back restores context and focus; filtered task fallback and own clear'],
         results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false } });
     } catch (error) {
       report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });

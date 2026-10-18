@@ -21,6 +21,14 @@ ROUTES = {'/api/v1/health/': 'health', '/api/v1/version/': 'version',
 METHODS = {'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'}
 
 
+def log_route(path):
+    # Classify before URL resolution as body/rate/host guards run first. Return
+    # only a fixed template, including for malformed dynamic-path variants.
+    if path.startswith('/api/v1/materials/') and path != '/api/v1/materials/':
+        return '/api/v1/materials/{material_id}/'
+    return ROUTES.get(path, 'unknown')
+
+
 class APIGuardMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -88,7 +96,7 @@ class APIGuardMiddleware:
         logger.info(json.dumps({
             'api_version': API_VERSION, 'request_id': request_id,
             'method': request.method if request.method in METHODS else 'OTHER',
-            'route': ROUTES.get(request.path, 'unknown'),
+            'route': log_route(request.path),
             'status': response.status_code,
             'duration_ms': max(0, round((time.monotonic() - start) * 1000)),
         }, separators=(',', ':')))

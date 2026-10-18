@@ -22,13 +22,18 @@ ERROR_STATUS = {
 }
 
 
-def _read_canonical_snapshot(query_pairs):
+def _canonical_provider():
     # Execute only this accepted repository module. Avoid sys.path/module-cache
     # changes and bytecode-cache writes; no request value can select code/files.
     namespace = {'__file__': str(PROVIDER_PATH),
                  '__name__': '_primserv_materials_v1_reference'}
     source = PROVIDER_PATH.read_bytes()
     exec(compile(source, str(PROVIDER_PATH), 'exec'), namespace)
+    return namespace
+
+
+def _read_canonical_snapshot(query_pairs):
+    namespace = _canonical_provider()
     return namespace['mock_api'](query_pairs, method='GET')
 
 

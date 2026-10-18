@@ -259,6 +259,53 @@
       }
     });
   }
+  const TASK_MATERIAL_LINKS_KEY='primserv:coordinator:task-material-links:v1';
+  function taskMaterialLinks(storage) {
+    let links=[],persistence='ready',canWrite=true;
+    const keys=(x,expected)=>x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).sort().join(',')===expected;
+    function refresh() {
+      try {
+        const raw=storage.getItem(TASK_MATERIAL_LINKS_KEY);let latest=[];
+        if(raw!==null) {
+          if(typeof raw!=='string'||new TextEncoder().encode(raw).length>2048)throw Error('invalid');
+          const value=JSON.parse(raw);
+          if(!keys(value,'links,version')||value.version!==1||!Array.isArray(value.links)||value.links.length>3||
+            !value.links.every(x=>keys(x,'material_id,requested_language,task_id')&&typeof x.task_id==='string'&&typeof x.material_id==='string'&&MATERIAL_LANGS.includes(x.requested_language))||
+            new Set(value.links.map(x=>x.task_id)).size!==value.links.length)throw Error('invalid');
+          if(value.links.some(x=>!IDS.includes(x.task_id)||!materialIDs.includes(x.material_id)))throw Error('stale');
+          latest=value.links.map(x=>({...x}));
+        }
+        if(!canWrite)return; // A failed read/write stays page-only until explicit own-key recovery.
+        links=latest;persistence='ready';canWrite=true;
+      } catch(error){persistence=['invalid','stale'].includes(error.message)?error.message:error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
+    }
+    function save() {
+      if(!canWrite)return;
+      try {
+        if(links.length)storage.setItem(TASK_MATERIAL_LINKS_KEY,JSON.stringify({version:1,links}));
+        else storage.removeItem(TASK_MATERIAL_LINKS_KEY);
+        persistence='saved';
+      }catch {persistence='blocked';canWrite=false;}
+    }
+    refresh();
+    return Object.freeze({
+      snapshot(){return Object.freeze({links:Object.freeze(links.map(x=>Object.freeze({...x}))),persistence});},
+      assign(task_id,material_id,requested_language) {
+        if(!IDS.includes(task_id)||!materialIDs.includes(material_id)||!MATERIAL_LANGS.includes(requested_language))return false;
+        refresh();const entry={task_id,material_id,requested_language};
+        links=[...links.filter(x=>x.task_id!==task_id),entry];save();return true;
+      },
+      remove(task_id) {
+        if(!IDS.includes(task_id))return false;
+        refresh();if(!links.some(x=>x.task_id===task_id))return false;
+        links=links.filter(x=>x.task_id!==task_id);save();return true;
+      },
+      clear() {
+        links=[];try {storage.removeItem(TASK_MATERIAL_LINKS_KEY);persistence='cleared';canWrite=true;return true;}
+        catch {persistence='blocked';canWrite=false;return false;}
+      }
+    });
+  }
   return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create, PROGRESS_FORMAT, parseProgress,
-    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory, FAVOURITES_KEY, materialFavourites});
+    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory, FAVOURITES_KEY, materialFavourites, TASK_MATERIAL_LINKS_KEY, taskMaterialLinks});
 });

@@ -64,3 +64,18 @@ claim the unchanged JSON Schema rejects every semantically stale external body.
 Siechnice/Ryczywół/Bogatynia, incompatible with strict v1 Zgorzelec. This was a
 source-selection boundary, not a product defect or justification to weaken the
 location schema/filter. Existing provider/schema/OpenAPI/error negatives remain.
+
+## Detail contract (not yet an installed detail route)
+
+GET `/api/v1/materials/{material_id}/` uses `mock_detail_api` and
+`detail-response.schema.json`: unchanged canonical envelope/item schema via
+offline allOf/$ref, items min/max1, same snapshot/source identity and fallback.
+Only location_id/language query keys; no limit/cursor, duplicates or unknowns.
+Malformed ID400 INVALID_MATERIAL_ID; unknown valid ID404 MATERIAL_NOT_FOUND;
+HEAD/writes405 (HTTP integration must set Allow: GET). New error codes are an
+additive extension of the existing fixed error schema. Existing list operation,
+fixture, capabilities and max/default20 are preserved. Full schema/date/source
+shape failures and duplicate IDs fail closed, not 404 or partial success.
+No remote schema fetch, source-selected path, new snapshot or item-rule copy.
+See docs/integration/material-detail-v1.md for exact owner12 integration limits.
+The materials test suite now has19 methods; runner wiring belongs to owner15.

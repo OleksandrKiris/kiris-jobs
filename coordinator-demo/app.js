@@ -37,10 +37,10 @@
     const code=String(requested).toLowerCase();
     return ['ru','ua','uk','pl','en','ka','tr','hy'].includes(code)?code:'en';
   }
-  function openMaterial(id,requestedLanguage,remember=true) {
+  function openMaterial(id,requestedLanguage,remember=true,taskContext=null) {
     const item=reader.read({language:requestedLanguage}).items.find(x=>x.id===id);
     if(!item){selectedMaterial=null;renderMaterials();return;}
-    selectedMaterial={id,language:requestedLanguage};
+    selectedMaterial={id,language:requestedLanguage,taskContext};
     if(remember)recent.remember(id,requestedLanguage);
     renderMaterials();$('reading-title').focus();
   }
@@ -58,6 +58,14 @@
     const text=node('p',item.text);text.lang=item.language;
     const badge=node('p',response.fallback?materialCopy[lang].fallback.replace('{requested}',response.requested_language):'ru · Zgorzelec','muted');
     reading.replaceChildren(heading,badge,text);
+    if(selectedMaterial.taskContext){
+      const context=selectedMaterial.taskContext,back=node('button',taskLinkCopy[lang].back);back.id='taskMaterialBack';back.type='button';
+      back.addEventListener('click',()=>{
+        requested=context.requested;lang=context.lang;filter=context.filter;$('materialQuery').value=context.query;materialMode=context.mode;
+        reader=M.materialReader(materialMode==='mock'?{mode:'mock',mock:q=>JSON.stringify(M.materialSnapshot(q))}:{});
+        selectedMaterial=null;syncURL();render();($(context.task_id+'-title')||$('filter')).focus();
+      });reading.append(back);
+    }
   }
   const favouriteCopy={
     en:{title:'Pinned materials',pin:'Pin material',open:'Open pinned material',remove:'Remove pin',clear:'Clear pinned-material record',help:'A pin keeps its requested language. To change it, remove the pin and pin again.',none:'No pinned materials.',saved:'Pinned choice saved on this device.',blocked:'Pinned-material storage is unavailable. Changes work only on this page and may be lost after reload. Removal is not guaranteed.',invalid:'The pinned-material record is damaged or has an unknown format. It is preserved. New choices work only on this page until you clear this record.',stale:'A saved pin refers to an unavailable material. The record is preserved; new choices work only on this page until cleared.',cleared:'Pinned-material record cleared. Last material and tasks are unchanged.'},
@@ -167,6 +175,7 @@
   const model = M.create(storage);
   const recent = M.materialMemory(storage);
   const favourites = M.materialFavourites(storage);
+  const taskLinks = M.taskMaterialLinks(storage);
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text) element.textContent = text;
@@ -240,6 +249,29 @@
     $('progressSummary').value=['DEMO · '+t.title,t.help,...lines,total,['blocked','invalid'].includes(state.persistence)?t.pageOnly:t.local].join('\n');
   }
   $('progressSummarySelect').addEventListener('click',()=>{$('progressSummary').focus();$('progressSummary').select();});
+  const taskLinkCopy={
+    en:{choose:'Choose a public material for this DEMO task',none:'No material linked',save:'Save chosen link',open:'Open linked material',remove:'Clear this link',back:'Back to demo task',clear:'Clear only task material links',ready:'DEMO links are optional. Choose a material explicitly; this does not make it a task instruction.',saved:'Demo material links saved on this device.',blocked:'Link storage is unavailable. Changes work only on this page; saving or removal is not confirmed.',invalid:'Link data is damaged or has an unknown format. Original data is preserved; choices work only on this page until links are cleared.',stale:'A saved task or material is unavailable. It is not opened. Original data is preserved; use explicit link recovery.',cleared:'Task material links cleared. Statuses, backup, pins and last material are unchanged.'},
+    ru:{choose:'Выберите публичный материал для этой DEMO-задачи',none:'Материал не связан',save:'Сохранить выбранную связь',open:'Открыть связанный материал',remove:'Очистить эту связь',back:'Назад к демо-задаче',clear:'Очистить только связи задач с материалами',ready:'Связи DEMO необязательны. Выбирайте материал явно; это не делает его инструкцией к задаче.',saved:'Демо-связи материалов сохранены на этом устройстве.',blocked:'Хранилище связей недоступно. Изменения работают только на этой странице; сохранение или удаление не подтверждено.',invalid:'Данные связей повреждены или имеют неизвестный формат. Оригинал сохранён; выбор работает только на странице до очистки связей.',stale:'Сохранённая задача или материал недоступны. Они не открываются. Оригинал сохранён; используйте явную очистку связей.',cleared:'Связи задач с материалами очищены. Статусы, копия, закрепления и последний материал не изменены.'},
+    uk:{choose:'Виберіть публічний матеріал для цього DEMO-завдання',none:'Матеріал не пов’язаний',save:'Зберегти вибраний зв’язок',open:'Відкрити пов’язаний матеріал',remove:'Очистити цей зв’язок',back:'Назад до демо-завдання',clear:'Очистити лише зв’язки завдань із матеріалами',ready:'Зв’язки DEMO необов’язкові. Вибирайте матеріал явно; це не робить його інструкцією до завдання.',saved:'Демо-зв’язки матеріалів збережено на цьому пристрої.',blocked:'Сховище зв’язків недоступне. Зміни працюють лише на цій сторінці; збереження або видалення не підтверджено.',invalid:'Дані зв’язків пошкоджені або невідомого формату. Оригінал збережено; вибір працює лише на сторінці до очищення зв’язків.',stale:'Збережене завдання або матеріал недоступні. Вони не відкриваються. Оригінал збережено; скористайтеся явним очищенням зв’язків.',cleared:'Зв’язки завдань із матеріалами очищено. Статуси, копія, закріплення й останній матеріал не змінені.'},
+    pl:{choose:'Wybierz publiczny materiał dla tego zadania DEMO',none:'Brak powiązanego materiału',save:'Zapisz wybrane powiązanie',open:'Otwórz powiązany materiał',remove:'Usuń to powiązanie',back:'Wróć do zadania demo',clear:'Usuń tylko powiązania zadań z materiałami',ready:'Powiązania DEMO są opcjonalne. Wybierz materiał jawnie; nie staje się on instrukcją zadania.',saved:'Powiązania demo zapisano na tym urządzeniu.',blocked:'Pamięć powiązań niedostępna. Zmiany działają tylko na tej stronie; zapis lub usunięcie nie jest potwierdzone.',invalid:'Powiązania są uszkodzone lub nieznanego formatu. Oryginał zachowano; wybory działają tylko na stronie do wyczyszczenia powiązań.',stale:'Zapisane zadanie lub materiał jest niedostępny. Nie zostanie otwarty. Oryginał zachowano; użyj jawnego czyszczenia powiązań.',cleared:'Powiązania usunięto. Statusy, kopia, przypięcia i ostatni materiał nie zmieniły się.'}
+  };
+  function renderTaskLink(task_id) {
+    const t=taskLinkCopy[lang],entry=taskLinks.snapshot().links.find(x=>x.task_id===task_id),items=reader.read({language:requestedMaterialLanguage()}).items;
+    const box=node('div','', 'task-material-link'),label=node('label',t.choose),choice=node('select');choice.id='task-link-choice-'+task_id;
+    const empty=node('option',t.none);empty.value='';choice.append(empty,...items.map(item=>{const option=node('option',item.title+' · '+item.language);option.value=item.id;return option;}));choice.value=entry?.material_id||'';label.append(choice);
+    const target=items.find(x=>x.id===entry?.material_id),notice=node('p',target?target.title+' · '+entry.requested_language+' → ru':t.none,'muted');notice.id='task-link-status-'+task_id;
+    const save=node('button',t.save);save.id='task-link-save-'+task_id;save.type='button';
+    save.addEventListener('click',()=>{if(!choice.value)return;taskLinks.assign(task_id,choice.value,requestedMaterialLanguage());render();$('task-link-save-'+task_id)?.focus();});
+    const open=node('button',t.open);open.id='task-link-open-'+task_id;open.type='button';open.disabled=!target;
+    open.addEventListener('click',()=>{
+      const current=taskLinks.snapshot().links.find(x=>x.task_id===task_id);if(!current)return;
+      openMaterial(current.material_id,current.requested_language,false,{task_id,requested,lang,filter,query:$('materialQuery').value,mode:materialMode});
+    });
+    const remove=node('button',t.remove);remove.id='task-link-remove-'+task_id;remove.type='button';remove.disabled=!entry;
+    remove.addEventListener('click',()=>{taskLinks.remove(task_id);render();$('task-link-choice-'+task_id)?.focus();});
+    box.append(label,notice,save,open,remove);return box;
+  }
+  $('taskLinksClear').addEventListener('click',()=>{taskLinks.clear();render();$('taskLinksClear').focus();});
   function render() {
     if(backupPending){model.cancelProgress();backupPending=false;backupChanges=[];backupStatus='cancelled';}
     const t = copy[lang], state = model.snapshot();
@@ -257,17 +289,18 @@
     $('summary').textContent = t.summary.replace('{done}', model.list('done').length).replace('{total}',M.IDS.length).replace('{shown}',visible.length);
     $('empty').hidden = visible.length !== 0;
     $('tasks').setAttribute('aria-label',t.tasks);
+    $('taskLinksNotice').textContent=taskLinkCopy[lang][taskLinks.snapshot().persistence];$('taskLinksClear').textContent=taskLinkCopy[lang].clear;
     $('tasks').replaceChildren(...visible.map(id => {
       const [stage,title,detail] = t.items[M.IDS.indexOf(id)];
       const article=node('article','', 'task'), content=node('div');
-      const heading=node('h2',title);heading.id=id+'-title';
+      const heading=node('h2',title);heading.id=id+'-title';heading.tabIndex=-1;
       content.append(node('span',t.stage+' · '+stage,'tag'),heading,node('p',detail,'muted'));
       const label=node('label',t.filter), select=node('select');select.id=id;
       select.setAttribute('aria-label',t.filter+' · '+title);
       select.append(...M.STATUSES.map(status=>{const option=node('option',t[status]);option.value=status;return option;}));
       select.value=state.statuses[id];
       select.addEventListener('change',()=>{model.set(id,select.value);render();});
-      label.append(select);article.append(content,label);return article;
+      label.append(select);article.append(content,label,renderTaskLink(id));return article;
     }));
     $('links').setAttribute('aria-label',t.links);
     const paths=[['company','https://www.primserv.pl/'],['jobs','https://oleksandrkiris.github.io/kiris-jobs/?lang='+lang],['training','https://oleksandrkiris.github.io/citronex-hydra-project/?lang='+(lang==='uk'?'ua':lang)],['bot','https://t.me/KirisWorkPoland_bot']];
