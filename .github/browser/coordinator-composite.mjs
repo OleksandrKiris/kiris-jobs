@@ -167,6 +167,7 @@ try {
     assert.equal(full.applyHiNeOldRed?.length,2);assert.deepEqual(full.applyHiNeOldRed.map(r=>r.lang).sort(),['hi','ne']);assert.ok(full.applyHiNeOldRed.every(r=>r.status==='expected-failure'&&r.width===320&&r.ref==='6bc7550941e078eb7c95b3ea5feea2eb90619b48'));
     assert.equal(full.applyCentralOldRed?.length,3);assert.deepEqual(full.applyCentralOldRed.map(r=>r.lang).sort(),['kk','ky','tg']);assert.ok(full.applyCentralOldRed.every(r=>r.status==='expected-failure'&&r.width===320&&r.ref==='b974b534b8c378de1f82e63ec6334cefe33b90ce'));
     assert.equal(full.applyTailOldRed?.length,3);assert.deepEqual(full.applyTailOldRed.map(r=>r.lang).sort(),['bn','si','ur']);assert.ok(full.applyTailOldRed.every(r=>r.status==='expected-failure'&&r.width===320&&r.ref==='3e7f04bfbccb5caacb9141f7af193c802f6fb8cb'));
+    assert.equal(full.applyUrduHintOldRed?.status,'expected-failure');assert.ok(full.applyUrduHintOldRed.plusX>full.applyUrduHintOldRed.lastDigitX);
     assert.equal(full.applyUrduCounterOldRed?.direction,'rtl');assert.ok(full.applyUrduCounterOldRed.firstX>full.applyUrduCounterOldRed.lastX);
     assert.equal(full.applyUrduPhoneOldRed?.direction,'rtl');assert.ok(full.applyUrduPhoneOldRed.plusX>full.applyUrduPhoneOldRed.lastDigitX);assert.equal(full.applyUrduPhoneOldRed.ref,'3e7f04bfbccb5caacb9141f7af193c802f6fb8cb');
     assertApplyEntry(full.applyEntry);assertScreeningRows(full.applyScreening);assert.equal(full.applyScreeningIconOldRed.length,1);assert.ok(full.applyScreeningIconOldRed[0].lines.some(n=>n>1));
@@ -180,7 +181,7 @@ try {
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,
-      applyTailOldRed:full.applyTailOldRed,applyTailRegressionSource:full.applyTailRegressionSource,applyUrduPhoneOldRed:full.applyUrduPhoneOldRed,applyUrduCounterOldRed:full.applyUrduCounterOldRed,
+      applyTailOldRed:full.applyTailOldRed,applyTailRegressionSource:full.applyTailRegressionSource,applyUrduPhoneOldRed:full.applyUrduPhoneOldRed,applyUrduCounterOldRed:full.applyUrduCounterOldRed,applyUrduHintOldRed:full.applyUrduHintOldRed,
       applyCentralOldRed:full.applyCentralOldRed,applyCentralRegressionSource:full.applyCentralRegressionSource,
       applyHiNeOldRed:full.applyHiNeOldRed,applyHiNeRegressionSource:full.applyHiNeRegressionSource,
       applyProgressOldRed:full.applyProgressOldRed,applyProgressRegressionSource:full.applyProgressRegressionSource,
