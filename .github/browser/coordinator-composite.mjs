@@ -1,3 +1,4 @@
+import {assertScreeningRows} from './apply-screening.mjs';
 import {assertFieldStatusProof} from './catalogue-field-status.mjs';
 import {assertFormErrors,assertFormUpgrades,FORM_VACANCY_IDS} from './catalogue-form-errors.mjs';
 import { assertApplyEntry } from './apply-entry.mjs';
@@ -161,7 +162,8 @@ try {
     assertContrastRegressionRows(full.cardContrastOldRed,report.base);
     assertFieldStatusProof(full);assertFormErrors(full.formErrors);assertFormUpgrades(full.formUpgrades,execFileSync('git',['show',report.base+':sw.js']).toString()!==(await readFile(join(artifact,'sw.js'))).toString());
     assert.deepEqual(full.formErrorOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);assert.ok(full.formErrorOldRed.every(r=>r.iconClear===false));
-    assertApplyEntry(full.applyEntry);
+    assertApplyEntry(full.applyEntry);assertScreeningRows(full.applyScreening);
+    assert.equal(full.applyScreeningOldRed.length,2);assert.ok(full.applyScreeningOldRed.every(r=>r.status==='expected-failure'));
     assert.deepEqual(full.applyOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);
     assert.ok(full.applyOldRed.every(r=>r.status==='expected-failure'));
     assertHousingControls(full.housingControls);
@@ -171,6 +173,7 @@ try {
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,
+      applyScreening:full.applyScreening,applyScreeningOldRed:full.applyScreeningOldRed,
       formErrors:full.formErrors,formFieldStatusOldRed:full.formFieldStatusOldRed,formFieldLifecycle:full.formFieldLifecycle,formUpgrades:full.formUpgrades,formErrorOldRed:full.formErrorOldRed,
       applyEntry:full.applyEntry, applyOldRed:full.applyOldRed, applyRegressionSource:full.applyRegressionSource,
       housingControls:full.housingControls, housingReturns:full.housingReturns, housingGroups:full.housingGroups,
