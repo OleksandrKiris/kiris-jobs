@@ -1,6 +1,6 @@
 # PrimServ — проверенный GitHub-инвентарь
 
-Сверка: 18.10.2026, Europe/Budapest; доказательства прохода00:35UTC, сверка 2026-10-18 00:44 UTC, kiris-jobs mainc032 после84 и Dragon mainf088 после13. Владелец: роль10.
+Сверка: 18.10.2026, Europe/Budapest; доказательства прохода01:03UTC, сверка 2026-10-18 01:12 UTC, kiris-jobs main8abf после89 и Dragon mainf088 после13. Владелец: роль10.
 Это свидетельство состояния, не второй roadmap. Каноническая очередь находится
 в [primserv-roadmap.md](primserv-roadmap.md). Перед записью или merge перечитывать
 main, head и CI; перечисленные SHA не являются вечными guards.
@@ -12,32 +12,40 @@ recruitmentbot. Остальной аккаунт не объявляется о
 
 | Репозиторий | Проверенный main | Открытые PR | Последняя успешная публикация |
 | --- | --- | --- | --- |
-| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `c032359519f1458e56963395bada7e0f711795da` | #62 draft; [#89](https://github.com/OleksandrKiris/kiris-jobs/pull/89)6f source/runtime CLEAR, [#91](https://github.com/OleksandrKiris/kiris-jobs/pull/91)59 guard imported; [#90](https://github.com/OleksandrKiris/kiris-jobs/pull/90)9c contract in [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)3807 source/runtime bounded CLEAR. Не merged; root-docs import в89/новыйCI впереди | [39080849475](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39080849475) |
+| [OleksandrKiris/kiris-jobs](https://github.com/OleksandrKiris/kiris-jobs) | `8abf8aaf9ad950e193d52b4f56d2a9cc0c011014` | [#89](https://github.com/OleksandrKiris/kiris-jobs/pull/89)0811 merged/published. #62 frozen/draft; existing [#92](https://github.com/OleksandrKiris/kiris-jobs/pull/92)3807 formerly accepted on basec032; ordinary8abf/rootdocs integration assigned, newhead/CI pending. Contract90/CI21 immutable components; no backend deployment | [39085391777](https://github.com/OleksandrKiris/kiris-jobs/actions/runs/39085391777) |
 | [OleksandrKiris/citronex-hydra-project](https://github.com/OleksandrKiris/citronex-hydra-project) | `533360d78af23d61bebaa3607d26b5af5b6cdd70` | [#14](https://github.com/OleksandrKiris/citronex-hydra-project/pull/14) ready,efbb5a8 | [39067949384](https://github.com/OleksandrKiris/citronex-hydra-project/actions/runs/39067949384) |
 | [OleksandrKiris/przyjazd-do-pracy](https://github.com/OleksandrKiris/przyjazd-do-pracy) | `fe33e4c8f74990d6b90de90cd6dec6bf67799024` | нет | [39035276392](https://github.com/OleksandrKiris/przyjazd-do-pracy/actions/runs/39035276392) |
-| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `f0883032674a5dc9c2034fb144c04286a5617598` | [#13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13) merged/published; новый [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)d000cf28/basef088 copy MEMO TEXT: CI39083717944 observed00:42 IN_PROGRESS, source/runtime/peer pending | [39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804) |
+| [OleksandrKiris/citronex-dragon-guide](https://github.com/OleksandrKiris/citronex-dragon-guide) | `f0883032674a5dc9c2034fb144c04286a5617598` | [#13](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/13) published; [#14](https://github.com/OleksandrKiris/citronex-dragon-guide/pull/14)a573/basef088 copy MEMO TEXT source/runtime/peer accepted, actualready/unpublished; CI39084077900 SUCCESS | [39083503804](https://github.com/OleksandrKiris/citronex-dragon-guide/actions/runs/39083503804) |
 | [OleksandrKiris/citronex-siechnice-szkolenie](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie) | `7de9b9531736fdc44ab299ecac21ad1c7457cc1c` | нет | [39022510232](https://github.com/OleksandrKiris/citronex-siechnice-szkolenie/actions/runs/39022510232) |
 | [OleksandrKiris/citronex-ryczywol-szkolenie](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie) | `65ad74e8f4d5010d1a1189ba78cd01c29469214a` | нет | [39020651545](https://github.com/OleksandrKiris/citronex-ryczywol-szkolenie/actions/runs/39020651545) |
 | [OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie) | `adadca034f3c0724564922209e05f91444a825fe` | нет | [39035291375](https://github.com/OleksandrKiris/citronex-zgorzelec-bogatynia-szkolenie/actions/runs/39035291375) |
 
-PR84 опубликованc032: Pages39080849475/Backend39080849480 SUCCESS,
-30public bytes exact. Материалы доступны во фронтенде; API source
+PR89 опубликован8abf: Pages39085391777/Backend39085391776 SUCCESS,
+31public bytes exact, tested/merged tree67a0 и orderedparents[c032,0811].
+Явный Return к последнему материалу работает в автономном кабинете;
+без autoopen после reload, с requested language и независимой очисткой.
+Предыдущая PR84→c032/30assets приёмка сохранена как история. API source
 остаётся локальным, без backend deployment/online adapter/AI.
-Внутренние component merge_commit_sha не заменяют main-release c032.
+Внутренние component merge_commit_sha не заменяют main-release8abf.
 
 Dragon13 head5ded/basef51 →f088: Pages39083503804 SUCCESS,
 accepted/merged treecd117 и8HTTP files exact Git bytes/SHA256/blob.
 Принятые310unit/57browser/8real TXT и отдельная peer-матрица не являются
-новой OS-save/physical/full12browser проверкой. Новый copy MEMO TEXT14@d000/basef088
-имеет CI39083717944 observed00:42 IN_PROGRESS; source/runtime/peer pending,
-без заявленных resultcounts или приёмки.
+новой OS-save/physical/full12browser проверкой. Новый copy MEMO TEXT14@a573/basef088
+accepted source/runtime/peer, actualready/unpublished. CI39084077900 дал413unit,
+59browser (57 прежних+2 clipboard viewport), peer current8GREEN VM отдельно.
+Старыйd000 отклонён по cross-action stale-callback P2 и сохранён как история.
 
 89@6f: independent418union/source и current runtime CLEAR; core16+workerN/A,
 main19/prototypes16+8 и6native jobs SUCCESS metadata. Raw144/12Return journeys
 относятся к историческомуc2. 92@3807: current Backend87+29, early18 иCatalogue
-gates PASS; API локальный, native6 не планировался. PR89/92 не merged/published,
-новый docs-head89 должен пройти свой CI. Один guard00:35 использован13;
-backend deployment/online-adapter/AI не включены.
+gates PASS; API локальный, native6 не планировался. Docs-only89@0811 сохранил
+11 source paths и прошёл8current checks; новая literal144/12/72 проверка не заявлена.
+Один guard01:03 использован89. Existing92 ещё не merged; разрешена ordinary
+интеграция8abf+новых rootdocs с сохранением12API/schema/CI source paths до одного
+нового push/CI. Issue87 закрыт после main/postproof; issue93 открыт до source
+release CI21. Семь repo не подвергались повторному тяжёлому аудиту; остальные
+строки сохраняют прежнюю сверку. Backend deployment/online-adapter/AI выключены.
 
 ## Приёмка и ограничения
 
