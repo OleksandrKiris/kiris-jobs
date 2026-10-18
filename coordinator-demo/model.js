@@ -138,6 +138,61 @@
       }
     });
   }
+  const FAVOURITES_KEY='primserv:coordinator:favourites:v1';
+  function materialFavourites(storage) {
+    let items=[],persistence='ready',canWrite=true;
+    const keys=(value,expected)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join(',')===expected;
+    function refresh() {
+    try {
+      const raw=storage.getItem(FAVOURITES_KEY);
+      let latest=[];
+      if(raw!==null) {
+        if(typeof raw!=='string'||new TextEncoder().encode(raw).length>2048)throw Error('invalid');
+        const record=JSON.parse(raw);
+        if(!keys(record,'items,version')||record.version!==1||!Array.isArray(record.items)||record.items.length>5||
+          !record.items.every(x=>keys(x,'material_id,requested_language')&&typeof x.material_id==='string'&&x.material_id.length<=100&&MATERIAL_LANGS.includes(x.requested_language))||
+          new Set(record.items.map(x=>x.material_id)).size!==record.items.length)throw Error('invalid');
+        if(record.items.some(x=>x.material_id!==material.id))throw Error('stale');
+        latest=record.items.map(x=>({...x}));
+      }
+      items=latest;canWrite=true;persistence='ready';
+    } catch(error){persistence=['invalid','stale'].includes(error.message)?error.message:error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
+    }
+    refresh();
+    function save() {
+      if(!canWrite)return;
+      try {
+        if(!items.length)storage.removeItem(FAVOURITES_KEY);
+        else {
+          const raw=JSON.stringify({version:1,items});
+          if(new TextEncoder().encode(raw).length>2048)throw Error('too_large');
+          storage.setItem(FAVOURITES_KEY,raw);
+        }
+        persistence='saved';
+      } catch {persistence='blocked';canWrite=false;}
+    }
+    return Object.freeze({
+      snapshot(){return Object.freeze({items:Object.freeze(items.map(x=>Object.freeze({...x}))),persistence});},
+      pin(id,requestedLanguage) {
+        if(id!==material.id||!MATERIAL_LANGS.includes(requestedLanguage))return false;
+        refresh();
+        if(items.some(x=>x.material_id===id))return true;
+        if(items.length>=5)return false;
+        items=[...items,{material_id:id,requested_language:requestedLanguage}];save();return true;
+      },
+      remove(id) {
+        if(id!==material.id)return false;
+        refresh();
+        if(!items.some(x=>x.material_id===id))return false;
+        items=items.filter(x=>x.material_id!==id);save();return true;
+      },
+      clear() {
+        items=[];
+        try {storage.removeItem(FAVOURITES_KEY);canWrite=true;persistence='cleared';return true;}
+        catch {persistence='blocked';canWrite=false;return false;}
+      }
+    });
+  }
   return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create,
-    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory});
+    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory, FAVOURITES_KEY, materialFavourites});
 });

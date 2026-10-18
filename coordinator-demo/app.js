@@ -59,6 +59,31 @@
     const badge=node('p',response.fallback?materialCopy[lang].fallback.replace('{requested}',response.requested_language):'ru · Zgorzelec','muted');
     reading.replaceChildren(heading,badge,text);
   }
+  const favouriteCopy={
+    en:{title:'Pinned materials',pin:'Pin material',open:'Open pinned material',remove:'Remove pin',clear:'Clear pinned-material record',help:'A pin keeps its requested language. To change it, remove the pin and pin again.',none:'No pinned materials.',saved:'Pinned choice saved on this device.',blocked:'Pinned-material storage is unavailable. Changes work only on this page and may be lost after reload. Removal is not guaranteed.',invalid:'The pinned-material record is damaged or has an unknown format. It is preserved. New choices work only on this page until you clear this record.',stale:'A saved pin refers to an unavailable material. The record is preserved; new choices work only on this page until cleared.',cleared:'Pinned-material record cleared. Last material and tasks are unchanged.'},
+    ru:{title:'Закреплённые материалы',pin:'Закрепить материал',open:'Открыть закреплённый материал',remove:'Убрать закрепление',clear:'Очистить запись закреплений',help:'Закрепление сохраняет выбранный язык. Чтобы изменить его, уберите закрепление и закрепите снова.',none:'Нет закреплённых материалов.',saved:'Закрепление сохранено на этом устройстве.',blocked:'Хранилище закреплений недоступно. Изменения работают только на этой странице и могут потеряться после перезагрузки. Удаление не гарантировано.',invalid:'Запись закреплений повреждена или имеет неизвестный формат. Она сохранена без перезаписи. Новый выбор работает только на этой странице до очистки записи.',stale:'Сохранённое закрепление относится к недоступному материалу. Запись сохранена; новый выбор работает только на этой странице до очистки.',cleared:'Запись закреплений очищена. Последний материал и задачи не изменены.'},
+    uk:{title:'Закріплені матеріали',pin:'Закріпити матеріал',open:'Відкрити закріплений матеріал',remove:'Прибрати закріплення',clear:'Очистити запис закріплень',help:'Закріплення зберігає вибрану мову. Щоб змінити її, приберіть закріплення й закріпіть знову.',none:'Немає закріплених матеріалів.',saved:'Закріплення збережено на цьому пристрої.',blocked:'Сховище закріплень недоступне. Зміни працюють лише на цій сторінці й можуть зникнути після перезавантаження. Видалення не гарантовано.',invalid:'Запис закріплень пошкоджено або має невідомий формат. Його не перезаписано. Новий вибір працює лише на цій сторінці до очищення запису.',stale:'Збережене закріплення стосується недоступного матеріалу. Запис збережено; новий вибір працює лише на цій сторінці до очищення.',cleared:'Запис закріплень очищено. Останній матеріал і завдання не змінено.'},
+    pl:{title:'Przypięte materiały',pin:'Przypnij materiał',open:'Otwórz przypięty materiał',remove:'Usuń przypięcie',clear:'Wyczyść zapis przypięć',help:'Przypięcie zachowuje wybrany język. Aby go zmienić, usuń przypięcie i przypnij ponownie.',none:'Brak przypiętych materiałów.',saved:'Przypięcie zapisano na tym urządzeniu.',blocked:'Pamięć przypięć jest niedostępna. Zmiany działają tylko na tej stronie i mogą zniknąć po odświeżeniu. Usunięcie nie jest gwarantowane.',invalid:'Zapis przypięć jest uszkodzony lub ma nieznany format. Zachowano go bez nadpisania. Nowy wybór działa tylko na tej stronie do wyczyszczenia zapisu.',stale:'Zapisane przypięcie dotyczy niedostępnego materiału. Zapis zachowano; nowy wybór działa tylko na tej stronie do wyczyszczenia.',cleared:'Zapis przypięć wyczyszczono. Ostatni materiał i zadania są niezmienione.'}
+  };
+  function renderFavourites() {
+    const state=favourites.snapshot(),t=favouriteCopy[lang];
+    $('favouritesTitle').textContent=t.title;$('favouritesHelp').textContent=t.help;
+    $('favouritesNotice').textContent=t[['blocked','invalid','stale','cleared'].includes(state.persistence)?state.persistence:state.items.length?'saved':'none'];
+    $('favouritesClear').textContent=t.clear;$('favouritesClear').hidden=!['blocked','invalid','stale'].includes(state.persistence);
+    $('favouritesList').replaceChildren(...state.items.map(pin=>{
+      const response=reader.read({language:pin.requested_language}),item=response.items.find(x=>x.id===pin.material_id);
+      if(!item)return null;
+      const article=node('article'),title=node('h4',item.title);title.lang=item.language;
+      const badge=node('p',response.fallback?materialCopy[lang].fallback.replace('{requested}',pin.requested_language):'ru · Zgorzelec','muted');
+      const open=node('button',t.open);open.type='button';open.id='pin-open-'+pin.material_id;
+      open.addEventListener('click',()=>{
+        requested=pin.requested_language;lang=M.language(requested);syncURL();render();openMaterial(pin.material_id,pin.requested_language,false);
+      });
+      const remove=node('button',t.remove);remove.type='button';remove.id='pin-remove-'+pin.material_id;
+      remove.addEventListener('click',()=>{favourites.remove(pin.material_id);renderMaterials();$('favouritesTitle').focus();});
+      article.append(title,badge,open,remove);return article;
+    }).filter(Boolean));
+  }
   const sourceCopy={en:['Local source','Snapshot','Local mock'],ru:['Локальный источник','Снимок','Локальный mock'],uk:['Локальне джерело','Знімок','Локальний mock'],pl:['Lokalne źródło','Kopia','Lokalny mock']};
   function renderMaterials() {
     const t=materialCopy[lang];
@@ -79,10 +104,13 @@
       source.target='_blank';source.rel='noopener noreferrer';
       const read=node('button',recentCopy[lang].read);read.type='button';read.id='read-'+item.id;
       read.addEventListener('click',()=>openMaterial(item.id,requestedLanguage));
-      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector+' · '+item.source.ref.slice(0,8),'muted'),source,read);
+      const pin=node('button',favouriteCopy[lang].pin);pin.type='button';pin.id='pin-'+item.id;
+      pin.disabled=favourites.snapshot().items.some(x=>x.material_id===item.id);
+      pin.addEventListener('click',()=>{favourites.pin(item.id,requestedLanguage);renderMaterials();$('favouritesTitle').focus();});
+      article.append(heading,text,node('p',item.location_id+' · '+item.id+' · '+item.source.selector+' · '+item.source.ref.slice(0,8),'muted'),source,read,pin);
       return article;
     }));
-    renderRecent();
+    renderRecent();renderFavourites();
   }
   const published = /^https?:$/.test(location.protocol) && /\/tools\/coordinator\/(?:index\.html)?$/.test(location.pathname);
   let offlineState = 'loading', offlineAttempt = 0, offlineTimer;
@@ -129,7 +157,7 @@
   let lang = M.language(requested);
   let filter = fileView?.get('status') || initialURL.searchParams.get('status') || 'all';
   if (!['all', ...M.STATUSES].includes(filter)) filter = 'all';
-  // Accessing localStorage itself can throw; no other keys are read.
+  // Accessing localStorage itself can throw; each model reads only its own key.
   const storage = {
     getItem: key => window.localStorage.getItem(key),
     setItem: (key, value) => window.localStorage.setItem(key, value),
@@ -137,6 +165,7 @@
   };
   const model = M.create(storage);
   const recent = M.materialMemory(storage);
+  const favourites = M.materialFavourites(storage);
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text) element.textContent = text;
@@ -197,6 +226,7 @@
   }
   $('language').addEventListener('change',()=>{requested=$('language').value;lang=M.language(requested);syncURL();render();});
   $('filter').addEventListener('change',()=>{filter=$('filter').value;syncURL();render();});
+  $('favouritesClear').addEventListener('click',()=>{favourites.clear();renderMaterials();$('favouritesTitle').focus();});
   $('lastMaterialReturn').addEventListener('click',()=>{
     const entry=recent.snapshot().entry;if(!entry)return;
     requested=entry.requested_language;lang=M.language(requested);syncURL();render();
