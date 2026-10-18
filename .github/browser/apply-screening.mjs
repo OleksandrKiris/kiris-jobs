@@ -5,9 +5,10 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-export const SCREENING_LANGS=['ka','az','hy','tr','uz'];
+export const SCREENING_LANGS=['ka','az','hy','tr','uz','id','fil','vi'];
 export const SCREENING_BASE='f89ba98f32c998e3b4b4261b455a03651837974a';
 export const SCREENING_KEYS=['draftFound','resumeDraft','discardDraft','trustLabel','trustShort','trustNoCv','trustControl','languageLead','recruiterLead','step1Title','step1Lead','step2Title','step2Lead','step3Title','step3Lead','citizenshipHint','citizenshipPlaceholder','gender','stayDuration','physicalWork','physicalDetails','physicalDetailsHint','workNoteTitle','workNote','performanceMetrics','performanceMetricsHint','fastPace','watchedVideos','understandsRole','longHours','longHoursHint','yesShort','noShort','copyRow','rowCopied','copyFailed','sectionAvailability','sectionExperience','sectionExpectations'];
+export const USER_CUSTOM_KEYS=['moreLanguages','lessLanguages','optional','rowOnlyTitle','rowOnlyLead','reviewLead','sendRow','sendHint','pdfTitle','pdfLead','pdfOpen','formSaved','emailOpened','sectionSubmission','sectionCandidate','sectionContact','sectionWork','noValue','statusNew','firstContact','chooseOneRecruiter'];
 export function applyLocales() {
   const scope=vm.createContext({window:{},console,URL,Intl,Object});
   for(const file of ['i18n-core','i18n-caucasus-central','i18n-asia','i18n-extra','i18n-mobile','translations']) {
@@ -19,7 +20,7 @@ export function applyLocales() {
 export function assertScreeningCopy(i18n) {
   for(const lang of SCREENING_LANGS) {
     const locale=i18n.locales[lang];
-    for(const key of SCREENING_KEYS) {assert.ok(locale[key]?.trim(),lang+':'+key);assert.notEqual(locale[key],i18n.locales.en[key],lang+':English fallback:'+key);}
+    for(const key of [...SCREENING_KEYS,...USER_CUSTOM_KEYS]) {assert.ok(locale[key]?.trim(),lang+':'+key);assert.notEqual(locale[key],i18n.locales.en[key],lang+':English fallback:'+key);}
     for(const group of ['gender','stayDurations']) {
       assert.deepEqual(Object.keys(locale.options[group]),Object.keys(i18n.locales.en.options[group]));
       for(const [key,value] of Object.entries(locale.options[group]))assert.notEqual(value,i18n.locales.en.options[group][key],lang+':'+group+':'+key);
@@ -37,7 +38,7 @@ export function assertScreeningCopy(i18n) {
 }
 const flags=['steps','labels','options','conditional','answers','review','back','resumed','fits','painted','iconsOneLine','noDelivery'];
 export function assertScreeningRows(rows) {
-  assert.equal(rows?.length,10);
+  assert.equal(rows?.length,16);
   assert.deepEqual(rows.map(r=>r.width+':'+r.lang).sort(),[320,1280].flatMap(w=>SCREENING_LANGS.map(l=>w+':'+l)).sort());
   for(const row of rows){assert.equal(row.status,'passed');for(const key of flags)assert.equal(row[key],true,`${row.lang}:${row.width}:${key}`);}
 }
@@ -73,6 +74,16 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
   await oldIconPage.locator('#messenger').selectOption('telegram');await oldIconPage.locator('[name="gender"][value="undisclosed"]').locator('..').click();await oldIconPage.locator('[data-action="next"]').click();
   const oldIconLines=await iconLines(oldIconPage);assert.ok(oldIconLines.some(n=>n>1),'Actual old Turkish icon words must wrap');
   await oldIconPage.screenshot({path:join(reportDir,'apply-screening-old-icons-320.png'),fullPage:true});report.applyScreeningIconOldRed.push({width:320,lang:'tr',ref:iconRef,lines:oldIconLines,status:'expected-failure'});await oldIconCtx.close();
+  const seaRef='e3c4f7da7334864f229bf6e276150a13bfae2af4';report.applySeaOldRed=[];
+  const seaFiles=Object.fromEntries(['index.html','app.js','translations.js'].map(f=>[f,execFileSync('git',['show',seaRef+':apply/'+f])]));
+  report.applySeaRegressionSource={ref:seaRef,files:Object.fromEntries(Object.entries(seaFiles).map(([f,b])=>[f,createHash('sha256').update(b).digest('hex')]))};
+  for(const lang of ['id','fil','vi']) {
+    const ctx=await context({width:320,height:900});const page=await ctx.newPage();active(page);
+    for(const [f,body]of Object.entries(seaFiles))await ctx.route(f==='index.html'?'**/apply/':'**/apply/'+f+'?*',r=>r.fulfill({status:200,contentType:f==='index.html'?'text/html':'text/javascript',body}));
+    await page.goto(base+'apply/');await page.locator('#languageSearch').fill(lang);await page.locator(`[data-language="${lang}"]`).click();await page.locator('[data-recruiter="yana"]').click();
+    assert.equal(await page.locator('html').getAttribute('lang'),lang);assert.equal(await page.locator('h1').innerText(),'Contact details');
+    await page.screenshot({path:join(reportDir,`apply-sea-old-${lang}-320.png`),fullPage:true});report.applySeaOldRed.push({lang,width:320,ref:seaRef,heading:'Contact details',status:'expected-failure'});await ctx.close();
+  }
   for(const width of [320,1280]) {
     const before=await context({width,height:900});const previous=await before.newPage();active(previous);
     await before.route('**/apply/',r=>r.fulfill({status:200,contentType:'text/html',body:old['index.html']}));
@@ -82,11 +93,15 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
     assert.ok((await previous.locator('[name="gender"][value="female"]').locator('..').innerText()).includes('Woman'));
     await previous.screenshot({path:join(reportDir,`apply-screening-old-${width}.png`),fullPage:true});
     report.applyScreeningOldRed.push({width,lang:'ka',status:'expected-failure',heading:'Contact details',base:SCREENING_BASE});await before.close();
-    for(const lang of SCREENING_LANGS) {
+  }
+  // Preserve every case, PNG and trace under the same timeout. Contexts are isolated.
+  const cases=[320,1280].flatMap(width=>SCREENING_LANGS.map(lang=>({width,lang})));
+  let cursor=0;
+  async function currentCase({width,lang}) {
       const ctx=await context({width,height:900});const page=await ctx.newPage();active(page);const l=i18n.locales[lang];
       await ctx.tracing.start({screenshots:true,snapshots:true,sources:false});
       try {
-        await page.goto(base+'apply/');await page.locator(`[data-language="${lang}"]`).click();
+        await page.goto(base+'apply/');await page.locator('#languageSearch').fill(lang);await page.locator(`[data-language="${lang}"]`).click();
         assert.equal(await page.locator('.opening-copy p').innerText(),l.recruiterLead);
         await page.locator('[data-recruiter="yana"]').click();
         await checkScreen(page,l,1,reportDir,`apply-screening-${lang}-${width}-step1`);
@@ -131,7 +146,8 @@ export async function acceptApplyScreening({context,base,reportDir,report,active
         assert.ok(await page.locator('[name="gender"][value="undisclosed"]').isChecked());
         report.applyScreening.push({lang,width,status:'passed',...Object.fromEntries(flags.map(k=>[k,true]))});
       } finally {await ctx.tracing.stop({path:join(reportDir,`apply-screening-${lang}-${width}.zip`)});await ctx.close();}
-    }
   }
+  async function worker(){while(cursor<cases.length)await currentCase(cases[cursor++]);}
+  await Promise.all([worker(),worker()]);
   assertScreeningRows(report.applyScreening);
 }

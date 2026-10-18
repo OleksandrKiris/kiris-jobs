@@ -162,6 +162,7 @@ try {
     assertContrastRegressionRows(full.cardContrastOldRed,report.base);
     assertFieldStatusProof(full);assertFormErrors(full.formErrors);assertFormUpgrades(full.formUpgrades,execFileSync('git',['show',report.base+':sw.js']).toString()!==(await readFile(join(artifact,'sw.js'))).toString());
     assert.deepEqual(full.formErrorOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);assert.ok(full.formErrorOldRed.every(r=>r.iconClear===false));
+    assert.equal(full.applySeaOldRed?.length,3);assert.deepEqual(full.applySeaOldRed.map(r=>r.lang).sort(),['fil','id','vi']);assert.ok(full.applySeaOldRed.every(r=>r.status==='expected-failure'&&r.ref==='e3c4f7da7334864f229bf6e276150a13bfae2af4'));
     assertApplyEntry(full.applyEntry);assertScreeningRows(full.applyScreening);assert.equal(full.applyScreeningIconOldRed.length,1);assert.ok(full.applyScreeningIconOldRed[0].lines.some(n=>n>1));
     assert.equal(full.applyScreeningOldRed.length,2);assert.ok(full.applyScreeningOldRed.every(r=>r.status==='expected-failure'));
     assert.deepEqual(full.applyOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);
@@ -173,6 +174,7 @@ try {
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,
+      applySeaOldRed:full.applySeaOldRed,applySeaRegressionSource:full.applySeaRegressionSource,
       applyScreening:full.applyScreening,applyScreeningOldRed:full.applyScreeningOldRed,applyScreeningIconOldRed:full.applyScreeningIconOldRed,
       formErrors:full.formErrors,formFieldStatusOldRed:full.formFieldStatusOldRed,formFieldLifecycle:full.formFieldLifecycle,formUpgrades:full.formUpgrades,formErrorOldRed:full.formErrorOldRed,
       applyEntry:full.applyEntry, applyOldRed:full.applyOldRed, applyRegressionSource:full.applyRegressionSource,
