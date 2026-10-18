@@ -42,7 +42,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { buildArtifact, coordinatorRuntime } from '../../scripts/build-pages-artifact.mjs';
-import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
+import { captureStagedPublication, captureCurrentToolTarget, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
 const hash = value => createHash('sha256').update(value).digest('hex');
 function publicationFixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'primserv-scope-regression-'));
@@ -204,4 +204,113 @@ test('after NEW is accepted as event base, pinned published ref/body/hashes stay
   assert.deepEqual(transition.published.hashes, f.oldHashes);
   assert.equal(transition.eventBase, newBase, 'Event base remains separate provenance');
   assert.equal(transition.target.ref, newBase);
+});
+
+function nextHeadFixture(t) {
+  const f = publicationFixture(t), oldHead = f.git(['rev-parse', 'HEAD']);
+  for (const name of coordinatorRuntime) if (name !== 'primserv-logo.svg') f.write('coordinator-demo/' + name, 'next-complete-' + name);
+  f.commit();
+  const captured = f.capture();
+  const files = new Map(coordinatorRuntime.map(name => [name, readFileSync(join(captured.artifact, 'tools/coordinator', name))]));
+  return { ...f, ...captured, oldHead, files };
+}
+const refingerprint = staged => ({ ...staged, sha256: hash(JSON.stringify(staged.files)) });
+
+test('the next complete Git HEAD outside both historical tuples uses actual captured five and requires fresh public coverage', t => {
+  const f = nextHeadFixture(t);
+  const current = captureCurrentToolTarget(f.source, f.head, f.staged, f.files);
+  assert.equal(current.sourceHead, f.head);
+  assert.equal(current.checkout, f.head);
+  assert.equal(current.inventorySHA256, f.staged.sha256);
+  assert.notDeepEqual(current.hashes, f.oldHashes); assert.notDeepEqual(current.hashes, f.acceptedHashes);
+  const mode = selectToolTarget(current.hashes, f.oldHashes, current.hashes);
+  assert.equal(mode, 'actual-staged-head');
+  assert.equal(toolInput(mode, current.files, () => { throw Error('Cannot conceal the next current head'); }).files, f.files);
+  assert.equal(publicationReuse(f.historical, f.staged.files).requireFullCurrentCatalogue, true);
+});
+
+test('current tuple rejects a syntactically valid but wrong source HEAD and a malformed HEAD', t => {
+  const f = nextHeadFixture(t);
+  for (const head of [f.oldHead, 'f'.repeat(40), 'main'])
+    assert.throws(() => captureCurrentToolTarget(f.source, head, f.staged, f.files), /head|HEAD/);
+});
+
+test('current tuple rejects any mixed captured body and any missing or extra buffer', t => {
+  const f = nextHeadFixture(t);
+  for (const name of coordinatorRuntime) {
+    const mixed = new Map(f.files); mixed.set(name, Buffer.from('foreign-generation-' + name));
+    assert.throws(() => captureCurrentToolTarget(f.source, f.head, f.staged, mixed), /exact current HEAD/);
+    const missing = new Map(f.files); missing.delete(name);
+    assert.throws(() => captureCurrentToolTarget(f.source, f.head, f.staged, missing), /five captured/);
+  }
+  assert.throws(() => captureCurrentToolTarget(f.source, f.head, f.staged, new Map([...f.files, ['extra.js', Buffer.from('x')]])), /five captured/);
+});
+
+test('current tuple rejects forged hash, blob, size and source mapping even with a recomputed inventory fingerprint', t => {
+  const f = nextHeadFixture(t);
+  for (const [field, value] of [['sha256', hash('forged')], ['blob', 'f'.repeat(40)], ['bytes', 1], ['sourcePath', 'coordinator-demo/foreign.js']]) {
+    const forged = structuredClone(f.staged);
+    forged.files.find(x => x.path === 'tools/coordinator/app.js')[field] = value;
+    assert.throws(() => captureCurrentToolTarget(f.source, f.head, refingerprint(forged), f.files), /Current|current/);
+  }
+  const reduced = structuredClone(f.staged);
+  reduced.files = reduced.files.filter(x => x.path !== 'tools/coordinator/app.js');
+  assert.throws(() => captureCurrentToolTarget(f.source, f.head, refingerprint(reduced), f.files), /five staged/);
+  const staleFingerprint = structuredClone(f.staged); staleFingerprint.sha256 = 'f'.repeat(64);
+  assert.throws(() => captureCurrentToolTarget(f.source, f.head, staleFingerprint, f.files), /fingerprint/);
+});
+
+function fullCurrentFixture() {
+  const head = '1'.repeat(40), base = '2'.repeat(40), results = [];
+  for (const width of [1280, 320]) {
+    results.push({ scenario: 'uncached locale with origin stopped: Polish fallback, failed keyboard retry, reload, reconnect/retry without lost search, failed Georgian switch', width, status: 'passed' });
+    results.push({ scenario: 'catalogue-route', viewport: { width, height: 900 }, status: 'passed' });
+    for (const mode of ['', 'corrupt', 'denied']) results.push({ scenario: 'six shortcut anchors / focus / language' + (mode ? ' / ' + mode : ' / Back / offline reload / saved search'), width, status: 'passed' });
+    results.push({ scenario: 'catalogue → coordinator → return / cold and warm offline / four languages + fallback', width, status: 'passed' });
+  }
+  for (const mode of ['corrupt', 'denied']) {
+    results.push({ scenario: 'storage-' + mode, viewport: { width: 320, height: 900 }, status: 'passed' });
+    results.push({ scenario: 'published demo ' + mode + ' storage / preserved record and return language', status: 'passed' });
+  }
+  results.push({ scenario: 'base → head worker upgrade', status: 'not-applicable', reason: 'Worker bytes are unchanged' });
+  const tools = Object.fromEntries(coordinatorRuntime.map(name => [name, { bytes: 7, sha256: hash('current-' + name) }]));
+  const report = { status: 'passed', head, base, checkout: head,
+    scope: 'full-current-catalogue-core; historical tool overlays excluded', results,
+    files: Object.fromEntries(Object.entries(tools).map(([name, record]) => ['tools/coordinator/' + name, { ...record }])) };
+  return { report, expected: { head, base, checkout: head, tools, workerChanged: false } };
+}
+
+test('full-current report binds all sixteen distinct cases and current five to exact head/base/checkout', () => {
+  const { report, expected } = fullCurrentFixture();
+  assert.doesNotThrow(() => assertFullCurrentResult(undefined, report, expected));
+  for (const field of ['head', 'base', 'checkout']) {
+    const forged = structuredClone(report); forged[field] = 'f'.repeat(40);
+    assert.throws(() => assertFullCurrentResult(undefined, forged, expected), /Full-current/);
+  }
+  for (const field of ['bytes', 'sha256']) {
+    const forged = structuredClone(report); forged.files['tools/coordinator/app.js'][field] = field === 'bytes' ? 1 : hash('forged');
+    assert.throws(() => assertFullCurrentResult(undefined, forged, expected), /captured/);
+  }
+});
+
+test('a passed reduced report, duplicated case, failed case or missing current tool evidence is rejected', () => {
+  const { report, expected } = fullCurrentFixture();
+  const reduced = structuredClone(report); reduced.results.splice(0, 1);
+  assert.throws(() => assertFullCurrentResult(undefined, reduced, expected), /sixteen/);
+  const duplicated = structuredClone(report); duplicated.results[0] = duplicated.results[1];
+  assert.throws(() => assertFullCurrentResult(undefined, duplicated, expected), /sixteen/);
+  const failed = structuredClone(report); failed.results[0].status = 'failed';
+  assert.throws(() => assertFullCurrentResult(undefined, failed, expected), /must pass/);
+  const missing = structuredClone(report); delete missing.files['tools/coordinator/app.js'];
+  assert.throws(() => assertFullCurrentResult(undefined, missing, expected), /captured/);
+  assert.throws(() => assertFullCurrentResult(undefined, report, { ...expected, workerChanged: true }));
+});
+
+test('a changed worker needs both fresh viewport upgrade cases, not a not-applicable report', () => {
+  const { report, expected } = fullCurrentFixture(); expected.workerChanged = true;
+  report.results.pop();
+  for (const width of [1280, 320]) report.results.push({ scenario: 'actual base complete tool → head shell → origin stopped/offline first tool entry, reload, languages, return and saved fictional statuses', width, status: 'passed' });
+  assert.doesNotThrow(() => assertFullCurrentResult(undefined, report, expected));
+  report.results.pop();
+  assert.throws(() => assertFullCurrentResult(undefined, report, expected));
 });

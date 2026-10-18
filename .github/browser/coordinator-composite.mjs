@@ -8,7 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
-import { captureStagedPublication, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
+import { captureStagedPublication, captureCurrentToolTarget, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
 import { acceptCoordinatorHTTP } from './coordinator-http.mjs';
 import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, publishedToolBytes, TOOL_FILES } from './coordinator-refresh.mjs';
 
@@ -108,9 +108,11 @@ try {
   originalTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
     [name, await readFile(join(artifact, 'tools/coordinator', name))])));
   const actualHashes = Object.fromEntries([...originalTools].map(([name, bytes]) => [name, sha256(bytes)]));
+  const currentTarget = captureCurrentToolTarget(checkout, report.head, staged, originalTools);
   report.currentStagedHead = { sourceHead: report.head, checkout: report.checkout,
-    inventorySHA256: staged.sha256, files: staged.files.length, actualToolHashes: actualHashes };
-  const mode = selectToolTarget(actualHashes, oldHashes, JOINT_TOOL_TRANSITION.target.hashes);
+    inventorySHA256: staged.sha256, files: staged.files.length, actualToolHashes: actualHashes,
+    expectedCurrentTools: currentTarget.resources };
+  const mode = selectToolTarget(actualHashes, oldHashes, currentTarget.hashes);
   report.currentStagedHead.toolMode = mode;
   report.historicalEvidence = { head: reused.head, base: reused.base, run: reused.run,
     artifact: reused.artifact, zipSHA256: reused.zipSHA256, historicalGroups: 33,
@@ -138,16 +140,14 @@ try {
       checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), error: full.error || null };
-    assert.equal(full.scope, 'full-current-catalogue-core; historical tool overlays excluded');
-    assert.equal(full.head, report.head); assert.equal(full.checkout, report.checkout);
-    assertFullCurrentResult(failure, full);
-    assert.ok(report.fullCurrentCatalogue.passed >= 16, 'All actual catalogue and coordinator core cases must execute');
-    for (const name of TOOL_FILES) assert.equal(full.files['tools/coordinator/' + name].sha256, actualHashes[name]);
+    assertFullCurrentResult(failure, full, { head: report.head, base: report.base, checkout: report.checkout,
+      tools: currentTarget.resources, workerChanged: execFileSync('git', ['show', report.base + ':sw.js']).toString()
+        !== (await readFile(join(artifact, 'sw.js'))).toString() });
     assert.equal(captureStagedPublication(checkout, artifact, report.checkout).sha256, staged.sha256,
       'Full-current core must leave the actual staged HEAD intact');
   }
 
-  const candidate = toolInput(mode, originalTools, () => publishedToolBytes(JOINT_TOOL_TRANSITION.target, false));
+  const candidate = toolInput(mode, currentTarget.files, () => publishedToolBytes(JOINT_TOOL_TRANSITION.target, false));
   const targetHashes = Object.fromEntries([...candidate.files].map(([name, bytes]) => [name, sha256(bytes)]));
   const transition = transitionForTarget(JOINT_TOOL_TRANSITION,
     { head: report.head, base: report.base, hashes: targetHashes, mode });
