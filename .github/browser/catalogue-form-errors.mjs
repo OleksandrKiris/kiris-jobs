@@ -77,7 +77,11 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
  for(const width of [320,1280]){
   const oldCtx=await context({width,height:900});await oldCtx.route('**/application-form.js?*',r=>r.fulfill({status:200,contentType:'text/javascript',body:oldApp}));const old=await oldCtx.newPage();active(old);
   await old.goto(base+'vacancies/banana-warehouse-poland/?lang=ru&apply=1');await old.locator('#application-form').waitFor();await old.locator('#application-form button[type="submit"]').click();assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);await locale(old,'ka');assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);assert.notEqual(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ka.missing);await old.screenshot({path:join(reportDir,`form-error-old-red-${width}.png`)});report.formErrorOldRed.push({width,ref:oldRef,status:'expected-failure',from:'ru',to:'ka',error:FORM_ERROR_LABELS.ru.missing});await oldCtx.close();
-  for(const lang of Object.keys(FORM_ERROR_LABELS))for(const kind of FORM_ERROR_CASES){
+ }
+ // Every case retains a fresh isolated context. Two independent workers avoid
+ // serial UI animation waits exhausting the existing full-runner deadline.
+ const cases=[320,1280].flatMap(width=>Object.keys(FORM_ERROR_LABELS).flatMap(lang=>FORM_ERROR_CASES.map(kind=>({width,lang,kind}))));
+ async function acceptCase({width,lang,kind}){
    const from=lang==='en'?'ru':'en';const ctx=await context({width,height:900}),page=await ctx.newPage();active(page);const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto(base+`vacancies/banana-warehouse-poland/?lang=${from}&apply=1`);await page.locator('#application-form').waitFor();
    if(kind!=='missing'){await page.locator('[name="firstName"]').fill(kind==='latin'?'ТЕСТ':'QA');await page.locator('[name="lastName"]').fill('FIXTURE');await page.locator('[name="phone"]').fill('+123');}
@@ -88,8 +92,9 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
    const dom=await page.evaluate(()=>({fits:document.documentElement.scrollWidth<=innerWidth+1,notSubmitted:document.querySelector('#application-form')!==null&&!document.querySelector('.application-success')}));
    await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-${width}-${lang}-${kind}.png`)});
    report.formErrors.push({width,lang,kind,status:'passed',error,preserved,associated,roundTrip,...dom});assert.deepEqual(errors,[]);await ctx.close();
-  }
  }
+ let nextCase=0;
+ await Promise.all(Array.from({length:2},async()=>{while(nextCase<cases.length){const item=cases[nextCase++];await acceptCase(item);}}));
  assertFormErrors(report.formErrors);
 }
 export async function cachedFormHash(page,cacheName,url){return page.evaluate(async({cacheName,url})=>{const response=await(await caches.open(cacheName)).match(url);if(!response)return null;const bytes=await response.arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');},{cacheName,url});}
