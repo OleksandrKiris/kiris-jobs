@@ -1,4 +1,5 @@
 import {photoOldRed,rejectBrokenPhoto,addMixedPhotos,photoRaceAndSize} from './pdf-photo-acceptance.mjs';
+import {scrollbarOldRed,scrollbarCurrent} from './pdf-width.mjs';
 import {PDF_ALL_LANGUAGES,pdfCopy,assertPdfCopy,assertEmptyGeometry,emptyGeometry,visiblePdfCopy} from './pdf-copy.mjs';
 // Personal acceptance on isolated GitHub Actions contexts; no external delivery.
 import assert from 'node:assert/strict';
@@ -33,9 +34,9 @@ export async function runPdfAcceptance(){
   const root=await mkdtemp(join(tmpdir(),'primserv-pdf-'));await symlink(artifact,join(root,'kiris-jobs'),'dir');
   const origin=staticOrigin(root),base='http://127.0.0.1:4173/kiris-jobs/';
   const report={head:process.env.TESTED_HEAD,base:process.env.TESTED_BASE,checkout,started:new Date().toISOString(),rows:[],oldRed:[],edgeCases:[],mutations:[],external:[],files:publication.files};
-  let browser,active;
-  async function context(width,denied=false){
-    const ctx=await browser.newContext({viewport:{width,height:900},locale:'en-GB',serviceWorkers:'block'});ctx.setDefaultTimeout(10000);
+  let browser,active,gutterBrowser;
+  async function context(width,denied=false,renderer=browser){
+    const ctx=await renderer.newContext({viewport:{width,height:900},locale:'en-GB',serviceWorkers:'block'});ctx.setDefaultTimeout(10000);
     await ctx.tracing.start({screenshots:true,snapshots:true,sources:true});
     await ctx.route('**/*',r=>{
       if(!['GET','HEAD'].includes(r.request().method())){report.mutations.push(r.request().method());return r.abort();}
@@ -46,7 +47,7 @@ export async function runPdfAcceptance(){
     return ctx;
   }
   async function fits(page){assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
-  async function shot(page,name){await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:join(out,name+'.png'),fullPage:true});}
+  async function shot(page,name,fullPage=true){await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:join(out,name+'.png'),fullPage});}
   async function close(ctx,name){await ctx.tracing.stop({path:join(out,name+'.zip')});await ctx.close();}
   try{
     await origin.start();browser=await chromium.launch({headless:true});report.browser=browser.version();
@@ -84,6 +85,10 @@ export async function runPdfAcceptance(){
       await shot(page,'copy-old-'+kind+'-320');report.copyOldRed.push({kind,lang,ref:copyRef,width:320,observed,status:'expected-failure'});await close(ctx,'copy-old-'+kind);
     }
     await photoOldRed({context,base,shot,close,report,setActive:p=>{active=p}});
+    gutterBrowser=await chromium.launch({headless:true,ignoreDefaultArgs:['--hide-scrollbars']});
+    report.scrollbarBrowser={version:gutterBrowser.version(),scope:'Dedicated native visible scrollbar renderer; default --hide-scrollbars omitted, no DOM/CSS overrides or CSP bypass'};
+    const gutterContext=width=>context(width,false,gutterBrowser);
+    await scrollbarOldRed({context:gutterContext,base,shot,close,report,setActive:p=>{active=p}});
     for(const width of [320,1280])for(const lang of PDF_LANGUAGES){
       const ctx=await context(width),page=await ctx.newPage();active=page;
       const appURL=base+'apply/?lang='+lang+'&recruiter=yana&location=any&src=fixture&campaign=sample&vacancy=tomatoes';
@@ -132,6 +137,7 @@ export async function runPdfAcceptance(){
       await fits(page);await shot(page,`review-return-${lang}-${width}`);
       report.rows.push({lang,width,passed:true,footer:true,review:true,language:true,returnRoute:true,draft:true,fits:true,noCandidateURL:true,copy:true,preview:true,direction:true,numericLTR:true,photoPreserved:true,print:true,...rejectedPhoto,...acceptedPhoto,printScope:width===320?'A4-generated':'narrow-print-covered',geometry,filledGeometry,number});await close(ctx,`${lang}-${width}`);
     }
+    await scrollbarCurrent({context:gutterContext,base,shot,close,report,setActive:p=>{active=p},copyData});
     // Standalone URL priority, preference, denied storage, safe return, and local preview/print.
     for(const mode of ['saved','url-priority','denied','hostile-return']){
       const ctx=await context(320,mode==='denied'),page=await ctx.newPage();active=page;
@@ -154,8 +160,9 @@ export async function runPdfAcceptance(){
     assert.deepEqual(report.mutations,[]);assert.deepEqual(report.external,[]);
     assert.equal(captureStagedPublication(process.cwd(),artifact,checkout).sha256,publication.sha256);
     assert.equal(report.imageOldRed.length,2);assert.equal(report.imageRaceCases.length,2);assert.equal(report.imageSizeCases.length,2);
+    assert.equal(report.scrollbarOldRed.length,2);assert.equal(report.scrollbarRows.length,20);
     report.status='passed';
   }catch(error){report.status='failed';report.error=String(error.stack||error);if(active)await active.screenshot({path:join(out,'failure.png'),fullPage:true}).catch(()=>{});throw error;
-  }finally{report.finished=new Date().toISOString();await writeFile(join(out,'acceptance.json'),JSON.stringify(report,null,2));await browser?.close();await origin.stop();}
+  }finally{report.finished=new Date().toISOString();await writeFile(join(out,'acceptance.json'),JSON.stringify(report,null,2));await gutterBrowser?.close();await browser?.close();await origin.stop();}
 }
 if(process.argv[1]&&resolve(process.argv[1])===resolve(new URL(import.meta.url).pathname))await runPdfAcceptance();
