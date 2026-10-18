@@ -110,6 +110,108 @@
           }
         }
       }
+    },
+    "/api/v1/materials/{material_id}/": {
+      "get": {
+        "operationId": "getMaterial",
+        "description": "Local read-only detail; only location_id/language query parameters, no limit/cursor or duplicate/unknown keys. HEAD/writes405 AllowGET. No auth or implicit online activation.",
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "description": "Stable material ID; malformed IDs fail400, unknown valid IDs fail404.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{1,80}$"
+            }
+          },
+          {
+            "name": "location_id",
+            "in": "query",
+            "required": false,
+            "description": "Exact location; no cross-location fallback.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "zgorzelec"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "description": "Requested language; ua aliases uk. Missing defaults to en.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ua",
+                "uk",
+                "ru",
+                "pl",
+                "en",
+                "ka",
+                "tr",
+                "hy"
+              ],
+              "default": "en"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canonical materials envelope with exactly one matching item; max32768 UTF-8 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./detail-response.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; no request echo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only method.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Bounded generic error; no traceback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown stable ID; no payload echo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./error.schema.json"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

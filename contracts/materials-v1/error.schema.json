@@ -12,7 +12,9 @@
         "INVALID_CURSOR",
         "METHOD_NOT_ALLOWED",
         "RESPONSE_TOO_LARGE",
-        "INTERNAL_ERROR"
+        "INTERNAL_ERROR",
+        "INVALID_MATERIAL_ID",
+        "MATERIAL_NOT_FOUND"
       ]
     },
     "request_id": {
