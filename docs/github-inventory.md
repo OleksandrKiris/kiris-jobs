@@ -25,6 +25,15 @@ recruitmentbot. Остальной аккаунт не объявляется о
 Actual runtime: Native6 jobs по140 TAP с browser16+8 в каждом; CatalogueTAP groups[11,30,7,26,36,14,13,24,16,25,15,117,23,50]; core16/worker N/A unchanged/main19/prototypes16+8; Backend10/108/39; earlysecurity21. New journeys: tasklink additive inside2 existingrestart journeys, total16 unchanged; это не новые18/26case totals. ControlledCI/3201280, не physical/OS/full-language certification.
 В source100 доставлены local detail GET backend12@96d2, contract14@4fef и обязательный CI15@a045 (39contracts). Django не deployed; frontend snapshot/mock самостоятельный, online-adapter/AIoff. Один guard использован; второго merge в этом проходе нет.
 
+### Локальная сводка с привязанными материалами — 18.10.2026 05:35 UTC
+
+Следующий срез владельца9 уже реализован локально: `0fb303616834f4c7d143b53ef6e0ac5f955c9013`, base опубликованный `95eb7a125c16cf3779ad2f5ee6fc5579d4c05550`, tree `febd070c52e7fad5936b06bae5f961a3f1423890`. Независимое source-only review CLEAR: readonly-сводка всех3 DEMO-задач добавляет только явно сохранённые stable material ID и requested language; EN/RU/UK/PL, честная оговорка при недоступной или неподтверждённой связи. Фильтр/поиск не сужают сводку; effective language, факт прочтения/отправки и реальные записи не выдумываются. Без связей прежний текст сохранён. Source440/net3,437 остальных Git entries неизменны; model/storage/backend/contracts/browser helpers не менялись.
+Авторский сохранённый лог:6 новых +5 затронутых Open/Back =11 PASS,0 skipped. Четыре языковых proof — VM/данные, не текущая браузерная приёмка. Этот локальный срез не pushed, не Ready и не опубликован; hosted CI и новый browser runtime NOTRUN. Приёмка100 и36HTTP/312projection/276Git-only остаётся отдельным опубликованным результатом.
+
+В проходе05:35 владельцу9 назначены только добавочные проверки собственного browser harness: новая сводка после Save/Back/reload/Clear и page-only сохранения внутри двух существующих restart journeys. Нового harness head, общего candidate head/PR и числа проверок пока нет. После готового handoff требуются независимая проверка изменённого source и точный ordinary union с принятыми root2docs, затем текущие CI/browser gates; публикация не следует из одного source CLEAR. Root4043 остаётся локальным неопубликованным компонентом; его доставка будущему candidate будет подтверждена фактическим import. Guard05:35 пока0; новый merge не выполнен.
+
+### История назначения перед поздним handoff — snapshot 18.10.2026 05:26 UTC
+
 Следующее поручение9 назначено, только ASSIGNED_ONLY: расширить readonly-сводку3задач явно привязанной инструкцией — stableID/requested language,4локали и честный fallback. Не выдумывать effective language, факт прочтения/отправки или новые записи. Нового head/реализации/тестов/CI пока не подтверждаем.
 
 ### История подготовки100 — snapshot до публикации, проход05:03
