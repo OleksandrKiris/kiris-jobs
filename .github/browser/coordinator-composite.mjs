@@ -8,6 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { staticOrigin } from './static-origin.mjs';
+import { assertContrastRegressionRows } from './catalogue-contrast.mjs';
 import { captureStagedPublication, captureCurrentToolTarget, gitPublication, publicationReuse, selectToolTarget, toolInput, assertFullCurrentResult, transitionForTarget } from './catalogue-scope.mjs';
 import { acceptCoordinatorHTTP } from './coordinator-http.mjs';
 import { acceptCoordinatorRefresh, JOINT_TOOL_TRANSITION, publishedToolBytes, TOOL_FILES } from './coordinator-refresh.mjs';
@@ -145,8 +146,7 @@ try {
     assert.deepEqual(full.cardActionContrast?.map(x=>`${x.width}:${x.lang}`).sort(),
       [320,1280].flatMap(width=>contrastLocales.map(lang=>`${width}:${lang}`)).sort());
     assert.ok(full.cardActionContrast.every(x=>x.status==='passed'&&x.normal.length===17&&x.states.length===3));
-    assert.deepEqual(full.cardContrastOldRed?.map(x=>x.width).sort((a,b)=>a-b),[320,1280]);
-    assert.ok(full.cardContrastOldRed.every(x=>x.base===report.base&&x.status==='expected-failure-observed'&&x.button.ratio<4.5));
+    assertContrastRegressionRows(full.cardContrastOldRed,report.base);
     report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
       checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
       passed: full.results.filter(x => x.status === 'passed').length,
