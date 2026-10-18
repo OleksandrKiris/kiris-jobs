@@ -149,12 +149,13 @@ try {
     assert.ok(full.cardActionContrast.every(x=>x.status==='passed'&&x.normal.length===17&&x.states.length===3));
     assertContrastRegressionRows(full.cardContrastOldRed,report.base);
     assertHousingControls(full.housingControls);
+    assert.deepEqual(full.housingGroups?.map(r=>`${r.width}:${r.cases}:${r.status}`).sort(),['1280:33:passed','320:33:passed']);
     report.fullCurrentCatalogue = { status: full.status, processSucceeded: true, head: full.head, base: full.base,
       checkout: full.checkout, scope: full.scope, report: 'full-current/acceptance.json',
       passed: full.results.filter(x => x.status === 'passed').length,
       notApplicable: full.results.filter(x => x.status === 'not-applicable'), earlyInput: full.earlyInput,
       shortcutFonts: full.shortcutFonts,
-      housingControls:full.housingControls, housingReturns:full.housingReturns,
+      housingControls:full.housingControls, housingReturns:full.housingReturns, housingGroups:full.housingGroups,
       cardActionContrast:full.cardActionContrast.map(x=>({width:x.width,lang:x.lang,status:x.status})),
       cardContrastOldRed:full.cardContrastOldRed, error: full.error || null };
     assertFullCurrentResult(failure, full, { head: report.head, base: report.base, checkout: report.checkout,

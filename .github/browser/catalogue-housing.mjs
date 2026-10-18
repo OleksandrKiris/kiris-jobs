@@ -126,7 +126,7 @@ export function assertHousingControls(rows){
 }
 export async function acceptHousingControls({context,base,reportDir,report,active}){
   assert.equal(process.env.GITHUB_ACTIONS,'true','Use the authorized Actions runner');
-  report.housingControls=[];report.housingReturns=[];
+  report.housingControls=[];report.housingReturns=[];report.housingGroups=[];
   for(const width of [320,1280]){
     const ctx=await context({width,height:900}),page=await ctx.newPage(),errors=[];
     active(page);page.on('pageerror',e=>errors.push(e.message));
@@ -172,7 +172,7 @@ export async function acceptHousingControls({context,base,reportDir,report,activ
         report.housingReturns.push({width,id:g.id,lang:'hy',status:'passed'});
       }
       assert.deepEqual(errors,[]);
-      report.results.push({scenario:'three remaining housing galleries: visible language picker, eleven translations, keyboard wrap/Home/End/Escape and actual language-safe Back',width,status:'passed',cases:33});
+      report.housingGroups.push({scenario:'three remaining housing galleries: visible language picker, eleven translations, keyboard wrap/Home/End/Escape and actual language-safe Back',width,status:'passed',cases:33});
     }finally{
       await ctx.tracing.stop({path:join(reportDir,`housing-${width}-trace.zip`)});await ctx.close();active(null);
     }
