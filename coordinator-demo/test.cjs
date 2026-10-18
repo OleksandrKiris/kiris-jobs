@@ -558,3 +558,50 @@ test('published demo returns to same-origin catalogue and reports unavailable of
   assert.equal(h.$('offline').dataset.offlineState,'unavailable');
   h.change('demo-02','done');assert.equal(h.$('demo-02').value,'done');
 });
+
+test('last material stores exactly whitelist ID, requested language and version; no automatic write',()=>{
+ const s=storage(),m=M.materialMemory(s);assert.equal(m.snapshot().entry,null);assert.deepEqual(s.calls,[['get',M.LAST_MATERIAL_KEY]]);
+ assert.equal(m.remember('site-cleaning-summary-ru','ua'),true);
+ assert.deepEqual(JSON.parse(s.data.get(M.LAST_MATERIAL_KEY)),{version:1,material_id:'site-cleaning-summary-ru',requested_language:'ua'});
+ const entry=m.snapshot().entry;entry.material_id='other';assert.equal(m.snapshot().entry.material_id,'site-cleaning-summary-ru');
+ assert.equal(m.remember('candidate-id','ru'),false);assert.equal(m.remember('site-cleaning-summary-ru','RU'),false);
+ assert.equal(s.data.has(M.KEY),false);assert.equal(M.materialMemory(s).snapshot().entry.requested_language,'ua');
+});
+test('last material corrupt/future/extra fields remain untouched until explicit clear',()=>{
+ for(const raw of ['{bad','null','[]','x'.repeat(257),JSON.stringify({version:2,material_id:'site-cleaning-summary-ru',requested_language:'ru'}),JSON.stringify({version:1,material_id:'site-cleaning-summary-ru',requested_language:'ru',query:'private'}),JSON.stringify({version:1,material_id:'site-cleaning-summary-ru',requested_language:'unknown'})]){
+  const s=storage([[M.LAST_MATERIAL_KEY,raw],['other','keep']]),m=M.materialMemory(s);assert.equal(m.snapshot().persistence,'invalid');assert.equal(m.snapshot().entry,null);
+  m.remember('site-cleaning-summary-ru','pl');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),raw);assert.equal(m.snapshot().entry.requested_language,'pl');assert.equal(m.clear(),true);assert.equal(s.data.has(M.LAST_MATERIAL_KEY),false);assert.equal(s.data.get('other'),'keep');
+ }
+});
+test('removed last material ID has no return target and cannot overwrite stale record',()=>{
+ const raw=JSON.stringify({version:1,material_id:'removed-material',requested_language:'ru'}),s=storage([[M.LAST_MATERIAL_KEY,raw]]),m=M.materialMemory(s);
+ assert.deepEqual(m.snapshot(),{entry:null,persistence:'stale'});m.remember('site-cleaning-summary-ru','ru');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),raw);assert.equal(m.snapshot().persistence,'stale');
+});
+test('last material denied read/write/quota/removal keeps page-only truth and task isolation',()=>{
+ const taskRaw=JSON.stringify({version:1,statuses:{...M.initial(),'demo-01':'doing'}});
+ for(const fail of ['get','set','remove']){
+  const s=storage([[M.KEY,taskRaw]],fail),m=M.materialMemory(s);m.remember('site-cleaning-summary-ru','ru');
+  if(fail!=='remove')assert.equal(m.snapshot().persistence,'blocked');
+  m.clear();if(fail==='remove')assert.equal(m.snapshot().persistence,'blocked');assert.equal(s.data.get(M.KEY),taskRaw);
+ }
+ const s=storage(),base=s.setItem;s.setItem=()=>{throw new DOMException('quota','QuotaExceededError');};const m=M.materialMemory(s);m.remember('site-cleaning-summary-ru','ru');assert.equal(m.snapshot().persistence,'blocked');assert.equal(s.data.has(M.LAST_MATERIAL_KEY),false);s.setItem=base;
+});
+test('explicit last-material UI return preserves query/source/task filter and restores requested ua context',()=>{
+ const h=ui({lang:'UA'});assert.equal(h.$('materialReading').hidden,true);assert.equal(h.$('lastMaterialReturn').disabled,true);
+ h.change('demo-01','doing');h.change('filter','doing');h.change('materialsSource','mock');h.click('read-site-cleaning-summary-ru');
+ assert.equal(h.$('materialReading').hidden,false);assert.equal(h.document.activeElement.id,'reading-title');assert.equal(JSON.parse(h.store.data.get(M.LAST_MATERIAL_KEY)).requested_language,'ua');
+ const href=h.location.href,raw=h.store.data.get(M.KEY),reload=ui({href,store:h.store});assert.equal(reload.$('materialReading').hidden,true);assert.equal(reload.$('lastMaterialReturn').disabled,false);
+ reload.change('language','pl');reload.change('materialsSource','mock');reload.$('materialQuery').value='unmatched query';reload.$('materialQuery').handlers.input();assert.equal(reload.$('materials').children.length,0);
+ const search=reload.location.search,path=reload.location.pathname;reload.click('lastMaterialReturn');
+ assert.equal(reload.$('materialQuery').value,'unmatched query');assert.equal(reload.$('materialsSource').value,'mock');assert.equal(reload.$('filter').value,'doing');assert.equal(reload.document.documentElement.lang,'uk');assert.match(reload.location.hash+reload.location.search,/lang=uk/);assert.equal(reload.$('reading-title').lang,'ru');assert.equal(reload.document.activeElement.id,'reading-title');assert.equal(reload.store.data.get(M.KEY),raw);assert.equal(reload.location.pathname,path);
+ reload.click('lastMaterialClear');assert.equal(reload.$('materialReading').hidden,true);assert.equal(reload.store.data.has(M.LAST_MATERIAL_KEY),false);assert.equal(reload.document.activeElement.id,'materialsTitle');assert.equal(reload.store.data.get(M.KEY),raw);
+});
+test('last-material UI corrupt/stale records show notice and clear without empty reading panel',()=>{
+ for(const raw of ['{bad',JSON.stringify({version:1,material_id:'deleted',requested_language:'ru'})]){
+  const h=ui({store:storage([[M.LAST_MATERIAL_KEY,raw]])});assert.equal(h.$('lastMaterialReturn').disabled,true);assert.equal(h.$('materialReading').hidden,true);assert.match(h.$('lastMaterialNotice').textContent,/damaged|no longer available/);h.click('lastMaterialClear');assert.equal(h.store.data.has(M.LAST_MATERIAL_KEY),false);
+ }
+});
+test('last-material blocked notice never claims persistence or removal; task reset leaves material choice',()=>{
+ const h=ui({store:storage([],'set')});h.click('read-site-cleaning-summary-ru');assert.match(h.$('lastMaterialNotice').textContent,/only on this page/);
+ const s=storage(),good=ui({store:s});good.click('read-site-cleaning-summary-ru');const raw=s.data.get(M.LAST_MATERIAL_KEY);good.click('reset');good.click('confirm');assert.equal(s.data.get(M.LAST_MATERIAL_KEY),raw);
+});
