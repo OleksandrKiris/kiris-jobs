@@ -125,9 +125,9 @@ try {
   await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
   await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
-    '03d5cd6f746c024fe1fc6825e1c701a23d52a817', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
+    '725e9cc83e4492bb2e11bc525afce92e441a253c', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
   const workerSource=(await readFile(join(artifact,'sw.js'))).toString();
-  assert.equal((workerSource.match(/formErrorLocale=1/g)||[]).length,3);
+  assert.equal((workerSource.match(/formErrorLocale=1/g)||[]).length,4);
   let oldAlgorithm=workerSource.replace('kiris-jobs-v220-form-error-locale-2026-10-18-1','kiris-jobs-v220-card-contrast-2026-10-18-1').replaceAll('&formErrorLocale=1','');
   for(const id of FORM_VACANCY_IDS)oldAlgorithm=oldAlgorithm.replace(',\n  "./vacancies/'+id+'/"','');
   oldAlgorithm=oldAlgorithm.replace('          || await caches.match(requestUrl.origin + requestUrl.pathname)\n','');
@@ -157,7 +157,7 @@ try {
     assert.ok(full.cardActionContrast.every(x=>x.status==='passed'&&x.normal.length===17&&x.states.length===3));
     assertContrastRegressionRows(full.cardContrastOldRed,report.base);
     assertFormErrors(full.formErrors);assertFormUpgrades(full.formUpgrades,execFileSync('git',['show',report.base+':sw.js']).toString()!==(await readFile(join(artifact,'sw.js'))).toString());
-    assert.deepEqual(full.formErrorOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);
+    assert.deepEqual(full.formErrorOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);assert.ok(full.formErrorOldRed.every(r=>r.iconClear===false));
     assertApplyEntry(full.applyEntry);
     assert.deepEqual(full.applyOldRed?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);
     assert.ok(full.applyOldRed.every(r=>r.status==='expected-failure'));
@@ -188,7 +188,7 @@ try {
     kind: mode === 'actual-staged-head' ? 'actual-staged-head-with-pinned-published-base' : 'composite-test-inputs', version: 2,
     currentStagedHead: report.currentStagedHead, eventBase: transition.eventBase,
     shell: { sourceHead: report.head, checkout: report.checkout, files: report.files,
-      workerBlob: '03d5cd6f746c024fe1fc6825e1c701a23d52a817', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
+      workerBlob: '725e9cc83e4492bb2e11bc525afce92e441a253c', workerSHA256: sha256(await readFile(join(artifact, 'sw.js'))) },
     candidate5: { sourceHead: transition.target.ref, sourcePath: 'coordinator-demo/',
       stagedPath: 'tools/coordinator/', hashes: targetHashes, actualStagedHead: mode === 'actual-staged-head' },
     publishedOld5: { sourceHead: transition.published.ref, hashes: transition.published.hashes },

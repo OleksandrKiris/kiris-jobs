@@ -63,20 +63,21 @@ export const FORM_VACANCY_IDS=["greenhouse-tomatoes", "greenhouse-renewal", "tom
 export const FORM_ERROR_CASES=['missing','latin','phone'];
 export function assertFormErrors(rows){
  assert.equal(rows?.length,66);assert.deepEqual(rows.map(r=>`${r.width}:${r.lang}:${r.kind}`).sort(),[320,1280].flatMap(width=>Object.keys(FORM_ERROR_LABELS).flatMap(lang=>FORM_ERROR_CASES.map(kind=>`${width}:${lang}:${kind}`))).sort());
- for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.error,FORM_ERROR_LABELS[r.lang][r.kind]);for(const k of ['roundTrip','preserved','associated','fits','notSubmitted'])assert.equal(r[k],true,`${r.lang}:${r.kind}:${k}`);}
+ for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.error,FORM_ERROR_LABELS[r.lang][r.kind]);for(const k of ['roundTrip','preserved','associated','fits','notSubmitted','iconClear'])assert.equal(r[k],true,`${r.lang}:${r.kind}:${k}`);}
 }
 export function assertFormUpgrades(rows,workerChanged=true){
  if(!workerChanged){assert.deepEqual(rows,[]);return;}
- assert.deepEqual(rows?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.originStopped,true);assert.equal(r.baseFormExact,true);assert.equal(r.headFormExact,true);assert.equal(r.headLoaderExact,true);assert.deepEqual(r.offlineLanguages,['pl','uk']);}
+ assert.deepEqual(rows?.map(r=>r.width).sort((a,b)=>a-b),[320,1280]);for(const r of rows){assert.equal(r.status,'passed');assert.equal(r.originStopped,true);assert.equal(r.baseFormExact,true);assert.equal(r.headFormExact,true);assert.equal(r.headLoaderExact,true);assert.equal(r.headErrorStyleExact,true);assert.deepEqual(r.offlineLanguages,['pl','uk']);}
 }
 async function locale(page,lang){await page.locator('.language-switcher-button').click();await page.locator(`[data-language-option="${lang}"]`).click();await page.waitForFunction(lang=>document.documentElement.lang===lang,lang);}
+async function iconClear(page){return page.locator('#application-error').evaluate(el=>{const style=getComputedStyle(el,'::before'),box=el.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(el);const right=box.left+parseFloat(getComputedStyle(el).borderLeftWidth)+parseFloat(style.left)+parseFloat(style.width);return [...range.getClientRects()].every(r=>r.left>=right+4);});}
 async function values(page){return page.evaluate(()=>Object.fromEntries(['firstName','lastName','phone'].map(k=>[k,document.querySelector(`[name="${k}"]`).value])));}
 export async function acceptFormErrors({context,base,reportDir,report,active}){
  assert.equal(process.env.GITHUB_ACTIONS,'true');report.formErrors=[];report.formErrorOldRed=[];
- const oldRef='01cc8c7f30ac5c54587da9431a7cfd382353e9e4';const oldApp=execFileSync('git',['show',oldRef+':assets/application-form.js']);
+ const oldRef='01cc8c7f30ac5c54587da9431a7cfd382353e9e4';const oldApp=execFileSync('git',['show',oldRef+':assets/application-form.js']);const oldStyle=execFileSync('git',['show',oldRef+':assets/clean.css']);
  for(const width of [320,1280]){
-  const oldCtx=await context({width,height:900});await oldCtx.route('**/application-form.js?*',r=>r.fulfill({status:200,contentType:'text/javascript',body:oldApp}));const old=await oldCtx.newPage();active(old);
-  await old.goto(base+'vacancies/banana-warehouse-poland/?lang=ru&apply=1');await old.locator('#application-form').waitFor();await old.locator('#application-form button[type="submit"]').click();assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);await locale(old,'ka');assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);assert.notEqual(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ka.missing);await old.screenshot({path:join(reportDir,`form-error-old-red-${width}.png`)});report.formErrorOldRed.push({width,ref:oldRef,status:'expected-failure',from:'ru',to:'ka',error:FORM_ERROR_LABELS.ru.missing});await oldCtx.close();
+  const oldCtx=await context({width,height:900});await oldCtx.route('**/application-form.js?*',r=>r.fulfill({status:200,contentType:'text/javascript',body:oldApp}));await oldCtx.route('**/clean.css?*',r=>r.fulfill({status:200,contentType:'text/css',body:oldStyle}));const old=await oldCtx.newPage();active(old);
+  await old.goto(base+'vacancies/banana-warehouse-poland/?lang=ru&apply=1');await old.locator('#application-form').waitFor();await old.locator('#application-form button[type="submit"]').click();assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);await locale(old,'ka');assert.equal(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ru.missing);assert.notEqual(await old.locator('#application-error').innerText(),FORM_ERROR_LABELS.ka.missing);assert.equal(await iconClear(old),false,'Pinned original CSS must reproduce icon overlapping text');await old.screenshot({path:join(reportDir,`form-error-old-red-${width}.png`)});report.formErrorOldRed.push({width,ref:oldRef,status:'expected-failure',from:'ru',to:'ka',error:FORM_ERROR_LABELS.ru.missing,iconClear:false});await oldCtx.close();
  }
  // Every case retains a fresh isolated context. Two independent workers avoid
  // serial UI animation waits exhausting the existing full-runner deadline.
@@ -91,7 +92,7 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
    await locale(page,from);const roundTrip=await page.locator('#application-error').innerText()===FORM_ERROR_LABELS[from][kind];await locale(page,lang);
    const dom=await page.evaluate(()=>({fits:document.documentElement.scrollWidth<=innerWidth+1,notSubmitted:document.querySelector('#application-form')!==null&&!document.querySelector('.application-success')}));
    await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-${width}-${lang}-${kind}.png`)});
-   report.formErrors.push({width,lang,kind,status:'passed',error,preserved,associated,roundTrip,...dom});assert.deepEqual(errors,[]);await ctx.close();
+   report.formErrors.push({width,lang,kind,status:'passed',error,preserved,associated,roundTrip,iconClear:await iconClear(page),...dom});assert.deepEqual(errors,[]);await ctx.close();
  }
  let nextCase=0;
  await Promise.all(Array.from({length:2},async()=>{while(nextCase<cases.length){const item=cases[nextCase++];await acceptCase(item);}}));
@@ -100,5 +101,5 @@ export async function acceptFormErrors({context,base,reportDir,report,active}){
 export async function cachedFormHash(page,cacheName,url){return page.evaluate(async({cacheName,url})=>{const response=await(await caches.open(cacheName)).match(url);if(!response)return null;const bytes=await response.arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');},{cacheName,url});}
 export async function acceptOfflineFormErrors({page,base,width,reportDir}){
  await page.goto(base+'vacancies/banana-warehouse-poland/?lang=uk&apply=1');await page.locator('#application-form').waitFor();await page.locator('#application-form button[type="submit"]').click();assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.uk.missing);
- await locale(page,'pl');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.pl.missing);await locale(page,'uk');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.uk.missing);await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-upgrade-offline-${width}.png`)});return ['pl','uk'];
+ await locale(page,'pl');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.pl.missing);await locale(page,'uk');assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.uk.missing);assert.equal(await iconClear(page),true,'Offline cached style must keep error wording clear of its icon');await page.locator('#application-error').scrollIntoViewIfNeeded();await page.screenshot({path:join(reportDir,`form-error-upgrade-offline-${width}.png`)});return ['pl','uk'];
 }

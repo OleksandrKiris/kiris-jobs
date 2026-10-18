@@ -10,7 +10,7 @@ const CORE_SHELL = [
   "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1&localeRecovery=1&earlySearch=1&formErrorLocale=1",
   "./assets/privacy-bootstrap.js?v=220&localeRecovery=1",
   "./assets/candidate-base.css?v=220",
-  "./assets/clean.css?v=220",
+  "./assets/clean.css?v=220&formErrorLocale=1",
   "./assets/homepage.css?v=220&localeRecovery=1&cardContrast=1",
   "./assets/privacy.css?v=220",
   "./assets/i18n.js?v=220&localeRecovery=1",

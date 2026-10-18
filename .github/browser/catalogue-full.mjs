@@ -533,7 +533,7 @@ try {
 
   // Download the actual base runtime, then update only from the catalogue.
   // There must be no online tool visit/refresh after activation of the head SW.
-  const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js', 'assets/application-form.js', 'assets/application-loader.js'];
+  const upgradeFiles = ['index.html', 'privacy.html', 'assets/bootstrap.js', 'assets/privacy-bootstrap.js', 'assets/i18n.js', 'assets/homepage.css', 'assets/candidate.js', 'manifest.webmanifest', 'sw.js', 'assets/application-form.js', 'assets/application-loader.js', 'assets/clean.css'];
   upgradeFiles.push(...execFileSync('git',['diff','--name-only',report.base,report.checkout],{encoding:'utf8'}).trim().split('\n').filter(path=>path.startsWith('vacancies/')&&path.endsWith('/index.html')));
   const headFiles = new Map(await Promise.all(upgradeFiles.map(async file => [file, await readFile(join(artifact, file))])));
   const headTools = new Map(await Promise.all(TOOL_FILES.map(async name =>
@@ -621,7 +621,8 @@ try {
       ctx.off('request',observe);
       const headFormExact=await cachedFormHash(page,headCache,new URL('assets/application-form.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-form.js'));
       const headLoaderExact=await cachedFormHash(page,headCache,new URL('assets/application-loader.js?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/application-loader.js'));
-      assert.ok(headFormExact&&headLoaderExact,'New worker must cache the exact new import chain');
+      const headErrorStyleExact=await cachedFormHash(page,headCache,new URL('assets/clean.css?v=220&formErrorLocale=1',base).href)===sha256(headFiles.get('assets/clean.css'));
+      assert.ok(headFormExact&&headLoaderExact&&headErrorStyleExact,'New worker must cache the exact new import/style chain');
       await stopServer();originStopped=true;await ctx.setOffline(true);
       await page.locator('[data-primserv-service="coordinator"]').click();
       await page.locator('#offline[data-offline-state="ready"]').waitFor();
@@ -646,7 +647,7 @@ try {
       await page.locator('#offline[data-offline-state="ready"]').waitFor();
       assert.deepEqual(await toolSnapshot(page),before);
       const offlineLanguages=await acceptOfflineFormErrors({page,base,width,reportDir});
-      report.formUpgrades.push({width,status:'passed',originStopped:true,baseFormExact,headFormExact,headLoaderExact,offlineLanguages});
+      report.formUpgrades.push({width,status:'passed',originStopped:true,baseFormExact,headFormExact,headLoaderExact,headErrorStyleExact,offlineLanguages});
       assert.deepEqual(errors,[]);
       report.results.push({scenario:'actual base complete tool → head shell → origin stopped/offline first tool entry, reload, languages, return and saved fictional statuses',
         width,status:'passed',baseCache,headCache,baseToolHashes,before,after,onlineToolRequests});
