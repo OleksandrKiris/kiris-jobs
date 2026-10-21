@@ -6,6 +6,9 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { withFileProfile } from './browser-profile.mjs';
+import { captureStorageIdentity,compareStorageIdentity,hasCompleteIdentity } from './storage-identity.mjs';
+import { captureBackendOpen,compareBackendOpen,hasCompleteBackendOpen } from './backend-open-observation.mjs';
 
 if (process.env.GITHUB_ACTIONS !== 'true') throw Error('Run only in the approved GitHub Actions acceptance job. No local browser launch.');
 const { PLAYWRIGHT_PACKAGE, BROWSER_REPORT, TESTED_HEAD, TESTED_BASE } = process.env;
@@ -19,11 +22,12 @@ git('merge-base', '--is-ancestor', TESTED_BASE, 'HEAD');
 const report = { status: 'running', head: TESTED_HEAD, base: TESTED_BASE,
   checkout: git('rev-parse', 'HEAD').toString().trim(), started: new Date().toISOString(),
   launch: 'downloaded folder via file://; no HTTP server, SW, PWA or public deployment',
+  profile: 'fresh isolated on-disk Chromium profile per scenario; no storage import or replay',
   resources: [], scenarios: [], networkRequests: [], pageErrors: [],
   limitations: ['Chromium emulated viewport, not a physical phone',
     'External links inspected, not opened; no forms or messages sent',
     'v1 fixture compatibility, not an upgrade from a previously released coordinator',
-    'Other browsers and optional localhost HTTP launch remain untested'] };
+    'Incognito file storage, other browsers and optional localhost HTTP launch remain untested'] };
 const files = ['index.html', 'model.js', 'app.js', 'style.css', 'primserv-logo.svg'];
 for (const name of files) {
   const bytes = await readFile(join(dir, name));
@@ -34,12 +38,56 @@ for (const name of files) {
 report.runtimeBytes = report.resources.reduce((sum, file) => sum + file.bytes, 0);
 await mkdir(reportDir, { recursive: true });
 const { chromium } = createRequire(import.meta.url)(PLAYWRIGHT_PACKAGE);
-const { seedFixture } = createRequire(import.meta.url)('./browser-fixtures.cjs');
+const { seedNativeFixture, installFixtureHooks, acceptanceStatus } = createRequire(import.meta.url)('./browser-fixtures.cjs');
 const KEY = 'primserv:coordinator-demo:v1', OTHER = 'primserv:acceptance:unrelated';
 const initial = { version: 1, statuses: { 'demo-01': 'todo', 'demo-02': 'todo', 'demo-03': 'todo' } };
 const previous = JSON.stringify({ version: 1, statuses: { ...initial.statuses, 'demo-02': 'done' } });
 const fileURL = pathToFileURL(join(dir, 'index.html')).href;
-const focus = async (page, id) => assert.equal(await page.evaluate(() => document.activeElement.id), id);
+const readEvidence=()=>({
+  fixture:window.__coordinatorEvidence||null,model:window.__coordinatorObservedModel?.snapshot()||null,
+  focused:document.activeElement?.id,url:location.href,
+  dom:{summary:document.querySelector('#summary')?.textContent,storage:document.querySelector('#storage')?.textContent,
+    filter:document.querySelector('#filter')?.value,tasks:[...document.querySelectorAll('#tasks select[id^="demo-"]')].map(x=>({id:x.id,value:x.value}))}
+});
+report.storageEvidence=[];
+report.storageIdentity=[];
+report.backendOpen=[];
+report.backendOpenObservation={effect:"Extra browser CDP attach/read/detach changes timing; not a fix",
+  scope:"Existing six observed state reloads only; cumulative process-wide open telemetry selected from each measured profile",
+  sourceRevision:null, // No universal revision: see each sample.provenance.
+  provenanceContract:"Per-sample measured profile/version, selected schema, source revision and attempted names; unknown fields remain null",
+  limits:"Missing/empty is unavailable, unchanged is no new open sample; OK includes memory/recovery, not KEY commit/load/durability"};
+report.identityObservation={scope:'Only six explicitly observed scenarios, state reload only; original controls and restarts unchanged',
+  effect:'Extra CDP attach/read-only RPC/detach round trips can change timing; not a causal fix',
+  context:'Optional browserContextId is kept null when not reported; no fabricated context ID',
+  protocolSource:'https://raw.githubusercontent.com/microsoft/playwright/v1.56.1/packages/playwright-core/src/server/chromium/protocol.d.ts',
+  protocolSourceSha256:'3f6ef9c13ca4e92bc06426a01f2c3198448e949f64f62eb02e2db23146a8d06c',
+  acceptance:'Issue79 remains open; even green observation does not accept PR68 or establish Chromium cause'};
+const backendOpenProvenance=sample=>{
+  const maxCode=sample.profile==='chromium141'?5:sample.profile==='chromium156'?6:null;
+  return {measuredProfile:sample.profile??null,measuredVersion:sample.version??null,
+    schema:maxCode===null?null:{id:sample.profile==='chromium141'?'legacy-leveldb-status':'dom-storage-db-status',minCode:0,maxCode},
+    sourceRevision:maxCode===null?null:sample.version?.revision?.replace(/^@/,'')??null,
+    attemptedHistogramNames:sample.requests.filter(x=>x.method==='Browser.getHistogram').map(x=>x.params.name)};
+};
+const observeIdentity=async(context,page,scenario,phase)=>{
+  const sample=await captureStorageIdentity(context,page);
+  report.storageIdentity.push({scenario:scenario.name,phase,...sample});
+  const backend=await captureBackendOpen(context);
+  report.backendOpen.push({scenario:scenario.name,phase,...backend,provenance:backendOpenProvenance(backend)});
+};
+report.observationProtocol={control:'No observer; one native fixture preparation before the tested journey',
+  passive:'Wrap existing storage calls and retain real model; no added storage reads, but CPU/payload timing changes',
+  preseed:'Passive plus one labelled raw read during ready-document fixture preparation, before tested edits',
+  failure:'Unobserved controls inspected only after the original assertion failed; never retried'};
+const collectEvidence=async(page,scenario,phase)=>report.storageEvidence.push({scenario:scenario.name,phase,...await page.evaluate(readEvidence)});
+const focus = async (page, id, scenario) => {
+  if(!scenario?.observe)return assert.equal(await page.evaluate(() => document.activeElement.id), id);
+  // Same existing evaluate call; larger returned payload, no added storage read.
+  const data=await page.evaluate(readEvidence);
+  report.storageEvidence.push({scenario:scenario.name,phase:'existing-focus-read',...data});
+  assert.equal(data.focused,id);
+};
 const fits = async page => assert.ok(await page.evaluate(() =>
   document.documentElement.scrollWidth <= innerWidth), 'No horizontal overflow');
 const ready = async page => {
@@ -49,21 +97,26 @@ const ready = async page => {
 const keyClick = async (page, id) => { await page.locator(`#${id}`).focus(); await page.keyboard.press('Enter'); };
 let browser;
 try {
-  browser = await chromium.launch({ headless: true });
-  report.browser = `Chromium ${browser.version()}`;
   for (const scenario of [
     { name: 'board-wide', width: 1280, mode: 'empty' },
     { name: 'board-narrow', width: 320, mode: 'empty' },
-    ...['v1', 'corrupt', 'future', 'denied-read', 'denied-write', 'denied-remove'].map(mode => ({ name: mode, width: 320, mode }))
+    ...['v1', 'corrupt', 'future', 'denied-read', 'denied-write', 'denied-remove'].map(mode => ({ name: mode, width: 320, mode })),
+    ...['passive','preseed'].flatMap(observe=>[
+      {name:'observed-wide-'+observe,width:1280,mode:'empty',observe},
+      {name:'observed-narrow-'+observe,width:320,mode:'empty',observe},
+      {name:'observed-v1-'+observe,width:320,mode:'v1',observe}
+    ])
   ]) {
     const viewport = { width: scenario.width, height: 900 };
-    const context = await browser.newContext({ viewport });
+    await withFileProfile(chromium,viewport,async profile=>{
+    const context = profile.context;
+    browser = context.browser();
+    report.browser = `Chromium ${browser.version()}`;
     context.setDefaultTimeout(10000);
     const requests = [], errors = [];
     context.on('request', request => { if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() }); });
     // Any attempted network request is blocked and fails the run, including GET.
     await context.route(/^https?:/, route => route.abort());
-    await context.addInitScript(seedFixture, { key: KEY, other: OTHER, mode: scenario.mode, previous });
     await context.tracing.start({ screenshots: true, snapshots: true });
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
@@ -71,8 +124,29 @@ try {
       // Start already offline: all five runtime files must already be on disk.
       await context.setOffline(true);
       await page.goto(`${fileURL}?lang=en&from=acceptance#board`); await ready(page);
+      const fixtureArgs={key:KEY,other:OTHER,mode:scenario.mode,previous,observe:scenario.observe||false};
+      // Initialize this owned profile once, after a real file document is ready.
+      // Subsequent reloads have observation/denial hooks but NO seeding or replay.
+      const preparation=await page.evaluate(seedNativeFixture,fixtureArgs);
+      if(scenario.observe)report.storageEvidence.push({scenario:scenario.name,...preparation});
+      await context.addInitScript(installFixtureHooks,fixtureArgs);
+      await page.reload(); await ready(page);
+      const originalFileSearch = new URL(page.url()).search;
       assert.equal(await page.evaluate(() => navigator.onLine), false);
       assert.equal(await page.locator('.task').count(), 3);
+      assert.equal(await page.locator('#materials article').count(),2);
+      assert.match(await page.locator('#materialsStatus').innerText(),/en.*ru/);
+      assert.deepEqual(await page.locator('#materials h3').evaluateAll(nodes=>nodes.map(x=>x.lang)),['ru','ru']);
+      const snapshotText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),snapshotText);
+      await page.locator('#materialsSource').selectOption('snapshot');
+      await page.locator('#materialQuery').fill('bogatynia');
+      assert.equal(await page.locator('#materials article').count(),0);
+      assert.match(await page.locator('#materialsStatus').innerText(),/No confirmed material/);
+      await page.locator('#materialQuery').fill('zgorzelec');
+      assert.equal(await page.locator('#materials article').count(),2);
+      await page.locator('#materialQuery').fill('');
       await fits(page);
       if (scenario.mode === 'empty') {
         await page.locator('#language').focus(); await page.keyboard.press('Tab'); await focus(page, 'filter');
@@ -83,15 +157,19 @@ try {
         }
         await page.locator('#demo-01').focus();
         await page.keyboard.press('End'); await page.keyboard.press('Enter');
-        assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focus(page, 'demo-01');
+        assert.equal(await page.locator('#demo-01').inputValue(), 'done'); await focus(page, 'demo-01',scenario);
         await page.locator('#filter').selectOption('done');
         await page.locator('#language').selectOption('uk');
+        if(scenario.observe)await observeIdentity(context,page,scenario,'before-state-reload');
         await page.reload(); await ready(page);
+        if(scenario.observe)await observeIdentity(context,page,scenario,'after-state-reload');
+        if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#filter').inputValue(), 'done');
         assert.equal(await page.locator('#demo-01').inputValue(), 'done');
         assert.equal(new URL(page.url()).searchParams.get('from'), 'acceptance');
-        assert.equal(new URL(page.url()).hash, '#board');
+        assert.equal(new URL(page.url()).search, originalFileSearch, 'File storage address stays stable');
+        assert.equal(new URL(page.url()).hash, '#board?lang=uk&status=done');
         const savedURL = page.url();
         // Local navigation / Back, no external page or operational action.
         await page.goto(`${fileURL}?lang=ka`); await ready(page);
@@ -117,7 +195,16 @@ try {
         await page.goto(`${fileURL}?lang=ua`); await ready(page);
         assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
         assert.equal(await page.locator('#fallback').isVisible(), false);
+        await page.goto(`${fileURL}?lang=RU`); await ready(page);
+        assert.equal(await page.locator('html').getAttribute('lang'),'ru');
+        assert.equal(await page.locator('#materialsStatus').innerText(),'ru · Zgorzelec');
+        assert.equal(new URL(page.url()).searchParams.get('lang'),'RU');
+        await page.goto(`${fileURL}?lang=UA`); await ready(page);
+        assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+        assert.match(await page.locator('#materialsStatus').innerText(),/ua.*ru/);
+        assert.equal(new URL(page.url()).searchParams.get('lang'),'UA');
         await context.setOffline(false); await page.reload(); await ready(page);
+        if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
       } else {
         if (scenario.mode === 'v1') assert.equal(await page.locator('#demo-02').inputValue(), 'done');
         if (['corrupt', 'future'].includes(scenario.mode)) assert.match(await page.locator('#storage').innerText(), /preserved/);
@@ -133,13 +220,22 @@ try {
           await page.evaluate(() => sessionStorage.clear());
         }
         if (scenario.mode !== 'denied-read') {
-          const raw = await page.evaluate(key => localStorage.getItem(key), KEY);
+          let raw;
+          if(scenario.observe) {
+            // Reuse the existing getItem/RPC rather than adding a pre-reload read.
+            const capture=await page.evaluate(key=>({raw:localStorage.getItem(key),fixture:window.__coordinatorEvidence,
+              model:window.__coordinatorObservedModel?.snapshot()}),KEY);
+            raw=capture.raw;report.storageEvidence.push({scenario:scenario.name,phase:'existing-raw-read',...capture});
+          } else raw=await page.evaluate(key => localStorage.getItem(key), KEY);
           if (scenario.mode === 'corrupt') assert.equal(raw, '{broken');
           if (scenario.mode === 'future') assert.equal(raw, JSON.stringify({ version: 2, statuses: {} }));
           if (scenario.mode === 'denied-write') assert.equal(raw, previous);
           assert.equal(await page.evaluate(key => localStorage.getItem(key), OTHER), 'keep');
         }
+        if(scenario.observe)await observeIdentity(context,page,scenario,'before-state-reload');
         await page.reload(); await ready(page);
+        if(scenario.observe)await observeIdentity(context,page,scenario,'after-state-reload');
+        if(scenario.observe)await collectEvidence(page,scenario,'after-reload');
         if (scenario.mode === 'v1' || scenario.mode === 'denied-remove') {
           assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
           assert.equal(await page.locator('#demo-02').inputValue(), 'done');
@@ -156,14 +252,393 @@ try {
     } catch (error) {
       report.scenarios.push({ ...scenario, viewport, status: 'failed', error: error.stack });
       await page.screenshot({ path: join(reportDir, `${scenario.name}-failure.png`), fullPage: true }).catch(() => {});
-      throw error;
+      if(scenario.observe)await collectEvidence(page,scenario,'failure-after-assertion').catch(()=>{});
+      else {
+        // Post-failure inspection cannot turn the already failed assertion green.
+        const data=await page.evaluate(()=>{
+          let storage;
+          try {storage={raw:localStorage.getItem('primserv:coordinator-demo:v1'),marker:localStorage.getItem('primserv:acceptance:coordinator-seeded')};}
+          catch(error){storage={error:error.name};}
+          return {storage,url:location.href,summary:document.querySelector('#summary')?.textContent,
+            tasks:[...document.querySelectorAll('#tasks select[id^="demo-"]')].map(x=>({id:x.id,value:x.value}))};
+        }).catch(error=>({captureError:error.message}));
+        report.storageEvidence.push({scenario:scenario.name,phase:'control-post-failure-only',...data});
+      }
+      // Continue independent diagnostic scenarios, retaining this failure and exit 1.
     } finally {
       report.networkRequests.push(...requests); report.pageErrors.push(...errors);
       await context.tracing.stop({ path: join(reportDir, `${scenario.name}-trace.zip`) });
-      await context.close();
     }
+    });
   }
-  report.status = 'passed';
+  // Mandatory durability checks: restart the browser with its native profile,
+  // without an init script/seed, storageState(), or any test-side state write.
+  for (const width of [1280, 320]) {
+    const name = `profile-restart-${width}`, viewport = { width, height: 900 };
+    await withFileProfile(chromium,viewport,async profile=>{
+    const requests = [], errors = [];
+    let context = profile.context;
+    const prepare = async () => {
+      context.setDefaultTimeout(10000);
+      context.on('request', request => {
+        if (!request.url().startsWith('file:')) requests.push({ method: request.method(), url: request.url() });
+      });
+      context.on('page', page => page.on('pageerror', error => errors.push(error.message)));
+      await context.route(/^https?:/, route => route.abort());
+      await context.setOffline(true);
+      await context.tracing.start({ screenshots: true, snapshots: true });
+      return context.newPage();
+    };
+    let tracing = false;
+    try {
+      let page = await prepare(); tracing = true;
+      await page.goto(`${fileURL}?lang=en&from=restart#board`); await ready(page);
+      assert.equal(await page.locator('#demo-01').inputValue(), 'todo');
+      await page.locator('#demo-01').selectOption('doing');
+      await page.locator('#demo-02').selectOption('done');
+      await page.locator('#filter').selectOption('done');
+      await page.locator('#language').selectOption('uk');
+      const savedURL = page.url();
+      const savedMaterialText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),savedMaterialText);
+      await page.locator('#materialQuery').fill('zgorzelec');
+      assert.equal(await page.locator('#materials article').count(),2);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      await page.locator('#read-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('primserv:coordinator:last-material:v1'))),
+        {version:1,material_id:'site-cleaning-summary-ru',requested_language:'uk'});
+      await context.tracing.stop({ path: join(reportDir, `${name}-before-trace.zip`) }); tracing = false;
+      context = await profile.reopen();
+      page = await prepare(); tracing = true;
+      await page.goto(savedURL); await ready(page);
+      assert.equal(await page.evaluate(() => navigator.onLine), false);
+      assert.equal(await page.locator('html').getAttribute('lang'), 'uk');
+      assert.equal(await page.locator('#filter').inputValue(), 'done');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'snapshot');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'');
+      assert.equal(await page.locator('#materials').innerText(),savedMaterialText);
+      assert.match(await page.locator('#materialsStatus').innerText(),/uk.*ru/);
+      assert.equal(await page.locator('#demo-02').inputValue(), 'done');
+      assert.equal(await page.locator('.task').count(), 1);
+      await page.locator('#filter').selectOption('all');
+      assert.equal(await page.locator('#demo-01').inputValue(), 'doing');
+      assert.equal(await page.locator('#demo-02').inputValue(), 'done');
+      assert.equal(await page.locator('#demo-03').inputValue(), 'todo');
+      // Real native restart restores only the pointer; opening remains explicit.
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#lastMaterialReturn').isEnabled(),true);
+      await page.locator('#language').selectOption('pl');
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#materialQuery').fill('no matching material');
+      assert.equal(await page.locator('#materials article').count(),0);
+      await page.locator('#lastMaterialReturn').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching material');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'all');
+      assert.equal(await page.locator('#materialReading').isVisible(),true);
+      assert.match(await page.locator('#materialReading').innerText(),/uk.*ru/);
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      await page.locator('#lastMaterialClear').click();
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.evaluate(()=>localStorage.getItem('primserv:coordinator:last-material:v1')),null);
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#lastMaterialReturn').isDisabled(),true);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#demo-01').inputValue(),'doing');
+      assert.equal(await page.locator('#demo-02').inputValue(),'done');
+      // Favourites are separate intentional storage, never a recent-pointer import.
+      const favouriteKey='primserv:coordinator:favourites:v1',lastKey='primserv:coordinator:last-material:v1';
+      const taskBytes=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      await page.locator('#pin-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      const pinBytes=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
+      assert.deepEqual(JSON.parse(pinBytes),{version:1,items:[{material_id:'site-cleaning-summary-ru',requested_language:'uk'}]});
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      await page.locator('#language').selectOption('pl');
+      await page.locator('#read-site-cleaning-summary-ru').click();
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),pinBytes);
+      assert.equal(await page.locator('#pin-site-cleaning-summary-ru').isDisabled(),true);
+      await page.locator('#lastMaterialClear').click();
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),pinBytes);
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#favouritesList article').count(),1);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#lastMaterialReturn').isDisabled(),true);
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#filter').selectOption('doing');
+      await page.locator('#materialQuery').fill('no matching pinned source');
+      await page.locator('#pin-open-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('html').getAttribute('lang'),'uk');
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      assert.match(await page.locator('#materialReading').innerText(),/uk.*ru/);
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching pinned source');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      await fits(page);
+      await page.screenshot({path:join(reportDir,`${name}-pinned-open.png`),fullPage:true});
+      await page.locator('#pin-remove-site-cleaning-summary-ru').focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#favouritesList article').count(),0);
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching pinned source');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      // Labelled negative fixture: corrupt only the NEW key after normal journeys.
+      await page.locator('#language').selectOption('en');
+      await page.evaluate(key=>localStorage.setItem(key,'{broken'),favouriteKey);
+      await page.reload();await ready(page);
+      assert.match(await page.locator('#favouritesNotice').innerText(),/damaged/);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),'{broken');
+      assert.equal(await page.locator('#favouritesList article').count(),0);
+      await page.locator('#favouritesClear').click();
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),null);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      // Negative write fixture affects only the NEW key and is always restored.
+      await page.evaluate(key=>{
+        const original=Storage.prototype.setItem;
+        window.__restorePinnedWrite=()=>{Storage.prototype.setItem=original;delete window.__restorePinnedWrite;};
+        Storage.prototype.setItem=function(k,v){if(k===key)throw new DOMException('Pinned fixture denied','SecurityError');return original.call(this,k,v);};
+      },favouriteKey);
+      try {
+        await page.locator('#pin-site-cleaning-summary-ru').click();
+        assert.match(await page.locator('#favouritesNotice').innerText(),/only on this page/);
+        assert.equal(await page.locator('#favouritesList article').count(),1);
+        assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),null);
+        assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+        assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      } finally {await page.evaluate(()=>window.__restorePinnedWrite?.());}
+      await page.locator('#favouritesClear').click();
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#favouritesList article').count(),0);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),taskBytes);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),null);
+      await page.locator('#filter').selectOption('all');
+      // Backup slice: export only current demo statuses, never other keys/context.
+      await page.locator('#language').selectOption('en');
+      await page.locator('#pin-site-cleaning-summary-ru').click();
+      await page.locator('#read-site-cleaning-summary-ru').click();
+      const backupOther=await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[lastKey,favouriteKey]);
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#materialQuery').fill('no matching backup source');
+      await page.locator('#filter').selectOption('doing');
+      const backupURL=page.url(),backupBefore=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      // Explicit download-unavailable fixture, not a simulated OS file save.
+      await page.evaluate(()=>{const original=URL.createObjectURL;window.__restoreBackupDownload=()=>{URL.createObjectURL=original;delete window.__restoreBackupDownload;};URL.createObjectURL=()=>{throw Error('Download fixture unavailable');};});
+      try {await keyClick(page,'backupExport');}finally {await page.evaluate(()=>window.__restoreBackupDownload?.());}
+      const backupJSON=await page.locator('#backupOutput').inputValue();
+      assert.deepEqual(JSON.parse(backupJSON),{format:'primserv-coordinator-demo-progress',version:1,statuses:JSON.parse(backupBefore).statuses});
+      assert.match(await page.locator('#backupNotice').innerText(),/manual copying.*no file save is confirmed/);
+      assert.equal(await page.locator('#backupOutput').getAttribute('readonly'),'');
+      const restoredStatuses={'demo-01':'done','demo-02':'todo','demo-03':'doing'};
+      const restoreJSON=JSON.stringify({format:'primserv-coordinator-demo-progress',version:1,statuses:restoredStatuses});
+      await page.locator('#backupInput').fill(restoreJSON);await keyClick(page,'backupPreview');
+      assert.equal(await page.locator('#backupChanges li').count(),3);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'backupReviewTitle');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),backupBefore);
+      await keyClick(page,'backupCancel');
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'backupInput');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),backupBefore);
+      await keyClick(page,'backupPreview');await fits(page);
+      await page.screenshot({path:join(reportDir,`${name}-backup-preview.png`),fullPage:true});
+      await keyClick(page,'backupApply');
+      assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),KEY)),{version:1,statuses:restoredStatuses});
+      assert.match(await page.locator('#backupNotice').innerText(),/restored and saved/);
+      const importedSummary=await page.locator('#progressSummary').inputValue();
+      assert.match(importedSummary,/DEMO/);
+      assert.equal((importedSummary.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(importedSummary,/1 \/ 3/);
+      assert.doesNotMatch(importedSummary,/no matching backup source|primserv:|banana-warehouse/);
+      assert.equal(await page.locator('#demo-03').inputValue(),'doing');
+      assert.equal(page.url(),backupURL);
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching backup source');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[lastKey,favouriteKey]),backupOther);
+      // A second model instance changes actual storage AFTER preview; abort, do not overwrite.
+      await keyClick(page,'backupPreview');
+      await page.evaluate(()=>window.CoordinatorDemo.create(localStorage).set('demo-02','done'));
+      const concurrentBackup=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      await keyClick(page,'backupApply');
+      assert.match(await page.locator('#backupNotice').innerText(),/changed after preview/);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      await page.locator('#backupInput').fill('{broken');await keyClick(page,'backupPreview');
+      assert.match(await page.locator('#backupNotice').innerText(),/Invalid demo backup/);
+      assert.equal(await page.locator('#backupReview').isHidden(),true);
+      // Confirmed import quota failure preserves original raw and current in-tab state.
+      await page.locator('#backupInput').fill(backupJSON);await keyClick(page,'backupPreview');
+      await page.evaluate(key=>{const original=Storage.prototype.setItem;window.__restoreBackupWrite=()=>{Storage.prototype.setItem=original;delete window.__restoreBackupWrite;};Storage.prototype.setItem=function(k,v){if(k===key)throw new DOMException('Backup fixture quota','QuotaExceededError');return original.call(this,k,v);};},KEY);
+      try {await keyClick(page,'backupApply');}finally {await page.evaluate(()=>window.__restoreBackupWrite?.());}
+      assert.match(await page.locator('#backupNotice').innerText(),/Restore aborted.*storage is unavailable/);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      assert.equal(await page.locator('#demo-03').inputValue(),'doing');
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[lastKey,favouriteKey]),backupOther);
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#backupReview').isHidden(),true);
+      assert.equal(await page.locator('#backupInput').inputValue(),'');
+      assert.equal(await page.locator('#backupOutput').inputValue(),'');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      // Second accepted source material: both pins coexist; saved languages stay independent.
+      const bananaID='banana-warehouse-poland-summary-ru';
+      await page.locator('#language').selectOption('pl');
+      await keyClick(page,'pin-'+bananaID);
+      const twoPins=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
+      assert.deepEqual(JSON.parse(twoPins).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'},{material_id:bananaID,requested_language:'pl'}]);
+      await page.locator('#materialQuery').fill('бананов');
+      assert.equal(await page.locator('#materials article').count(),1);
+      const bananaText=await page.locator('#materials').innerText();
+      await page.locator('#materialsSource').selectOption('mock');
+      assert.equal(await page.locator('#materials').innerText(),bananaText);
+      await keyClick(page,'read-'+bananaID);
+      assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
+      const bananaLast=await page.evaluate(key=>localStorage.getItem(key),lastKey);
+      assert.deepEqual(JSON.parse(bananaLast),{version:1,material_id:bananaID,requested_language:'pl'});
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#favouritesList article').count(),2);
+      await page.locator('#language').selectOption('uk');
+      await page.locator('#materialsSource').selectOption('mock');
+      await page.locator('#materialQuery').fill('no matching second material');
+      await keyClick(page,'lastMaterialReturn');
+      assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
+      assert.equal(await page.locator('#language').inputValue(),'pl');
+      await keyClick(page,'pin-open-site-cleaning-summary-ru');
+      assert.equal(await page.locator('#language').inputValue(),'en');
+      await keyClick(page,'pin-open-'+bananaID);
+      assert.equal(await page.locator('#language').inputValue(),'pl');
+      assert.equal(await page.locator('#reading-title').getAttribute('lang'),'ru');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching second material');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),twoPins);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      const fullSummary=await page.locator('#progressSummary').inputValue();
+      assert.equal((fullSummary.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(fullSummary,/2 \/ 3/);
+      assert.equal(await page.locator('#progressSummary').getAttribute('readonly'),'');
+      await keyClick(page,'progressSummarySelect');
+      assert.deepEqual(await page.locator('#progressSummary').evaluate(node=>({start:node.selectionStart,end:node.selectionEnd,focused:node===document.activeElement})),{start:0,end:fullSummary.length,focused:true});
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      await fits(page);await page.screenshot({path:join(reportDir,`${name}-second-material.png`),fullPage:true});
+      await keyClick(page,'pin-remove-'+bananaID);
+      assert.deepEqual(JSON.parse(await page.evaluate(key=>localStorage.getItem(key),favouriteKey)).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      // Explicit task→material linkage, independent of all pre-existing keys.
+      const taskLinkKey='primserv:coordinator:task-material-links:v1';
+      const summaryKeysBefore=await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
+      assert.equal(await page.locator('#task-link-open-demo-03').isDisabled(),true);
+      await page.locator('#task-link-choice-demo-03').selectOption(bananaID);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
+      await keyClick(page,'task-link-save-demo-03');
+      const taskLinkRaw=await page.evaluate(key=>localStorage.getItem(key),taskLinkKey);
+      assert.deepEqual(JSON.parse(taskLinkRaw),{version:1,links:[{task_id:'demo-03',material_id:bananaID,requested_language:'pl'}]});
+      const summaryAfterLinkSave=await page.locator('#progressSummary').inputValue();
+      assert.ok(summaryAfterLinkSave.includes('Powiązanie DEMO z materiałem: '+bananaID+' · Żądany język: pl'));
+      assert.equal((summaryAfterLinkSave.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(summaryAfterLinkSave,/2 \/ 3/);
+      assert.doesNotMatch(summaryAfterLinkSave,/no matching second material|effective_language|read confirmed|→ ru/);
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]),summaryKeysBefore);
+      await page.locator('#progressSummary').scrollIntoViewIfNeeded();
+      await page.locator('#progressSummary').evaluate(node=>{node.scrollTop=node.scrollHeight;});
+      await page.locator('#progressSummary').screenshot({path:join(reportDir,`${name}-summary-task-material-save.png`)});
+      const linkedURL=page.url();
+      await keyClick(page,'task-link-open-demo-03');
+      assert.equal(await page.locator('#reading-title').innerText(),'Работник склада бананов — Польша');
+      assert.equal(await page.locator('#materials article').count(),0);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'reading-title');
+      await page.locator('#language').selectOption('en');
+      await page.locator('#filter').selectOption('done');
+      await page.locator('#materialsSource').selectOption('snapshot');
+      await page.locator('#materialQuery').fill('changed during linked reading');
+      const summaryDuringOtherContext=await page.locator('#progressSummary').inputValue();
+      assert.ok(summaryDuringOtherContext.includes('DEMO material link: '+bananaID+' · Requested language: pl'));
+      assert.equal((summaryDuringOtherContext.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(summaryDuringOtherContext,/2 \/ 3/);
+      await keyClick(page,'taskMaterialBack');
+      assert.equal(page.url(),linkedURL);
+      assert.equal(await page.locator('#language').inputValue(),'pl');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.locator('#materialsSource').inputValue(),'mock');
+      assert.equal(await page.locator('#materialQuery').inputValue(),'no matching second material');
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'demo-03-title');
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),concurrentBackup);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      const pinsAfterLink=await page.evaluate(key=>localStorage.getItem(key),favouriteKey);
+      assert.deepEqual(JSON.parse(pinsAfterLink).items,[{material_id:'site-cleaning-summary-ru',requested_language:'en'}]);
+      const summaryAfterLinkBack=await page.locator('#progressSummary').inputValue();
+      assert.equal(summaryAfterLinkBack,summaryAfterLinkSave);
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]),summaryKeysBefore);
+      await page.locator('#progressSummary').scrollIntoViewIfNeeded();
+      await page.locator('#progressSummary').evaluate(node=>{node.scrollTop=node.scrollHeight;});
+      await page.locator('#progressSummary').screenshot({path:join(reportDir,`${name}-summary-task-material-back.png`)});
+      await fits(page);await page.screenshot({path:join(reportDir,`${name}-task-material-back.png`),fullPage:true});
+      await page.reload();await ready(page);
+      assert.equal(await page.locator('#materialReading').isHidden(),true);
+      assert.equal(await page.locator('#task-link-open-demo-03').isDisabled(),false);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),taskLinkRaw);
+      const summaryAfterLinkReload=await page.locator('#progressSummary').inputValue();
+      assert.equal(summaryAfterLinkReload,summaryAfterLinkSave);
+      assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),[KEY,lastKey,favouriteKey]),summaryKeysBefore);
+      await keyClick(page,'task-link-open-demo-03');
+      await page.locator('#demo-03').selectOption('done');
+      const intentionallyEditedTask=await page.evaluate(key=>localStorage.getItem(key),KEY);
+      await keyClick(page,'taskMaterialBack');
+      assert.equal(await page.locator('#filter').inputValue(),'doing');
+      assert.equal(await page.locator('.task').count(),0);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'filter');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),intentionallyEditedTask);
+      const summaryBeforeLinkClear=await page.locator('#progressSummary').inputValue();
+      assert.ok(summaryBeforeLinkClear.includes('Powiązanie DEMO z materiałem: '+bananaID+' · Żądany język: pl'));
+      assert.match(summaryBeforeLinkClear,/3 \/ 3/);
+      await keyClick(page,'taskLinksClear');
+      const summaryAfterLinkClear=await page.locator('#progressSummary').inputValue();
+      assert.equal(summaryAfterLinkClear,summaryBeforeLinkClear.split('\n').filter(line=>!line.includes('Powiązanie DEMO z materiałem:')).join('\n'));
+      assert.doesNotMatch(summaryAfterLinkClear,/banana-warehouse-poland-summary-ru|Powiązanie DEMO z materiałem:/);
+      assert.equal((summaryAfterLinkClear.match(/DEMO-0[123] ·/g)||[]).length,3);
+      assert.match(summaryAfterLinkClear,/3 \/ 3/);
+      const summaryTaskMaterialProof={task:'demo-03',materialID:bananaID,requestedLanguage:'pl',afterSave:summaryAfterLinkSave,duringOtherContext:summaryDuringOtherContext,afterBack:summaryAfterLinkBack,afterReload:summaryAfterLinkReload,afterClear:summaryAfterLinkClear};
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),taskLinkKey),null);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),intentionallyEditedTask);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),lastKey),bananaLast);
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),favouriteKey),pinsAfterLink);
+      await fits(page); assert.deepEqual(requests, []); assert.deepEqual(errors, []);
+      await page.screenshot({ path: join(reportDir, `${name}.png`), fullPage: true });
+      report.scenarios.push({ name, viewport, status: 'passed', offline: true,
+        actions: ['fresh native profile', 'UI status edits', 'close browser', 'reopen same profile without fixture', 'restore filtered and full board', 'explicit last material return preserves search/source context', 'clear material pointer without task reset', 'keyboard pin and saved-language open preserve search/source/tasks/recent pointer', 'remove pin and corrupt/denied new-key recovery', 'demo-only backup manual export/preview/cancel/confirm; concurrent-key and quota abort', 'second source material search/read/last/two independent pins across reload and modes', 'explicit task material link/Open/Back restores context and focus; filtered task fallback and own clear', 'readonly summary exact linked ID/requested language after Save/Back/reload; Clear retains all3 task statuses/progress'],
+        results: { networkRequests: requests.length, pageErrors: errors.length, horizontalOverflow: false, summaryTaskMaterialProof } });
+    } catch (error) {
+      report.scenarios.push({ name, viewport, status: 'failed', error: error.stack });
+    } finally {
+      report.networkRequests.push(...requests); report.pageErrors.push(...errors);
+      if (tracing) await context.tracing.stop({ path: join(reportDir, `${name}-after-trace.zip`) });
+    }
+    });
+  }
+  report.status = acceptanceStatus(report.scenarios);
+  const observedNames=report.scenarios.filter(x=>x.observe).map(x=>x.name);
+  report.identityComparisons=observedNames.map(scenario=>({scenario,result:compareStorageIdentity(
+    report.storageIdentity.find(x=>x.scenario===scenario&&x.phase==='before-state-reload'),
+    report.storageIdentity.find(x=>x.scenario===scenario&&x.phase==='after-state-reload'))}));
+  report.identityGate={expectedObservedScenarios:6,samples:report.storageIdentity.length,
+    status:observedNames.length===6&&hasCompleteIdentity(report.storageIdentity,observedNames)&&
+      report.identityComparisons.every(x=>!['unavailable','incomparable-version'].includes(x.result))?'observed':'unavailable'};
+  if(report.identityGate.status!=='observed')report.status='failed';
+  report.backendOpenComparisons=observedNames.map(scenario=>({scenario,...compareBackendOpen(
+    report.backendOpen.find(x=>x.scenario===scenario&&x.phase==='before-state-reload'),
+    report.backendOpen.find(x=>x.scenario===scenario&&x.phase==='after-state-reload'))}));
+  report.backendOpenGate={samples:report.backendOpen.length,status:hasCompleteBackendOpen(report.backendOpen,observedNames)&&
+    report.backendOpenComparisons.every(x=>x.status==='observed')?'observed':'unavailable'};
+  if(report.backendOpenGate.status!=='observed')report.status='failed';
+  if(report.status==='failed')process.exitCode=1;
 } catch (error) { report.status = 'failed'; report.error = error.stack; process.exitCode = 1; }
 finally {
   await browser?.close(); report.finished = new Date().toISOString();

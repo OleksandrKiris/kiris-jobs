@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "INVALID_QUERY",
+        "INVALID_LOCATION",
+        "INVALID_LANGUAGE",
+        "INVALID_LIMIT",
+        "INVALID_CURSOR",
+        "METHOD_NOT_ALLOWED",
+        "RESPONSE_TOO_LARGE",
+        "INTERNAL_ERROR",
+        "INVALID_MATERIAL_ID",
+        "MATERIAL_NOT_FOUND"
+      ]
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-]{1,80}$"
+    }
+  },
+  "required": [
+    "code",
+    "request_id"
+  ],
+  "additionalProperties": false
+}

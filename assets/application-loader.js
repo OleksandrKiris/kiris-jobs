@@ -43,7 +43,7 @@
     if (!modulePromise) {
       const retry = attempt++;
       const suffix = retry ? `&retry=${retry}` : "";
-      modulePromise = import(`./application-form.js?v=${window.PORTAL_ASSET_VERSION}${suffix}`)
+      modulePromise = import(`./application-form.js?v=${window.PORTAL_ASSET_VERSION}${suffix}&formErrorLocale=1`)
         .then(() => {
           if (typeof window.PortalApplication?.open !== "function") throw new Error("Application module unavailable");
           return window.PortalApplication;

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v220-coordinator-2026-10-17-2";
+const CACHE_VERSION = "kiris-jobs-v220-field-status-2026-10-18-2";
 const CORE_SHELL = [
   "./",
   "./index.html",
@@ -7,17 +7,17 @@ const CORE_SHELL = [
   "./manifest.webmanifest",
   "./data/content.js?v=220",
   "./data/locales/pl.js?v=220",
-  "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1",
-  "./assets/privacy-bootstrap.js?v=220",
+  "./assets/bootstrap.js?v=220&shortcuts=1&coordinator=1&localeRecovery=1&earlySearch=1&formErrorLocale=1",
+  "./assets/privacy-bootstrap.js?v=220&localeRecovery=1",
   "./assets/candidate-base.css?v=220",
-  "./assets/clean.css?v=220",
-  "./assets/homepage.css?v=220",
+  "./assets/clean.css?v=220&formErrorLocale=1&fieldStatus=2",
+  "./assets/homepage.css?v=220&localeRecovery=1&cardContrast=1",
   "./assets/privacy.css?v=220",
-  "./assets/i18n.js?v=220",
-  "./assets/application-form.js?v=220",
-  "./assets/application-loader.js?v=220",
+  "./assets/i18n.js?v=220&localeRecovery=1",
+  "./assets/application-form.js?v=220&formErrorLocale=1",
+  "./assets/application-loader.js?v=220&formErrorLocale=1",
   "./assets/vacancy-overrides.js?v=220",
-  "./assets/candidate.js?v=220&shortcuts=1&coordinator=1",
+  "./assets/candidate.js?v=220&shortcuts=1&coordinator=1&earlySearch=1",
   "./assets/privacy.js?v=220",
   "./assets/icons.svg",
   "./assets/mobility-map.svg?v=10",
@@ -37,7 +37,21 @@ const CORE_SHELL = [
   "./assets/icon-192.png?v=220",
   "./assets/icon-512.png?v=220",
   "./assets/share-card.svg",
-  "./assets/share-card.png?v=220"
+  "./assets/share-card.png?v=220",
+  "./vacancies/greenhouse-tomatoes/",
+  "./vacancies/greenhouse-renewal/",
+  "./vacancies/tomato-sorting/",
+  "./vacancies/banana-warehouse-poland/",
+  "./vacancies/plant-protection/",
+  "./vacancies/site-cleaning/",
+  "./vacancies/forklift-udt/",
+  "./vacancies/team-leader/",
+  "./vacancies/greenhouse-agronomist/",
+  "./vacancies/truck-mechanic/",
+  "./vacancies/driver-ce-poland/",
+  "./vacancies/driver-ce-relief/",
+  "./vacancies/banana-warehouse-hungary/",
+  "./vacancies/banana-warehouse-belgium/"
 ];
 
 self.addEventListener("install", (event) => {
@@ -136,6 +150,9 @@ async function prepareToolPack(refresh) {
   try {
     const responses = await Promise.all(toolUrls.map(url => fetch(url, { cache: 'no-store', credentials: 'omit' })));
     if (responses.some(response => !response.ok)) throw Error('Incomplete tool package');
+    // Headers can succeed before a truncated network body fails. Validate all
+    // bodies before treating any later failure as unavailable cache storage.
+    await Promise.all(responses.map(response => response.clone().arrayBuffer()));
     try {
       const pack = await storeToolPack(responses);
       onlineToolPack = null;
@@ -227,6 +244,7 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(async () => (
           await caches.match(event.request)
+          || await caches.match(requestUrl.origin + requestUrl.pathname)
           || await caches.match("./index.html")
           || Response.error()
         ))

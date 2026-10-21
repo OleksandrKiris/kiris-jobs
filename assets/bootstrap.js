@@ -26,16 +26,29 @@
   window.PORTAL_LOCALE_BASE = localeBase.href;
   window.PORTAL_ASSET_VERSION = "220";
 
+  const pendingSearch = window.document?.getElementById("job-search");
+  if (pendingSearch) {
+    const rememberInput = () => { pendingSearch.dataset.pendingInput = "true"; };
+    pendingSearch.addEventListener("input", rememberInput);
+    window.PORTAL_STOP_PENDING_SEARCH = () => pendingSearch.removeEventListener("input", rememberInput);
+  }
+
   await import(new URL(`pl.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
   if (active !== fallback) {
-    await import(new URL(`${active}.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
+    try {
+      await import(new URL(`${active}.js?v=${window.PORTAL_ASSET_VERSION}`, localeBase));
+    } catch {
+      // The cached Polish catalogue remains useful when a selected pack is absent.
+      // Preserve the requested language for an explicit retry; do not overwrite storage.
+      window.PORTAL_LOCALE_LOAD_ERROR = active;
+    }
   }
   await import(`../data/content.js?v=${window.PORTAL_ASSET_VERSION}`);
   await import(`./vacancy-overrides.js?v=${window.PORTAL_ASSET_VERSION}`);
   await window.PORTAL_VACANCY_OVERRIDES_READY;
-  await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}`);
-  await import(`./application-loader.js?v=${window.PORTAL_ASSET_VERSION}`);
-  await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}&shortcuts=1&coordinator=1`);
+  await import(`./i18n.js?v=${window.PORTAL_ASSET_VERSION}&localeRecovery=1`);
+  await import(`./application-loader.js?v=${window.PORTAL_ASSET_VERSION}&formErrorLocale=1`);
+  await import(`./candidate.js?v=${window.PORTAL_ASSET_VERSION}&shortcuts=1&coordinator=1&earlySearch=1`);
 })().catch((error) => {
   console.error("[kiris-jobs] unable to start", error);
   document.documentElement.classList.add("app-load-failed");

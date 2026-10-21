@@ -462,15 +462,27 @@
 
   function restoreCatalogContext() {
     if (directJobId) return;
+    const searchInput = $("job-search");
+    // Imports can finish after someone has already typed in the visible field.
+    const earlyQuery = searchInput.value;
+    const editedBeforeStartup = searchInput.dataset?.pendingInput === "true";
+    window.PORTAL_STOP_PENDING_SEARCH?.();
+    delete window.PORTAL_STOP_PENDING_SEARCH;
+    if (searchInput.dataset) delete searchInput.dataset.pendingInput;
     try {
       const saved = JSON.parse(window.sessionStorage.getItem(CATALOG_CONTEXT_KEY) || "null");
       if (!saved || typeof saved !== "object" || Array.isArray(saved)) return;
       if (typeof saved.query === "string") state.query = saved.query;
       if (jobs.some((job) => countryCode(job) === saved.country)) state.country = saved.country;
       if (["housing", "noExperience", "pairs", "official"].includes(saved.feature)) state.feature = saved.feature;
-      $("job-search").value = state.query;
     } catch {
       // Tab-local context is optional; never block the catalogue.
+    } finally {
+      if (editedBeforeStartup || earlyQuery) {
+        state.query = earlyQuery;
+        saveCatalogContext();
+      }
+      searchInput.value = state.query;
     }
   }
 
@@ -1057,6 +1069,25 @@
     if (!target) return;
     target.focus({ preventScroll: true });
     target.scrollIntoView({ block: "center", behavior: "instant" });
+    // Font swapping can move the footer after the initial scroll, especially
+    // on narrow translated pages. Keep this shortcut visible once fonts settle,
+    // unless the user has already started another interaction.
+    if (document.fonts?.ready) {
+      const hash = location.hash;
+      let interrupted = false;
+      const cancel = () => { interrupted = true; };
+      const events = ["pointerdown", "keydown", "wheel", "touchstart"];
+      events.forEach((event) => window.addEventListener(event, cancel, { once: true, passive: true }));
+      document.fonts.ready.then(() => {
+        if (interrupted || location.hash !== hash || document.activeElement !== target) return;
+        const bounds = target.getBoundingClientRect();
+        if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) {
+          target.scrollIntoView({ block: "center", behavior: "instant" });
+        }
+      }).catch(() => {}).finally(() => {
+        events.forEach((event) => window.removeEventListener(event, cancel));
+      });
+    }
   }
 
   function openDeepLink() {

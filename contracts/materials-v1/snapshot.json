@@ -1,0 +1,49 @@
+{
+  "api_version": "v1",
+  "schema_version": "1.0.0",
+  "content_version": "2e80ab811fa3573fc13ac7dd6ee65279865cc58b",
+  "requested_language": "ru",
+  "effective_language": "ru",
+  "fallback": false,
+  "items": [
+    {
+      "id": "site-cleaning-summary-ru",
+      "type": "job-summary",
+      "job_id": "site-cleaning",
+      "location_id": "zgorzelec",
+      "language": "ru",
+      "title": "Уборка территории",
+      "text": "Уборка территории предприятия, сбор отходов и простые хозяйственные работы внутри технических зон и на улице.",
+      "source": {
+        "repo": "OleksandrKiris/kiris-jobs",
+        "path": "data/content.js",
+        "ref": "fc672d805fb884eb1d09bdc8ca342ba530ad83f4",
+        "selector": "jobs[id=site-cleaning]",
+        "source_updated_on": "2026-07-23",
+        "verified_on": "2026-10-17",
+        "verification_status": "verified-against-repository"
+      },
+      "synthetic": false
+    },
+    {
+      "id": "banana-warehouse-poland-summary-ru",
+      "type": "job-summary",
+      "job_id": "banana-warehouse-poland",
+      "location_id": "zgorzelec",
+      "language": "ru",
+      "title": "Работник склада бананов — Польша",
+      "text": "Приём, перемещение, сортировка, переупаковка и подготовка бананов к отгрузке в центрах дозревания.",
+      "source": {
+        "repo": "OleksandrKiris/kiris-jobs",
+        "path": "data/content.js",
+        "ref": "2e80ab811fa3573fc13ac7dd6ee65279865cc58b",
+        "selector": "jobs[id=banana-warehouse-poland]",
+        "source_updated_on": "2026-07-23",
+        "verified_on": "2026-10-18",
+        "verification_status": "verified-against-repository"
+      },
+      "synthetic": false
+    }
+  ],
+  "next_cursor": null
+}

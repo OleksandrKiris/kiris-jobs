@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assertHousingControls,HOUSING_LABELS,HOUSING_GALLERIES} from './catalogue-housing.mjs';
+function complete(){return [320,1280].flatMap(width=>HOUSING_GALLERIES.flatMap(g=>Object.entries(HOUSING_LABELS).map(([lang,l])=>({width,id:g.id,lang,place:g.place,total:g.total,status:'passed',dialog:l.dialog,counter:l.counter.replace('{current}','1').replace('{total}',g.total),buttons:l.buttons.map((label,i)=>({label,x:i*45,y:10,w:42,h:42})),image:{alt:g.place+' · 1',complete:true,width:1400},overflow:false,keys:{next:g.place+' · 2',last:g.place+' · '+g.total,wrap:g.place+' · 1',reverseWrap:g.place+' · '+g.total,home:g.place+' · 1'},focusReturned:true,backLang:lang}))));}
+test('complete66 gallery cases are accepted',()=>assert.doesNotThrow(()=>assertHousingControls(complete())));
+test('missing or duplicated gallery/locale/width fails acceptance',()=>{const a=complete();assert.throws(()=>assertHousingControls(a.slice(1)));a[1]=a[0];assert.throws(()=>assertHousingControls(a));assert.throws(()=>assertHousingControls(undefined));});
+test('untranslated controls, false success and offscreen buttons fail acceptance',()=>{for(const mutate of [r=>r.buttons[0].label='untranslated',r=>r.status='failed',r=>r.buttons[0].x=-1,r=>r.buttons[0].y=1000,r=>r.overflow=true]){const a=complete();mutate(a[1]);assert.throws(()=>assertHousingControls(a));}});
+test('broken keyboard wrap, missing image, lost focus and stale Back language fail acceptance',()=>{for(const mutate of [r=>r.keys.wrap='wrong',r=>r.image.width=0,r=>r.image.complete=false,r=>r.focusReturned=false,r=>r.backLang='wrong']){const a=complete();mutate(a[1]);assert.throws(()=>assertHousingControls(a));}});

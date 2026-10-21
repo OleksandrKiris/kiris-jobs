@@ -24,10 +24,20 @@
         IDS.some(id => !STATUSES.includes(statuses[id]))) throw Error('invalid');
     return Object.fromEntries(IDS.map(id => [id, statuses[id]]));
   }
+  const PROGRESS_FORMAT='primserv-coordinator-demo-progress';
+  function parseProgress(raw) {
+    if(typeof raw!=='string'||new TextEncoder().encode(raw).length>2048)throw Error('invalid');
+    const value=JSON.parse(raw);
+    if(!value||typeof value!=='object'||Array.isArray(value)||
+      Object.keys(value).sort().join(',')!=='format,statuses,version'||
+      value.format!==PROGRESS_FORMAT||value.version!==1)throw Error('invalid');
+    return decode(JSON.stringify({version:1,statuses:value.statuses}));
+  }
   function create(storage) {
     let statuses = initial();
     let persistence = 'ready';
     let canWrite = true;
+    let pendingProgress=null;
     try { statuses = decode(storage.getItem(KEY)); }
     catch (error) {
       persistence = error?.message === 'invalid' || error instanceof SyntaxError ? 'invalid' : 'blocked';
@@ -41,18 +51,261 @@
     }
     return {
       snapshot: () => ({statuses:{...statuses}, persistence}),
+      exportProgress() {return JSON.stringify({format:PROGRESS_FORMAT,version:1,statuses:{...statuses}},null,2);},
+      cancelProgress() {pendingProgress=null;},
+      previewProgress(raw) {
+        pendingProgress=null;
+        let target;try {target=parseProgress(raw);}catch {return {status:'invalid',changes:[]};}
+        let actual;try {actual=storage.getItem(KEY);decode(actual);}catch {return {status:'unavailable',changes:[]};}
+        if(!canWrite)return {status:'unavailable',changes:[]};
+        const before={...statuses};pendingProgress={target,actual,before};
+        return {status:'preview',changes:IDS.map(id=>({id,from:before[id],to:target[id]}))};
+      },
+      applyProgress() {
+        const pending=pendingProgress;pendingProgress=null;
+        if(!pending)return 'cancelled';
+        try {
+          const actual=storage.getItem(KEY);
+          if(actual!==pending.actual||IDS.some(id=>statuses[id]!==pending.before[id]))return 'changed';
+          decode(actual);
+          if(!canWrite)return 'unavailable';
+          storage.setItem(KEY,JSON.stringify({version:1,statuses:pending.target}));
+          statuses={...pending.target};persistence='saved';return 'saved';
+        } catch {return 'unavailable';}
+      },
       list(filter = 'all') { return IDS.filter(id => filter === 'all' || statuses[id] === filter); },
       set(id, status) {
         if (!IDS.includes(id) || !STATUSES.includes(status)) return false;
+        pendingProgress=null;
         statuses = {...statuses, [id]:status}; save(); return true;
       },
       reset(confirmed) {
         if (confirmed !== true) return false;
+        pendingProgress=null;
         try { storage.removeItem(KEY); persistence = 'ready'; canWrite = true; }
         catch { persistence = persistence === 'invalid' ? 'invalid' : 'blocked'; }
         statuses = initial(); return true;
       }
     };
   }
-  return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create});
+  const CONTENT_VERSION = '2e80ab811fa3573fc13ac7dd6ee65279865cc58b';
+  const materials = [
+  {
+    "id": "site-cleaning-summary-ru",
+    "type": "job-summary",
+    "job_id": "site-cleaning",
+    "location_id": "zgorzelec",
+    "language": "ru",
+    "title": "Уборка территории",
+    "text": "Уборка территории предприятия, сбор отходов и простые хозяйственные работы внутри технических зон и на улице.",
+    "source": {
+      "repo": "OleksandrKiris/kiris-jobs",
+      "path": "data/content.js",
+      "ref": "fc672d805fb884eb1d09bdc8ca342ba530ad83f4",
+      "selector": "jobs[id=site-cleaning]",
+      "source_updated_on": "2026-07-23",
+      "verified_on": "2026-10-17",
+      "verification_status": "verified-against-repository"
+    },
+    "synthetic": false
+  },
+  {
+    "id": "banana-warehouse-poland-summary-ru",
+    "type": "job-summary",
+    "job_id": "banana-warehouse-poland",
+    "location_id": "zgorzelec",
+    "language": "ru",
+    "title": "Работник склада бананов — Польша",
+    "text": "Приём, перемещение, сортировка, переупаковка и подготовка бананов к отгрузке в центрах дозревания.",
+    "source": {
+      "repo": "OleksandrKiris/kiris-jobs",
+      "path": "data/content.js",
+      "ref": "2e80ab811fa3573fc13ac7dd6ee65279865cc58b",
+      "selector": "jobs[id=banana-warehouse-poland]",
+      "source_updated_on": "2026-07-23",
+      "verified_on": "2026-10-18",
+      "verification_status": "verified-against-repository"
+    },
+    "synthetic": false
+  }
+];
+  const materialIDs=Object.freeze(materials.map(item=>item.id));
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function materialRequest(request={}) {
+    if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['location_id','language','limit','cursor'].includes(k)))throw Error('invalid_request');
+    const {location_id='zgorzelec',language='en',limit=20,cursor=null}=request;
+    if (location_id !== 'zgorzelec' ||
+        !['ru','ua','uk','pl','en','ka','tr','hy'].includes(language) ||
+        !Number.isInteger(limit) || limit < 1 || limit > 20 || cursor !== null) throw Error('invalid_request');
+    return {location_id,language,limit,cursor};
+  }
+  function materialSnapshot(request={}) {
+    const q=materialRequest(request), canonical=q.language==='ua'?'uk':q.language;
+    return {api_version:'v1',schema_version:'1.0.0',content_version:CONTENT_VERSION,
+      requested_language:q.language,effective_language:'ru',fallback:canonical!=='ru',
+      items:clone(materials.slice(0,q.limit)),next_cursor:null};
+  }
+  // Deliberately synchronous and local: mock is a JSON transport, never a URL.
+  // Both sources must return this exact pinned, reviewed slice; no online mode.
+  function materialReader({mode='snapshot',mock}={}) {
+    if (!['snapshot','mock'].includes(mode) || (mode==='mock' && typeof mock!=='function')) throw Error('online_disabled');
+    return Object.freeze({read(request={}) {
+      const q=materialRequest(request), expected=materialSnapshot(q);
+      if(mode==='snapshot') return expected;
+      const raw=mock(clone(q));
+      if(typeof raw!=='string'||raw.length>32768||new TextEncoder().encode(raw).length>32768) throw Error('invalid_response');
+      let response;
+      try {response=JSON.parse(raw);} catch {throw Error('invalid_response');}
+      // v1 additive fields and JSON property order remain compatible.
+      const equal=(a,b)=>{
+        if(a===b)return true;
+        if(!a||!b||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b))return false;
+        if(Array.isArray(a)&&a.length!==b.length)return false;
+        return Object.keys(b).every(k=>Object.hasOwn(a,k)&&equal(a[k],b[k]));
+      };
+      if(!equal(response,expected))throw Error('invalid_response');
+      return clone(response);
+    }});
+  }
+  function searchMaterials(response,query='') {
+    if(typeof query!=='string'||query.length>120)throw Error('invalid_query');
+    const words=query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    return response.items.filter(item=>words.every(word=>(item.title+' '+item.text+' '+item.location_id).toLocaleLowerCase().includes(word)));
+  }
+  const LAST_MATERIAL_KEY='primserv:coordinator:last-material:v1';
+  const MATERIAL_LANGS=Object.freeze(['ru','ua','uk','pl','en','ka','tr','hy']);
+  function materialMemory(storage) {
+    let entry=null,persistence='ready',canWrite=true;
+    const valid=value=>value&&typeof value==='object'&&!Array.isArray(value)&&
+      Object.keys(value).sort().join(',')==='material_id,requested_language,version'&&
+      value.version===1&&typeof value.material_id==='string'&&MATERIAL_LANGS.includes(value.requested_language);
+    try {
+      const raw=storage.getItem(LAST_MATERIAL_KEY);
+      if(raw!==null) {
+        if(typeof raw!=='string'||raw.length>256)throw Error('invalid');
+        const value=JSON.parse(raw);if(!valid(value))throw Error('invalid');
+        if(!materialIDs.includes(value.material_id)){persistence='stale';canWrite=false;}
+        else entry={...value};
+      }
+    } catch(error){persistence=error.message==='invalid'||error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
+    return Object.freeze({
+      snapshot(){return {entry:entry?{...entry}:null,persistence};},
+      remember(id,requestedLanguage) {
+        if(!materialIDs.includes(id)||!MATERIAL_LANGS.includes(requestedLanguage))return false;
+        entry={version:1,material_id:id,requested_language:requestedLanguage};
+        if(canWrite)try {storage.setItem(LAST_MATERIAL_KEY,JSON.stringify(entry));persistence='saved';}
+        catch {persistence='blocked';canWrite=false;}
+        return true;
+      },
+      clear() {
+        entry=null;
+        try {storage.removeItem(LAST_MATERIAL_KEY);persistence='cleared';canWrite=true;return true;}
+        catch {persistence='blocked';canWrite=false;return false;}
+      }
+    });
+  }
+  const FAVOURITES_KEY='primserv:coordinator:favourites:v1';
+  function materialFavourites(storage) {
+    let items=[],persistence='ready',canWrite=true;
+    const keys=(value,expected)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join(',')===expected;
+    function refresh() {
+    try {
+      const raw=storage.getItem(FAVOURITES_KEY);
+      let latest=[];
+      if(raw!==null) {
+        if(typeof raw!=='string'||new TextEncoder().encode(raw).length>2048)throw Error('invalid');
+        const record=JSON.parse(raw);
+        if(!keys(record,'items,version')||record.version!==1||!Array.isArray(record.items)||record.items.length>5||
+          !record.items.every(x=>keys(x,'material_id,requested_language')&&typeof x.material_id==='string'&&x.material_id.length<=100&&MATERIAL_LANGS.includes(x.requested_language))||
+          new Set(record.items.map(x=>x.material_id)).size!==record.items.length)throw Error('invalid');
+        if(record.items.some(x=>!materialIDs.includes(x.material_id)))throw Error('stale');
+        latest=record.items.map(x=>({...x}));
+      }
+      items=latest;canWrite=true;persistence='ready';
+    } catch(error){persistence=['invalid','stale'].includes(error.message)?error.message:error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
+    }
+    refresh();
+    function save() {
+      if(!canWrite)return;
+      try {
+        if(!items.length)storage.removeItem(FAVOURITES_KEY);
+        else {
+          const raw=JSON.stringify({version:1,items});
+          if(new TextEncoder().encode(raw).length>2048)throw Error('too_large');
+          storage.setItem(FAVOURITES_KEY,raw);
+        }
+        persistence='saved';
+      } catch {persistence='blocked';canWrite=false;}
+    }
+    return Object.freeze({
+      snapshot(){return Object.freeze({items:Object.freeze(items.map(x=>Object.freeze({...x}))),persistence});},
+      pin(id,requestedLanguage) {
+        if(!materialIDs.includes(id)||!MATERIAL_LANGS.includes(requestedLanguage))return false;
+        refresh();
+        if(items.some(x=>x.material_id===id))return true;
+        if(items.length>=5)return false;
+        items=[...items,{material_id:id,requested_language:requestedLanguage}];save();return true;
+      },
+      remove(id) {
+        if(!materialIDs.includes(id))return false;
+        refresh();
+        if(!items.some(x=>x.material_id===id))return false;
+        items=items.filter(x=>x.material_id!==id);save();return true;
+      },
+      clear() {
+        items=[];
+        try {storage.removeItem(FAVOURITES_KEY);canWrite=true;persistence='cleared';return true;}
+        catch {persistence='blocked';canWrite=false;return false;}
+      }
+    });
+  }
+  const TASK_MATERIAL_LINKS_KEY='primserv:coordinator:task-material-links:v1';
+  function taskMaterialLinks(storage) {
+    let links=[],persistence='ready',canWrite=true;
+    const keys=(x,expected)=>x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).sort().join(',')===expected;
+    function refresh() {
+      try {
+        const raw=storage.getItem(TASK_MATERIAL_LINKS_KEY);let latest=[];
+        if(raw!==null) {
+          if(typeof raw!=='string'||new TextEncoder().encode(raw).length>2048)throw Error('invalid');
+          const value=JSON.parse(raw);
+          if(!keys(value,'links,version')||value.version!==1||!Array.isArray(value.links)||value.links.length>3||
+            !value.links.every(x=>keys(x,'material_id,requested_language,task_id')&&typeof x.task_id==='string'&&typeof x.material_id==='string'&&MATERIAL_LANGS.includes(x.requested_language))||
+            new Set(value.links.map(x=>x.task_id)).size!==value.links.length)throw Error('invalid');
+          if(value.links.some(x=>!IDS.includes(x.task_id)||!materialIDs.includes(x.material_id)))throw Error('stale');
+          latest=value.links.map(x=>({...x}));
+        }
+        if(!canWrite)return; // A failed read/write stays page-only until explicit own-key recovery.
+        links=latest;persistence='ready';canWrite=true;
+      } catch(error){persistence=['invalid','stale'].includes(error.message)?error.message:error instanceof SyntaxError?'invalid':'blocked';canWrite=false;}
+    }
+    function save() {
+      if(!canWrite)return;
+      try {
+        if(links.length)storage.setItem(TASK_MATERIAL_LINKS_KEY,JSON.stringify({version:1,links}));
+        else storage.removeItem(TASK_MATERIAL_LINKS_KEY);
+        persistence='saved';
+      }catch {persistence='blocked';canWrite=false;}
+    }
+    refresh();
+    return Object.freeze({
+      snapshot(){return Object.freeze({links:Object.freeze(links.map(x=>Object.freeze({...x}))),persistence});},
+      assign(task_id,material_id,requested_language) {
+        if(!IDS.includes(task_id)||!materialIDs.includes(material_id)||!MATERIAL_LANGS.includes(requested_language))return false;
+        refresh();const entry={task_id,material_id,requested_language};
+        links=[...links.filter(x=>x.task_id!==task_id),entry];save();return true;
+      },
+      remove(task_id) {
+        if(!IDS.includes(task_id))return false;
+        refresh();if(!links.some(x=>x.task_id===task_id))return false;
+        links=links.filter(x=>x.task_id!==task_id);save();return true;
+      },
+      clear() {
+        links=[];try {storage.removeItem(TASK_MATERIAL_LINKS_KEY);persistence='cleared';canWrite=true;return true;}
+        catch {persistence='blocked';canWrite=false;return false;}
+      }
+    });
+  }
+  return Object.freeze({KEY, IDS, STATUSES, LANGS, initial, language, decode, create, PROGRESS_FORMAT, parseProgress,
+    CONTENT_VERSION, materialSnapshot, materialReader, searchMaterials, LAST_MATERIAL_KEY, materialMemory, FAVOURITES_KEY, materialFavourites, TASK_MATERIAL_LINKS_KEY, taskMaterialLinks});
 });

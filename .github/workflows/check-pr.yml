@@ -59,6 +59,14 @@ jobs:
           TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
           TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/browser/catalogue.mjs
+      - name: Browser acceptance of PDF language handoff and preserved draft
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-browser-report/pdf-handoff
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/apply-pdf.mjs
       - name: Browser acceptance owned by present local prototypes
         env:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright

@@ -5,7 +5,7 @@ import vm from "node:vm";
 
 const root = new URL("../", import.meta.url);
 const locales = ["ru", "uk", "pl", "en", "az", "ka", "id", "es", "fil", "ne", "hy"];
-const source = await fs.readFile(new URL("assets/candidate.js", root), "utf8");
+const source = await fs.readFile(process.env.CANDIDATE_SOURCE_FILE || new URL("assets/candidate.js", root), "utf8");
 const instrumented = source.replace(/\n  init\(\);\n\}\)\(\);\s*$/, "\n  window.filterTest = { bind, renderCountryFilter, renderFeatureFilter, resetFilters, restoreCatalogContext, visibleJobs, state };\n})();");
 assert.notEqual(instrumented, source, "Replace startup only; never run analytics or candidate submissions");
 const scripts = await Promise.all(["data/content.js", ...locales.map(l => `data/locales/${l}.js`), "assets/i18n.js"].map(async path => fs.readFile(new URL(path, root), "utf8")));
@@ -58,6 +58,8 @@ function catalog(locale = "pl", options = {}) {
     return node;
   }
   for (const id of ["country-filter", "feature-filter", "job-search", "reset-filters", "job-grid", "other-job-grid", "other-job-count", "other-jobs", "result-count", "empty-state", "job-total"]) elements.set(id, element(id));
+  if (options.earlyQuery !== undefined) elements.get("job-search").value = options.earlyQuery;
+  if (options.earlyEdited) elements.get("job-search").dataset = { pendingInput: "true" };
   const context = vm.createContext({ window, document, location, URL, Intl, Date,
     navigator: { language: locale, languages: [locale] }, localStorage: { getItem: () => null },
     fetch() { throw Error("Network forbidden in filter tests"); }
@@ -170,4 +172,42 @@ test("invalid or unavailable session context never breaks catalogue filters", ()
 
 test("startup restores context before rendering the catalogue", () => {
   assert.match(source, /function init\(\)\s*\{\s*i18n\.init\(\);\s*restoreCatalogContext\(\);/);
+});
+
+for (const locale of locales) {
+  test(`${locale}: text entered before startup survives context restore and filters immediately`, () => {
+    const ready = catalog(locale);
+    const facts = JSON.stringify(ready.window.PORTAL_CONTENT);
+    const job = ready.window.PORTAL_CONTENT.jobs.find(job => job.id === "greenhouse-tomatoes");
+    const earlyQuery = "  " + ready.window.PortalI18n.job(job).title + "  ";
+    for (const saved of [null, { query: "no-such-old-query", country: "PL", feature: "housing" }]) {
+      const storage = new Map(saved ? [[contextKey, JSON.stringify(saved)]] : []);
+      const before = storage.get(contextKey);
+      const c = catalog(locale, { earlyQuery, storage });
+      assert.equal(c.api.state.query, earlyQuery);
+      assert.equal(c.elements.get("job-search").value, earlyQuery);
+      assert.ok(c.api.visibleJobs().some(job => job.id === "greenhouse-tomatoes"));
+      assert.ok(c.api.visibleJobs().length < 14, "Initial render must filter the visible typed text");
+      if (saved) {
+        assert.equal(c.api.state.country, "PL");
+        assert.equal(c.api.state.feature, "housing");
+      }
+      assert.deepEqual(JSON.parse(storage.get(contextKey)), { query: earlyQuery, country: saved?.country || "", feature: saved?.feature || "" }, "Early user input updates only the catalogue context");
+      assert.equal(JSON.stringify(c.window.PORTAL_CONTENT), facts);
+    }
+  });
+}
+test("early search remains usable when session storage cannot be read or written", () => {
+  const c = catalog("ru", { earlyQuery: "томат", blockRead: true, blockWrite: true });
+  assert.equal(c.api.state.query, "томат");
+  assert.equal(c.api.visibleJobs().length, 2);
+});
+
+test("clearing a search before startup overrides an older saved query", () => {
+  const storage = new Map([[contextKey, JSON.stringify({query:"no-such-old-query",country:"PL",feature:"housing"})]]);
+  const c = catalog("ru", { earlyQuery: "", earlyEdited: true, storage });
+  assert.equal(c.api.state.query, "");
+  assert.equal(c.elements.get("job-search").value, "");
+  assert.ok(c.api.visibleJobs().some(job => job.id === "greenhouse-tomatoes"));
+  assert.equal(JSON.parse(storage.get(contextKey)).query, "");
 });

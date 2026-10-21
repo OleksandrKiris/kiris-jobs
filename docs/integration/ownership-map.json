@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "repo": "OleksandrKiris/kiris-jobs",
+  "status": "proposed-manual-review",
+  "rules": [
+    {
+      "owner": 15,
+      "paths": [
+        ".github/workflows/backend.yml",
+        ".github/workflows/check-pr.yml",
+        ".github/workflows/pages.yml",
+        ".github/workflows/production-health.yml",
+        ".github/workflows/rebuild-apply-v17.yml",
+        ".github/scripts/backend-ci.py",
+        ".github/scripts/backend-ci.test.py",
+        ".github/scripts/local-prototypes.mjs",
+        ".github/scripts/local-prototypes.test.mjs",
+        ".github/scripts/local-prototypes.md",
+        "quality/security/",
+        "docs/quality/"
+      ]
+    },
+    {
+      "owner": 14,
+      "paths": [
+        "contracts/",
+        "docs/integration/"
+      ]
+    },
+    {
+      "owner": 13,
+      "paths": [
+        "backend/domain/",
+        "backend/tests/domain/",
+        "docs/backend/domain/"
+      ]
+    },
+    {
+      "owner": 12,
+      "paths": [
+        "backend/config/",
+        "backend/core/",
+        "backend/tests/core/",
+        "docs/backend/core/",
+        "backend/manage.py",
+        "backend/pyproject.toml",
+        "backend/requirements.txt",
+        "backend/README.md",
+        "backend/tests/__init__.py"
+      ]
+    },
+    {
+      "owner": 11,
+      "paths": [
+        "offline-tools/",
+        "docs/offline-services/"
+      ]
+    },
+    {
+      "owner": 10,
+      "paths": [
+        "docs/primserv-roadmap.md",
+        "docs/github-inventory.md"
+      ]
+    },
+    {
+      "owner": 9,
+      "paths": [
+        "coordinator-demo/",
+        "docs/platform/"
+      ]
+    },
+    {
+      "owner": 1,
+      "paths": [
+        "assets/",
+        "data/",
+        "vacancies/",
+        "scripts/",
+        ".github/browser/",
+        ".github/public-tools.json",
+        "package.json",
+        "package-lock.json",
+        "index.html",
+        "privacy.html",
+        "sw.js",
+        "README.md",
+        "manifest.webmanifest",
+        "styles.css"
+      ]
+    }
+  ],
+  "review_paths": [
+    "docs/integration/ownership-map.json",
+    "docs/integration/check-diff.py",
+    "docs/integration/test_ownership.py"
+  ],
+  "shared_files": [
+    "package.json",
+    "package-lock.json",
+    "scripts/build-pages-artifact.mjs",
+    "backend/config/urls.py"
+  ],
+  "transfer": {
+    "from": 1,
+    "to": 15,
+    "paths": [
+      ".github/workflows/backend.yml",
+      ".github/workflows/check-pr.yml",
+      ".github/workflows/pages.yml",
+      ".github/workflows/production-health.yml",
+      ".github/workflows/rebuild-apply-v17.yml",
+      ".github/scripts/backend-ci.py",
+      ".github/scripts/backend-ci.test.py",
+      ".github/scripts/local-prototypes.mjs",
+      ".github/scripts/local-prototypes.test.mjs",
+      ".github/scripts/local-prototypes.md"
+    ],
+    "acceptance": "role10 independently accepted exact existing paths on 2026-10-17 at base fc672d805fb884eb1d09bdc8ca342ba530ad83f4; new CI files require map review",
+    "excluded": [
+      "package.json",
+      "package-lock.json",
+      "scripts/",
+      ".github/browser/",
+      "coordinator-demo/browser-acceptance.mjs",
+      "offline-tools/**/browser-acceptance.mjs"
+    ]
+  }
+}

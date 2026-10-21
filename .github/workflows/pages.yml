@@ -46,9 +46,9 @@ jobs:
           test -s apply/config.js
           test -s apply/translations.js
           test -s apply/app.js
-          grep -q 'styles.css?v=17.2.1' apply/index.html
-          grep -q 'translations.js?v=17.0.0' apply/index.html
-          grep -q 'app.js?v=17.2.1' apply/index.html
+          grep -q 'styles.css?v=17.2.2' apply/index.html
+          grep -q 'translations.js?v=17.0.6' apply/index.html
+          grep -q 'app.js?v=17.2.5' apply/index.html
           grep -q 'href="pdf/"' apply/index.html
           grep -q 'assets/bootstrap.js?v=220' index.html
           grep -q '<loc>https://oleksandrkiris.github.io/kiris-jobs/vacancies/greenhouse-tomatoes/</loc>' sitemap.xml
@@ -64,10 +64,13 @@ jobs:
           test -s apply/pdf/index.html
           test -s apply/pdf/styles.css
           test -s apply/pdf/app.js
-          grep -q 'styles.css?v=1.1.2' apply/pdf/index.html
-          grep -q 'app.js?v=1.1.2' apply/pdf/index.html
+          test -s apply/pdf/images.js
+          test -s apply/pdf/translations.js
+          grep -q 'styles.css?v=1.1.6' apply/pdf/index.html
+          grep -q 'app.js?v=1.1.5' apply/pdf/index.html
+          grep -q 'images.js?v=1.0.0' apply/pdf/index.html
           grep -q 'window.print()' apply/pdf/app.js
-          grep -q 'URL.createObjectURL' apply/pdf/app.js
+          grep -q 'URL.createObjectURL' apply/pdf/images.js
           grep -q 'minmax(0,420px)' apply/pdf/styles.css
           ! grep -q 'position:sticky\|position:fixed\|min-max(' apply/pdf/styles.css
           ! grep -Eqi '\b(csv|xlsx|tsv|zip)\b' apply/pdf/index.html apply/pdf/styles.css apply/pdf/app.js

@@ -21,8 +21,55 @@
     <p id="fallback" class="notice" hidden></p>
     <p id="storage" role="status" aria-live="polite"></p>
     <p id="summary" role="status" aria-live="polite"></p>
+    <p id="taskLinksNotice" role="status" aria-live="polite"></p>
+    <button id="taskLinksClear" type="button">Clear only task material links</button>
     <section id="tasks" aria-label="Demo tasks"></section>
     <p id="empty" hidden></p>
+    <section aria-labelledby="materialsTitle">
+      <h2 id="materialsTitle" tabindex="-1">Source materials</h2>
+      <div class="toolbar">
+        <label><span id="materialsSourceLabel">Local source</span><select id="materialsSource"><option value="snapshot">Snapshot</option><option value="mock">Local mock</option></select></label>
+        <label><span id="materialsLabel">Search source text</span><input id="materialQuery" type="search" maxlength="120"></label>
+      </div>
+      <p id="materialsNotice" class="muted"></p>
+      <p id="materialsStatus" role="status" aria-live="polite"></p>
+      <div class="toolbar">
+        <button id="lastMaterialReturn" type="button" disabled>Return to last material</button>
+        <button id="lastMaterialClear" type="button" disabled>Clear last material</button>
+      </div>
+      <p id="lastMaterialNotice" role="status" aria-live="polite"></p>
+      <div id="materials"></div>
+      <div id="materialReading" hidden></div>
+      <section aria-labelledby="favouritesTitle">
+        <h3 id="favouritesTitle" tabindex="-1">Pinned materials</h3>
+        <p id="favouritesHelp" class="muted"></p>
+        <p id="favouritesNotice" role="status" aria-live="polite"></p>
+        <div id="favouritesList"></div>
+        <button id="favouritesClear" type="button" hidden>Clear pinned-material record</button>
+      </section>
+    </section>
+    <section id="progressBackup" aria-labelledby="backupTitle">
+      <h2 id="backupTitle" tabindex="-1">Demo progress backup</h2>
+      <h3 id="progressSummaryTitle">Demo progress summary</h3>
+      <p id="progressSummaryHelp" class="muted"></p>
+      <label for="progressSummary" id="progressSummaryLabel">All three fictional demo tasks (read only)</label>
+      <textarea id="progressSummary" rows="9" readonly spellcheck="false" aria-describedby="progressSummaryHelp"></textarea>
+      <button id="progressSummarySelect" type="button">Select summary text</button>
+      <p id="backupHelp" class="muted"></p>
+      <button id="backupExport" type="button">Export demo JSON</button>
+      <label for="backupOutput" id="backupOutputLabel">Current demo JSON (read only)</label>
+      <textarea id="backupOutput" rows="7" readonly spellcheck="false"></textarea>
+      <label for="backupInput" id="backupInputLabel">Paste demo JSON to restore</label>
+      <textarea id="backupInput" rows="7" maxlength="2048" spellcheck="false"></textarea>
+      <button id="backupPreview" type="button">Preview restore</button>
+      <p id="backupNotice" tabindex="-1" role="status" aria-live="polite"></p>
+      <div id="backupReview" hidden>
+        <h3 id="backupReviewTitle" tabindex="-1">Review all three demo statuses</h3>
+        <ul id="backupChanges"></ul>
+        <button id="backupApply" type="button">Apply demo statuses</button>
+        <button id="backupCancel" type="button">Cancel</button>
+      </div>
+    </section>
     <section class="reset-area">
       <button id="reset" type="button">Reset demo progress</button>
       <div id="resetConfirm" hidden>

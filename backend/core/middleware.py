@@ -16,8 +16,17 @@ from .protocol import API_VERSION
 from .views import api_error
 
 logger = logging.getLogger('core.requests')
-ROUTES = {'/api/v1/health/': 'health', '/api/v1/version/': 'version'}
+ROUTES = {'/api/v1/health/': 'health', '/api/v1/version/': 'version',
+          '/api/v1/materials/': 'materials', '/api/v1/capabilities/': 'capabilities'}
 METHODS = {'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'}
+
+
+def log_route(path):
+    # Classify before URL resolution as body/rate/host guards run first. Return
+    # only a fixed template, including for malformed dynamic-path variants.
+    if path.startswith('/api/v1/materials/') and path != '/api/v1/materials/':
+        return '/api/v1/materials/{material_id}/'
+    return ROUTES.get(path, 'unknown')
 
 
 class APIGuardMiddleware:
@@ -64,6 +73,7 @@ class APIGuardMiddleware:
             return self.get_response(request)
         start = time.monotonic()
         request_id = uuid.uuid4().hex
+        request.core_request_id = request_id
         retry = self.retry_after(start)
         if retry is not None:
             response = api_error('rate_limited', 'Too many requests. Try again later.', status=429)
@@ -86,7 +96,7 @@ class APIGuardMiddleware:
         logger.info(json.dumps({
             'api_version': API_VERSION, 'request_id': request_id,
             'method': request.method if request.method in METHODS else 'OTHER',
-            'route': ROUTES.get(request.path, 'unknown'),
+            'route': log_route(request.path),
             'status': response.status_code,
             'duration_ms': max(0, round((time.monotonic() - start) * 1000)),
         }, separators=(',', ':')))

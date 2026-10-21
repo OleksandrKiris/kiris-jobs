@@ -13,21 +13,22 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
   <title>PrimServ — Rekrutacja</title>
   <link rel="icon" href="../assets/icon-192.png?v=216">
-  <link rel="stylesheet" href="styles.css?v=17.2.1">
+  <link rel="stylesheet" href="styles.css?v=17.2.2">
   <script defer src="config.js?v=17.0.1"></script>
   <script defer src="i18n-core.js?v=17.0.0"></script>
   <script defer src="i18n-caucasus-central.js?v=17.0.0"></script>
   <script defer src="i18n-asia.js?v=17.0.0"></script>
   <script defer src="i18n-extra.js?v=17.0.0"></script>
   <script defer src="i18n-mobile.js?v=17.0.0"></script>
-  <script defer src="translations.js?v=17.0.0"></script>
-  <script defer src="app.js?v=17.2.1"></script>
+  <script defer src="translations.js?v=17.0.6"></script>
+  <script defer src="pdf/navigation.js?v=1.0.0"></script>
+  <script defer src="app.js?v=17.2.5"></script>
 </head>
 <body>
   <noscript><div class="noscript">Ta strona wymaga włączonego JavaScript.</div></noscript>
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="./" aria-label="PrimServ — formularz rekrutacyjny">
+      <a id="formBrand" class="brand" href="./" aria-label="PrimServ — formularz rekrutacyjny">
         <span class="logo-frame"><img src="../assets/primserv-avatar.jpg" alt="PrimServ" width="138" height="52"></span>
         <span class="brand-copy"><strong>PrimServ</strong><small id="headerSubtitle">Formularz kandydata</small></span>
       </a>
@@ -38,7 +39,7 @@
   <main id="app" class="app-shell" aria-live="polite"></main>
 
   <footer class="site-footer">
-    <p>Formularz nie zapisuje danych na GitHub. <a id="footerPdf" href="pdf/">Generator PDF</a> · <a href="https://pposiechnice.pl/?lang=en&page_id=981" target="_blank" rel="noopener noreferrer">Prywatność</a></p>
+    <p><span id="footerNotice">Formularz nie zapisuje danych na GitHub.</span> <a id="footerPdf" href="pdf/">Generator PDF</a> · <a id="footerPrivacy" href="https://pposiechnice.pl/?lang=en&page_id=981" target="_blank" rel="noopener noreferrer">Prywatność</a></p>
   </footer>
 </body>
 </html>
