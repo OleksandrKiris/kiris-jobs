@@ -10,7 +10,7 @@ from backend.domain.material_snapshot import InvalidMaterialSnapshot
 
 class ContractAdapterTests(unittest.TestCase):
     def setUp(self):
-        self.data = json.loads(Path(__file__).with_name('materials_v1_fixture.json').read_text())
+        self.data = json.loads(Path(__file__).with_name('materials_v1_fixture.json').read_text(encoding='utf-8'))
         self.validator = Mock()
 
     def adapt(self, data=None):
