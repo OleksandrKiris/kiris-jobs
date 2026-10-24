@@ -1,0 +1,51 @@
+name: Short form draft save status
+
+on:
+  pull_request:
+    paths:
+      - .github/browser/short-apply-draft-status.mjs
+      - .github/browser/fixtures/short-apply-draft-status.json
+      - .github/workflows/short-apply-draft-status.yml
+      - apply/**
+
+permissions:
+  contents: read
+
+jobs:
+  draft-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Exact event base and staged publication
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python quality/security/exact_base.py
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Anonymous storage access and write faults without delivery
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-draft-report
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/short-apply-draft-status.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: short-apply-draft-status
+          path: ${{ runner.temp }}/primserv-draft-report
+          if-no-files-found: error
