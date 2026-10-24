@@ -794,3 +794,11 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
 .logo-frame{width:54px;height:54px;box-shadow:none;border:1px solid #dbe2e9}
 .logo-frame img{padding:0;object-fit:contain}
 @media(max-width:560px){.logo-frame{width:46px;height:46px}}
+
+.arrival-preparation{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:17px;background:var(--surface-soft);overflow-wrap:anywhere}
+.arrival-preparation h2{margin:0;font-size:18px;line-height:1.4}
+.arrival-preparation p{margin:8px 0 14px;font-size:13px;line-height:1.55}
+.arrival-preparation .button{display:flex;align-items:center;justify-content:center;width:100%;height:auto;min-height:54px;padding:12px;text-align:center;text-decoration:none;line-height:1.4;white-space:normal}
+.arrival-preparation [hidden]{display:none}
+.arrival-preparation select:focus-visible,.arrival-preparation a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.arrival-preparation #arrivalNote{margin-bottom:0;color:var(--muted)}
