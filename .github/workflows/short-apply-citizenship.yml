@@ -27,6 +27,9 @@ jobs:
           TESTED_HEAD: ${{ github.sha }}
           TESTED_BASE: unused-for-push
         run: |
+          published=$(node -p "JSON.parse(require('fs').readFileSync('.github/browser/fixtures/short-apply-citizenship.json','utf8')).publishedMain")
+          [[ "$published" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags --depth=1 origin "$published"
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
