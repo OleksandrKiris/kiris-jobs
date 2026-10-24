@@ -27,6 +27,7 @@ jobs:
           TESTED_HEAD: ${{ github.sha }}
           TESTED_BASE: unused-for-push
         run: |
+          git fetch --no-tags --depth=1 origin 2c7ea4157eec621d6a540a861b592f5cfb354ff4
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -34,8 +35,9 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
           "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Messenger-only error and correction without delivery
+      - name: Required-field errors and correction without delivery
         env:
+          CASE_SCOPE: gender
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-required-report

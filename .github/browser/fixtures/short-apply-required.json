@@ -1,7 +1,7 @@
 {
   "sourceRuntimeBase": "2c7ea4157eec621d6a540a861b592f5cfb354ff4",
   "sourceKeysAreNotScreenEvidence": true,
-  "scope": "Only isolated missing messenger selection; other required fields valid. Native option-popup UI is not certified.",
+  "scope": "Isolated missing messenger-select and gender-radio group errors; native option-popup/device/native-speaker/offline certification excluded.",
   "labels": {
     "pl": "Pole wymagane",
     "uk": "Обов’язкове поле",
@@ -144,6 +144,169 @@
       "label": "Ứng dụng nhắn tin ưu tiên",
       "placeholder": "Chọn một mục",
       "recovery": "Telegram"
+    }
+  },
+  "publishedMain": "2c7ea4157eec621d6a540a861b592f5cfb354ff4",
+  "gender": {
+    "pl": {
+      "label": "Płeć",
+      "options": {
+        "female": "Kobieta",
+        "male": "Mężczyzna",
+        "undisclosed": "Wolę nie podawać"
+      }
+    },
+    "uk": {
+      "label": "Стать",
+      "options": {
+        "female": "Жінка",
+        "male": "Чоловік",
+        "undisclosed": "Не хочу вказувати"
+      }
+    },
+    "ru": {
+      "label": "Пол",
+      "options": {
+        "female": "Женщина",
+        "male": "Мужчина",
+        "undisclosed": "Не хочу указывать"
+      }
+    },
+    "en": {
+      "label": "Gender",
+      "options": {
+        "female": "Woman",
+        "male": "Man",
+        "undisclosed": "Prefer not to say"
+      }
+    },
+    "ka": {
+      "label": "სქესი",
+      "options": {
+        "female": "ქალი",
+        "male": "კაცი",
+        "undisclosed": "არ მსურს მითითება"
+      }
+    },
+    "az": {
+      "label": "Cins",
+      "options": {
+        "female": "Qadın",
+        "male": "Kişi",
+        "undisclosed": "Bildirmək istəmirəm"
+      }
+    },
+    "hy": {
+      "label": "Սեռ",
+      "options": {
+        "female": "Կին",
+        "male": "Տղամարդ",
+        "undisclosed": "Նախընտրում եմ չնշել"
+      }
+    },
+    "tr": {
+      "label": "Cinsiyet",
+      "options": {
+        "female": "Kadın",
+        "male": "Erkek",
+        "undisclosed": "Belirtmek istemiyorum"
+      }
+    },
+    "uz": {
+      "label": "Jins",
+      "options": {
+        "female": "Ayol",
+        "male": "Erkak",
+        "undisclosed": "Ko‘rsatishni istamayman"
+      }
+    },
+    "ky": {
+      "label": "Жынысы",
+      "options": {
+        "female": "Аял",
+        "male": "Эркек",
+        "undisclosed": "Айткым келбейт"
+      }
+    },
+    "tg": {
+      "label": "Ҷинс",
+      "options": {
+        "female": "Зан",
+        "male": "Мард",
+        "undisclosed": "Намехоҳам бигӯям"
+      }
+    },
+    "kk": {
+      "label": "Жынысы",
+      "options": {
+        "female": "Әйел",
+        "male": "Ер",
+        "undisclosed": "Айтқым келмейді"
+      }
+    },
+    "hi": {
+      "label": "लिंग",
+      "options": {
+        "female": "महिला",
+        "male": "पुरुष",
+        "undisclosed": "बताना नहीं चाहते"
+      }
+    },
+    "bn": {
+      "label": "লিঙ্গ",
+      "options": {
+        "female": "নারী",
+        "male": "পুরুষ",
+        "undisclosed": "বলতে চাই না"
+      }
+    },
+    "ne": {
+      "label": "लिङ्ग",
+      "options": {
+        "female": "महिला",
+        "male": "पुरुष",
+        "undisclosed": "खुलाउन चाहन्न"
+      }
+    },
+    "ur": {
+      "label": "جنس",
+      "options": {
+        "female": "عورت",
+        "male": "مرد",
+        "undisclosed": "بتانا نہیں چاہتا/چاہتی"
+      }
+    },
+    "si": {
+      "label": "ස්ත්‍රී පුරුෂ භාවය",
+      "options": {
+        "female": "කාන්තාව",
+        "male": "පුරුෂයා",
+        "undisclosed": "පැවසීමට කැමති නැත"
+      }
+    },
+    "fil": {
+      "label": "Kasarian",
+      "options": {
+        "female": "Babae",
+        "male": "Lalaki",
+        "undisclosed": "Mas gustong hindi sabihin"
+      }
+    },
+    "id": {
+      "label": "Jenis kelamin",
+      "options": {
+        "female": "Perempuan",
+        "male": "Laki-laki",
+        "undisclosed": "Tidak ingin menyebutkan"
+      }
+    },
+    "vi": {
+      "label": "Giới tính",
+      "options": {
+        "female": "Nữ",
+        "male": "Nam",
+        "undisclosed": "Không muốn cung cấp"
+      }
     }
   }
 }
