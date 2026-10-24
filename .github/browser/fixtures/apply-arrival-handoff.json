@@ -1,0 +1,222 @@
+{
+  "arrivalHead": "606f43a496e53bfb3c9c4d855d511fcb5ed9a412",
+  "languages": {
+    "pl": "Polski",
+    "ru": "Русский",
+    "uk": "Українська",
+    "en": "English",
+    "az": "Azərbaycanca",
+    "es": "Español",
+    "fil": "Filipino",
+    "id": "Indonesia",
+    "ne": "नेपाली"
+  },
+  "locations": {
+    "siechnice": "Siechnice",
+    "ryczywol": "Ryczywół",
+    "bogatynia": "Bogatynia",
+    "zgorzelec": "Zgorzelec"
+  },
+  "copy": {
+    "pl": [
+      "Przygotowanie do przyjazdu",
+      "Trasy, kontakty i listy rzeczy. Miejsce i datę przyjazdu potwierdź z koordynatorem.",
+      "Język poradnika",
+      "Miejsce przyjazdu w poradniku",
+      "Wybierz",
+      "Otwórz poradnik przyjazdu",
+      "Poradnik nie jest dostępny w języku ankiety. Wybierz obsługiwany język.",
+      "Otwiera nową kartę. Ankieta zostaje tutaj i nie jest wysyłana."
+    ],
+    "uk": [
+      "Підготовка до приїзду",
+      "Маршрути, контакти та списки речей. Місце й дату приїзду підтвердьте з координатором.",
+      "Мова пам’ятки",
+      "Місце приїзду в пам’ятці",
+      "Виберіть",
+      "Відкрити пам’ятку приїзду",
+      "Пам’ятка недоступна мовою анкети. Виберіть підтримувану мову.",
+      "Відкриється нова вкладка. Анкета залишається тут і не надсилається."
+    ],
+    "ru": [
+      "Подготовка к приезду",
+      "Маршруты, контакты и списки вещей. Место и дату приезда подтвердите с координатором.",
+      "Язык памятки",
+      "Место приезда в памятке",
+      "Выберите",
+      "Открыть памятку приезда",
+      "Памятка недоступна на языке анкеты. Выберите поддерживаемый язык.",
+      "Откроется новая вкладка. Анкета остаётся здесь и не отправляется."
+    ],
+    "en": [
+      "Prepare for arrival",
+      "Routes, contacts and packing lists. Confirm your destination and arrival date with the coordinator.",
+      "Guide language",
+      "Guide destination",
+      "Choose",
+      "Open arrival guide",
+      "The guide is unavailable in the application language. Choose a supported language.",
+      "Opens a new tab. Your application stays here and is not sent."
+    ],
+    "ka": [
+      "ჩამოსვლისთვის მომზადება",
+      "მარშრუტები, საკონტაქტო ინფორმაცია და ნივთების სიები. ჩამოსვლის ადგილი და თარიღი კოორდინატორთან შეათანხმეთ.",
+      "გზამკვლევის ენა",
+      "ჩამოსვლის ადგილი გზამკვლევში",
+      "აირჩიეთ",
+      "ჩამოსვლის გზამკვლევის გახსნა",
+      "გზამკვლევი ანკეტის ენაზე არ არის ხელმისაწვდომი. აირჩიეთ მხარდაჭერილი ენა.",
+      "გაიხსნება ახალი ჩანართი. ანკეტა აქ რჩება და არ იგზავნება."
+    ],
+    "az": [
+      "Gəlişə hazırlıq",
+      "Marşrutlar, əlaqələr və əşya siyahıları. Gəliş yerini və tarixini koordinatorla təsdiqləyin.",
+      "Bələdçinin dili",
+      "Bələdçidə gəliş yeri",
+      "Seçin",
+      "Gəliş bələdçisini açın",
+      "Bələdçi anketin dilində mövcud deyil. Dəstəklənən dili seçin.",
+      "Yeni vərəq açılır. Anketiniz burada qalır və göndərilmir."
+    ],
+    "hy": [
+      "Նախապատրաստում ժամանելուն",
+      "Երթուղիներ, կոնտակտներ և իրերի ցուցակներ։ Ժամանման վայրը և ամսաթիվը հաստատեք համակարգողի հետ։",
+      "Ուղեցույցի լեզուն",
+      "Ժամանման վայրը ուղեցույցում",
+      "Ընտրեք",
+      "Բացել ժամանման ուղեցույցը",
+      "Ուղեցույցը հասանելի չէ հարցաթերթիկի լեզվով։ Ընտրեք աջակցվող լեզու։",
+      "Կբացվի նոր ներդիր։ Հարցաթերթիկը մնում է այստեղ և չի ուղարկվում։"
+    ],
+    "tr": [
+      "Varışa hazırlık",
+      "Güzergâhlar, iletişim bilgileri ve eşya listeleri. Varış yerini ve tarihini koordinatörle teyit edin.",
+      "Rehberin dili",
+      "Rehberdeki varış yeri",
+      "Seçin",
+      "Varış rehberini aç",
+      "Rehber, başvuru dilinde mevcut değil. Desteklenen bir dil seçin.",
+      "Yeni sekme açılır. Başvurunuz burada kalır ve gönderilmez."
+    ],
+    "uz": [
+      "Kelishga tayyorgarlik",
+      "Yo‘nalishlar, aloqa ma’lumotlari va buyumlar ro‘yxatlari. Kelish joyi va sanasini koordinator bilan tasdiqlang.",
+      "Qo‘llanma tili",
+      "Qo‘llanmadagi kelish joyi",
+      "Tanlang",
+      "Kelish qo‘llanmasini ochish",
+      "Qo‘llanma anketa tilida mavjud emas. Mavjud tillardan birini tanlang.",
+      "Yangi sahifa ochiladi. Anketangiz shu yerda qoladi va yuborilmaydi."
+    ],
+    "ky": [
+      "Келүүгө даярдык",
+      "Багыттар, байланыштар жана буюмдардын тизмелери. Келе турган жерди жана күндү координатор менен тактаңыз.",
+      "Колдонмонун тили",
+      "Колдонмодогу келүүчү жер",
+      "Тандаңыз",
+      "Келүү боюнча колдонмону ачуу",
+      "Колдонмо анкетанын тилинде жеткиликтүү эмес. Колдоого алынган тилди тандаңыз.",
+      "Жаңы өтмөк ачылат. Анкетаңыз бул жерде калат жана жөнөтүлбөйт."
+    ],
+    "tg": [
+      "Омодагӣ ба омадан",
+      "Масирҳо, тамосҳо ва рӯйхати ашё. Ҷой ва санаи омаданро бо ҳамоҳангсоз тасдиқ кунед.",
+      "Забони роҳнамо",
+      "Ҷои омадан дар роҳнамо",
+      "Интихоб кунед",
+      "Кушодани роҳнамои омадан",
+      "Роҳнамо ба забони пурсишнома дастрас нест. Забони дастрасро интихоб кунед.",
+      "Варақаи нав кушода мешавад. Пурсишнома дар ин ҷо мемонад ва фиристода намешавад."
+    ],
+    "kk": [
+      "Келуге дайындық",
+      "Бағыттар, байланыстар және заттар тізімдері. Келетін жеріңіз бен күніңізді үйлестірушімен растаңыз.",
+      "Нұсқаулық тілі",
+      "Нұсқаулықтағы келу орны",
+      "Таңдаңыз",
+      "Келу нұсқаулығын ашу",
+      "Нұсқаулық сауалнама тілінде қолжетімді емес. Қолдау көрсетілетін тілді таңдаңыз.",
+      "Жаңа қойынды ашылады. Сауалнамаңыз осында қалады және жіберілмейді."
+    ],
+    "hi": [
+      "आगमन की तैयारी",
+      "मार्ग, संपर्क और सामान की सूचियाँ। आने की जगह और तारीख समन्वयक से पक्की करें।",
+      "मार्गदर्शिका की भाषा",
+      "मार्गदर्शिका में आगमन का स्थान",
+      "चुनें",
+      "आगमन मार्गदर्शिका खोलें",
+      "मार्गदर्शिका आवेदन की भाषा में उपलब्ध नहीं है। उपलब्ध भाषाओं में से एक चुनें।",
+      "नया टैब खुलेगा। आपका आवेदन यहाँ रहता है और भेजा नहीं जाता।"
+    ],
+    "bn": [
+      "আগমনের প্রস্তুতি",
+      "পথ, যোগাযোগ ও জিনিসপত্রের তালিকা। আসার স্থান ও তারিখ সমন্বয়কারীর সঙ্গে নিশ্চিত করুন।",
+      "নির্দেশিকার ভাষা",
+      "নির্দেশিকায় আগমনের স্থান",
+      "নির্বাচন করুন",
+      "আগমনের নির্দেশিকা খুলুন",
+      "আবেদনের ভাষায় নির্দেশিকা নেই। উপলব্ধ ভাষাগুলোর একটি বেছে নিন।",
+      "নতুন ট্যাব খুলবে। আপনার আবেদন এখানেই থাকবে এবং পাঠানো হবে না।"
+    ],
+    "ne": [
+      "आगमनको तयारी",
+      "मार्ग, सम्पर्क र सामानका सूचीहरू। आउने ठाउँ र मिति संयोजकसँग पक्का गर्नुहोस्।",
+      "मार्गदर्शिकाको भाषा",
+      "मार्गदर्शिकामा आउने ठाउँ",
+      "छान्नुहोस्",
+      "आगमन मार्गदर्शिका खोल्नुहोस्",
+      "मार्गदर्शिका आवेदनको भाषामा उपलब्ध छैन। उपलब्ध भाषा छान्नुहोस्।",
+      "नयाँ ट्याब खुल्छ। तपाईंको आवेदन यहीँ रहन्छ र पठाइँदैन।"
+    ],
+    "ur": [
+      "آمد کی تیاری",
+      "راستے، رابطے اور سامان کی فہرستیں۔ آنے کی جگہ اور تاریخ کوآرڈینیٹر سے طے کریں۔",
+      "رہنما کی زبان",
+      "رہنما میں آمد کی جگہ",
+      "منتخب کریں",
+      "آمد کا رہنما کھولیں",
+      "رہنما درخواست کی زبان میں دستیاب نہیں۔ دستیاب زبانوں میں سے ایک منتخب کریں۔",
+      "نیا ٹیب کھلے گا۔ آپ کی درخواست یہیں رہے گی اور بھیجی نہیں جائے گی۔"
+    ],
+    "si": [
+      "පැමිණීමට සූදානම් වීම",
+      "මාර්ග, සම්බන්ධතා සහ බඩු ලැයිස්තු. පැමිණෙන ස්ථානය සහ දිනය සම්බන්ධීකාරක සමඟ තහවුරු කරන්න.",
+      "මාර්ගෝපදේශයේ භාෂාව",
+      "මාර්ගෝපදේශයේ පැමිණෙන ස්ථානය",
+      "තෝරන්න",
+      "පැමිණීමේ මාර්ගෝපදේශය විවෘත කරන්න",
+      "අයදුම්පත් භාෂාවෙන් මාර්ගෝපදේශය නොමැත. තිබෙන භාෂාවක් තෝරන්න.",
+      "නව පටිත්තක් විවෘත වේ. ඔබගේ අයදුම්පත මෙහි පවතින අතර යවනු නොලැබේ."
+    ],
+    "fil": [
+      "Paghahanda sa pagdating",
+      "Mga ruta, contact at listahan ng dadalhin. Kumpirmahin sa coordinator ang lugar at petsa ng pagdating.",
+      "Wika ng gabay",
+      "Destinasyon sa gabay",
+      "Pumili",
+      "Buksan ang gabay sa pagdating",
+      "Walang gabay sa wika ng aplikasyon. Pumili ng suportadong wika.",
+      "Magbubukas sa bagong tab. Mananatili rito ang aplikasyon at hindi ito ipapadala."
+    ],
+    "id": [
+      "Persiapan kedatangan",
+      "Rute, kontak dan daftar barang. Konfirmasikan tujuan dan tanggal kedatangan dengan koordinator.",
+      "Bahasa panduan",
+      "Tujuan dalam panduan",
+      "Pilih",
+      "Buka panduan kedatangan",
+      "Panduan tidak tersedia dalam bahasa formulir. Pilih bahasa yang tersedia.",
+      "Membuka tab baru. Formulir Anda tetap di sini dan tidak dikirim."
+    ],
+    "vi": [
+      "Chuẩn bị đến nơi",
+      "Lộ trình, liên hệ và danh sách đồ cần mang. Xác nhận địa điểm và ngày đến với điều phối viên.",
+      "Ngôn ngữ hướng dẫn",
+      "Điểm đến trong hướng dẫn",
+      "Chọn",
+      "Mở hướng dẫn đến nơi",
+      "Không có hướng dẫn bằng ngôn ngữ đơn đăng ký. Hãy chọn một ngôn ngữ được hỗ trợ.",
+      "Mở tab mới. Đơn đăng ký vẫn ở đây và không được gửi."
+    ]
+  }
+}

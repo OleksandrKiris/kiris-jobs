@@ -1,0 +1,58 @@
+name: Application arrival guide handoff
+
+on:
+  pull_request:
+    paths:
+      - apply/**
+      - .github/browser/apply-arrival-handoff.mjs
+      - .github/browser/fixtures/apply-arrival-handoff.json
+      - .github/workflows/apply-arrival-handoff.yml
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/checkout@v7
+        with:
+          repository: OleksandrKiris/przyjazd-do-pracy
+          ref: 606f43a496e53bfb3c9c4d855d511fcb5ed9a412
+          path: .arrival-fixture
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Exact event base and staged publication
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python quality/security/exact_base.py
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Real review and destination with anonymous fixtures
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-handoff-report
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+          ARRIVAL_SOURCE: ${{ github.workspace }}/.arrival-fixture
+        run: node .github/browser/apply-arrival-handoff.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: apply-arrival-handoff
+          path: ${{ runner.temp }}/primserv-handoff-report
+          if-no-files-found: error
