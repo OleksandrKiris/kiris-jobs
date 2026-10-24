@@ -1,7 +1,7 @@
 {
   "publishedMain": "eb6d9c18cc9be39df295defdda4eea2319079cf3",
   "sourceKeysAreNotScreenEvidence": true,
-  "scope": "Only isolated missing citizenship text; other required fields valid anonymous fixtures. No delivery, device, offline or native-speaker certification.",
+  "scope": "Isolated missing citizenship/firstName/lastName text; all other required fields use valid anonymous fixtures. PR requires all120 cases. No delivery/device/offline/native-speaker certification.",
   "labels": {
     "pl": "Pole wymagane",
     "uk": "Обов’язкове поле",
@@ -144,6 +144,288 @@
       "label": "Quốc tịch",
       "hint": "Bạn có thể nhập tên quốc gia hoặc mã ngắn, ví dụ UKR, GEO hoặc AZE.",
       "placeholder": "Ví dụ VNM"
+    }
+  },
+  "names": {
+    "pl": {
+      "firstName": {
+        "required": "Pole wymagane",
+        "label": "Imię",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Pole wymagane",
+        "label": "Nazwisko",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "uk": {
+      "firstName": {
+        "required": "Обов’язкове поле",
+        "label": "Ім’я",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Обов’язкове поле",
+        "label": "Прізвище",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "ru": {
+      "firstName": {
+        "required": "Обязательное поле",
+        "label": "Имя",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Обязательное поле",
+        "label": "Фамилия",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "en": {
+      "firstName": {
+        "required": "Required field",
+        "label": "First name",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Required field",
+        "label": "Last name",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "ka": {
+      "firstName": {
+        "required": "სავალდებულო ველი",
+        "label": "სახელი",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "სავალდებულო ველი",
+        "label": "გვარი",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "az": {
+      "firstName": {
+        "required": "Məcburi sahə",
+        "label": "Ad",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Məcburi sahə",
+        "label": "Soyad",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "hy": {
+      "firstName": {
+        "required": "Պարտադիր դաշտ",
+        "label": "Անուն",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Պարտադիր դաշտ",
+        "label": "Ազգանուն",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "tr": {
+      "firstName": {
+        "required": "Zorunlu alan",
+        "label": "Ad",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Zorunlu alan",
+        "label": "Soyad",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "uz": {
+      "firstName": {
+        "required": "Majburiy maydon",
+        "label": "Ism",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Majburiy maydon",
+        "label": "Familiya",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "ky": {
+      "firstName": {
+        "required": "Милдеттүү талаа",
+        "label": "Аты",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Милдеттүү талаа",
+        "label": "Фамилиясы",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "tg": {
+      "firstName": {
+        "required": "Майдони ҳатмӣ",
+        "label": "Ном",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Майдони ҳатмӣ",
+        "label": "Насаб",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "kk": {
+      "firstName": {
+        "required": "Міндетті өріс",
+        "label": "Аты",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Міндетті өріс",
+        "label": "Тегі",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "hi": {
+      "firstName": {
+        "required": "आवश्यक फ़ील्ड",
+        "label": "नाम",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "आवश्यक फ़ील्ड",
+        "label": "उपनाम",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "bn": {
+      "firstName": {
+        "required": "আবশ্যক ঘর",
+        "label": "নাম",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "আবশ্যক ঘর",
+        "label": "পদবি",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "ne": {
+      "firstName": {
+        "required": "अनिवार्य क्षेत्र",
+        "label": "नाम",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "अनिवार्य क्षेत्र",
+        "label": "थर",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "ur": {
+      "firstName": {
+        "required": "لازمی خانہ",
+        "label": "نام",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "لازمی خانہ",
+        "label": "خاندانی نام",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "si": {
+      "firstName": {
+        "required": "අනිවාර්ය ක්ෂේත්‍රය",
+        "label": "නම",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "අනිවාර්ය ක්ෂේත්‍රය",
+        "label": "වාසගම",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "fil": {
+      "firstName": {
+        "required": "Kailangang sagutan",
+        "label": "Pangalan",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Kailangang sagutan",
+        "label": "Apelyido",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "id": {
+      "firstName": {
+        "required": "Wajib diisi",
+        "label": "Nama depan",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Wajib diisi",
+        "label": "Nama belakang",
+        "hint": "",
+        "placeholder": ""
+      }
+    },
+    "vi": {
+      "firstName": {
+        "required": "Trường bắt buộc",
+        "label": "Tên",
+        "hint": "",
+        "placeholder": ""
+      },
+      "lastName": {
+        "required": "Trường bắt buộc",
+        "label": "Họ",
+        "hint": "",
+        "placeholder": ""
+      }
     }
   }
 }

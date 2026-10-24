@@ -1,4 +1,4 @@
-name: Short form citizenship validation
+name: Short form text required validation
 
 on:
   push:
@@ -34,13 +34,14 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
           "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Citizenship-only error and correction without delivery
+      - name: Text-field errors and correction without delivery
         env:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-citizenship-report
           TESTED_HEAD: ${{ github.sha }}
           TESTED_BASE: unused-for-push
+          CASE_SCOPE: firstName,lastName
         run: |
           export TESTED_BASE="$(git rev-parse HEAD^)"
           node .github/browser/short-apply-citizenship.mjs
