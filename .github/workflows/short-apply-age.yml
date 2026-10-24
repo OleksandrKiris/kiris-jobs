@@ -1,12 +1,12 @@
 name: Short form age validation
 
 on:
-  push:
-    branches: [codex/personal-short-apply-age]
+  pull_request:
     paths:
       - .github/browser/short-apply-age.mjs
       - .github/browser/fixtures/short-apply-age.json
       - .github/workflows/short-apply-age.yml
+      - apply/**
 
 permissions:
   contents: read
@@ -24,9 +24,10 @@ jobs:
           node-version: 22
       - name: Exact event base and staged publication
         env:
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: unused-for-push
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -39,11 +40,9 @@ jobs:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-age-report
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: unused-for-push
-        run: |
-          export TESTED_BASE="$(git rev-parse HEAD^)"
-          node .github/browser/short-apply-age.mjs
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/short-apply-age.mjs
       - uses: actions/upload-artifact@v7
         if: always()
         with:

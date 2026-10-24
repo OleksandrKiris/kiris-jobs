@@ -51,7 +51,10 @@ async function run({width,lang,age}){
   await page.locator('#age').fill('30');const cleared=await page.locator('#age-error').count()===0&&await page.locator('#age').getAttribute('aria-invalid')===null;assert.equal(cleared,true);
   await page.locator('[data-action="next"]').click();await page.locator('#location').waitFor();assert.equal(await page.locator('.progress-meta strong').innerText(),'2 / 3');assert.equal(await page.locator('[data-action="send"]').count(),0);
   await page.locator('[data-action="back"]').click();await page.locator('#age').waitFor();assert.deepEqual(await values(page),{...before,age:'30'});
-  assert.deepEqual(errors,[]);report.rows.push({width,lang,invalidAge:age,status:'passed',...dom,onlyAgeInvalid:true,answersPreserved:true,languageRoundTrip:true,previousErrorResetThenRevalidated:true,clearedOnEdit:cleared,correctedAdvancesToStep2:true,backPreserved:true,noDelivery:true});
+  for(const validAge of [18,99]){
+   await page.locator('#age').fill(String(validAge));await page.locator('[data-action="next"]').click();await page.locator('#location').waitFor();assert.equal(await page.locator('.progress-meta strong').innerText(),'2 / 3');assert.equal(await page.locator('[data-action="send"]').count(),0);await page.locator('[data-action="back"]').click();await page.locator('#age').waitFor();assert.deepEqual(await values(page),{...before,age:String(validAge)});
+  }
+  assert.deepEqual(errors,[]);report.rows.push({width,lang,invalidAge:age,status:'passed',...dom,onlyAgeInvalid:true,inclusiveBoundaries18And99:true,answersPreserved:true,languageRoundTrip:true,previousErrorResetThenRevalidated:true,clearedOnEdit:cleared,correctedAdvancesToStep2:true,backPreserved:true,noDelivery:true});
  }catch(e){await page.screenshot({path:join(reportDir,`failure-${age}-${width}-${lang}.png`)}).catch(()=>{});throw e;}finally{await ctx.close();}
 }
 try{
