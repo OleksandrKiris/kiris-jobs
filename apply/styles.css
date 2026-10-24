@@ -802,3 +802,9 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
 .arrival-preparation [hidden]{display:none}
 .arrival-preparation select:focus-visible,.arrival-preparation a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .arrival-preparation #arrivalNote{margin-bottom:0;color:var(--muted)}
+
+/* Persistent polite status: updates never replace the form or move keyboard focus. */
+.draft-status{width:calc(100% - 28px);max-width:752px;margin:0 auto;overflow-wrap:anywhere;font-size:14px;line-height:1.55}
+.draft-status[data-state="saved"],.draft-status[data-state="failed"]{margin-top:12px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);color:var(--ink)}
+.draft-status[data-state="failed"]{border-color:var(--danger);background:var(--danger-soft);color:var(--danger)}
+@media(max-width:520px){.draft-status{width:calc(100% - 14px)}}

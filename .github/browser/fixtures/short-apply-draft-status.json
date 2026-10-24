@@ -1,0 +1,22 @@
+{
+  "pl": {"saved":"Szkic zapisany w tej przeglądarce.","failed":"Nie udało się zapisać ostatnich odpowiedzi. Pozostaw tę stronę otwartą — po jej odświeżeniu lub zamknięciu możesz je utracić."},
+  "uk": {"saved":"Чернетку збережено в цьому браузері.","failed":"Не вдалося зберегти останні відповіді. Залиште цю сторінку відкритою — після оновлення або закриття ви можете їх втратити."},
+  "ru": {"saved":"Черновик сохранён в этом браузере.","failed":"Не удалось сохранить последние ответы. Оставьте эту страницу открытой — после обновления или закрытия вы можете их потерять."},
+  "en": {"saved":"Draft saved in this browser.","failed":"Recent answers could not be saved. Keep this page open — reloading or closing it may lose them."},
+  "ka": {"saved":"მონახაზი შენახულია ამ ბრაუზერში.","failed":"ბოლო პასუხების შენახვა ვერ მოხერხდა. დატოვეთ ეს გვერდი ღია — განახლების ან დახურვის შემდეგ შეიძლება ისინი დაკარგოთ."},
+  "az": {"saved":"Qaralama bu brauzerdə saxlanılıb.","failed":"Son cavabları saxlamaq mümkün olmadı. Bu səhifəni açıq saxlayın — yeniləsəniz və ya bağlasanız, onları itirə bilərsiniz."},
+  "hy": {"saved":"Սևագիրը պահպանված է այս դիտարկիչում։","failed":"Վերջին պատասխանները չհաջողվեց պահպանել։ Այս էջը բաց թողեք․ այն թարմացնելուց կամ փակելուց հետո կարող եք կորցնել դրանք։"},
+  "tr": {"saved":"Taslak bu tarayıcıda kaydedildi.","failed":"Son yanıtlar kaydedilemedi. Bu sayfayı açık tutun — yenilerseniz veya kapatırsanız yanıtları kaybedebilirsiniz."},
+  "uz": {"saved":"Qoralama ushbu brauzerda saqlandi.","failed":"Oxirgi javoblarni saqlab bo‘lmadi. Bu sahifani ochiq qoldiring — uni yangilasangiz yoki yopsangiz, javoblar yo‘qolishi mumkin."},
+  "ky": {"saved":"Долбоор бул браузерде сакталды.","failed":"Акыркы жооптор сакталган жок. Бул баракты ачык калтырыңыз — аны жаңыртсаңыз же жапсаңыз, жоопторду жоготуп алышыңыз мүмкүн."},
+  "tg": {"saved":"Пешнавис дар ин браузер захира шуд.","failed":"Ҷавобҳои охирин захира нашуданд. Ин саҳифаро кушода нигоҳ доред — агар онро нав кунед ё пӯшед, ҷавобҳо метавонанд гум шаванд."},
+  "kk": {"saved":"Жоба осы браузерде сақталды.","failed":"Соңғы жауаптарды сақтау мүмкін болмады. Бұл бетті ашық қалдырыңыз — оны жаңартсаңыз немесе жапсаңыз, жауаптар жоғалуы мүмкін."},
+  "hi": {"saved":"ड्राफ़्ट इस ब्राउज़र में सहेजा गया है।","failed":"हाल के उत्तर सहेजे नहीं जा सके। यह पेज खुला रखें — इसे रीफ़्रेश करने या बंद करने पर ये उत्तर खो सकते हैं।"},
+  "bn": {"saved":"খসড়া এই ব্রাউজারে সংরক্ষিত হয়েছে।","failed":"সাম্প্রতিক উত্তরগুলি সংরক্ষণ করা যায়নি। এই পৃষ্ঠাটি খোলা রাখুন — রিফ্রেশ বা বন্ধ করলে উত্তরগুলি হারিয়ে যেতে পারে।"},
+  "ne": {"saved":"मस्यौदा यस ब्राउजरमा सुरक्षित गरिएको छ।","failed":"पछिल्ला उत्तरहरू सुरक्षित गर्न सकिएन। यो पृष्ठ खुला राख्नुहोस् — रिफ्रेस गर्दा वा बन्द गर्दा ती उत्तरहरू हराउन सक्छन्।"},
+  "ur": {"saved":"مسودہ اس براؤزر میں محفوظ ہو گیا ہے۔","failed":"حالیہ جوابات محفوظ نہیں ہو سکے۔ یہ صفحہ کھلا رکھیں — اسے ریفریش یا بند کرنے سے یہ جوابات ضائع ہو سکتے ہیں۔"},
+  "si": {"saved":"කෙටුම්පත මෙම බ්‍රවුසරයේ සුරකින ලදී.","failed":"අවසන් පිළිතුරු සුරැකීමට නොහැකි විය. මෙම පිටුව විවෘතව තබන්න — එය නැවත පූරණය කළහොත් හෝ වසා දැමුවහොත් එම පිළිතුරු නැති විය හැක."},
+  "fil": {"saved":"Naka-save ang draft sa browser na ito.","failed":"Hindi na-save ang mga pinakahuling sagot. Panatilihing bukas ang pahinang ito — maaaring mawala ang mga ito kapag ni-reload o isinara ito."},
+  "id": {"saved":"Draf tersimpan di browser ini.","failed":"Jawaban terbaru tidak dapat disimpan. Biarkan halaman ini terbuka — memuat ulang atau menutupnya dapat menghilangkan jawaban tersebut."},
+  "vi": {"saved":"Bản nháp đã được lưu trong trình duyệt này.","failed":"Không thể lưu các câu trả lời mới nhất. Hãy giữ trang này mở — tải lại hoặc đóng trang có thể làm mất các câu trả lời đó."}
+}

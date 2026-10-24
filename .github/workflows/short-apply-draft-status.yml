@@ -1,11 +1,12 @@
 name: Short form draft save status
 
 on:
-  push:
-    branches: [codex/personal-short-apply-draft-status]
+  pull_request:
     paths:
       - .github/browser/short-apply-draft-status.mjs
+      - .github/browser/fixtures/short-apply-draft-status.json
       - .github/workflows/short-apply-draft-status.yml
+      - apply/**
 
 permissions:
   contents: read
@@ -21,14 +22,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Exact diagnostic source and staged publication
+      - name: Exact event base and staged publication
         env:
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: ${{ github.event.before == '0000000000000000000000000000000000000000' && '0fea01ce9bdeba339d6648f846bdcb966d745429' || github.event.before }}
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          git fetch --no-tags origin 0fea01ce9bdeba339d6648f846bdcb966d745429
-          test "$(git rev-parse HEAD)" = "$TESTED_HEAD"
-          test "$(git rev-parse HEAD^)" = "$TESTED_BASE"
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -41,8 +40,8 @@ jobs:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-draft-report
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: ${{ github.event.before == '0000000000000000000000000000000000000000' && '0fea01ce9bdeba339d6648f846bdcb966d745429' || github.event.before }}
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/browser/short-apply-draft-status.mjs
       - uses: actions/upload-artifact@v7
         if: always()
