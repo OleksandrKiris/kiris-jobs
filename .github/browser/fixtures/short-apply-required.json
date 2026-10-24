@@ -1,0 +1,149 @@
+{
+  "sourceRuntimeBase": "2c7ea4157eec621d6a540a861b592f5cfb354ff4",
+  "sourceKeysAreNotScreenEvidence": true,
+  "scope": "Only isolated missing messenger selection; other required fields valid. Native option-popup UI is not certified.",
+  "labels": {
+    "pl": "Pole wymagane",
+    "uk": "Обов’язкове поле",
+    "ru": "Обязательное поле",
+    "en": "Required field",
+    "ka": "სავალდებულო ველი",
+    "az": "Məcburi sahə",
+    "hy": "Պարտադիր դաշտ",
+    "tr": "Zorunlu alan",
+    "uz": "Majburiy maydon",
+    "ky": "Милдеттүү талаа",
+    "tg": "Майдони ҳатмӣ",
+    "kk": "Міндетті өріс",
+    "hi": "आवश्यक फ़ील्ड",
+    "bn": "আবশ্যক ঘর",
+    "ne": "अनिवार्य क्षेत्र",
+    "ur": "لازمی خانہ",
+    "si": "අනිවාර්ය ක්ෂේත්‍රය",
+    "fil": "Kailangang sagutan",
+    "id": "Wajib diisi",
+    "vi": "Trường bắt buộc"
+  },
+  "messages": {
+    "pl": {
+      "required": "Pole wymagane",
+      "label": "Preferowany komunikator",
+      "placeholder": "Wybierz opcję",
+      "recovery": "Telegram"
+    },
+    "uk": {
+      "required": "Обов’язкове поле",
+      "label": "Бажаний месенджер",
+      "placeholder": "Оберіть варіант",
+      "recovery": "Telegram"
+    },
+    "ru": {
+      "required": "Обязательное поле",
+      "label": "Предпочитаемый мессенджер",
+      "placeholder": "Выберите вариант",
+      "recovery": "Telegram"
+    },
+    "en": {
+      "required": "Required field",
+      "label": "Preferred messenger",
+      "placeholder": "Select an option",
+      "recovery": "Telegram"
+    },
+    "ka": {
+      "required": "სავალდებულო ველი",
+      "label": "სასურველი მესენჯერი",
+      "placeholder": "აირჩიეთ ვარიანტი",
+      "recovery": "Telegram"
+    },
+    "az": {
+      "required": "Məcburi sahə",
+      "label": "Üstünlük verilən messencer",
+      "placeholder": "Variant seçin",
+      "recovery": "Telegram"
+    },
+    "hy": {
+      "required": "Պարտադիր դաշտ",
+      "label": "Նախընտրելի հաղորդագրության ծրագիր",
+      "placeholder": "Ընտրեք տարբերակը",
+      "recovery": "Telegram"
+    },
+    "tr": {
+      "required": "Zorunlu alan",
+      "label": "Tercih edilen mesajlaşma uygulaması",
+      "placeholder": "Bir seçenek seçin",
+      "recovery": "Telegram"
+    },
+    "uz": {
+      "required": "Majburiy maydon",
+      "label": "Afzal ko‘rilgan messenjer",
+      "placeholder": "Variantni tanlang",
+      "recovery": "Telegram"
+    },
+    "ky": {
+      "required": "Милдеттүү талаа",
+      "label": "Каалаган мессенжер",
+      "placeholder": "Тандаңыз",
+      "recovery": "Telegram"
+    },
+    "tg": {
+      "required": "Майдони ҳатмӣ",
+      "label": "Паёмрасони афзал",
+      "placeholder": "Интихоб кунед",
+      "recovery": "Telegram"
+    },
+    "kk": {
+      "required": "Міндетті өріс",
+      "label": "Қалаған мессенджер",
+      "placeholder": "Таңдаңыз",
+      "recovery": "Telegram"
+    },
+    "hi": {
+      "required": "आवश्यक फ़ील्ड",
+      "label": "पसंदीदा मैसेंजर",
+      "placeholder": "एक विकल्प चुनें",
+      "recovery": "Telegram"
+    },
+    "bn": {
+      "required": "আবশ্যক ঘর",
+      "label": "পছন্দের মেসেঞ্জার",
+      "placeholder": "একটি বিকল্প নির্বাচন করুন",
+      "recovery": "Telegram"
+    },
+    "ne": {
+      "required": "अनिवार्य क्षेत्र",
+      "label": "रुचाइएको मेसेन्जर",
+      "placeholder": "विकल्प छान्नुहोस्",
+      "recovery": "Telegram"
+    },
+    "ur": {
+      "required": "لازمی خانہ",
+      "label": "پسندیدہ میسنجر",
+      "placeholder": "ایک آپشن منتخب کریں",
+      "recovery": "Telegram"
+    },
+    "si": {
+      "required": "අනිවාර්ය ක්ෂේත්‍රය",
+      "label": "කැමති පණිවිඩ යෙදුම",
+      "placeholder": "විකල්පයක් තෝරන්න",
+      "recovery": "Telegram"
+    },
+    "fil": {
+      "required": "Kailangang sagutan",
+      "label": "Gustong messenger",
+      "placeholder": "Pumili ng opsyon",
+      "recovery": "Telegram"
+    },
+    "id": {
+      "required": "Wajib diisi",
+      "label": "Aplikasi pesan pilihan",
+      "placeholder": "Pilih opsi",
+      "recovery": "Telegram"
+    },
+    "vi": {
+      "required": "Trường bắt buộc",
+      "label": "Ứng dụng nhắn tin ưu tiên",
+      "placeholder": "Chọn một mục",
+      "recovery": "Telegram"
+    }
+  }
+}
