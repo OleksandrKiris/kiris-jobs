@@ -24,7 +24,7 @@ jobs:
       - name: Exact diagnostic source and staged publication
         env:
           TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: ${{ github.event.before }}
+          TESTED_BASE: ${{ github.event.before == '0000000000000000000000000000000000000000' && '0fea01ce9bdeba339d6648f846bdcb966d745429' || github.event.before }}
         run: |
           git fetch --no-tags origin 0fea01ce9bdeba339d6648f846bdcb966d745429
           test "$(git rev-parse HEAD)" = "$TESTED_HEAD"
@@ -42,7 +42,7 @@ jobs:
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-draft-report
           TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: ${{ github.event.before }}
+          TESTED_BASE: ${{ github.event.before == '0000000000000000000000000000000000000000' && '0fea01ce9bdeba339d6648f846bdcb966d745429' || github.event.before }}
         run: node .github/browser/short-apply-draft-status.mjs
       - uses: actions/upload-artifact@v7
         if: always()
