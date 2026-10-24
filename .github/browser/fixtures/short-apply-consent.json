@@ -1,0 +1,128 @@
+{
+  "publishedMain": "77408501936e535fa4334903cc50bc365faa7ce0",
+  "sourceKeysAreNotScreenEvidence": true,
+  "scope": "Only local anonymous missing-consent step3 diagnostic; other answers valid. No delivery, worker, native-speaker or physical-device certification.",
+  "privacyUrl": "https://pposiechnice.pl/?lang=en&page_id=981",
+  "messages": {
+    "pl": {
+      "required": "Pole wymagane",
+      "consent": "Potwierdzam poprawność danych, wyrażam zgodę na kontakt w sprawie zatrudnienia i zapoznałem/-am się z",
+      "privacyLink": "informacją o prywatności",
+      "reviewTitle": "Sprawdź zgłoszenie"
+    },
+    "uk": {
+      "required": "Обов’язкове поле",
+      "consent": "Підтверджую правильність даних, погоджуюся на контакт щодо роботи та ознайомився(-лася) з",
+      "privacyLink": "інформацією про конфіденційність",
+      "reviewTitle": "Перевірте анкету"
+    },
+    "ru": {
+      "required": "Обязательное поле",
+      "consent": "Подтверждаю правильность данных, согласен(на) на контакт по поводу работы и ознакомился(-ась) с",
+      "privacyLink": "информацией о конфиденциальности",
+      "reviewTitle": "Проверьте анкету"
+    },
+    "en": {
+      "required": "Required field",
+      "consent": "I confirm that the information is correct, I agree to be contacted about employment and I have read the",
+      "privacyLink": "privacy information",
+      "reviewTitle": "Check your application"
+    },
+    "ka": {
+      "required": "სავალდებულო ველი",
+      "consent": "ვადასტურებ მონაცემების სისწორეს, ვეთანხმები დასაქმების საკითხზე დაკავშირებას და გავეცანი",
+      "privacyLink": "კონფიდენციალურობის ინფორმაციას",
+      "reviewTitle": "შეამოწმეთ განაცხადი"
+    },
+    "az": {
+      "required": "Məcburi sahə",
+      "consent": "Məlumatların düzgün olduğunu təsdiqləyirəm, işlə bağlı əlaqəyə razıyam və",
+      "privacyLink": "məxfilik məlumatı ilə tanış olmuşam",
+      "reviewTitle": "Anketi yoxlayın"
+    },
+    "hy": {
+      "required": "Պարտադիր դաշտ",
+      "consent": "Հաստատում եմ տվյալների ճշտությունը, համաձայն եմ աշխատանքի վերաբերյալ կապ հաստատելուն և ծանոթացել եմ",
+      "privacyLink": "գաղտնիության տեղեկատվությանը",
+      "reviewTitle": "Ստուգեք հայտը"
+    },
+    "tr": {
+      "required": "Zorunlu alan",
+      "consent": "Bilgilerin doğru olduğunu onaylıyor, işle ilgili iletişime izin veriyor ve",
+      "privacyLink": "gizlilik bilgisini okuduğumu kabul ediyorum",
+      "reviewTitle": "Başvuruyu kontrol edin"
+    },
+    "uz": {
+      "required": "Majburiy maydon",
+      "consent": "Ma’lumotlar to‘g‘riligini tasdiqlayman, ish bo‘yicha bog‘lanishga roziman va",
+      "privacyLink": "maxfiylik ma’lumotlari bilan tanishdim",
+      "reviewTitle": "Anketani tekshiring"
+    },
+    "ky": {
+      "required": "Милдеттүү талаа",
+      "consent": "Маалымат туура экенин ырастайм, жумуш боюнча байланышууга макулмун жана",
+      "privacyLink": "купуялык маалыматы менен тааныштым",
+      "reviewTitle": "Анкетаны текшериңиз"
+    },
+    "tg": {
+      "required": "Майдони ҳатмӣ",
+      "consent": "Дурустии маълумотро тасдиқ мекунам, ба тамоси корӣ розӣ ҳастам ва бо",
+      "privacyLink": "маълумоти махфият шинос шудам",
+      "reviewTitle": "Анкетаро санҷед"
+    },
+    "kk": {
+      "required": "Міндетті өріс",
+      "consent": "Деректердің дұрыстығын растаймын, жұмыс бойынша байланысқа келісемін және",
+      "privacyLink": "құпиялылық ақпаратымен таныстым",
+      "reviewTitle": "Анкетаны тексеріңіз"
+    },
+    "hi": {
+      "required": "आवश्यक फ़ील्ड",
+      "consent": "मैं पुष्टि करता/करती हूँ कि जानकारी सही है, नौकरी के संबंध में संपर्क की अनुमति देता/देती हूँ और मैंने",
+      "privacyLink": "गोपनीयता जानकारी पढ़ी है",
+      "reviewTitle": "आवेदन जाँचें"
+    },
+    "bn": {
+      "required": "আবশ্যক ঘর",
+      "consent": "আমি নিশ্চিত করছি যে তথ্য সঠিক, চাকরি সম্পর্কে যোগাযোগে সম্মত এবং",
+      "privacyLink": "গোপনীয়তা তথ্য পড়েছি",
+      "reviewTitle": "আবেদন পরীক্ষা করুন"
+    },
+    "ne": {
+      "required": "अनिवार्य क्षेत्र",
+      "consent": "जानकारी सही भएको पुष्टि गर्छु, रोजगारीबारे सम्पर्क स्वीकार गर्छु र",
+      "privacyLink": "गोपनीयता जानकारी पढेको छु",
+      "reviewTitle": "आवेदन जाँच्नुहोस्"
+    },
+    "ur": {
+      "required": "لازمی خانہ",
+      "consent": "میں تصدیق کرتا/کرتی ہوں کہ معلومات درست ہیں، ملازمت کے بارے میں رابطے کی اجازت دیتا/دیتی ہوں اور میں نے",
+      "privacyLink": "رازداری کی معلومات پڑھ لی ہیں",
+      "reviewTitle": "درخواست چیک کریں"
+    },
+    "si": {
+      "required": "අනිවාර්ය ක්ෂේත්‍රය",
+      "consent": "තොරතුරු නිවැරදි බව තහවුරු කරමි, රැකියාව සම්බන්ධයෙන් සම්බන්ධ වීමට එකඟ වන අතර",
+      "privacyLink": "පෞද්ගලිකත්ව තොරතුරු කියවා ඇත",
+      "reviewTitle": "අයදුම්පත පරීක්ෂා කරන්න"
+    },
+    "fil": {
+      "required": "Kailangang sagutan",
+      "consent": "Kinukumpirma kong tama ang impormasyon, pumapayag akong kontakin tungkol sa trabaho at nabasa ko ang",
+      "privacyLink": "impormasyon sa privacy",
+      "reviewTitle": "Suriin ang aplikasyon"
+    },
+    "id": {
+      "required": "Wajib diisi",
+      "consent": "Saya menyatakan informasi ini benar, setuju dihubungi mengenai pekerjaan dan telah membaca",
+      "privacyLink": "informasi privasi",
+      "reviewTitle": "Periksa formulir"
+    },
+    "vi": {
+      "required": "Trường bắt buộc",
+      "consent": "Tôi xác nhận thông tin là đúng, đồng ý được liên hệ về việc làm và đã đọc",
+      "privacyLink": "thông tin quyền riêng tư",
+      "reviewTitle": "Kiểm tra đơn đăng ký"
+    }
+  }
+}

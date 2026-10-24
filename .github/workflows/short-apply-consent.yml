@@ -1,0 +1,52 @@
+name: Short form consent diagnostic
+
+on:
+  push:
+    branches: [codex/personal-short-apply-consent]
+    paths:
+      - .github/browser/short-apply-consent.mjs
+      - .github/browser/fixtures/short-apply-consent.json
+      - .github/workflows/short-apply-consent.yml
+
+permissions:
+  contents: read
+
+jobs:
+  consent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Build exact diagnostic publication
+        run: |
+          if ! git cat-file -e 77408501936e535fa4334903cc50bc365faa7ce0^{commit}; then
+            git fetch --no-tags --depth=1 origin 77408501936e535fa4334903cc50bc365faa7ce0
+          fi
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Consent-only error and local correction without delivery
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-consent-report
+          TESTED_HEAD: ${{ github.sha }}
+        run: |
+          export TESTED_BASE="$(git rev-parse HEAD^)"
+          node .github/browser/short-apply-consent.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: short-apply-consent
+          path: ${{ runner.temp }}/primserv-consent-report
+          if-no-files-found: error
