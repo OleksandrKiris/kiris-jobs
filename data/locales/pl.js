@@ -270,6 +270,7 @@
       sendWhatsapp: "Wyślij ankietę",
       sendingApplication: "Wysyłanie ankiety…",
       missingRequired: "Uzupełnij wymagane pola.",
+      emailError: "Podaj poprawny adres e-mail albo pozostaw pole puste.",
       latinError: "Użyj wyłącznie liter alfabetu łacińskiego, spacji, łącznika lub apostrofu.",
       phoneError: "Wpisz numer w formacie międzynarodowym: + oraz 8–15 cyfr.",
       peselError: "Wpisz poprawny 11-cyfrowy numer PESEL.",

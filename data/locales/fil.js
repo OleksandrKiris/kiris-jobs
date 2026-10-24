@@ -270,6 +270,7 @@
       sendWhatsapp: "Ipadala ang aplikasyon",
       sendingApplication: "Ipinapadala ang aplikasyon…",
       missingRequired: "Kumpletuhin ang lahat ng required field.",
+      emailError: "Maglagay ng wastong email o iwanang blangko.",
       latinError: "Latin letters, space, gitling, o apostrophe lang ang gamitin.",
       phoneError: "Ilagay sa international format: + at 8–15 numero.",
       peselError: "Maglagay ng wastong 11-digit na PESEL number.",

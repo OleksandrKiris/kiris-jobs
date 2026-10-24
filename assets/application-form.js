@@ -2139,7 +2139,7 @@
       } else if (!PHONE.test(state.values.phone.replace(/[\s()-]/g, ""))) {
         setValidationError(() => t("form.phoneError"), ["phone"]);
       } else if (state.values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.values.email)) {
-        setValidationError(() => t("form.missingRequired"), ["email"]);
+        setValidationError(() => t("form.emailError"), ["email"]);
       }
     } else if (state.step === 1) {
       const required = [

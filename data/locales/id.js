@@ -270,6 +270,7 @@
       sendWhatsapp: "Kirim lamaran",
       sendingApplication: "Mengirim lamaran…",
       missingRequired: "Lengkapi semua kolom wajib.",
+      emailError: "Masukkan email yang benar atau kosongkan kolom.",
       latinError: "Gunakan hanya huruf Latin, spasi, tanda hubung, atau apostrof.",
       phoneError: "Masukkan nomor internasional: tanda + diikuti 8–15 angka.",
       peselError: "Masukkan nomor PESEL 11 digit yang valid.",

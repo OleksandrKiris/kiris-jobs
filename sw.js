@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "kiris-jobs-";
-const CACHE_VERSION = "kiris-jobs-v220-field-status-2026-10-18-2";
+const CACHE_VERSION = "kiris-jobs-v220-optional-email-2026-10-24-1";
 const CORE_SHELL = [
   "./",
   "./index.html",
