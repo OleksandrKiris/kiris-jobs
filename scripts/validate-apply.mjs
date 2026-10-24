@@ -57,7 +57,7 @@ for (const marker of [
   'styles.css?v=17.2.5',
   'config.js?v=17.0.1',
   'translations.js?v=17.0.6',
-  'app.js?v=17.2.7',
+  'app.js?v=17.2.8',
   '../assets/primserv-avatar.jpg',
   'href="pdf/"',
   'id="app"'
