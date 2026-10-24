@@ -1,12 +1,12 @@
 name: Short form text required validation
 
 on:
-  push:
-    branches: [codex/personal-short-apply-citizenship]
+  pull_request:
     paths:
       - .github/browser/short-apply-citizenship.mjs
       - .github/browser/fixtures/short-apply-citizenship.json
       - .github/workflows/short-apply-citizenship.yml
+      - apply/**
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ permissions:
 jobs:
   citizenship:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
@@ -24,12 +24,10 @@ jobs:
           node-version: 22
       - name: Exact event base and staged publication
         env:
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: unused-for-push
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          published=$(node -p "JSON.parse(require('fs').readFileSync('.github/browser/fixtures/short-apply-citizenship.json','utf8')).publishedMain")
-          [[ "$published" =~ ^[0-9a-f]{40}$ ]]
-          git fetch --no-tags --depth=1 origin "$published"
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -42,12 +40,9 @@ jobs:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-citizenship-report
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: unused-for-push
-          CASE_SCOPE: firstName,lastName
-        run: |
-          export TESTED_BASE="$(git rev-parse HEAD^)"
-          node .github/browser/short-apply-citizenship.mjs
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/short-apply-citizenship.mjs
       - uses: actions/upload-artifact@v7
         if: always()
         with:
