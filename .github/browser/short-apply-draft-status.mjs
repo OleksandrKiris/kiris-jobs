@@ -12,7 +12,7 @@ assert.equal(process.env.GITHUB_ACTIONS,'true','Use only the authorized Actions 
 const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_PACKAGE);
 const artifact=resolve(process.env.PAGES_ARTIFACT),reportDir=resolve(process.env.BROWSER_REPORT);await mkdir(reportDir,{recursive:true});
 const git=(...args)=>execFileSync('git',args),sha=b=>createHash('sha256').update(b).digest('hex');
-const publishedMain='0fea01ce9bdeba339d6648f846bdcb966d745429',diagnostic=process.env.GITHUB_EVENT_NAME==='push';
+const diagnostic=process.env.GITHUB_EVENT_NAME==='push',publishedMain=diagnostic?'0fea01ce9bdeba339d6648f846bdcb966d745429':process.env.TESTED_BASE;
 const messages=JSON.parse(await readFile(new URL('./fixtures/short-apply-draft-status.json',import.meta.url),'utf8'));assert.equal(Object.keys(messages).length,20);
 const report={head:process.env.TESTED_HEAD,base:process.env.TESTED_BASE,publishedMain,diagnostic,checkout:git('rev-parse','HEAD').toString().trim(),files:{},rows:[],startup:[],captures:[],mutations:[],external:[],limits:['Anonymous isolated browser storage only; no candidate data or delivery.','Chromium320/1280; not physical-device, offline or native-speaker certification.','DOM live-region/focus verification does not certify a screen-reader announcement.']};
 if(diagnostic){assert.equal(report.checkout,report.head);assert.equal(git('rev-parse','HEAD^').toString().trim(),report.base);}else{assert.deepEqual(git('show','-s','--format=%P','HEAD').toString().trim().split(' '),[report.base,report.head]);assert.equal(git('rev-parse','HEAD^{tree}').toString().trim(),git('rev-parse',report.head+'^{tree}').toString().trim());}

@@ -1,0 +1,49 @@
+name: Short form privacy destination diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 2fc1945136031701b86308a03f5757908ebc06c6
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Exact diagnostic head parent and published source
+        env:
+          TESTED_HEAD: 2fc1945136031701b86308a03f5757908ebc06c6
+          TESTED_BASE: 4ab89f3b95350cf8a76ee0aeb7164ea67d16a537
+        run: |
+          git fetch --no-tags origin 4ab89f3b95350cf8a76ee0aeb7164ea67d16a537
+          test "$(git rev-parse HEAD)" = "$TESTED_HEAD"
+          test "$(git rev-parse HEAD^)" = "$TESTED_BASE"
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Anonymous public privacy GET and unchanged return
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-privacy-report
+          TESTED_HEAD: 2fc1945136031701b86308a03f5757908ebc06c6
+          TESTED_BASE: 4ab89f3b95350cf8a76ee0aeb7164ea67d16a537
+        run: node .github/browser/short-apply-privacy-destination.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: short-apply-privacy-destination
+          path: ${{ runner.temp }}/primserv-privacy-report
+          if-no-files-found: error

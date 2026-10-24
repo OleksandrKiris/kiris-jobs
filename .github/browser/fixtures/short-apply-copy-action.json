@@ -1,0 +1,140 @@
+{
+  "messages": {
+    "pl": {
+      "copyRow": "Skopiuj wiersz do Excela",
+      "rowCopied": "Wiersz do Excela został skopiowany.",
+      "copyFailed": "Nie udało się skopiować wiersza. Otwórz wiadomość e-mail.",
+      "reviewTitle": "Sprawdź zgłoszenie"
+    },
+    "uk": {
+      "copyRow": "Скопіювати рядок для Excel",
+      "rowCopied": "Рядок для Excel скопійовано.",
+      "copyFailed": "Не вдалося скопіювати рядок. Відкрийте email.",
+      "reviewTitle": "Перевірте анкету"
+    },
+    "ru": {
+      "copyRow": "Скопировать строку для Excel",
+      "rowCopied": "Строка для Excel скопирована.",
+      "copyFailed": "Не удалось скопировать строку. Откройте email.",
+      "reviewTitle": "Проверьте анкету"
+    },
+    "en": {
+      "copyRow": "Copy the Excel row",
+      "rowCopied": "The Excel row has been copied.",
+      "copyFailed": "The row could not be copied. Open email instead.",
+      "reviewTitle": "Check your application"
+    },
+    "ka": {
+      "copyRow": "Excel-ის სტრიქონის კოპირება",
+      "rowCopied": "Excel-ის სტრიქონი დაკოპირებულია.",
+      "copyFailed": "სტრიქონი ვერ დაკოპირდა. გახსენით ელფოსტა.",
+      "reviewTitle": "შეამოწმეთ განაცხადი"
+    },
+    "az": {
+      "copyRow": "Excel sətrini kopyala",
+      "rowCopied": "Excel sətri kopyalandı.",
+      "copyFailed": "Sətri kopyalamaq mümkün olmadı. E-poçtu açın.",
+      "reviewTitle": "Anketi yoxlayın"
+    },
+    "hy": {
+      "copyRow": "Պատճենել Excel-ի տողը",
+      "rowCopied": "Excel-ի տողը պատճենված է։",
+      "copyFailed": "Չհաջողվեց պատճենել տողը։ Բացեք էլ․ փոստը։",
+      "reviewTitle": "Ստուգեք հայտը"
+    },
+    "tr": {
+      "copyRow": "Excel satırını kopyala",
+      "rowCopied": "Excel satırı kopyalandı.",
+      "copyFailed": "Satır kopyalanamadı. E-postayı açın.",
+      "reviewTitle": "Başvuruyu kontrol edin"
+    },
+    "uz": {
+      "copyRow": "Excel qatorini nusxalash",
+      "rowCopied": "Excel qatori nusxalandi.",
+      "copyFailed": "Qatorni nusxalab bo‘lmadi. Elektron pochtani oching.",
+      "reviewTitle": "Anketani tekshiring"
+    },
+    "ky": {
+      "copyRow": "Excel сабын көчүрүү",
+      "rowCopied": "Excel сабы көчүрүлдү.",
+      "copyFailed": "Сапты көчүрүү мүмкүн болгон жок. Почтаны ачыңыз.",
+      "reviewTitle": "Анкетаны текшериңиз"
+    },
+    "tg": {
+      "copyRow": "Нусхабардории сатри Excel",
+      "rowCopied": "Сатри Excel нусхабардорӣ шуд.",
+      "copyFailed": "Сатр нусхабардорӣ нашуд. Почтаро кушоед.",
+      "reviewTitle": "Анкетаро санҷед"
+    },
+    "kk": {
+      "copyRow": "Excel жолын көшіру",
+      "rowCopied": "Excel жолы көшірілді.",
+      "copyFailed": "Жолды көшіру мүмкін болмады. Поштаны ашыңыз.",
+      "reviewTitle": "Анкетаны тексеріңіз"
+    },
+    "hi": {
+      "copyRow": "Excel की पंक्ति कॉपी करें",
+      "rowCopied": "Excel की पंक्ति कॉपी हो गई है।",
+      "copyFailed": "पंक्ति कॉपी नहीं हो सकी. इसके बजाय ईमेल खोलें।",
+      "reviewTitle": "आवेदन जाँचें"
+    },
+    "bn": {
+      "copyRow": "Excel সারি কপি করুন",
+      "rowCopied": "Excel সারি কপি হয়েছে।",
+      "copyFailed": "সারিটি কপি করা যায়নি। ইমেইল খুলুন।",
+      "reviewTitle": "আবেদন পরীক্ষা করুন"
+    },
+    "ne": {
+      "copyRow": "Excel को पङ्क्ति कपी गर्नुहोस्",
+      "rowCopied": "Excel को पङ्क्ति कपी भयो।",
+      "copyFailed": "पङ्क्ति कपी हुन सकेन. यसको सट्टा इमेल खोल्नुहोस्।",
+      "reviewTitle": "आवेदन जाँच्नुहोस्"
+    },
+    "ur": {
+      "copyRow": "Excel کی قطار کاپی کریں",
+      "rowCopied": "Excel کی قطار کاپی ہو گئی ہے۔",
+      "copyFailed": "قطار کاپی نہیں ہو سکی۔ ای میل کھولیں۔",
+      "reviewTitle": "درخواست چیک کریں"
+    },
+    "si": {
+      "copyRow": "Excel පේළිය පිටපත් කරන්න",
+      "rowCopied": "Excel පේළිය පිටපත් කර ඇත.",
+      "copyFailed": "පේළිය පිටපත් කළ නොහැකි විය. ඊමේල් විවෘත කරන්න.",
+      "reviewTitle": "අයදුම්පත පරීක්ෂා කරන්න"
+    },
+    "fil": {
+      "copyRow": "Kopyahin ang hilera para sa Excel",
+      "rowCopied": "Nakopya na ang hilera para sa Excel.",
+      "copyFailed": "Hindi nakopya ang hilera. Buksan na lang ang email.",
+      "reviewTitle": "Suriin ang aplikasyon"
+    },
+    "id": {
+      "copyRow": "Salin baris Excel",
+      "rowCopied": "Baris Excel telah disalin.",
+      "copyFailed": "Baris tidak dapat disalin. Buka email sebagai gantinya.",
+      "reviewTitle": "Periksa formulir"
+    },
+    "vi": {
+      "copyRow": "Sao chép dòng dữ liệu Excel",
+      "rowCopied": "Đã sao chép dòng dữ liệu Excel.",
+      "copyFailed": "Không thể sao chép dòng dữ liệu. Hãy mở email.",
+      "reviewTitle": "Kiểm tra đơn đăng ký"
+    }
+  },
+  "expectedColumns": [
+    "'+FIXTURE =QA X Y | +99912345678 | Telegram",
+    "'@FIXTURE",
+    "",
+    "30",
+    "DO USTALENIA",
+    "6 MSC",
+    "TAK — -FIXTURE",
+    "WSKAŹNIKI: NIE; SZYBKIE TEMPO: NIE",
+    "FILMY: NIE; WARUNKI PRACY: NIE",
+    "NIE",
+    "",
+    ""
+  ],
+  "baseline": "c702bce698ddb6f0d648388918a56bef177528cd",
+  "publishedMain": "4ab89f3b95350cf8a76ee0aeb7164ea67d16a537"
+}

@@ -757,7 +757,7 @@
   }
 
   function polishOption(group, value) {
-    return I18N.internal[group]?.[value] || value || '';
+    return I18N.internal[group]?.[value] ?? value ?? '';
   }
 
   function yesNoPolish(value) {
@@ -824,14 +824,19 @@
     try {
       if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
       else {
+        const focused = document.activeElement;
         const area = document.createElement('textarea');
         area.value = text;
         area.style.position = 'fixed';
         area.style.opacity = '0';
         document.body.appendChild(area);
-        area.select();
-        document.execCommand('copy');
-        area.remove();
+        try {
+          area.select();
+          if (!document.execCommand('copy')) throw new Error('Clipboard copy command failed.');
+        } finally {
+          area.remove();
+          if (focused?.isConnected) focused.focus({ preventScroll: true });
+        }
       }
       setResult(t('rowCopied'));
     } catch {
