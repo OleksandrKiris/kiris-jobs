@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  unit:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -45,13 +45,63 @@ jobs:
       - name: Verify generated files are current
         run: git diff --exit-code
 
-      # Test the same staged bytes that Pages uploads, before any publication.
+  browser:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [catalogue, pdf, prototypes]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Make exact event base available for upgrade acceptance
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: python quality/security/exact_base.py
+      - name: Restore exact historical PDF regression sources
+        if: matrix.gate == 'pdf'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pdf_checkout=$(git rev-parse HEAD)
+          for pdf_source in \
+            3fb5e53647a4fc025ad8fb8621308ce7f1a6e11a \
+            3aa1f00163de5342d2c67c2af0adf92da909cd5f \
+            93d0c2c5b98d2e56e4fa523d4b120db14de79785 \
+            7eed857e3e286bafd2ab4d95f02d5abd62a451aa
+          do
+            if ! git cat-file -e "$pdf_source^{commit}"; then
+              timeout 60s git fetch --no-tags --depth=1 --filter=blob:none origin "$pdf_source"
+            fi
+            git cat-file -e "$pdf_source^{commit}"
+          done
+          test "$(git rev-parse HEAD)" = "$pdf_checkout"
+      # Every independent gate builds and verifies the same exact staged input.
       # Browser tooling and evidence stay outside the public artifact.
+      - name: Build and verify Pages artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+      - name: Verify generated files are current
+        run: git diff --exit-code
       - name: Install pinned Chromium test tooling
         run: |
           npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
           "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
       - name: Browser acceptance of staged catalogue
+        if: matrix.gate == 'catalogue'
         env:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
@@ -60,6 +110,7 @@ jobs:
           TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/browser/catalogue.mjs
       - name: Browser acceptance of PDF language handoff and preserved draft
+        if: matrix.gate == 'pdf'
         env:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
@@ -68,6 +119,7 @@ jobs:
           TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/browser/apply-pdf.mjs
       - name: Browser acceptance owned by present local prototypes
+        if: matrix.gate == 'prototypes'
         env:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PROTOTYPE_REPORT_ROOT: ${{ runner.temp }}/primserv-prototype-reports
@@ -75,18 +127,34 @@ jobs:
           TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/scripts/local-prototypes.mjs browser
       - name: Keep isolated-module evidence outside Pages
-        if: always()
+        if: always() && matrix.gate == 'prototypes'
         uses: actions/upload-artifact@v4
         with:
           name: local-prototypes-${{ github.event.pull_request.head.sha }}
           path: ${{ runner.temp }}/primserv-prototype-reports
           if-no-files-found: warn
           retention-days: 7
+
       - name: Keep browser evidence for this commit
-        if: always()
+        if: always() && matrix.gate != 'prototypes'
         uses: actions/upload-artifact@v4
         with:
-          name: catalogue-browser-${{ github.event.pull_request.head.sha }}
+          name: catalogue-browser-${{ github.event.pull_request.head.sha }}-${{ matrix.gate }}
           path: ${{ runner.temp }}/primserv-browser-report
           if-no-files-found: error
           retention-days: 7
+
+  # Preserve the existing required check name as an aggregate of every gate.
+  verify:
+    if: always()
+    needs: [unit, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Require unit and every browser gate
+        env:
+          UNIT_RESULT: ${{ needs.unit.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: |
+          test "$UNIT_RESULT" = success
+          test "$BROWSER_RESULT" = success
