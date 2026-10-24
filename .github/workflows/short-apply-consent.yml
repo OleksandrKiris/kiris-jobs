@@ -1,12 +1,12 @@
-name: Short form consent diagnostic
+name: Short form consent validation
 
 on:
-  push:
-    branches: [codex/personal-short-apply-consent]
+  pull_request:
     paths:
       - .github/browser/short-apply-consent.mjs
       - .github/browser/fixtures/short-apply-consent.json
       - .github/workflows/short-apply-consent.yml
+      - apply/**
 
 permissions:
   contents: read
@@ -22,12 +22,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Build exact diagnostic publication
+      - name: Exact event base and staged publication
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          if ! git cat-file -e 77408501936e535fa4334903cc50bc365faa7ce0^{commit}; then
-            git fetch --no-tags --depth=1 origin 77408501936e535fa4334903cc50bc365faa7ce0
-          fi
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -40,10 +40,9 @@ jobs:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-consent-report
-          TESTED_HEAD: ${{ github.sha }}
-        run: |
-          export TESTED_BASE="$(git rev-parse HEAD^)"
-          node .github/browser/short-apply-consent.mjs
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/short-apply-consent.mjs
       - uses: actions/upload-artifact@v7
         if: always()
         with:

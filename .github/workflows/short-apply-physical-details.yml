@@ -1,12 +1,12 @@
 name: Short form conditional details validation
 
 on:
-  push:
-    branches: [codex/personal-short-apply-consent]
+  pull_request:
     paths:
       - .github/browser/short-apply-physical-details.mjs
       - .github/browser/fixtures/short-apply-physical-details.json
       - .github/workflows/short-apply-physical-details.yml
+      - apply/**
 
 permissions:
   contents: read
@@ -22,14 +22,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Build exact diagnostic publication
+      - name: Exact event base and staged publication
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          for reference in 77408501936e535fa4334903cc50bc365faa7ce0 b5a5316e43e9aa6c5be91de69cb499c775e8c6b4; do
-            if ! git cat-file -e "$reference^{commit}"; then
-              git fetch --no-tags --depth=1 origin "$reference"
-            fi
-          done
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -42,10 +40,9 @@ jobs:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-details-report
-          TESTED_HEAD: ${{ github.sha }}
-        run: |
-          export TESTED_BASE="$(git rev-parse HEAD^)"
-          node .github/browser/short-apply-physical-details.mjs
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/short-apply-physical-details.mjs
       - uses: actions/upload-artifact@v7
         if: always()
         with:
