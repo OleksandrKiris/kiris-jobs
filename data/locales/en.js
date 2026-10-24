@@ -270,6 +270,7 @@
       sendWhatsapp: "Send application",
       sendingApplication: "Sending application…",
       missingRequired: "Complete all required fields.",
+      emailError: "Enter a valid email address or leave the field empty.",
       latinError: "Use only Latin letters, spaces, hyphens or apostrophes.",
       phoneError: "Enter an international number: + followed by 8–15 digits.",
       peselError: "Enter a valid 11-digit PESEL number.",

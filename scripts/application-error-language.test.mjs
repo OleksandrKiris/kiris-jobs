@@ -17,7 +17,7 @@ function harness(){
 }
 for(const code of codes)test(`${code}: current errors translate without validating, advancing, or altering answers`,()=>{
  const {api:a,i18n}=harness();
- const cases=[['missing',{},'form.missingRequired',['firstName','lastName','phone']],['latin',{firstName:'ТЕСТ',lastName:'FIXTURE',phone:'+123'},'form.latinError',['firstName']],['phone',{firstName:'QA',lastName:'FIXTURE',phone:'+123'},'form.phoneError',['phone']]];
+ const cases=[['missing',{},'form.missingRequired',['firstName','lastName','phone']],['latin',{firstName:'ТЕСТ',lastName:'FIXTURE',phone:'+123'},'form.latinError',['firstName']],['phone',{firstName:'QA',lastName:'FIXTURE',phone:'+123'},'form.phoneError',['phone']],['email',{firstName:'QA',lastName:'FIXTURE',phone:'+99912345678',email:'fixture.example.invalid'},'form.emailError',['email']]];
  for(const [kind,values,key,fields]of cases){
   i18n.locale=code==='en'?'ru':'en';a.state.jobId='banana-warehouse-poland';a.state.step=0;a.state.values={preferredLanguage:i18n.locale,...values};
   assert.equal(a.validateStep(),false);assert.equal(a.state.error,i18n.t(key));assert.deepEqual(Array.from(a.state.invalidFields),fields);
@@ -34,6 +34,19 @@ for(const code of codes)test(`${code}: current errors translate without validati
  }
  a.setError('Literal fixture message');i18n.locale='en';a.refreshErrorLanguage();assert.equal(a.state.error,'Literal fixture message');
 });
+test('optional email retains existing empty/valid recovery and required-field precedence',()=>{
+ const {api:a,i18n}=harness();
+ for(const code of codes){
+  i18n.locale=code;a.state.jobId='banana-warehouse-poland';a.state.step=0;
+  for(const email of ['', 'fixture@example.invalid']){
+   a.state.values={preferredLanguage:code,firstName:'QA',lastName:'FIXTURE',phone:'+99912345678',email};
+   assert.equal(a.validateStep(),true);assert.equal(a.state.error,'');assert.deepEqual(Array.from(a.state.invalidFields),[]);
+  }
+  a.state.values={preferredLanguage:code,firstName:'',lastName:'FIXTURE',phone:'+99912345678',email:'fixture.example.invalid'};
+  assert.equal(a.validateStep(),false);assert.equal(a.state.error,i18n.t('form.missingRequired'));assert.deepEqual(Array.from(a.state.invalidFields),['firstName']);
+ }
+});
+
 test('underage copy resolver and matcher errors follow locale; empty matcher error stays empty',()=>{
  const {api:a,i18n}=harness();a.setValidationError(()=>a.candidateEngineCopy().underage,['birthDate']);for(const code of codes){i18n.locale=code;a.refreshErrorLanguage();assert.equal(a.state.error,a.candidateEngineCopy().underage);}
  a.state.values={};a.state.matchStep=0;assert.equal(a.validateMatchStep(),false);i18n.locale='pl';a.refreshErrorLanguage();assert.equal(a.state.error,i18n.t('form.missingRequired'));a.setError('');i18n.locale='uk';a.refreshErrorLanguage();assert.equal(a.state.error,'');

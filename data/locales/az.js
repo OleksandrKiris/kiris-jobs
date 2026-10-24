@@ -259,6 +259,7 @@
       sendWhatsapp: "Anketi göndər",
       sendingApplication: "Anket göndərilir…",
       missingRequired: "Məcburi sahələri doldurun.",
+      emailError: "Düzgün e-poçt ünvanı daxil edin və ya sahəni boş saxlayın.",
       latinError: "Yalnız ingilis latın hərflərindən A–Z, boşluq, defis və ya apostrofdan istifadə edin.",
       phoneError: "Nömrəni beynəlxalq formatda daxil edin: + və 8–15 rəqəm.",
       peselError: "Düzgün 11 rəqəmli PESEL nömrəsi daxil edin.",

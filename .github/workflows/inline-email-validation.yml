@@ -1,11 +1,14 @@
 name: Inline optional email validation
 
 on:
-  push:
-    branches: [codex/personal-inline-email-validation]
+  pull_request:
     paths:
       - .github/browser/inline-email-validation.mjs
       - .github/workflows/inline-email-validation.yml
+      - .github/browser/fixtures/inline-email-labels.json
+      - assets/application-form.js
+      - data/locales/**
+      - sw.js
 
 permissions:
   contents: read
@@ -17,14 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Exact unchanged-public-source diagnostic
+      - name: Exact event base and staged publication
+        env:
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          echo "TESTED_HEAD=$GITHUB_SHA" >> "$GITHUB_ENV"
-          echo "TESTED_BASE=$(git rev-parse HEAD^)" >> "$GITHUB_ENV"
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -37,6 +43,8 @@ jobs:
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-email-report
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: node .github/browser/inline-email-validation.mjs
       - uses: actions/upload-artifact@v7
         if: always()
