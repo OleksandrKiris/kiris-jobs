@@ -1,0 +1,32 @@
+{
+  "sourceRuntimeBase": "33972a6049e71536562bae884be31d398eb8b11a",
+  "sourceKeysAreNotScreenEvidence": true,
+  "invalidAges": [
+    17,
+    100
+  ],
+  "recoveryAge": 30,
+  "labels": {
+    "pl": "Wpisz wiek jako liczbę całkowitą od 18 do 99.",
+    "uk": "Вкажіть вік цілим числом від 18 до 99.",
+    "ru": "Укажите возраст целым числом от 18 до 99.",
+    "en": "Enter a whole-number age from 18 to 99.",
+    "ka": "მიუთითეთ ასაკი მთელი რიცხვით 18-დან 99-მდე.",
+    "az": "Yaşı 18-dən 99-a qədər tam ədədlə daxil edin.",
+    "hy": "Մուտքագրեք տարիքը՝ 18-ից 99 ամբողջ թվով։",
+    "tr": "Yaşınızı 18 ile 99 arasında bir tam sayı olarak girin.",
+    "uz": "Yoshingizni 18 dan 99 gacha butun son bilan kiriting.",
+    "ky": "Жашыңызды 18ден 99га чейинки бүтүн сан менен жазыңыз.",
+    "tg": "Синни худро бо адади бутуни аз 18 то 99 ворид кунед.",
+    "kk": "Жасыңызды 18 бен 99 аралығындағы бүтін санмен енгізіңіз.",
+    "hi": "उम्र 18 से 99 के बीच पूर्ण संख्या में दर्ज करें।",
+    "bn": "১৮ থেকে ৯৯-এর মধ্যে পূর্ণসংখ্যায় বয়স লিখুন।",
+    "ne": "उमेर १८ देखि ९९ सम्मको पूर्णाङ्कमा लेख्नुहोस्।",
+    "ur": "عمر 18 سے 99 کے درمیان صحیح عدد میں درج کریں۔",
+    "si": "වයස 18 සිට 99 දක්වා පූර්ණ සංඛ්‍යාවකින් ඇතුළත් කරන්න.",
+    "fil": "Ilagay ang edad bilang buong numero mula 18 hanggang 99.",
+    "id": "Masukkan usia berupa bilangan bulat dari 18 hingga 99.",
+    "vi": "Nhập tuổi bằng số nguyên từ 18 đến 99."
+  },
+  "sourceAssessment": "Actual80-case diagnostic40081037601 plus personal80-field review; existing integer18–99rule unchanged."
+}
