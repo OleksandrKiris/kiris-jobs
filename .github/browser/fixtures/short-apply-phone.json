@@ -1,0 +1,26 @@
+{
+  "sourceRuntimeBase": "be598d2c95b564031875860e0b33aba953c0af7f",
+  "sourceAssessment": "local-evidence:personal-repair-pass-canonical-inline-email/next-phone-source-assessment.json",
+  "labels": {
+    "pl": "Podaj poprawny międzynarodowy numer telefonu zawierający co najmniej 7 cyfr.",
+    "uk": "Введіть правильний міжнародний номер телефону, що містить щонайменше 7 цифр.",
+    "ru": "Введите корректный международный номер телефона, содержащий не менее 7 цифр.",
+    "en": "Enter a valid international phone number containing at least 7 digits.",
+    "ka": "შეიყვანეთ სწორი საერთაშორისო ნომერი მინიმუმ 7 ციფრით.",
+    "az": "Ən azı 7 rəqəmdən ibarət düzgün beynəlxalq telefon nömrəsi daxil edin.",
+    "hy": "Մուտքագրեք առնվազն 7 թվանշան պարունակող ճիշտ միջազգային համար։",
+    "tr": "En az 7 rakam içeren geçerli bir uluslararası telefon numarası girin.",
+    "uz": "Kamida 7 raqamdan iborat to‘g‘ri xalqaro telefon raqamini kiriting.",
+    "ky": "Кеминде 7 цифрадан турган туура эл аралык номерди киргизиңиз.",
+    "tg": "Рақами дурусти байналмилалиро бо камаш 7 рақам ворид кунед.",
+    "kk": "Кемінде 7 цифры бар дұрыс халықаралық нөмірді енгізіңіз.",
+    "hi": "कम से कम 7 अंकों वाला सही अंतरराष्ट्रीय फ़ोन नंबर दर्ज करें।",
+    "bn": "কমপক্ষে ৭ সংখ্যার সঠিক আন্তর্জাতিক ফোন নম্বর লিখুন।",
+    "ne": "कम्तीमा ७ अंक भएको सही अन्तर्राष्ट्रिय फोन नम्बर लेख्नुहोस्।",
+    "ur": "کم از کم 7 ہندسوں والا درست بین الاقوامی فون نمبر درج کریں۔",
+    "si": "අවම වශයෙන් ඉලක්කම් 7ක් ඇති වලංගු ජාත්‍යන්තර අංකයක් ඇතුළත් කරන්න.",
+    "fil": "Maglagay ng wastong international phone number na may hindi bababa sa 7 digit.",
+    "id": "Masukkan nomor telepon internasional yang benar dengan sedikitnya 7 digit.",
+    "vi": "Nhập số điện thoại quốc tế hợp lệ có ít nhất 7 chữ số."
+  }
+}

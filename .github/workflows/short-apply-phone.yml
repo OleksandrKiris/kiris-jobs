@@ -1,0 +1,47 @@
+name: Short form phone validation
+
+on:
+  push:
+    branches: [codex/personal-short-apply-phone]
+    paths:
+      - .github/browser/short-apply-phone.mjs
+      - .github/browser/fixtures/short-apply-phone.json
+      - .github/workflows/short-apply-phone.yml
+
+permissions:
+  contents: read
+
+jobs:
+  phone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Stage exact unchanged public source
+        run: |
+          echo "TESTED_HEAD=$GITHUB_SHA" >> "$GITHUB_ENV"
+          echo "TESTED_BASE=$(git rev-parse HEAD^)" >> "$GITHUB_ENV"
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Phone-only error and correction without delivery
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-phone-report
+        run: node .github/browser/short-apply-phone.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: short-apply-phone
+          path: ${{ runner.temp }}/primserv-phone-report
+          if-no-files-found: error
