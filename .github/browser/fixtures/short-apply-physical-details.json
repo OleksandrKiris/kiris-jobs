@@ -1,0 +1,108 @@
+{
+  "publishedMain": "77408501936e535fa4334903cc50bc365faa7ce0",
+  "priorWipHead": "b5a5316e43e9aa6c5be91de69cb499c775e8c6b4",
+  "sourceKeysAreNotScreenEvidence": true,
+  "existing40FlowErrorAssertionsPreserved": true,
+  "messages": {
+    "pl": {
+      "required": "Pole wymagane",
+      "label": "Gdzie i jak długo pracowałeś/-aś?",
+      "hint": "Krótko podaj miejsce, obowiązki i przybliżony okres pracy."
+    },
+    "uk": {
+      "required": "Обов’язкове поле",
+      "label": "Де і як довго ви працювали?",
+      "hint": "Коротко вкажіть місце, обов’язки та приблизний період роботи."
+    },
+    "ru": {
+      "required": "Обязательное поле",
+      "label": "Где и как долго вы работали?",
+      "hint": "Коротко укажите место, обязанности и примерный период работы."
+    },
+    "en": {
+      "required": "Required field",
+      "label": "Where did you work and for how long?",
+      "hint": "Briefly state the workplace, duties and approximate duration."
+    },
+    "ka": {
+      "required": "სავალდებულო ველი",
+      "label": "სად და რამდენ ხანს მუშაობდით?",
+      "hint": "მოკლედ მიუთითეთ სამუშაო ადგილი, მოვალეობები და მუშაობის სავარაუდო ხანგრძლივობა."
+    },
+    "az": {
+      "required": "Məcburi sahə",
+      "label": "Harada və nə qədər müddət işləmisiniz?",
+      "hint": "İş yerini, vəzifələrinizi və təxmini iş müddətini qısaca yazın."
+    },
+    "hy": {
+      "required": "Պարտադիր դաշտ",
+      "label": "Որտե՞ղ և որքա՞ն ժամանակ եք աշխատել։",
+      "hint": "Համառոտ նշեք աշխատավայրը, պարտականությունները և աշխատանքի մոտավոր տևողությունը։"
+    },
+    "tr": {
+      "required": "Zorunlu alan",
+      "label": "Nerede ve ne kadar süre çalıştınız?",
+      "hint": "İş yerini, görevlerinizi ve yaklaşık çalışma süresini kısaca belirtin."
+    },
+    "uz": {
+      "required": "Majburiy maydon",
+      "label": "Qayerda va qancha vaqt ishlagansiz?",
+      "hint": "Ish joyi, vazifalaringiz va taxminiy ishlagan muddatingizni qisqacha yozing."
+    },
+    "ky": {
+      "required": "Милдеттүү талаа",
+      "label": "Кайда жана канча убакыт иштедиңиз?",
+      "hint": "Иштеген жериңизди, милдеттериңизди жана болжолдуу мөөнөтүн кыскача жазыңыз."
+    },
+    "tg": {
+      "required": "Майдони ҳатмӣ",
+      "label": "Дар куҷо ва чанд вақт кор кардаед?",
+      "hint": "Ҷойи кор, вазифаҳо ва давомнокии тахминиро кӯтоҳ нависед."
+    },
+    "kk": {
+      "required": "Міндетті өріс",
+      "label": "Қайда және қанша уақыт жұмыс істедіңіз?",
+      "hint": "Жұмыс орнын, міндеттеріңізді және шамамен қанша уақыт істегеніңізді қысқаша жазыңыз."
+    },
+    "hi": {
+      "required": "आवश्यक फ़ील्ड",
+      "label": "आपने कहाँ और कितने समय तक काम किया?",
+      "hint": "काम की जगह, ज़िम्मेदारियाँ और लगभग कितने समय तक काम किया, संक्षेप में बताएँ।"
+    },
+    "bn": {
+      "required": "আবশ্যক ঘর",
+      "label": "কোথায় এবং কতদিন কাজ করেছেন?",
+      "hint": "কর্মস্থল, দায়িত্ব এবং কাজের আনুমানিক মেয়াদ সংক্ষেপে লিখুন।"
+    },
+    "ne": {
+      "required": "अनिवार्य क्षेत्र",
+      "label": "कहाँ र कति समय काम गर्नुभयो?",
+      "hint": "कार्यस्थल, जिम्मेवारी र काम गरेको अनुमानित अवधि छोटकरीमा लेख्नुहोस्।"
+    },
+    "ur": {
+      "required": "لازمی خانہ",
+      "label": "آپ نے کہاں اور کتنی مدت کام کیا؟",
+      "hint": "کام کی جگہ، ذمہ داریاں اور کام کی اندازاً مدت مختصراً لکھیں۔"
+    },
+    "si": {
+      "required": "අනිවාර්ය ක්ෂේත්‍රය",
+      "label": "ඔබ වැඩ කළේ කොහේද සහ කොපමණ කාලයක්ද?",
+      "hint": "සේවා ස්ථානය, රාජකාරි සහ සේවය කළ ආසන්න කාලය කෙටියෙන් සඳහන් කරන්න."
+    },
+    "fil": {
+      "required": "Kailangang sagutan",
+      "label": "Saan at gaano katagal ka nagtrabaho?",
+      "hint": "Maikling ilahad ang lugar, mga tungkulin, at tinatayang tagal ng trabaho."
+    },
+    "id": {
+      "required": "Wajib diisi",
+      "label": "Di mana dan berapa lama Anda bekerja?",
+      "hint": "Tuliskan secara singkat tempat kerja, tugas, dan perkiraan lama bekerja."
+    },
+    "vi": {
+      "required": "Trường bắt buộc",
+      "label": "Bạn đã làm việc ở đâu và trong bao lâu?",
+      "hint": "Ghi ngắn gọn nơi làm việc, nhiệm vụ và khoảng thời gian đã làm."
+    }
+  }
+}
