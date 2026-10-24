@@ -1,12 +1,12 @@
 name: Short form required validation
 
 on:
-  push:
-    branches: [codex/personal-short-apply-required]
+  pull_request:
     paths:
       - .github/browser/short-apply-required.mjs
       - .github/browser/fixtures/short-apply-required.json
       - .github/workflows/short-apply-required.yml
+      - apply/**
 
 permissions:
   contents: read
@@ -24,10 +24,10 @@ jobs:
           node-version: 22
       - name: Exact event base and staged publication
         env:
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: unused-for-push
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          git fetch --no-tags --depth=1 origin 2c7ea4157eec621d6a540a861b592f5cfb354ff4
+          python quality/security/exact_base.py
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
           git diff --exit-code
@@ -37,15 +37,12 @@ jobs:
           "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
       - name: Required-field errors and correction without delivery
         env:
-          CASE_SCOPE: gender
           PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
           PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
           BROWSER_REPORT: ${{ runner.temp }}/primserv-required-report
-          TESTED_HEAD: ${{ github.sha }}
-          TESTED_BASE: unused-for-push
-        run: |
-          export TESTED_BASE="$(git rev-parse HEAD^)"
-          node .github/browser/short-apply-required.mjs
+          TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          TESTED_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/browser/short-apply-required.mjs
       - uses: actions/upload-artifact@v7
         if: always()
         with:

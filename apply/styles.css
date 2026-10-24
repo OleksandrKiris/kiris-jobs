@@ -504,6 +504,7 @@ h1,h2,h3,p,strong,small,span,em{overflow-wrap:anywhere}
   cursor:pointer;
 }
 .choice-card input{position:absolute;opacity:0;pointer-events:none}
+.choice-card:focus-within{outline:3px solid var(--ink);outline-offset:2px}
 .choice-card.selected{border-color:var(--green-light);background:#effaf4;box-shadow:0 0 0 3px rgba(21,147,90,.10)}
 .choice-card:has(input:checked){border-color:var(--green-light);background:#effaf4;box-shadow:0 0 0 3px rgba(21,147,90,.10)}
 .choice-icon{
