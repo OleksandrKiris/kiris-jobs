@@ -68,6 +68,24 @@ jobs:
           TESTED_HEAD: ${{ github.event.pull_request.head.sha }}
           TESTED_BASE: ${{ github.event.pull_request.base.sha }}
         run: python quality/security/exact_base.py
+      - name: Restore exact historical PDF regression sources
+        if: matrix.gate == 'pdf'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pdf_checkout=$(git rev-parse HEAD)
+          for pdf_source in \
+            3fb5e53647a4fc025ad8fb8621308ce7f1a6e11a \
+            3aa1f00163de5342d2c67c2af0adf92da909cd5f \
+            93d0c2c5b98d2e56e4fa523d4b120db14de79785 \
+            7eed857e3e286bafd2ab4d95f02d5abd62a451aa
+          do
+            if ! git cat-file -e "$pdf_source^{commit}"; then
+              timeout 60s git fetch --no-tags --depth=1 --filter=blob:none origin "$pdf_source"
+            fi
+            git cat-file -e "$pdf_source^{commit}"
+          done
+          test "$(git rev-parse HEAD)" = "$pdf_checkout"
       # Every independent gate builds and verifies the same exact staged input.
       # Browser tooling and evidence stay outside the public artifact.
       - name: Build and verify Pages artifact

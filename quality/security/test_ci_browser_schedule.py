@@ -34,6 +34,17 @@ def validate(text):
         raise ValueError('Browser jobs require all unit/publication checks')
     if not re.search(r'(?m)^      fail-fast: false$', browser):
         raise ValueError('One browser failure must not cancel other evidence')
+    restore = next((step for step in re.split(r'(?m)^      - ', browser)
+                    if step.startswith('name: Restore exact historical PDF regression sources')), '')
+    pdf_sources = set()
+    for fixture in ('apply-pdf.mjs', 'pdf-photo-acceptance.mjs', 'pdf-width.mjs'):
+        source = (WORKFLOW.parents[2] / '.github/browser' / fixture).read_text(encoding='utf-8')
+        pdf_sources.update(re.findall(r"'([0-9a-f]{40})'", source))
+    if (set(re.findall(r'\b[0-9a-f]{40}\b', restore)) != pdf_sources
+            or "if: matrix.gate == 'pdf'" not in restore
+            or 'timeout 60s git fetch --no-tags --depth=1 --filter=blob:none origin "$pdf_source"' not in restore
+            or 'test "$(git rev-parse HEAD)" = "$pdf_checkout"' not in restore):
+        raise ValueError('Independent PDF job needs every exact original source without changing checkout')
     for block in (unit, browser):
         if not re.search(r'(?m)^    timeout-minutes: 15$', block):
             raise ValueError('Keep each original fifteen-minute bound')
@@ -119,6 +130,8 @@ class BrowserScheduleTests(unittest.TestCase):
             ('TESTED_BASE: ${{ github.event.pull_request.base.sha }}', 'TESTED_BASE: main'),
             ('playwright@1.56.1', 'playwright@latest'),
             ('-${{ matrix.gate }}', ''),
+            ('3fb5e53647a4fc025ad8fb8621308ce7f1a6e11a', '0000000000000000000000000000000000000000'),
+            ('timeout 60s git fetch', 'git fetch'),
         ]
         for before, after in mutations:
             with self.subTest(before=before):
