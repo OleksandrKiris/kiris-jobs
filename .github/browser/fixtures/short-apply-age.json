@@ -1,0 +1,31 @@
+{
+  "sourceRuntimeBase": "33972a6049e71536562bae884be31d398eb8b11a",
+  "sourceKeysAreNotScreenEvidence": true,
+  "invalidAges": [
+    17,
+    100
+  ],
+  "recoveryAge": 30,
+  "labels": {
+    "pl": "Zgłoszenie jest dostępne wyłącznie dla osób, które ukończyły 18 lat.",
+    "uk": "Анкету можуть надсилати лише особи віком від 18 років.",
+    "ru": "Анкету могут отправлять только лица старше 18 лет.",
+    "en": "The application is available only to people aged 18 or over.",
+    "ka": "განაცხადის შევსება შეუძლიათ მხოლოდ 18 წლის ან უფროს პირებს.",
+    "az": "Anket yalnız 18 yaş və yuxarı şəxslər üçündür.",
+    "hy": "Հայտը հասանելի է միայն 18 տարին լրացած անձանց համար։",
+    "tr": "Başvuru yalnızca 18 yaş ve üzeri kişiler içindir.",
+    "uz": "Anketa faqat 18 yosh va undan katta shaxslar uchun.",
+    "ky": "Анкета 18 жаштан жогору адамдар үчүн.",
+    "tg": "Анкета барои шахсони аз 18-сола боло аст.",
+    "kk": "Анкета 18 жастан асқан адамдарға арналған.",
+    "hi": "आवेदन केवल 18 वर्ष या उससे अधिक आयु के लोगों के लिए है।",
+    "bn": "আবেদনটি শুধুমাত্র ১৮ বছর বা তার বেশি বয়সীদের জন্য।",
+    "ne": "आवेदन १८ वर्ष वा माथिका व्यक्तिका लागि मात्र हो।",
+    "ur": "درخواست صرف 18 سال یا اس سے زیادہ عمر والوں کے لیے ہے۔",
+    "si": "අයදුම්පත වයස අවුරුදු 18 හෝ වැඩි අය සඳහා පමණි.",
+    "fil": "Para lamang sa edad 18 pataas ang aplikasyon.",
+    "id": "Formulir hanya untuk usia 18 tahun ke atas.",
+    "vi": "Đơn chỉ dành cho người từ 18 tuổi trở lên."
+  }
+}
