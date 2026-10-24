@@ -92,9 +92,10 @@ async function upgrade(width){
    await page.waitForFunction(async({headCache,url})=>Boolean(await(await caches.open(headCache)).match(url)),{headCache,url});
    assert.equal(await cachedFormHash(page,headCache,url),sha(headFiles.get(`data/locales/${lang}.js`)));
   }
-  await origin.stop();stopped=true;await ctx.setOffline(true);await assert.rejects(fetch(base));await page.reload();await resume(page);assert.deepEqual(await values(page),restored,'Offline resume must retain the same privacy boundary');
+  const beforeOffline=await values(page);assert.deepEqual(beforeOffline,{...restored,preferredLanguage:Object.keys(labels).at(-1)},'Preferred contact language follows the last chosen UI language');
+  await origin.stop();stopped=true;await ctx.setOffline(true);await assert.rejects(fetch(base));await page.reload();await resume(page);assert.deepEqual(await values(page),beforeOffline,'Offline resume must retain the same privacy boundary and latest chosen language');
   for(const lang of Object.keys(labels))await run({width,lang,page});
-  report.upgrades.push({width,ref:oldRef,oldCache,headCache,oldFormExact:true,newFormExact:true,localesExact:Object.keys(labels),originStopped:true,offlineReload:true,preferredLanguagePreserved:true,sensitiveFieldsNotPersisted:true,status:'passed'});
+  report.upgrades.push({width,ref:oldRef,oldCache,headCache,oldFormExact:true,newFormExact:true,localesExact:Object.keys(labels),originStopped:true,offlineReload:true,preferredLanguagePreserved:true,preferredLanguageBeforeOffline:beforeOffline.preferredLanguage,sensitiveFieldsNotPersisted:true,status:'passed'});
  }finally{for(const[p,bytes]of headFiles)await writeFile(join(artifact,p),bytes);await ctx.close();if(stopped)await origin.start();}
 }
 try{
