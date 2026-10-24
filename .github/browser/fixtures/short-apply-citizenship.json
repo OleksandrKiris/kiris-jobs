@@ -1,0 +1,149 @@
+{
+  "publishedMain": "eb6d9c18cc9be39df295defdda4eea2319079cf3",
+  "sourceKeysAreNotScreenEvidence": true,
+  "scope": "Only isolated missing citizenship text; other required fields valid anonymous fixtures. No delivery, device, offline or native-speaker certification.",
+  "labels": {
+    "pl": "Pole wymagane",
+    "uk": "Обов’язкове поле",
+    "ru": "Обязательное поле",
+    "en": "Required field",
+    "ka": "სავალდებულო ველი",
+    "az": "Məcburi sahə",
+    "hy": "Պարտադիր դաշտ",
+    "tr": "Zorunlu alan",
+    "uz": "Majburiy maydon",
+    "ky": "Милдеттүү талаа",
+    "tg": "Майдони ҳатмӣ",
+    "kk": "Міндетті өріс",
+    "hi": "आवश्यक फ़ील्ड",
+    "bn": "আবশ্যক ঘর",
+    "ne": "अनिवार्य क्षेत्र",
+    "ur": "لازمی خانہ",
+    "si": "අනිවාර්ය ක්ෂේත්‍රය",
+    "fil": "Kailangang sagutan",
+    "id": "Wajib diisi",
+    "vi": "Trường bắt buộc"
+  },
+  "messages": {
+    "pl": {
+      "required": "Pole wymagane",
+      "label": "Obywatelstwo",
+      "hint": "Możesz wpisać kraj albo krótki kod, np. UKR, GEO lub AZE.",
+      "placeholder": "Np. UKR"
+    },
+    "uk": {
+      "required": "Обов’язкове поле",
+      "label": "Громадянство",
+      "hint": "Можна вказати країну або короткий код, наприклад UKR, GEO чи AZE.",
+      "placeholder": "Наприклад UKR"
+    },
+    "ru": {
+      "required": "Обязательное поле",
+      "label": "Гражданство",
+      "hint": "Можно указать страну или короткий код, например UKR, GEO или AZE.",
+      "placeholder": "Например UKR"
+    },
+    "en": {
+      "required": "Required field",
+      "label": "Citizenship",
+      "hint": "You may enter a country or a short code, for example UKR, GEO or AZE.",
+      "placeholder": "For example UKR"
+    },
+    "ka": {
+      "required": "სავალდებულო ველი",
+      "label": "მოქალაქეობა",
+      "hint": "შეგიძლიათ მიუთითოთ ქვეყანა ან მოკლე კოდი, მაგალითად UKR, GEO ან AZE.",
+      "placeholder": "მაგალითად GEO"
+    },
+    "az": {
+      "required": "Məcburi sahə",
+      "label": "Vətəndaşlıq",
+      "hint": "Ölkə adını və ya qısa kodu yaza bilərsiniz, məsələn UKR, GEO və ya AZE.",
+      "placeholder": "Məsələn AZE"
+    },
+    "hy": {
+      "required": "Պարտադիր դաշտ",
+      "label": "Քաղաքացիություն",
+      "hint": "Կարող եք նշել երկիրը կամ կարճ կոդը, օրինակ՝ UKR, GEO կամ AZE։",
+      "placeholder": "Օրինակ՝ ARM"
+    },
+    "tr": {
+      "required": "Zorunlu alan",
+      "label": "Vatandaşlık",
+      "hint": "Ülke adını veya kısa kodunu yazabilirsiniz, örneğin UKR, GEO veya AZE.",
+      "placeholder": "Örneğin TUR"
+    },
+    "uz": {
+      "required": "Majburiy maydon",
+      "label": "Fuqarolik",
+      "hint": "Mamlakat nomini yoki qisqa kodini yozishingiz mumkin, masalan UKR, GEO yoki AZE.",
+      "placeholder": "Masalan UZB"
+    },
+    "ky": {
+      "required": "Милдеттүү талаа",
+      "label": "Жарандыгы",
+      "hint": "Өлкөнүн атын же UKR, GEO, AZE сыяктуу кыска кодду киргизсеңиз болот.",
+      "placeholder": "Мисалы, UKR"
+    },
+    "tg": {
+      "required": "Майдони ҳатмӣ",
+      "label": "Шаҳрвандӣ",
+      "hint": "Номи кишвар ё рамзи кӯтоҳ, масалан UKR, GEO ё AZE-ро ворид кардан мумкин аст.",
+      "placeholder": "Масалан, UKR"
+    },
+    "kk": {
+      "required": "Міндетті өріс",
+      "label": "Азаматтық",
+      "hint": "Ел атауын немесе UKR, GEO, AZE сияқты қысқа кодты енгізуге болады.",
+      "placeholder": "Мысалы, UKR"
+    },
+    "hi": {
+      "required": "आवश्यक फ़ील्ड",
+      "label": "नागरिकता",
+      "hint": "आप देश का नाम या उसका छोटा कोड लिख सकते हैं, जैसे UKR, GEO या AZE।",
+      "placeholder": "उदाहरण: IND"
+    },
+    "bn": {
+      "required": "আবশ্যক ঘর",
+      "label": "নাগরিকত্ব",
+      "hint": "দেশের নাম বা সংক্ষিপ্ত কোড লিখতে পারেন, যেমন UKR, GEO বা AZE।",
+      "placeholder": "যেমন UKR"
+    },
+    "ne": {
+      "required": "अनिवार्य क्षेत्र",
+      "label": "नागरिकता",
+      "hint": "देशको नाम वा छोटो कोड लेख्न सक्नुहुन्छ, जस्तै UKR, GEO वा AZE।",
+      "placeholder": "उदाहरण: NPL"
+    },
+    "ur": {
+      "required": "لازمی خانہ",
+      "label": "شہریت",
+      "hint": "ملک کا نام یا مختصر کوڈ درج کر سکتے ہیں، مثلاً UKR، GEO یا AZE۔",
+      "placeholder": "مثلاً UKR"
+    },
+    "si": {
+      "required": "අනිවාර්ය ක්ෂේත්‍රය",
+      "label": "පුරවැසිභාවය",
+      "hint": "රටේ නම හෝ UKR, GEO, AZE වැනි කෙටි කේතයක් ඇතුළත් කළ හැක.",
+      "placeholder": "උදාහරණයක් ලෙස UKR"
+    },
+    "fil": {
+      "required": "Kailangang sagutan",
+      "label": "Pagkamamamayan",
+      "hint": "Maaari mong ilagay ang bansa o maikling code, halimbawa UKR, GEO, o AZE.",
+      "placeholder": "Halimbawa PHL"
+    },
+    "id": {
+      "required": "Wajib diisi",
+      "label": "Kewarganegaraan",
+      "hint": "Anda dapat menulis nama negara atau kode singkat, misalnya UKR, GEO, atau AZE.",
+      "placeholder": "Misalnya IDN"
+    },
+    "vi": {
+      "required": "Trường bắt buộc",
+      "label": "Quốc tịch",
+      "hint": "Bạn có thể nhập tên quốc gia hoặc mã ngắn, ví dụ UKR, GEO hoặc AZE.",
+      "placeholder": "Ví dụ VNM"
+    }
+  }
+}
