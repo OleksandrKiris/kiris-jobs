@@ -1,0 +1,312 @@
+{
+  "sourceRuntimeBase": "2c7ea4157eec621d6a540a861b592f5cfb354ff4",
+  "sourceKeysAreNotScreenEvidence": true,
+  "scope": "Isolated missing messenger-select and gender-radio group errors; native option-popup/device/native-speaker/offline certification excluded.",
+  "labels": {
+    "pl": "Pole wymagane",
+    "uk": "Обов’язкове поле",
+    "ru": "Обязательное поле",
+    "en": "Required field",
+    "ka": "სავალდებულო ველი",
+    "az": "Məcburi sahə",
+    "hy": "Պարտադիր դաշտ",
+    "tr": "Zorunlu alan",
+    "uz": "Majburiy maydon",
+    "ky": "Милдеттүү талаа",
+    "tg": "Майдони ҳатмӣ",
+    "kk": "Міндетті өріс",
+    "hi": "आवश्यक फ़ील्ड",
+    "bn": "আবশ্যক ঘর",
+    "ne": "अनिवार्य क्षेत्र",
+    "ur": "لازمی خانہ",
+    "si": "අනිවාර්ය ක්ෂේත්‍රය",
+    "fil": "Kailangang sagutan",
+    "id": "Wajib diisi",
+    "vi": "Trường bắt buộc"
+  },
+  "messages": {
+    "pl": {
+      "required": "Pole wymagane",
+      "label": "Preferowany komunikator",
+      "placeholder": "Wybierz opcję",
+      "recovery": "Telegram"
+    },
+    "uk": {
+      "required": "Обов’язкове поле",
+      "label": "Бажаний месенджер",
+      "placeholder": "Оберіть варіант",
+      "recovery": "Telegram"
+    },
+    "ru": {
+      "required": "Обязательное поле",
+      "label": "Предпочитаемый мессенджер",
+      "placeholder": "Выберите вариант",
+      "recovery": "Telegram"
+    },
+    "en": {
+      "required": "Required field",
+      "label": "Preferred messenger",
+      "placeholder": "Select an option",
+      "recovery": "Telegram"
+    },
+    "ka": {
+      "required": "სავალდებულო ველი",
+      "label": "სასურველი მესენჯერი",
+      "placeholder": "აირჩიეთ ვარიანტი",
+      "recovery": "Telegram"
+    },
+    "az": {
+      "required": "Məcburi sahə",
+      "label": "Üstünlük verilən messencer",
+      "placeholder": "Variant seçin",
+      "recovery": "Telegram"
+    },
+    "hy": {
+      "required": "Պարտադիր դաշտ",
+      "label": "Նախընտրելի հաղորդագրության ծրագիր",
+      "placeholder": "Ընտրեք տարբերակը",
+      "recovery": "Telegram"
+    },
+    "tr": {
+      "required": "Zorunlu alan",
+      "label": "Tercih edilen mesajlaşma uygulaması",
+      "placeholder": "Bir seçenek seçin",
+      "recovery": "Telegram"
+    },
+    "uz": {
+      "required": "Majburiy maydon",
+      "label": "Afzal ko‘rilgan messenjer",
+      "placeholder": "Variantni tanlang",
+      "recovery": "Telegram"
+    },
+    "ky": {
+      "required": "Милдеттүү талаа",
+      "label": "Каалаган мессенжер",
+      "placeholder": "Тандаңыз",
+      "recovery": "Telegram"
+    },
+    "tg": {
+      "required": "Майдони ҳатмӣ",
+      "label": "Паёмрасони афзал",
+      "placeholder": "Интихоб кунед",
+      "recovery": "Telegram"
+    },
+    "kk": {
+      "required": "Міндетті өріс",
+      "label": "Қалаған мессенджер",
+      "placeholder": "Таңдаңыз",
+      "recovery": "Telegram"
+    },
+    "hi": {
+      "required": "आवश्यक फ़ील्ड",
+      "label": "पसंदीदा मैसेंजर",
+      "placeholder": "एक विकल्प चुनें",
+      "recovery": "Telegram"
+    },
+    "bn": {
+      "required": "আবশ্যক ঘর",
+      "label": "পছন্দের মেসেঞ্জার",
+      "placeholder": "একটি বিকল্প নির্বাচন করুন",
+      "recovery": "Telegram"
+    },
+    "ne": {
+      "required": "अनिवार्य क्षेत्र",
+      "label": "रुचाइएको मेसेन्जर",
+      "placeholder": "विकल्प छान्नुहोस्",
+      "recovery": "Telegram"
+    },
+    "ur": {
+      "required": "لازمی خانہ",
+      "label": "پسندیدہ میسنجر",
+      "placeholder": "ایک آپشن منتخب کریں",
+      "recovery": "Telegram"
+    },
+    "si": {
+      "required": "අනිවාර්ය ක්ෂේත්‍රය",
+      "label": "කැමති පණිවිඩ යෙදුම",
+      "placeholder": "විකල්පයක් තෝරන්න",
+      "recovery": "Telegram"
+    },
+    "fil": {
+      "required": "Kailangang sagutan",
+      "label": "Gustong messenger",
+      "placeholder": "Pumili ng opsyon",
+      "recovery": "Telegram"
+    },
+    "id": {
+      "required": "Wajib diisi",
+      "label": "Aplikasi pesan pilihan",
+      "placeholder": "Pilih opsi",
+      "recovery": "Telegram"
+    },
+    "vi": {
+      "required": "Trường bắt buộc",
+      "label": "Ứng dụng nhắn tin ưu tiên",
+      "placeholder": "Chọn một mục",
+      "recovery": "Telegram"
+    }
+  },
+  "publishedMain": "2c7ea4157eec621d6a540a861b592f5cfb354ff4",
+  "gender": {
+    "pl": {
+      "label": "Płeć",
+      "options": {
+        "female": "Kobieta",
+        "male": "Mężczyzna",
+        "undisclosed": "Wolę nie podawać"
+      }
+    },
+    "uk": {
+      "label": "Стать",
+      "options": {
+        "female": "Жінка",
+        "male": "Чоловік",
+        "undisclosed": "Не хочу вказувати"
+      }
+    },
+    "ru": {
+      "label": "Пол",
+      "options": {
+        "female": "Женщина",
+        "male": "Мужчина",
+        "undisclosed": "Не хочу указывать"
+      }
+    },
+    "en": {
+      "label": "Gender",
+      "options": {
+        "female": "Woman",
+        "male": "Man",
+        "undisclosed": "Prefer not to say"
+      }
+    },
+    "ka": {
+      "label": "სქესი",
+      "options": {
+        "female": "ქალი",
+        "male": "კაცი",
+        "undisclosed": "არ მსურს მითითება"
+      }
+    },
+    "az": {
+      "label": "Cins",
+      "options": {
+        "female": "Qadın",
+        "male": "Kişi",
+        "undisclosed": "Bildirmək istəmirəm"
+      }
+    },
+    "hy": {
+      "label": "Սեռ",
+      "options": {
+        "female": "Կին",
+        "male": "Տղամարդ",
+        "undisclosed": "Նախընտրում եմ չնշել"
+      }
+    },
+    "tr": {
+      "label": "Cinsiyet",
+      "options": {
+        "female": "Kadın",
+        "male": "Erkek",
+        "undisclosed": "Belirtmek istemiyorum"
+      }
+    },
+    "uz": {
+      "label": "Jins",
+      "options": {
+        "female": "Ayol",
+        "male": "Erkak",
+        "undisclosed": "Ko‘rsatishni istamayman"
+      }
+    },
+    "ky": {
+      "label": "Жынысы",
+      "options": {
+        "female": "Аял",
+        "male": "Эркек",
+        "undisclosed": "Айткым келбейт"
+      }
+    },
+    "tg": {
+      "label": "Ҷинс",
+      "options": {
+        "female": "Зан",
+        "male": "Мард",
+        "undisclosed": "Намехоҳам бигӯям"
+      }
+    },
+    "kk": {
+      "label": "Жынысы",
+      "options": {
+        "female": "Әйел",
+        "male": "Ер",
+        "undisclosed": "Айтқым келмейді"
+      }
+    },
+    "hi": {
+      "label": "लिंग",
+      "options": {
+        "female": "महिला",
+        "male": "पुरुष",
+        "undisclosed": "बताना नहीं चाहते"
+      }
+    },
+    "bn": {
+      "label": "লিঙ্গ",
+      "options": {
+        "female": "নারী",
+        "male": "পুরুষ",
+        "undisclosed": "বলতে চাই না"
+      }
+    },
+    "ne": {
+      "label": "लिङ्ग",
+      "options": {
+        "female": "महिला",
+        "male": "पुरुष",
+        "undisclosed": "खुलाउन चाहन्न"
+      }
+    },
+    "ur": {
+      "label": "جنس",
+      "options": {
+        "female": "عورت",
+        "male": "مرد",
+        "undisclosed": "بتانا نہیں چاہتا/چاہتی"
+      }
+    },
+    "si": {
+      "label": "ස්ත්‍රී පුරුෂ භාවය",
+      "options": {
+        "female": "කාන්තාව",
+        "male": "පුරුෂයා",
+        "undisclosed": "පැවසීමට කැමති නැත"
+      }
+    },
+    "fil": {
+      "label": "Kasarian",
+      "options": {
+        "female": "Babae",
+        "male": "Lalaki",
+        "undisclosed": "Mas gustong hindi sabihin"
+      }
+    },
+    "id": {
+      "label": "Jenis kelamin",
+      "options": {
+        "female": "Perempuan",
+        "male": "Laki-laki",
+        "undisclosed": "Tidak ingin menyebutkan"
+      }
+    },
+    "vi": {
+      "label": "Giới tính",
+      "options": {
+        "female": "Nữ",
+        "male": "Nam",
+        "undisclosed": "Không muốn cung cấp"
+      }
+    }
+  }
+}
