@@ -36,7 +36,7 @@ async function context(width,serviceWorkers='block'){
  const ctx=await browser.newContext({viewport:{width,height:900},serviceWorkers,reducedMotion:'reduce'});ctx.setDefaultTimeout(15000);
  await ctx.route('**/*',r=>{const q=r.request(),url=new URL(q.url());if(!['GET','HEAD'].includes(q.method())){report.mutations.push({method:q.method(),path:url.pathname,blocked:true});return r.abort();}if(url.origin!==new URL(base).origin){report.external.push({host:url.hostname,path:url.pathname,blocked:true});return r.abort();}return r.continue();});return ctx;
 }
-async function resume(page){if(await page.locator('[data-resume-draft]').isVisible())await page.locator('[data-resume-draft]').click();await page.locator('#application-form').waitFor();}
+async function resume(page){await page.locator('#application-form,[data-resume-draft]').first().waitFor();if(await page.locator('[data-resume-draft]').isVisible())await page.locator('[data-resume-draft]').click();await page.locator('#application-form').waitFor();}
 async function run({width,lang,page:existingPage}){
  const own=!existingPage,ctx=own?await context(width):existingPage.context(),page=existingPage||await ctx.newPage(),errors=[];const onError=e=>errors.push(e.message);page.on('pageerror',onError);
  if(own){await page.goto(base+`vacancies/banana-warehouse-poland/?lang=${lang}&apply=1`);await resume(page);}else await locale(page,lang);
