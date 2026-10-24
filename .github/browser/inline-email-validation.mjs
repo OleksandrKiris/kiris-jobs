@@ -19,7 +19,8 @@ const git=(...args)=>execFileSync('git',args),sha=b=>createHash('sha256').update
 const labels=JSON.parse(await readFile(new URL('./fixtures/inline-email-labels.json',import.meta.url),'utf8'));
 assert.deepEqual(Object.keys(labels).sort(),Object.keys(FORM_ERROR_LABELS).sort());
 const report={head:process.env.TESTED_HEAD,base:process.env.TESTED_BASE,checkout:git('rev-parse','HEAD').toString().trim(),mode:'acceptance',started:new Date().toISOString(),files:{},rows:[],offlineRows:[],upgrades:[],oldRed:[],mutations:[],external:[],limits:['Desktop Chromium at 320/1280; no physical device certification.','Anonymous reserved-domain fixtures; no final delivery or external services.','Existing inline form only; previous 66 form-error scenarios remain independent.']};
-assert.equal(report.checkout,report.head);
+assert.deepEqual(git('show','-s','--format=%P','HEAD').toString().trim().split(' '),[report.base,report.head]);
+assert.equal(git('rev-parse',report.checkout+'^{tree}').toString().trim(),git('rev-parse',report.head+'^{tree}').toString().trim(),'PR merge tree must equal the exact reviewed head');
 for(const {path:p} of inventory(artifact)){
  const source=p.startsWith('tools/coordinator/')?'coordinator-demo/'+p.split('/').at(-1):p;
  const bytes=await readFile(join(artifact,p));assert.deepEqual(bytes,git('show',`${report.head}:${source}`),p);
