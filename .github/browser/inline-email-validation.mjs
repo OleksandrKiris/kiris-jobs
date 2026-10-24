@@ -78,21 +78,23 @@ async function upgrade(width){
   await page.locator('#application-form button[type="submit"]').click();await settledForm(page);
   assert.equal(await page.locator('#application-error').innerText(),FORM_ERROR_LABELS.en.missing);
   const saved=await values(page),formUrl=new URL('assets/application-form.js?v=220&formErrorLocale=1',base).href;
+  const restored={...saved,firstName:'',lastName:'',phone:'',email:''};
+  const privateDraftSafe=await page.evaluate(()=>{const d=JSON.parse(localStorage.getItem('kiris-jobs-application:banana-warehouse-poland'));return ['firstName','lastName','phone','email'].every(k=>!Object.hasOwn(d.values,k));});assert.equal(privateDraftSafe,true);
   assert.equal(await cachedFormHash(page,oldCache,formUrl),sha(git('show',oldRef+':assets/application-form.js')));
   await page.locator('#application-error').screenshot({path:join(reportDir,`email-old-red-${width}-alert.png`)});await page.locator('[name="email"]').locator('..').screenshot({path:join(reportDir,`email-old-red-${width}-field.png`)});report.oldRed.push({width,ref:oldRef,error:FORM_ERROR_LABELS.en.missing,optional:true,status:'expected-failure'});
   for(const [p,bytes]of headFiles)await writeFile(join(artifact,p),bytes);
   await page.evaluate(async()=>{await(await navigator.serviceWorker.ready).update();});
   await page.waitForFunction(async({oldCache,headCache})=>{const keys=await caches.keys();return keys.includes(headCache)&&!keys.includes(oldCache);},{oldCache,headCache});
-  await page.reload();await resume(page);assert.deepEqual(await values(page),saved);
+  await page.reload();await resume(page);assert.deepEqual(await values(page),restored,'Sensitive contact fields must remain excluded from persisted drafts');
   assert.equal(await cachedFormHash(page,headCache,formUrl),sha(headFiles.get('assets/application-form.js')));
   for(const lang of Object.keys(labels)){
    await locale(page,lang);const url=new URL(`data/locales/${lang}.js?v=220`,base).href;
    await page.waitForFunction(async({headCache,url})=>Boolean(await(await caches.open(headCache)).match(url)),{headCache,url});
    assert.equal(await cachedFormHash(page,headCache,url),sha(headFiles.get(`data/locales/${lang}.js`)));
   }
-  await origin.stop();stopped=true;await ctx.setOffline(true);await assert.rejects(fetch(base));await page.reload();await resume(page);assert.deepEqual(await values(page),saved);
+  await origin.stop();stopped=true;await ctx.setOffline(true);await assert.rejects(fetch(base));await page.reload();await resume(page);assert.deepEqual(await values(page),restored,'Offline resume must retain the same privacy boundary');
   for(const lang of Object.keys(labels))await run({width,lang,page});
-  report.upgrades.push({width,ref:oldRef,oldCache,headCache,oldFormExact:true,newFormExact:true,localesExact:Object.keys(labels),originStopped:true,offlineReload:true,draftPreserved:true,status:'passed'});
+  report.upgrades.push({width,ref:oldRef,oldCache,headCache,oldFormExact:true,newFormExact:true,localesExact:Object.keys(labels),originStopped:true,offlineReload:true,preferredLanguagePreserved:true,sensitiveFieldsNotPersisted:true,status:'passed'});
  }finally{for(const[p,bytes]of headFiles)await writeFile(join(artifact,p),bytes);await ctx.close();if(stopped)await origin.start();}
 }
 try{

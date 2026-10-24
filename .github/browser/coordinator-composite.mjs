@@ -128,10 +128,12 @@ try {
   await writeFile(join(reportDir, 'publication-manifest.json'), JSON.stringify(staged, null, 2));
   await writeFile(join(reportDir, 'historical-publication.json'), JSON.stringify({ ref: reused.head, files: historical }, null, 2));
   assert.equal(execFileSync('git', ['hash-object', 'sw.js'], { encoding: 'utf8' }).trim(),
-    '891539399d857f40a4fb3637ba11075517c6bf65', 'This composite requires reviewed SW80 algorithm plus the form-error locale import/cache revision');
+    '01329241955f499a384769d40ac1c2b035234f97', 'This composite requires reviewed SW80 algorithm plus the optional-email cache generation');
   const workerSource=(await readFile(join(artifact,'sw.js'))).toString();
   assert.equal((workerSource.match(/formErrorLocale=1/g)||[]).length,4);
-  const accepted108=workerSource.replace('kiris-jobs-v220-field-status-2026-10-18-2','kiris-jobs-v220-form-error-locale-2026-10-18-1').replaceAll('&fieldStatus=2','');
+  const accepted113=workerSource.replace('kiris-jobs-v220-optional-email-2026-10-24-1','kiris-jobs-v220-field-status-2026-10-18-2');
+  assert.equal(execFileSync('git',['hash-object','--stdin'],{input:accepted113,encoding:'utf8'}).trim(),'891539399d857f40a4fb3637ba11075517c6bf65','Only the optional-email cache generation may differ from accepted PR113 worker');
+  const accepted108=accepted113.replace('kiris-jobs-v220-field-status-2026-10-18-2','kiris-jobs-v220-form-error-locale-2026-10-18-1').replaceAll('&fieldStatus=2','');
   assert.equal(execFileSync('git',['hash-object','--stdin'],{input:accepted108,encoding:'utf8'}).trim(),'725e9cc83e4492bb2e11bc525afce92e441a253c','Only the cache generation and reviewed error-state CSS query may differ from accepted PR108 worker');
   let oldAlgorithm=accepted108.replace('kiris-jobs-v220-form-error-locale-2026-10-18-1','kiris-jobs-v220-card-contrast-2026-10-18-1').replaceAll('&formErrorLocale=1','');
   for(const id of FORM_VACANCY_IDS)oldAlgorithm=oldAlgorithm.replace(',\n  "./vacancies/'+id+'/"','');
