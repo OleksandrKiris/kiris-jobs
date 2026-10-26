@@ -26,6 +26,7 @@ jobs:
           TESTED_HEAD: ${{ github.sha }}
           TESTED_BASE: ${{ github.event.before == '0000000000000000000000000000000000000000' && '4e1a93e54f48cc00c19be5256e13e91e6d4491e5' || github.event.before }}
         run: |
+          git fetch --no-tags origin 4e1a93e54f48cc00c19be5256e13e91e6d4491e5
           test "$(git rev-parse HEAD)" = "$TESTED_HEAD"
           test "$(git rev-parse HEAD^)" = "$TESTED_BASE"
           node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
