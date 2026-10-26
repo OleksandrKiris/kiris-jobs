@@ -46,9 +46,9 @@ jobs:
           test -s apply/config.js
           test -s apply/translations.js
           test -s apply/app.js
-          grep -q 'styles.css?v=17.2.5' apply/index.html
+          grep -q 'styles.css?v=17.2.6' apply/index.html
           grep -q 'translations.js?v=17.0.6' apply/index.html
-          grep -q 'app.js?v=17.2.8' apply/index.html
+          grep -q 'app.js?v=17.2.9' apply/index.html
           grep -q 'href="pdf/"' apply/index.html
           grep -q 'assets/bootstrap.js?v=220' index.html
           grep -q '<loc>https://oleksandrkiris.github.io/kiris-jobs/vacancies/greenhouse-tomatoes/</loc>' sitemap.xml
