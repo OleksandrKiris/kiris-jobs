@@ -13,8 +13,8 @@ permissions:
 
 jobs:
   draft-dismissal:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
