@@ -1,0 +1,54 @@
+name: Published short form draft lifetime and route diagnostic
+
+on:
+  push:
+    branches: [codex/personal-draft-lifetime-route]
+    paths:
+      - .github/browser/short-apply-draft-lifetime-route.mjs
+      - .github/workflows/short-apply-draft-lifetime-route.yml
+
+permissions:
+  contents: read
+
+jobs:
+  draft-lifetime-route:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Exact unchanged published source and staged publication
+        env:
+          TESTED_HEAD: ${{ github.sha }}
+          TESTED_BASE: ${{ github.event.before }}
+        run: |
+          git fetch --no-tags origin 181088556b9494e66a6188a8597f85917b41b580
+          if [ "$TESTED_BASE" = 0000000000000000000000000000000000000000 ]; then TESTED_BASE=181088556b9494e66a6188a8597f85917b41b580; fi
+          git fetch --no-tags origin "$TESTED_BASE"
+          test "$(git rev-parse HEAD^)" = "$TESTED_BASE"
+          echo "DIAGNOSTIC_BASE=$TESTED_BASE" >> "$GITHUB_ENV"
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Anonymous lifetime and route observations without delivery
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-lifetime-report
+          TESTED_HEAD: ${{ github.sha }}
+          TESTED_BASE: ${{ env.DIAGNOSTIC_BASE }}
+        run: node .github/browser/short-apply-draft-lifetime-route.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: short-apply-draft-lifetime-route
+          path: ${{ runner.temp }}/primserv-lifetime-report
+          if-no-files-found: error
