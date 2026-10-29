@@ -228,11 +228,35 @@
   }
 };
 
+  const draftRemovalCopy = Object.freeze({
+  "pl": "Nie udało się usunąć zapisanego szkicu. Spróbuj ponownie.",
+  "uk": "Не вдалося видалити збережену чернетку. Спробуйте ще раз.",
+  "ru": "Не удалось удалить сохранённый черновик. Попробуйте ещё раз.",
+  "en": "The saved draft could not be removed. Try again.",
+  "ka": "შენახული მონახაზის წაშლა ვერ მოხერხდა. სცადეთ ხელახლა.",
+  "az": "Saxlanmış qaralamanı silmək mümkün olmadı. Yenidən cəhd edin.",
+  "hy": "Չհաջողվեց ջնջել պահված սևագիրը։ Փորձեք կրկին։",
+  "tr": "Kaydedilen taslak silinemedi. Tekrar deneyin.",
+  "uz": "Saqlangan qoralamani o‘chirib bo‘lmadi. Qayta urinib ko‘ring.",
+  "tg": "Пешнависи захирашударо нест кардан нашуд. Аз нав кӯшиш кунед.",
+  "ky": "Сакталган каралама өчүрүлгөн жок. Кайра аракет кылыңыз.",
+  "kk": "Сақталған нобайды жою мүмкін болмады. Қайталап көріңіз.",
+  "hi": "सहेजा गया ड्राफ़्ट हटाया नहीं जा सका। फिर से कोशिश करें।",
+  "bn": "সংরক্ষিত খসড়াটি মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
+  "ne": "सुरक्षित गरिएको मस्यौदा हटाउन सकिएन। फेरि प्रयास गर्नुहोस्।",
+  "ur": "محفوظ مسودہ حذف نہیں ہو سکا۔ دوبارہ کوشش کریں۔",
+  "si": "සුරකින ලද කෙටුම්පත මකා දැමිය නොහැකි විය. නැවත උත්සාහ කරන්න.",
+  "fil": "Hindi matanggal ang naka-save na draft. Subukan muli.",
+  "id": "Draf tersimpan tidak dapat dihapus. Coba lagi.",
+  "vi": "Không thể xóa bản nháp đã lưu. Hãy thử lại."
+});
+
   function updateDraftStatus() {
     const status = document.getElementById('draftStatus');
     if (!status) return;
     const messages = draftStatusCopy[state.language || 'en'] || draftStatusCopy.en;
-    const text = draftSaveState === 'idle' ? '' : messages[draftSaveState];
+    const removalText = draftRemovalCopy[state.language || 'en'] || draftRemovalCopy.en;
+    const text = draftSaveState === 'idle' ? '' : draftSaveState === 'clearFailed' ? removalText : messages[draftSaveState];
     if (status.textContent !== text) status.textContent = text;
     status.dataset.state = draftSaveState;
   }
@@ -269,10 +293,17 @@
   }
 
   function clearDraft() {
-    try { localStorage.removeItem(CFG.storageKey); } catch { /* no-op */ }
+    try {
+      localStorage.removeItem(CFG.storageKey);
+    } catch {
+      draftSaveState = 'clearFailed';
+      updateDraftStatus();
+      return false;
+    }
     savedDraft = null;
     draftSaveState = 'idle';
     updateDraftStatus();
+    return true;
   }
 
   function pdfGeneratorUrl() {
@@ -378,7 +409,7 @@
       render();
     });
     app.querySelector('[data-action="discard"]')?.addEventListener('click', () => {
-      clearDraft();
+      if (!clearDraft()) return;
       state = createState();
       render();
     });
@@ -845,13 +876,15 @@
   }
 
   function startNew() {
-    clearDraft();
+    if (!clearDraft()) return;
     state = createState();
     errors = {};
     view = 'language';
     render();
   }
 
-  window.addEventListener('pagehide', saveDraft);
+  window.addEventListener('pagehide', () => {
+    if (draftSaveState === 'saved' || draftSaveState === 'failed') saveDraft();
+  });
   render();
 })();

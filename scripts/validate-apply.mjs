@@ -54,10 +54,10 @@ for (const code of codes) {
 
 const index = read('apply/index.html');
 for (const marker of [
-  'styles.css?v=17.2.5',
+  'styles.css?v=17.2.6',
   'config.js?v=17.0.1',
   'translations.js?v=17.0.6',
-  'app.js?v=17.2.8',
+  'app.js?v=17.2.9',
   '../assets/primserv-avatar.jpg',
   'href="pdf/"',
   'id="app"'
