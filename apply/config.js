@@ -6,6 +6,7 @@
     brand: 'PrimServ',
     privacyUrl: 'https://pposiechnice.pl/?lang=en&page_id=981',
     pdfGeneratorUrl: './pdf/',
+    publicFormUrl: 'https://oleksandrkiris.github.io/kiris-jobs/apply/',
     timeZone: 'Europe/Warsaw',
     storageKey: 'citronex_screening_application_v17',
     draftMaxAgeMs: 24 * 60 * 60 * 1000,
