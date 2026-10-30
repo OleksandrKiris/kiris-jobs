@@ -585,6 +585,257 @@
       </div>`;
   }
 
+  const formLinkCopy = Object.freeze({
+  "pl": [
+    "Udostępnij link do formularza",
+    "Twoje odpowiedzi nie są zawarte w linku.",
+    "Lokalizacja w linku",
+    "Link do formularza",
+    "Kopiuj link",
+    "Link skopiowany.",
+    "Zaznacz i skopiuj link z pola."
+  ],
+  "uk": [
+    "Поділитися посиланням на анкету",
+    "Ваші відповіді не включені в посилання.",
+    "Місце в посиланні",
+    "Посилання на анкету",
+    "Копіювати посилання",
+    "Посилання скопійовано.",
+    "Виділіть і скопіюйте посилання з поля."
+  ],
+  "ru": [
+    "Поделиться ссылкой на анкету",
+    "Ваши ответы не включены в ссылку.",
+    "Место в ссылке",
+    "Ссылка на анкету",
+    "Копировать ссылку",
+    "Ссылка скопирована.",
+    "Выделите и скопируйте ссылку из поля."
+  ],
+  "en": [
+    "Share form link",
+    "Your answers are not included in the link.",
+    "Location in the link",
+    "Form link",
+    "Copy link",
+    "Link copied.",
+    "Select and copy the link from the field."
+  ],
+  "ka": [
+    "ფორმის ბმულის გაზიარება",
+    "თქვენი პასუხები ბმულში არ შედის.",
+    "ადგილმდებარეობა ბმულში",
+    "ფორმის ბმული",
+    "ბმულის კოპირება",
+    "ბმული დაკოპირდა.",
+    "მონიშნეთ და დააკოპირეთ ბმული ველიდან."
+  ],
+  "az": [
+    "Forma keçidini paylaşın",
+    "Cavablarınız keçidə daxil edilmir.",
+    "Keçiddəki məkan",
+    "Forma keçidi",
+    "Keçidi kopyalayın",
+    "Keçid kopyalandı.",
+    "Sahədəki keçidi seçin və kopyalayın."
+  ],
+  "hy": [
+    "Կիսվել ձևի հղումով",
+    "Ձեր պատասխանները հղման մեջ ներառված չեն։",
+    "Վայրը հղման մեջ",
+    "Ձևի հղում",
+    "Պատճենել հղումը",
+    "Հղումը պատճենված է։",
+    "Ընտրեք և պատճենեք հղումը դաշտից։"
+  ],
+  "tr": [
+    "Form bağlantısını paylaş",
+    "Yanıtlarınız bağlantıya dahil edilmez.",
+    "Bağlantıdaki konum",
+    "Form bağlantısı",
+    "Bağlantıyı kopyala",
+    "Bağlantı kopyalandı.",
+    "Alandaki bağlantıyı seçip kopyalayın."
+  ],
+  "uz": [
+    "Anketa havolasini ulashish",
+    "Javoblaringiz havolaga kiritilmaydi.",
+    "Havoladagi joy",
+    "Anketa havolasi",
+    "Havolani nusxalash",
+    "Havola nusxalandi.",
+    "Maydondagi havolani tanlang va nusxalang."
+  ],
+  "ky": [
+    "Форманын шилтемесин бөлүшүү",
+    "Жоопторуңуз шилтемеге кошулбайт.",
+    "Шилтемедеги жайгашкан жер",
+    "Форманын шилтемеси",
+    "Шилтемени көчүрүү",
+    "Шилтеме көчүрүлдү.",
+    "Талаадагы шилтемени тандап, көчүрүңүз."
+  ],
+  "tg": [
+    "Мубодилаи пайванди форма",
+    "Ҷавобҳои шумо ба пайванд дохил намешаванд.",
+    "Ҷой дар пайванд",
+    "Пайванди форма",
+    "Нусхабардории пайванд",
+    "Пайванд нусхабардорӣ шуд.",
+    "Пайвандро аз майдон интихоб ва нусхабардорӣ кунед."
+  ],
+  "kk": [
+    "Сауалнама сілтемесін бөлісу",
+    "Жауаптарыңыз сілтемеге қосылмайды.",
+    "Сілтемедегі орын",
+    "Сауалнама сілтемесі",
+    "Сілтемені көшіру",
+    "Сілтеме көшірілді.",
+    "Өрістегі сілтемені таңдап, көшіріңіз."
+  ],
+  "hi": [
+    "फ़ॉर्म का लिंक साझा करें",
+    "आपके उत्तर इस लिंक में शामिल नहीं हैं।",
+    "लिंक में स्थान",
+    "फ़ॉर्म का लिंक",
+    "लिंक कॉपी करें",
+    "लिंक कॉपी हो गया।",
+    "फ़ील्ड से लिंक चुनकर कॉपी करें।"
+  ],
+  "bn": [
+    "ফর্মের লিংক শেয়ার করুন",
+    "আপনার উত্তরগুলো লিংকে অন্তর্ভুক্ত নয়।",
+    "লিংকে অবস্থান",
+    "ফর্মের লিংক",
+    "লিংক কপি করুন",
+    "লিংক কপি হয়েছে।",
+    "ঘর থেকে লিংক বেছে নিয়ে কপি করুন।"
+  ],
+  "ne": [
+    "फारमको लिङ्क साझा गर्नुहोस्",
+    "तपाईंका उत्तरहरू लिङ्कमा समावेश हुँदैनन्।",
+    "लिङ्कमा स्थान",
+    "फारमको लिङ्क",
+    "लिङ्क प्रतिलिपि गर्नुहोस्",
+    "लिङ्क प्रतिलिपि भयो।",
+    "फिल्डबाट लिङ्क छानेर प्रतिलिपि गर्नुहोस्।"
+  ],
+  "ur": [
+    "فارم کا لنک شیئر کریں",
+    "آپ کے جوابات اس لنک میں شامل نہیں ہیں۔",
+    "لنک میں مقام",
+    "فارم کا لنک",
+    "لنک کاپی کریں",
+    "لنک کاپی ہو گیا۔",
+    "خانے سے لنک منتخب کرکے کاپی کریں۔"
+  ],
+  "si": [
+    "පෝරමයේ සබැඳිය බෙදාගන්න",
+    "ඔබේ පිළිතුරු සබැඳියට ඇතුළත් නොවේ.",
+    "සබැඳියේ ස්ථානය",
+    "පෝරමයේ සබැඳිය",
+    "සබැඳිය පිටපත් කරන්න",
+    "සබැඳිය පිටපත් විය.",
+    "කොටුවෙන් සබැඳිය තෝරා පිටපත් කරන්න."
+  ],
+  "fil": [
+    "Ibahagi ang link ng form",
+    "Hindi kasama ang iyong mga sagot sa link.",
+    "Lokasyon sa link",
+    "Link ng form",
+    "Kopyahin ang link",
+    "Nakopya ang link.",
+    "Piliin at kopyahin ang link mula sa field."
+  ],
+  "id": [
+    "Bagikan tautan formulir",
+    "Jawaban Anda tidak disertakan dalam tautan.",
+    "Lokasi dalam tautan",
+    "Tautan formulir",
+    "Salin tautan",
+    "Tautan disalin.",
+    "Pilih dan salin tautan dari kolom."
+  ],
+  "vi": [
+    "Chia sẻ liên kết biểu mẫu",
+    "Câu trả lời của bạn không được đưa vào liên kết.",
+    "Địa điểm trong liên kết",
+    "Liên kết biểu mẫu",
+    "Sao chép liên kết",
+    "Đã sao chép liên kết.",
+    "Chọn và sao chép liên kết từ ô."
+  ]
+});
+
+  function publicFormLink(language, recruiterId, location = '') {
+    if (typeof language !== 'string' || !Object.hasOwn(I18N.languages, language)
+        || typeof recruiterId !== 'string' || !CFG.recruiters.some(person => person.id === recruiterId)
+        || typeof location !== 'string' || (location !== '' && !CFG.locations.includes(location))) {
+      throw new Error('Invalid public form selections.');
+    }
+    const url = new URL(CFG.publicFormUrl);
+    if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash) {
+      throw new Error('Invalid configured public form URL.');
+    }
+    url.searchParams.set(qp.language, language);
+    url.searchParams.set(qp.recruiter, recruiterId);
+    if (location) url.searchParams.set(qp.location, location);
+    return url.href;
+  }
+
+  function formLinkMarkup() {
+    const [title, lead, locationLabel, urlLabel, copyLabel] = formLinkCopy[state.language];
+    const location = validLocation(state.data.location) || '';
+    const options = locale().options.locations;
+    return `<details class="form-link">
+      <summary>${escapeHtml(title)}</summary>
+      <p id="publicFormLinkNote">${escapeHtml(lead)}</p>
+      <div class="field"><label for="publicFormLocation">${escapeHtml(locationLabel)} <span class="optional">(${escapeHtml(t('optional'))})</span></label>
+        <select id="publicFormLocation"><option value="">${escapeHtml(t('selectOption'))}</option>${CFG.locations.map(id => `<option value="${attr(id)}"${id === location ? ' selected' : ''}>${escapeHtml(options[id])}</option>`).join('')}</select></div>
+      <div class="field"><label for="publicFormUrl">${escapeHtml(urlLabel)}</label>
+        <input id="publicFormUrl" class="ltr" dir="ltr" type="text" readonly autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="publicFormLinkNote" value="${attr(publicFormLink(state.language, state.recruiterId, location))}"></div>
+      <button type="button" class="button secondary" data-action="copy-form-link">${escapeHtml(copyLabel)}</button>
+      <p id="publicFormLinkStatus" class="form-link-status" role="status" aria-live="polite" aria-atomic="true"></p>
+    </details>`;
+  }
+
+  function bindFormLink() {
+    const location = document.getElementById('publicFormLocation');
+    const field = document.getElementById('publicFormUrl');
+    const status = document.getElementById('publicFormLinkStatus');
+    const button = app.querySelector('[data-action="copy-form-link"]');
+    const copy = formLinkCopy[state.language];
+    let copying = false;
+    function notice(message) {
+      if (status.textContent !== message) status.textContent = message;
+    }
+    location.addEventListener('change', () => {
+      field.value = publicFormLink(state.language, state.recruiterId, location.value);
+      notice('');
+    });
+    button.addEventListener('click', async () => {
+      if (copying) return;
+      copying = true;
+      button.setAttribute('aria-busy', 'true');
+      const url = field.value;
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable.');
+        await navigator.clipboard.writeText(url);
+        if (field.isConnected && field.value === url) notice(copy[5]);
+      } catch {
+        if (field.isConnected && field.value === url) {
+          field.focus({ preventScroll: true });
+          field.select();
+          notice(copy[6]);
+        }
+      } finally {
+        copying = false;
+        if (button.isConnected) button.removeAttribute('aria-busy');
+      }
+    });
+  }
+
   function renderForm() {
     if (!state.language) { view = 'language'; render(); return; }
     if (!recruiter()) { view = 'recruiter'; render(); return; }
@@ -597,6 +848,7 @@
           <div><button type="button" class="text-button" data-action="language">${escapeHtml(t('changeLanguage'))}</button><button type="button" class="text-button" data-action="recruiter">${escapeHtml(t('changeRecruiter'))}</button></div>
         </div>
         ${selectedRecruiterHtml()}
+        ${formLinkMarkup()}
         <div class="progress-box">
           <div class="progress-meta"><strong dir="ltr">${state.step} / ${TOTAL_STEPS}</strong><span>${escapeHtml(titles[state.step - 1])}</span></div>
           <div class="progress-track"><span class="progress-fill progress-${state.step}"></span></div>
@@ -609,6 +861,7 @@
         </div>
       </section>`;
 
+    bindFormLink();
     app.querySelector('[data-action="language"]').addEventListener('click', () => { view = 'language'; saveDraft(); render(); });
     app.querySelector('[data-action="recruiter"]').addEventListener('click', () => { view = 'recruiter'; saveDraft(); render(); });
     app.querySelector('[data-action="back"]')?.addEventListener('click', () => { state.step = Math.max(1, state.step - 1); errors = {}; saveDraft(); render(); });
