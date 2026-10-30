@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - .github/browser/short-apply-language-search.mjs
+      - .github/browser/short-apply-language-search.test.mjs
       - .github/workflows/short-apply-language-search.yml
       - apply/**
 permissions:

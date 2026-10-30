@@ -336,9 +336,9 @@
   }
 
   function languageList(search = '') {
-    const query = String(search).trim().toLocaleLowerCase();
+    const query = String(search).trim().normalize('NFC').toLocaleLowerCase();
     const entries = Object.entries(I18N.languages)
-      .filter(([code, meta]) => !query || `${code} ${meta.native} ${meta.english}`.toLocaleLowerCase().includes(query));
+      .filter(([code, meta]) => !query || `${code} ${meta.native} ${meta.english}`.normalize('NFC').toLocaleLowerCase().includes(query));
     if (query || showAllLanguages) return entries.sort(([a], [b]) => {
       const ai = I18N.priority.includes(a) ? I18N.priority.indexOf(a) : 999;
       const bi = I18N.priority.includes(b) ? I18N.priority.indexOf(b) : 999;
