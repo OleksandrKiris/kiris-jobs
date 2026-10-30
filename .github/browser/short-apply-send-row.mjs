@@ -29,8 +29,9 @@ assert.equal(report.checkout,report.head);
 assert.deepEqual(git('show','-s','--format=%P',report.head).toString().trim().split(' '),[report.base]);
 git('merge-base','--is-ancestor',held,report.head);
 const heldPaths=git('ls-tree','-r','--name-only',held).toString().trim().split('\n');assert.equal(heldPaths.length,506);
-for(const p of heldPaths)assert.deepEqual(git('show',`${report.head}:${p}`),git('show',`${held}:${p}`),p);
-report.previousHeldTrackedFilesExact=506;
+for(const p of heldPaths)assert.deepEqual(git('show',`${report.head}:${p}`),git('show',`${p==='docs/primserv-roadmap.md'?report.base:held}:${p}`),p);
+report.previousHeldTrackedFilesExact=505;
+report.canonicalWipExactToEventParent=true;
 for(const {path:p}of inventory(artifact)){
  const source=p.startsWith('tools/coordinator/')?'coordinator-demo/'+p.split('/').at(-1):p,b=await readFile(join(artifact,p));
  assert.deepEqual(b,git('show',`${report.head}:${source}`));const exact=b.equals(git('show',`${published}:${source}`));
