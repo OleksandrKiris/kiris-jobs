@@ -1,0 +1,22 @@
+{
+  "pl": "Jeśli aplikacja pocztowa się otworzy, sprawdź odbiorcę i naciśnij „Wyślij”. Jeśli nie, skopiuj wiersz i wyślij go ręcznie.",
+  "uk": "Якщо пошта відкриється, перевірте одержувача та натисніть «Надіслати». Якщо ні, скопіюйте рядок і надішліть його вручну.",
+  "ru": "Если почта откроется, проверьте получателя и нажмите «Отправить». Если нет, скопируйте строку и отправьте её вручную.",
+  "en": "If your email app opens, check the recipient and press Send. If it does not, copy the row and send it manually.",
+  "ka": "თუ ელფოსტის აპი გაიხსნება, შეამოწმეთ მიმღები და დააჭირეთ გაგზავნას. თუ არ გაიხსნება, დააკოპირეთ სტრიქონი და ხელით გაგზავნეთ.",
+  "az": "E-poçt tətbiqi açılarsa, alıcını yoxlayın və Göndər düyməsini basın. Açılmazsa, sətri kopyalayın və əl ilə göndərin.",
+  "hy": "Եթե էլ․ փոստի հավելվածը բացվի, ստուգեք ստացողին և սեղմեք Ուղարկել։ Եթե չբացվի, պատճենեք տողը և ուղարկեք այն ձեռքով։",
+  "tr": "E-posta uygulaması açılırsa alıcıyı kontrol edip Gönder'e basın. Açılmazsa satırı kopyalayıp elle gönderin.",
+  "uz": "Email ilovasi ochilsa, qabul qiluvchini tekshiring va Yuborish tugmasini bosing. Ochilmasa, qatorni nusxalab, qo‘lda yuboring.",
+  "ky": "Почта колдонмосу ачылса, алуучуну текшерип, «Жөнөтүү» баскычын басыңыз. Ачылбаса, сапты көчүрүп, кол менен жөнөтүңүз.",
+  "tg": "Агар барномаи почта кушода шавад, қабулкунандаро санҷед ва «Фиристодан»-ро пахш кунед. Агар кушода нашавад, сатрро нусхабардорӣ карда, дастӣ фиристед.",
+  "kk": "Пошта қолданбасы ашылса, алушыны тексеріп, «Жіберу» түймесін басыңыз. Ашылмаса, жолды көшіріп, қолмен жіберіңіз.",
+  "hi": "अगर ईमेल ऐप खुले, तो प्राप्तकर्ता जाँचें और भेजें दबाएँ। अगर न खुले, तो पंक्ति कॉपी करके मैन्युअल रूप से भेजें।",
+  "bn": "ইমেইল অ্যাপ খুললে প্রাপক যাচাই করে পাঠানোর বোতাম চাপুন। না খুললে সারিটি কপি করে নিজে পাঠান।",
+  "ne": "इमेल एप खुलेमा प्राप्तकर्ता जाँचेर पठाउनुहोस् थिच्नुहोस्। नखुलेमा पङ्क्ति प्रतिलिपि गरेर आफैँ पठाउनुहोस्।",
+  "ur": "اگر ای میل ایپ کھلے تو وصول کنندہ چیک کریں اور بھیجنے کا بٹن دبائیں۔ اگر نہ کھلے تو قطار کاپی کریں اور خود بھیجیں۔",
+  "si": "ඊමේල් යෙදුම විවෘත වුවහොත් ලබන්නා පරීක්ෂා කර යවන්න ඔබන්න. විවෘත නොවුවහොත් පේළිය පිටපත් කර අතින් යවන්න.",
+  "fil": "Kung magbubukas ang email app, suriin ang tatanggap at pindutin ang Ipadala. Kung hindi, kopyahin ang row at ipadala ito nang manu-mano.",
+  "id": "Jika aplikasi email terbuka, periksa penerima lalu tekan Kirim. Jika tidak, salin baris lalu kirim secara manual.",
+  "vi": "Nếu ứng dụng email mở, hãy kiểm tra người nhận rồi nhấn Gửi. Nếu không, hãy sao chép dòng và gửi thủ công."
+}
