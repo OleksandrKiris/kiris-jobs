@@ -1,0 +1,43 @@
+name: Short form network boundary observation
+on:
+  push:
+    branches: [codex/personal-short-apply-network-boundary]
+    paths:
+      - .github/browser/short-apply-network-boundary.mjs
+      - .github/workflows/short-apply-network-boundary.yml
+permissions:
+  contents: read
+jobs:
+  observe-network-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Build the exact unchanged application
+        run: |
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Observe open form, actual offline reload and network recovery
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-network-boundary
+          TESTED_HEAD: ${{ github.sha }}
+          TESTED_BASE: 52dab8329273255027f1c8dbb015216ad55ac103
+        run: node .github/browser/short-apply-network-boundary.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: short-form-network-boundary
+          path: ${{ runner.temp }}/primserv-network-boundary
+          if-no-files-found: error

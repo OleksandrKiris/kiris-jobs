@@ -29,6 +29,7 @@
   let errors = {};
   let showAllLanguages = false;
   let draftSaveState = 'idle';
+  let lastDraftRecord = null;
   let savedDraft = loadDraft();
   let state = savedDraft || createState();
   let sending = false;
@@ -263,7 +264,9 @@
 
   function saveDraft() {
     try {
-      localStorage.setItem(CFG.storageKey, JSON.stringify({ ...state, savedAt: Date.now() }));
+      const record = JSON.stringify({ ...state, savedAt: Date.now() });
+      localStorage.setItem(CFG.storageKey, record);
+      lastDraftRecord = record;
       draftSaveState = 'saved';
     } catch (error) {
       draftSaveState = 'failed';
@@ -274,10 +277,12 @@
 
   function loadDraft() {
     try {
-      const draft = JSON.parse(localStorage.getItem(CFG.storageKey));
+      lastDraftRecord = localStorage.getItem(CFG.storageKey);
+      const draft = JSON.parse(lastDraftRecord);
       if (!draft || draft.version !== CFG.version || !draft.id || !draft.data || !draft.savedAt) return null;
       if (Date.now() - draft.savedAt > CFG.draftMaxAgeMs || (draft.routeKey || '') !== routeKey) {
         localStorage.removeItem(CFG.storageKey);
+        lastDraftRecord = null;
         return null;
       }
       draft.language = validLanguage(draft.language);
@@ -301,6 +306,7 @@
       return false;
     }
     savedDraft = null;
+    lastDraftRecord = null;
     draftSaveState = 'idle';
     updateDraftStatus();
     return true;
@@ -1141,7 +1147,17 @@
   }
 
   window.addEventListener('pagehide', () => {
-    if (draftSaveState === 'saved' || draftSaveState === 'failed') saveDraft();
+    if (draftSaveState !== 'saved' && draftSaveState !== 'failed') return;
+    try {
+      // Leaving an older tab must not replace or resurrect another tab's draft.
+      if (localStorage.getItem(CFG.storageKey) !== lastDraftRecord) return;
+    } catch (error) {
+      draftSaveState = 'failed';
+      console.warn('Draft save failed.', error);
+      updateDraftStatus();
+      return;
+    }
+    saveDraft();
   });
   render();
 })();
