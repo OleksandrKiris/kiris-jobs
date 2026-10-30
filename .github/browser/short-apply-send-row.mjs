@@ -87,7 +87,7 @@ async function run(width,test){
   const assigned=new URL(initial.assigns[0].url);assert.equal(assigned.protocol,'mailto:');assert.equal(decodeURIComponent(assigned.pathname),dependency.recruiterEmail);assert.deepEqual([...assigned.searchParams.keys()],['subject','body']);
   const subject=assigned.searchParams.get('subject'),body=assigned.searchParams.get('body'),lines=body.split('\n\n');assert(subject.includes('KAND-ANONYMOUS-SEND-FIXTURE')&&subject.includes('fixture / autumn / anonymous'));
   assert.equal(lines.length,2);const cells=lines[1].split('\t');assert.equal(cells.length,12);assert.equal(cells[2],'');assert.equal(cells[10],'');assert.equal(cells[11],'');assert(!cells.some(v=>/[\r\n]/.test(v)));
-  if(test.unicode){assert(cells[0].includes('Анонімний & = +')&&cells[0].includes('Łódź? # %'));assert(!cells[1].includes('\t'));}
+  if(test.unicode){assert(cells[0].includes('Анонімний & = +'.toLocaleUpperCase('pl-PL'))&&cells[0].includes('Łódź? # %'.toLocaleUpperCase('pl-PL')));assert(!cells[1].includes('\t'));}
   const current=await page.evaluate(key=>localStorage.getItem(key),key);if(test.saveRefused)assert.equal(current,old);else assert.deepEqual(JSON.parse(current).data,JSON.parse(old).data);
   assert.equal(await page.locator('.review-sections').innerText(),review);
   await capture(page,width,test,'after','.send-box');
@@ -98,7 +98,7 @@ async function run(width,test){
   if(test.throws){assert.equal(errors.length,1);assert(errors[0].includes('Anonymous fixture email handoff refused'));report.observations.falseOpenedOnAssignThrow++;report.observations.unhandledAssignThrows++;}else assert.deepEqual(errors,[]);
   const over=initial.assigns[0].url.length>dependency.configuredLimit;if(over)report.observations.overConfiguredLength++;if(test.saveRefused)report.observations.saveRefusals++;
   report.rows.push({width,case:test.name,status:'passed-observation',dependency,anonymousMailto:initial.assigns[0].url,encodedLength:initial.assigns[0].url.length,overConfiguredLimit:over,cells:12,resultBeforeAssignment:initial.assigns[0].notice,assignThrow:!!test.throws,unhandledErrorCount:errors.length,buttonRecoversAfter2500:true,repeatedDispatchSuppressed:true,focusAfterRecovery,answersKept:true,failedSaveKeepsExactDraft:!!test.saveRefused,draftStatus:await page.locator('#draftStatus').getAttribute('data-state'),unrelatedPreserved:true,mailClientLaunches:0,deliveryAttempts:0});
- }catch(e){await page.screenshot({path:join(reportDir,`failure-send-${width}-${test.name}.png`)}).catch(()=>{});report.failedCase={width,case:test.name,errors};throw e;}finally{await ctx.close();}
+ }catch(e){await page.screenshot({path:join(reportDir,`failure-send-${width}-${test.name}.png`)}).catch(()=>{});report.failedCase??={width,case:test.name,errors,failure:e.message};throw e;}finally{await ctx.close();}
 }
 try{
  await origin.start();browser=await chromium.launch({headless:true});report.browser=browser.version();
