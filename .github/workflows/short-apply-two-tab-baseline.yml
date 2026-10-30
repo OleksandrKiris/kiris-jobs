@@ -1,0 +1,43 @@
+name: Two tab draft baseline
+on:
+  push:
+    branches: [codex/personal-short-apply-network-boundary]
+    paths:
+      - .github/browser/short-apply-two-tab-baseline.mjs
+      - .github/workflows/short-apply-two-tab-baseline.yml
+permissions:
+  contents: read
+jobs:
+  observe-two-tab-draft:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 8
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Build exact unchanged application
+        run: |
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Observe actual two-tab input and older-tab pagehide
+        env:
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-two-tab-baseline
+          TESTED_HEAD: ${{ github.sha }}
+          TESTED_BASE: 52dab8329273255027f1c8dbb015216ad55ac103
+        run: node .github/browser/short-apply-two-tab-baseline.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: two-tab-draft-baseline
+          path: ${{ runner.temp }}/primserv-two-tab-baseline
+          if-no-files-found: error
