@@ -847,7 +847,11 @@
     setResult(t('emailOpened'));
     saveDraft();
     window.setTimeout(() => { sending = false; button.disabled = false; }, 2500);
-    window.location.assign(mailto);
+    try {
+      window.location.assign(mailto);
+    } catch {
+      console.warn('Email application could not be opened.');
+    }
   }
 
   async function copyRow() {
