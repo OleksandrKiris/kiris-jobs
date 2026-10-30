@@ -1,0 +1,44 @@
+name: Native language search baseline
+on:
+  push:
+    branches: [codex/personal-language-search-normalization]
+    paths:
+      - .github/browser/short-apply-language-search.mjs
+      - .github/workflows/short-apply-language-search-baseline.yml
+permissions:
+  contents: read
+jobs:
+  search-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 32
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Build exact publication without changing the published runtime
+        run: |
+          node scripts/build-pages-artifact.mjs build "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          node scripts/build-pages-artifact.mjs verify "$GITHUB_WORKSPACE" "$RUNNER_TEMP/primserv-pages"
+          git diff --exit-code
+      - name: Install pinned Chromium tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/primserv-browser" --no-save --no-package-lock playwright@1.56.1
+          "$RUNNER_TEMP/primserv-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Observe native-name search and NFC recovery on the unchanged app
+        env:
+          SEARCH_MODE: baseline
+          PLAYWRIGHT_PACKAGE: ${{ runner.temp }}/primserv-browser/node_modules/playwright
+          PAGES_ARTIFACT: ${{ runner.temp }}/primserv-pages
+          BROWSER_REPORT: ${{ runner.temp }}/primserv-search-baseline
+          TESTED_HEAD: ${{ github.sha }}
+          TESTED_BASE: 7a496cdb4e387c39be25f3594de1ef80fcd3b51c
+        run: node .github/browser/short-apply-language-search.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-search-baseline
+          path: ${{ runner.temp }}/primserv-search-baseline
+          if-no-files-found: error
